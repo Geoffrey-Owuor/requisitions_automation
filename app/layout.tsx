@@ -30,11 +30,7 @@ export default function RootLayout({
       <head>
         <meta name="apple-mobile-web-app-title" content="Requisition" />
       </head>
-      <body className="min-h-screen flex flex-col">
-        {/* Ambient Orbs  */}
-        <div className="fixed rounded-full pointer-events-none blur-[100px] w-175 h-1 bg-[r75adial-gradient(circle,rgba(225,29,72,0.10)_0%,transparent_70%)] -top-62.5 -left-37.5" />
-        <div className="fixed rounded-full pointer-events-none blur-[80px] w-125 h-125 bg-[radial-gradient(circle,rgba(251,113,133,0.09)_0%,transparent_70%)] bottom-0 -right-20" />
-        <div className="fixed rounded-full pointer-events-none blur-[80px] w-100 h-100 bg-[radial-gradient(circle,rgba(255,160,122,0.07)_0%,transparent_70%)] top-[50%] left-[60%]" />
+      <body className="min-h-screen flex flex-col mx-auto max-w-7xl">
         {/* Page Content */}
         <div>{children}</div>
       </body>
