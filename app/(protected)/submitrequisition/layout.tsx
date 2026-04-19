@@ -2,6 +2,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { AuthProvider } from "@/components/SessionProvider";
+import Footer from "@/components/Footer";
 
 export default async function ProtectedLayout({
   children,
@@ -15,5 +16,12 @@ export default async function ProtectedLayout({
     redirect("/login");
   }
 
-  return <AuthProvider>{children}</AuthProvider>;
+  return (
+    <AuthProvider>
+      <div className="flex flex-col min-h-screen">
+        <div className="flex-1">{children}</div>
+        <Footer />
+      </div>
+    </AuthProvider>
+  );
 }

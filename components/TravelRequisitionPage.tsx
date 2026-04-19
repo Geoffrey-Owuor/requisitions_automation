@@ -3,14 +3,8 @@
 import { useSession } from "next-auth/react";
 import { useState, ChangeEvent } from "react";
 import { DatePicker } from "./DatePicker";
-import {
-  ChevronDown,
-  Plane,
-  MapPin,
-  Wallet,
-  User,
-  UserRound,
-} from "lucide-react";
+import SignOutButton from "./SignOutButton";
+import { ChevronDown, Plane, MapPin, Wallet, UserRound } from "lucide-react";
 
 interface TravelFormData {
   employeeName: string;
@@ -115,17 +109,20 @@ export default function TravelRequisitionPage() {
           </div>
 
           {/* User Info Card */}
-          <div className="bg-white/70 backdrop-blur-xl border border-white/80 px-5 py-3 rounded-2xl flex items-center gap-3 shadow-[0_8px_16px_rgba(160,60,60,0.06)]">
-            <div className="w-9 h-9 bg-white rounded-[10px] flex items-center justify-center border border-[rgba(255,200,200,0.5)]">
-              <UserRound size={18} className="text-red-500" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[13px] font-semibold block">
-                {session?.user?.name ?? "Guest"}
-              </span>
-              <span className="text-[11px] text-[#a18080] block">
-                {session?.user?.email ?? "Not logged in"}
-              </span>
+          <div className="flex items-center gap-4">
+            <SignOutButton />
+            <div className="bg-white/70 backdrop-blur-xl border border-white/80 px-5 py-3 rounded-2xl flex items-center gap-3 shadow-[0_8px_16px_rgba(160,60,60,0.06)]">
+              <div className="w-9 h-9 bg-white rounded-[10px] flex items-center justify-center border border-[rgba(255,200,200,0.5)]">
+                <UserRound size={18} className="text-red-500" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[13px] font-semibold block">
+                  {session?.user?.name ?? "Guest"}
+                </span>
+                <span className="text-[11px] text-[#a18080] block">
+                  {session?.user?.email ?? "Not logged in"}
+                </span>
+              </div>
             </div>
           </div>
         </header>
@@ -139,7 +136,7 @@ export default function TravelRequisitionPage() {
             {/* Section 1: Employee Details */}
             <div>
               <h2 className="text-[13px] font-semibold uppercase tracking-[0.5px] text-rose-600 mb-5 flex items-center gap-2">
-                <User size={16} /> Employee Details
+                <UserRound size={16} /> Employee Details
               </h2>
               <div className="grid grid-cols-2 gap-5 max-sm:grid-cols-1">
                 <FormInput
@@ -296,6 +293,7 @@ export default function TravelRequisitionPage() {
             >
               Submit Requisition
             </button>
+            <p className="text-left text-xs">**All fields are required**</p>
           </form>
         </div>
       </div>
