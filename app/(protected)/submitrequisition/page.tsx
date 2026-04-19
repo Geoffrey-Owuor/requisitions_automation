@@ -1,11 +1,6 @@
-import SignOutButton from "@/components/SignOutButton";
+import TravelRequisitionPage from "@/components/TravelRequisitionPage";
 const page = () => {
-  return (
-    <div>
-      page
-      <SignOutButton />
-    </div>
-  );
+  return <TravelRequisitionPage />;
 };
 
 export default page;
