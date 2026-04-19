@@ -13,13 +13,11 @@ const Brand = () => {
           className="object-contain"
         />
       </div>
-      <div className="flex flex-col leading-none">
+      <div className="flex flex-col gap-px leading-none">
         <span className="text-[13px] font-semibold text-[#1e1b1b]">
           Hotpoint Appliances Ltd
         </span>
-        <span className="text-[10px] text-[#a18080]">
-          Travel Requisition Form V3
-        </span>
+        <span className="text-[10px] text-[#a18080]">Requisition Hub</span>
       </div>
     </div>
   );

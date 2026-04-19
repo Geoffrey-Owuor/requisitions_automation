@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Travel Requisition Form",
-  description: "Hotpoint travel requisition form",
+  title: "Requisition Hub",
+  description: "Hotpoint Requisition hub",
 };
 
 export default function RootLayout({
@@ -30,7 +30,7 @@ export default function RootLayout({
       <head>
         <meta name="apple-mobile-web-app-title" content="Requisition" />
       </head>
-      <body className="min-h-screen flex flex-col mx-auto max-w-7xl">
+      <body className="mx-auto flex min-h-screen max-w-7xl flex-col">
         {/* Page Content */}
         <div>{children}</div>
       </body>
