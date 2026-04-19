@@ -9,6 +9,7 @@ import {
   Shield,
   ArrowUpRight,
 } from "lucide-react";
+import Brand from "./Brand";
 
 const tiers = [
   {
@@ -46,20 +47,8 @@ export default function HomePage() {
       {/* ── HEADER ── */}
       <header className="relative z-20">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          {/* Wordmark */}
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-linear-to-br from-rose-500 to-rose-700 flex items-center justify-center shadow-[0_4px_12px_rgba(225,29,72,0.3)]">
-              <Plane size={15} className="text-white -rotate-45" />
-            </div>
-            <div className="flex flex-col leading-none">
-              <span className="text-[15px] font-bold tracking-[-0.3px] text-[#1e1b1b]">
-                Hotpoint
-              </span>
-              <span className="text-[10px] text-[#a18080] font-medium tracking-widest uppercase">
-                Appliances Ltd
-              </span>
-            </div>
-          </div>
+          {/* Brand */}
+          <Brand />
 
           {/* CTA */}
           <Link
