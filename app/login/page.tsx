@@ -1,4 +1,5 @@
 import { signIn } from "@/lib/auth";
+import Link from "next/link";
 
 export default function LoginPage() {
   return (
@@ -36,8 +37,7 @@ export default function LoginPage() {
           <h1 className="heading">Sign in to continue</h1>
           <p className="subheading">
             Access to this form requires your company Microsoft&nbsp;365
-            account. Please sign in below to submit and manage your
-            requisitions.
+            account. Please sign in below to submit your requisition.
           </p>
         </div>
 
@@ -60,10 +60,9 @@ export default function LoginPage() {
         </form>
 
         {/* Footer note */}
-        <p className="footer-note">
-          By signing in, you agree to your organisation&apos;s acceptable use
-          policy.
-        </p>
+        <Link href="/" className="footer-note underline">
+          Back to HomePage
+        </Link>
       </div>
 
       <style>{`
