@@ -1,10 +1,26 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useState, ChangeEvent } from "react";
+import { useState, ChangeEvent, useMemo } from "react";
 import { DatePicker } from "./DatePicker";
 import SignOutButton from "./SignOutButton";
-import { ChevronDown, Plane, MapPin, Wallet, UserRound } from "lucide-react";
+import {
+  ChevronDown,
+  Plane,
+  MapPin,
+  Wallet,
+  UserRound,
+  Send,
+} from "lucide-react";
+import Image from "next/image";
+import { assets } from "@/public/assets";
+import {
+  DEPARTMENTS,
+  TRAVEL_CATEGORIES,
+  TRAVEL_MODES,
+  HOD_APPROVERS,
+  BUDGET_STATUS,
+} from "@/public/assets";
 
 interface TravelFormData {
   employeeName: string;
@@ -40,23 +56,6 @@ interface FormSelectProps {
   onChange: (value: string) => void;
 }
 
-// --- Constants ---
-const DEPARTMENTS = [
-  "Finance",
-  "Engineering",
-  "Marketing",
-  "Operations",
-  "Sales",
-  "HR",
-];
-
-// Approvers
-const HOD_APPROVERS = ["Mwende", "Wazimu"];
-const TRAVEL_CATEGORIES = ["International", "Domestic", "Local"];
-const TRAVEL_MODES = ["Flight", "Train", "Rental Car", "Personal Vehicle"];
-const COST_CENTRES = ["CC-101 (Ops)", "CC-202 (Dev)", "CC-303 (Mktg)"];
-const BUDGET_STATUS = ["Yes", "No", "Pending Review"];
-
 export default function TravelRequisitionPage() {
   const { data: session } = useSession();
 
@@ -87,6 +86,30 @@ export default function TravelRequisitionPage() {
     formData.otherCost +
     formData.perDiem;
 
+  // Generating an approval tier
+  const generateAprovalTier = useMemo(() => {
+    if (!formData.travelCategory || !formData.travelMode || totalCost === 0)
+      return "Tier 1";
+
+    let approvalTier;
+    if (
+      formData.travelCategory === "Local" &&
+      formData.travelMode === "Road" &&
+      Number(totalCost) <= 30000
+    ) {
+      approvalTier = "Tier 1";
+    } else if (
+      formData.travelCategory === "International" ||
+      Number(totalCost) >= 100000
+    ) {
+      approvalTier = "Tier 3";
+    } else {
+      approvalTier = "Tier 2";
+    }
+
+    return approvalTier;
+  }, [formData.travelCategory, formData.travelMode, totalCost]);
+
   const updateField = <K extends keyof TravelFormData>(
     field: K,
     value: TravelFormData[K],
@@ -96,7 +119,17 @@ export default function TravelRequisitionPage() {
 
   return (
     <div className="font-sans min-h-screen relative overflow-x-hidden px-5 py-10">
-      <div className="max-w-250 mx-auto relative z-10">
+      <div className="max-w-225 mx-auto relative z-10">
+        {/* Form Image */}
+        <div className="mb-4 h-70 rounded-xl overflow-hidden">
+          <Image
+            src={assets.form_image}
+            sizes="100vh"
+            className="object-cover object-center rounded-xl" // or "object-cover" depending on your needs
+            priority // Use this if the image is above the fold
+            alt="Form Image"
+          />
+        </div>
         {/* Header */}
         <header className="flex justify-between items-end mb-8 max-sm:flex-col max-sm:items-start max-sm:gap-5">
           <div>
@@ -159,7 +192,7 @@ export default function TravelRequisitionPage() {
                 />
                 <FormSelect
                   label="Cost Centre"
-                  options={COST_CENTRES}
+                  options={DEPARTMENTS}
                   value={formData.costCentre}
                   onChange={(v) => updateField("costCentre", v)}
                 />
@@ -278,20 +311,30 @@ export default function TravelRequisitionPage() {
                 />
               </div>
 
-              <div className="mt-6 px-5 py-5 bg-linear-to-r from-rose-600 to-rose-400 rounded-2xl text-white flex justify-between items-center font-semibold shadow-[0_10px_20px_rgba(225,29,72,0.2)]">
-                <span>Total Estimated Cost</span>
-                <span className="text-2xl">
-                  KES {totalCost.toLocaleString()}
-                </span>
+              <div className="grid mt-6 grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Total Cost - Deep Slate Red */}
+                <div className="px-5 py-5 bg-linear-to-r from-slate-800 to-rose-900 rounded-2xl text-white flex justify-between items-center font-semibold shadow-lg">
+                  <span>Total Estimated Cost</span>
+                  <span className="text-2xl">
+                    KES {totalCost.toLocaleString()}
+                  </span>
+                </div>
+
+                {/* Approval Tier - Muted Rose Ash */}
+                <div className="px-5 py-5 bg-linear-to-r from-rose-900/80 to-rose-800/80 rounded-2xl text-rose-50 flex justify-between items-center font-semibold border border-rose-700/30">
+                  <span>Approval Tier</span>
+                  <span className="text-2xl">{generateAprovalTier}</span>
+                </div>
               </div>
             </div>
 
             <button
               type="submit"
               disabled={buttonDisabled}
-              className="w-full py-4 bg-[#1e1b1b] text-white rounded-[14px] font-semibold cursor-pointer transition-all duration-200 border-none hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)] disabled:opacity-70 disabled:cursor-not-allowed"
+              className="w-full flex items-center justify-center gap-2 py-4 bg-[#1e1b1b] text-white rounded-[14px] font-semibold cursor-pointer transition-all duration-200 border-none hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)] disabled:opacity-70 disabled:cursor-not-allowed"
             >
               Submit Requisition
+              <Send className="h-4 w-4" />
             </button>
             <p className="text-left text-xs">**All fields are required**</p>
           </form>

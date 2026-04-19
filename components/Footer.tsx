@@ -1,5 +1,3 @@
-import Image from "next/image";
-import { assets } from "@/public/assets";
 import Brand from "./Brand";
 
 const Footer = () => {
