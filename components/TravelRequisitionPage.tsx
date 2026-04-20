@@ -135,7 +135,7 @@ export default function TravelRequisitionPage() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden px-5 py-10 font-sans">
+    <div className="relative min-h-screen overflow-x-hidden p-5 font-sans">
       {step === 2 && (
         <TravelConfirmationModal
           formData={formData}
