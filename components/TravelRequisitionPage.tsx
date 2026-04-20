@@ -198,7 +198,7 @@ export default function TravelRequisitionPage() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden p-5 font-sans">
+    <div className="relative min-h-screen overflow-x-hidden p-5">
       {submitting && <SubmittingOverlay />}
       {step === 3 && <AlertModal alertInfo={alertInfo} setStep={setStep} />}
       {step === 2 && (
@@ -369,7 +369,7 @@ export default function TravelRequisitionPage() {
                       <span className="text-red-500">*</span>
                     </label>
                     <textarea
-                      className="h-25 resize-none rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 py-3 font-sans text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
+                      className="h-25 resize-none rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 py-3 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
                       placeholder="Describe the purpose of this trip..."
                       value={formData.justification}
                       onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>

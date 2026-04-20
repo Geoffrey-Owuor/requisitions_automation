@@ -1,4 +1,4 @@
-import UserDashboard from "@/components/UserDashboard";
+import UserDashboard from "@/components/Dashboard/UserDashboard";
 
 const page = () => {
   return <UserDashboard />;

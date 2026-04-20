@@ -74,7 +74,7 @@ const requisitions = [
 
 export default function HomePage() {
   return (
-    <div className="relative min-h-screen overflow-x-hidden font-sans">
+    <div className="relative min-h-screen overflow-x-hidden">
       {/* ── HEADER ── */}
       <header className="relative z-20">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
