@@ -122,7 +122,7 @@ export default function HomePage() {
 
               <Link
                 href="/dashboard/travelrequisition"
-                className="group flex items-center justify-between gap-3 rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white/70 px-4 py-3.5 shadow-[0_4px_16px_rgba(160,60,60,0.07)] backdrop-blur-xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(160,60,60,0.12)]"
+                className="group flex items-center justify-between gap-3 rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white/70 px-4 py-3.5 shadow-[0_4px_16px_rgba(160,60,60,0.07)] backdrop-blur-xl transition-transform hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(160,60,60,0.12)]"
               >
                 <div className="flex items-center gap-3">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-rose-500 to-rose-600 text-white">
@@ -145,7 +145,7 @@ export default function HomePage() {
 
               <Link
                 href="/dashboard/itrequisition"
-                className="group flex items-center justify-between gap-3 rounded-2xl border border-[rgba(200,210,220,0.5)] bg-white/70 px-4 py-3.5 shadow-[0_4px_16px_rgba(100,110,130,0.06)] backdrop-blur-xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(100,110,130,0.1)]"
+                className="group flex items-center justify-between gap-3 rounded-2xl border border-[rgba(200,210,220,0.5)] bg-white/70 px-4 py-3.5 shadow-[0_4px_16px_rgba(100,110,130,0.06)] backdrop-blur-xl transition-transform hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(100,110,130,0.1)]"
               >
                 <div className="flex items-center gap-3">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-slate-600 to-slate-700 text-white">
@@ -170,7 +170,7 @@ export default function HomePage() {
                 href="http://192.168.0.27:10556"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group flex items-center justify-between gap-3 rounded-2xl border border-[rgba(180,200,180,0.5)] bg-white/70 px-4 py-3.5 shadow-[0_4px_16px_rgba(60,120,60,0.05)] backdrop-blur-xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(60,120,60,0.09)]"
+                className="group flex items-center justify-between gap-3 rounded-2xl border border-[rgba(180,200,180,0.5)] bg-white/70 px-4 py-3.5 shadow-[0_4px_16px_rgba(60,120,60,0.05)] backdrop-blur-xl transition-transform hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(60,120,60,0.09)]"
               >
                 <div className="flex items-center gap-3">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-emerald-500 to-emerald-600 text-white">
@@ -320,7 +320,7 @@ export default function HomePage() {
                 <div className="px-7 pb-7">
                   <Link
                     href={req.href}
-                    className={`flex w-full items-center justify-center gap-2 bg-linear-to-r py-3 ${req.accent} rounded-2xl text-[13px] font-bold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg`}
+                    className={`flex w-full items-center justify-center gap-2 bg-linear-to-r py-3 ${req.accent} rounded-2xl text-[13px] font-bold text-white hover:-translate-y-0.5 hover:shadow-lg`}
                   >
                     Start {req.label} <ArrowUpRight size={14} />
                   </Link>

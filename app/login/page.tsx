@@ -49,7 +49,7 @@ export default function LoginPage() {
           action={async () => {
             "use server";
             await signIn("microsoft-entra-id", {
-              redirectTo: "/submitrequisition",
+              redirectTo: "/dashboard",
             });
           }}
         >
