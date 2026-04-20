@@ -1,4 +1,4 @@
-import { Send } from "lucide-react";
+import { ArrowLeft, Send } from "lucide-react";
 import { TravelFormData } from "./TravelRequisitionPage";
 
 interface ConfirmationModalProps {
@@ -157,9 +157,10 @@ export default function TravelConfirmationModal({
         <button
           type="button"
           onClick={onBack}
-          className="cursor-pointer rounded-[14px] border border-[rgba(240,180,180,0.6)] bg-transparent px-6 py-4 text-[14px] font-semibold text-[#1e1b1b] transition-all duration-200 hover:bg-white/60"
+          className="flex cursor-pointer items-center gap-2 rounded-[14px] border border-[rgba(240,180,180,0.6)] bg-transparent px-6 py-4 text-[14px] font-semibold text-[#1e1b1b] transition-all duration-200 hover:bg-white/60"
         >
-          ← Back
+          <ArrowLeft className="h-4 w-4" />
+          Back
         </button>
         <button
           type="button"
