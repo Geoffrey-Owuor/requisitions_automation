@@ -3,17 +3,17 @@ import Link from "next/link";
 
 export default function LoginPage() {
   return (
-    <div className="login-root">
+    <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[#EEF2FA] p-4 font-sans selection:bg-blue-100">
       {/* Ambient background orbs */}
-      <div className="orb orb-1" />
-      <div className="orb orb-2" />
-      <div className="orb orb-3" />
+      <div className="pointer-events-none absolute -top-30 -left-25 h-120 w-120 rounded-full bg-[radial-gradient(circle,rgba(99,140,255,0.28)_0%,transparent_70%)] blur-[80px]" />
+      <div className="pointer-events-none absolute -right-20 -bottom-20 h-100 w-100 rounded-full bg-[radial-gradient(circle,rgba(160,110,255,0.18)_0%,transparent_70%)] blur-[80px]" />
+      <div className="-tran5slate-x-1/2 pointer-events-none absolute top-1/2 left-[60%] h-75 w-7 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(80,210,200,0.14)_0%,transparent_70%)] blur-[80px]" />
 
       {/* Glass card */}
-      <div className="glass-card">
+      <div className="relative flex w-full max-w-105 flex-col items-center rounded-3xl border border-white/85 bg-white/60 px-9 py-10 shadow-[inset_0_2px_0_0_rgba(255,255,255,0.9),inset_0_-1px_0_0_rgba(180,190,220,0.25),0_24px_48px_rgba(60,80,160,0.10),0_8px_16px_rgba(60,80,160,0.06)] backdrop-blur-xl backdrop-saturate-160 sm:px-6 sm:py-8">
         {/* Logo mark */}
-        <div className="logo-wrap">
-          <div className="logo-ring">
+        <div className="mb-6">
+          <div className="flex h-15 w-15 items-center justify-center rounded-2xl border border-[#B4C8FF]/50 bg-white/90 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.95),0_4px_12px_rgba(59,110,232,0.12)]">
             <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
               <path
                 d="M14 3L24 8.5V19.5L14 25L4 19.5V8.5L14 3Z"
@@ -33,19 +33,22 @@ export default function LoginPage() {
         </div>
 
         {/* Heading group */}
-        <div className="heading-group">
-          <h1 className="heading">Sign in to continue</h1>
-          <p className="subheading">
+        <div className="mb-6 text-center">
+          <h1 className="mb-2.5 text-[22px] leading-tight font-semibold tracking-tight text-[#1a2340] sm:text-[20px]">
+            Sign in to continue
+          </h1>
+          <p className="text-[14px] leading-relaxed font-normal text-[#5a6480]">
             Access to this form requires your company Microsoft&nbsp;365
             account. Please sign in below to submit your requisition.
           </p>
         </div>
 
         {/* Divider */}
-        <div className="divider" />
+        <div className="mb-6 h-px w-full bg-linear-to-r from-transparent via-[#A0AFDC]/35 to-transparent" />
 
         {/* Auth form */}
         <form
+          className="w-full"
           action={async () => {
             "use server";
             await signIn("microsoft-entra-id", {
@@ -53,178 +56,23 @@ export default function LoginPage() {
             });
           }}
         >
-          <button type="submit" className="msft-btn">
+          <button
+            type="submit"
+            className="group flex w-full cursor-pointer items-center justify-center gap-2.75 rounded-xl border border-[#B4C3F0]/60 bg-white/85 px-5 py-3.25 text-[14.5px] font-medium text-[#1a2340] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.95),0_4px_14px_rgba(59,110,232,0.10),0_1px_3px_rgba(60,80,160,0.08)] transition-all duration-200 hover:border-[#648CFF]/45 hover:bg-white/95 hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,1),0_6px_20px_rgba(59,110,232,0.16),0_2px_6px_rgba(60,80,160,0.10)] active:translate-y-0 active:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.9),0_2px_8px_rgba(59,110,232,0.10)]"
+          >
             <MicrosoftIcon />
             <span>Sign in with Microsoft 365</span>
           </button>
         </form>
 
         {/* Footer note */}
-        <Link href="/" className="footer-note underline">
+        <Link
+          href="/"
+          className="mt-5 text-[12px] leading-normal text-[#8a95b0] underline decoration-[#8a95b0]/30 underline-offset-4 transition-colors hover:text-[#3B6EE8]"
+        >
           Back to HomePage
         </Link>
       </div>
-
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&display=swap');
-
-        .login-root {
-          font-family: 'Geist', -apple-system, sans-serif;
-          min-height: 100vh;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: #EEF2FA;
-          position: relative;
-          overflow: hidden;
-          padding: 1rem;
-        }
-
-        /* Ambient colour orbs */
-        .orb {
-          position: absolute;
-          border-radius: 50%;
-          filter: blur(80px);
-          pointer-events: none;
-        }
-        .orb-1 {
-          width: 480px; height: 480px;
-          background: radial-gradient(circle, rgba(99,140,255,0.28) 0%, transparent 70%);
-          top: -120px; left: -100px;
-        }
-        .orb-2 {
-          width: 400px; height: 400px;
-          background: radial-gradient(circle, rgba(160,110,255,0.18) 0%, transparent 70%);
-          bottom: -80px; right: -80px;
-        }
-        .orb-3 {
-          width: 300px; height: 300px;
-          background: radial-gradient(circle, rgba(80,210,200,0.14) 0%, transparent 70%);
-          top: 50%; left: 60%;
-          transform: translate(-50%, -50%);
-        }
-
-        /* Glass card */
-        .glass-card {
-          position: relative;
-          width: 100%;
-          max-width: 420px;
-          background: rgba(255, 255, 255, 0.62);
-          backdrop-filter: blur(24px) saturate(160%);
-          -webkit-backdrop-filter: blur(24px) saturate(160%);
-          border-radius: 24px;
-          border: 1px solid rgba(255, 255, 255, 0.85);
-          box-shadow:
-            0 2px 0 0 rgba(255,255,255,0.9) inset,
-            0 -1px 0 0 rgba(180,190,220,0.25) inset,
-            0 24px 48px rgba(60,80,160,0.10),
-            0 8px 16px rgba(60,80,160,0.06);
-          padding: 40px 36px 32px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 0;
-        }
-
-        /* Logo */
-        .logo-wrap {
-          margin-bottom: 24px;
-        }
-        .logo-ring {
-          width: 60px; height: 60px;
-          border-radius: 16px;
-          background: rgba(255,255,255,0.9);
-          border: 1px solid rgba(180,200,255,0.5);
-          box-shadow:
-            0 1px 0 0 rgba(255,255,255,0.95) inset,
-            0 4px 12px rgba(59,110,232,0.12);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        /* Heading */
-        .heading-group {
-          text-align: center;
-          margin-bottom: 24px;
-        }
-        .heading {
-          font-size: 22px;
-          font-weight: 600;
-          color: #1a2340;
-          margin: 0 0 10px;
-          letter-spacing: -0.3px;
-          line-height: 1.25;
-        }
-        .subheading {
-          font-size: 14px;
-          font-weight: 400;
-          color: #5a6480;
-          margin: 0;
-          line-height: 1.65;
-        }
-
-        /* Divider */
-        .divider {
-          width: 100%;
-          height: 1px;
-          background: linear-gradient(90deg, transparent, rgba(160,175,220,0.35) 30%, rgba(160,175,220,0.35) 70%, transparent);
-          margin-bottom: 24px;
-        }
-
-        /* Microsoft button */
-        .msft-btn {
-          width: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 11px;
-          padding: 13px 20px;
-          border-radius: 12px;
-          border: 1px solid rgba(180,195,240,0.6);
-          background: rgba(255,255,255,0.85);
-          box-shadow:
-            0 1px 0 0 rgba(255,255,255,0.95) inset,
-            0 4px 14px rgba(59,110,232,0.10),
-            0 1px 3px rgba(60,80,160,0.08);
-          font-family: inherit;
-          font-size: 14.5px;
-          font-weight: 500;
-          color: #1a2340;
-          cursor: pointer;
-          transition: all 0.18s ease;
-          letter-spacing: -0.1px;
-          margin-bottom: 0;
-        }
-        .msft-btn:hover {
-          background: rgba(255,255,255,0.98);
-          border-color: rgba(100,140,255,0.45);
-          box-shadow:
-            0 1px 0 0 rgba(255,255,255,1) inset,
-            0 6px 20px rgba(59,110,232,0.16),
-            0 2px 6px rgba(60,80,160,0.10);
-        }
-        .msft-btn:active {
-          transform: translateY(0px);
-          box-shadow:
-            0 1px 0 0 rgba(255,255,255,0.9) inset,
-            0 2px 8px rgba(59,110,232,0.10);
-        }
-
-        /* Footer */
-        .footer-note {
-          margin-top: 20px;
-          font-size: 12px;
-          color: #8a95b0;
-          text-align: center;
-          line-height: 1.5;
-        }
-
-        @media (max-width: 480px) {
-          .glass-card { padding: 32px 24px 28px; }
-          .heading { font-size: 20px; }
-        }
-      `}</style>
     </div>
   );
 }

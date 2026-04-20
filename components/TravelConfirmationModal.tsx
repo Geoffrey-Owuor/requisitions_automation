@@ -8,6 +8,7 @@ interface ConfirmationModalProps {
   session: { user?: { name?: string | null; email?: string | null } } | null;
   onBack: () => void;
   onSubmit: () => Promise<void>;
+  submitting: boolean;
 }
 
 export default function TravelConfirmationModal({
@@ -17,6 +18,7 @@ export default function TravelConfirmationModal({
   session,
   onBack,
   onSubmit,
+  submitting,
 }: ConfirmationModalProps) {
   const userName = session?.user?.name ?? "Guest";
   const userEmail = session?.user?.email ?? "";
@@ -46,7 +48,7 @@ export default function TravelConfirmationModal({
   ];
 
   return (
-    <div className="mx-auto max-w-3xl rounded-3xl border border-white/85 bg-white/65 p-10 shadow-[0_24px_48px_rgba(160,60,60,0.10)] backdrop-blur-2xl">
+    <div className="mx-auto max-w-3xl rounded-3xl border border-gray-100 bg-white/65 p-10 shadow-[0_24px_48px_rgba(160,60,60,0.10)] backdrop-blur-2xl">
       {/* Header */}
       <div className="mb-6">
         <p className="text-[11px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
@@ -165,9 +167,10 @@ export default function TravelConfirmationModal({
         <button
           type="button"
           onClick={onSubmit}
-          className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-[14px] border-none bg-[#1e1b1b] py-4 text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)]"
+          disabled={submitting}
+          className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-[14px] border-none bg-[#1e1b1b] py-4 text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)] disabled:opacity-50"
         >
-          Submit request
+          {submitting ? "Submitting..." : "Submit request"}
           <Send className="h-4 w-4" />
         </button>
       </div>
