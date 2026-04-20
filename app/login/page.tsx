@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default function LoginPage() {
   return (
-    <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[#EEF2FA] p-4 font-sans selection:bg-blue-100">
+    <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[#EEF2FA] p-4 selection:bg-blue-100">
       {/* Ambient background orbs */}
       <div className="pointer-events-none absolute -top-30 -left-25 h-120 w-120 rounded-full bg-[radial-gradient(circle,rgba(99,140,255,0.28)_0%,transparent_70%)] blur-[80px]" />
       <div className="pointer-events-none absolute -right-20 -bottom-20 h-100 w-100 rounded-full bg-[radial-gradient(circle,rgba(160,110,255,0.18)_0%,transparent_70%)] blur-[80px]" />
