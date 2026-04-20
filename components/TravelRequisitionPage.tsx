@@ -10,7 +10,7 @@ import {
   MapPin,
   Wallet,
   UserRound,
-  Send,
+  ArrowRight,
 } from "lucide-react";
 import Image from "next/image";
 import { assets } from "@/public/assets";
@@ -21,8 +21,9 @@ import {
   HOD_APPROVERS,
   BUDGET_STATUS,
 } from "@/public/assets";
+import TravelConfirmationModal from "./TravelConfirmationModal";
 
-interface TravelFormData {
+export interface TravelFormData {
   employeeName: string;
   department: string;
   designation: string;
@@ -78,6 +79,8 @@ export default function TravelRequisitionPage() {
     withinBudget: "",
   });
 
+  const [step, setStep] = useState(1);
+
   const buttonDisabled = Object.values(formData).some((value) => !value);
 
   const totalCost =
@@ -87,7 +90,7 @@ export default function TravelRequisitionPage() {
     formData.perDiem;
 
   // Generating an approval tier
-  const generateAprovalTier = useMemo(() => {
+  const generatedAprovalTier = useMemo(() => {
     if (!formData.travelCategory || !formData.travelMode || totalCost === 0)
       return "Tier 1";
 
@@ -110,6 +113,20 @@ export default function TravelRequisitionPage() {
     return approvalTier;
   }, [formData.travelCategory, formData.travelMode, totalCost]);
 
+  const handleSubmit = async () => {
+    const payload = {
+      ...formData,
+      totalCost,
+      approvalTier: generatedAprovalTier,
+      submittedBy: {
+        name: session?.user?.name,
+        email: session?.user?.email,
+      },
+    };
+    // await fetch('/api/travel-requisition', { method: 'POST', body: JSON.stringify(payload) });
+    console.log("Submitting:", payload);
+  };
+
   const updateField = <K extends keyof TravelFormData>(
     field: K,
     value: TravelFormData[K],
@@ -118,228 +135,249 @@ export default function TravelRequisitionPage() {
   };
 
   return (
-    <div className="font-sans min-h-screen relative overflow-x-hidden px-5 py-10">
-      <div className="max-w-225 mx-auto relative z-10">
-        {/* Form Image */}
-        <div className="mb-4 h-70 rounded-xl overflow-hidden">
-          <Image
-            src={assets.form_image}
-            sizes="100vh"
-            className="object-cover object-center rounded-xl" // or "object-cover" depending on your needs
-            priority // Use this if the image is above the fold
-            alt="Form Image"
-          />
-        </div>
-        {/* Header */}
-        <header className="flex justify-between items-end mb-8 max-sm:flex-col max-sm:items-start max-sm:gap-5">
-          <div>
-            <h1 className="text-[28px] font-semibold m-0 tracking-[-0.5px] text-[#1e1b1b]">
-              Travel Requisition
-            </h1>
-            <p className="text-[#7c5a5a] text-[15px] mt-1">
-              Submit your business travel details for approval.
-            </p>
+    <div className="relative min-h-screen overflow-x-hidden px-5 py-10 font-sans">
+      {step === 2 && (
+        <TravelConfirmationModal
+          formData={formData}
+          totalCost={totalCost}
+          approvalTier={generatedAprovalTier}
+          session={session}
+          onBack={() => {
+            setStep(1);
+            window.scrollTo({ top: 0, behavior: "instant" });
+          }}
+          onSubmit={handleSubmit}
+        />
+      )}
+      {step === 1 && (
+        <div className="relative z-10 mx-auto max-w-225">
+          {/* Form Image */}
+          <div className="mb-4 h-70 overflow-hidden rounded-xl">
+            <Image
+              src={assets.form_image}
+              sizes="100vh"
+              className="rounded-xl object-cover object-center" // or "object-cover" depending on your needs
+              priority // Use this if the image is above the fold
+              alt="Form Image"
+            />
           </div>
-
-          {/* User Info Card */}
-          <div className="flex items-center gap-4">
-            <SignOutButton />
-            <div className="bg-white/70 backdrop-blur-xl border border-white/80 px-5 py-3 rounded-2xl flex items-center gap-3 shadow-[0_8px_16px_rgba(160,60,60,0.06)]">
-              <div className="w-9 h-9 bg-white rounded-[10px] flex items-center justify-center border border-[rgba(255,200,200,0.5)]">
-                <UserRound size={18} className="text-red-500" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-[13px] font-semibold block">
-                  {session?.user?.name ?? "Guest"}
-                </span>
-                <span className="text-[11px] text-[#a18080] block">
-                  {session?.user?.email ?? "Not logged in"}
-                </span>
-              </div>
-            </div>
-          </div>
-        </header>
-
-        {/* Form Card */}
-        <div className="bg-white/65 backdrop-blur-2xl border border-white/85 rounded-3xl p-10 shadow-[0_24px_48px_rgba(160,60,60,0.10)]">
-          <form
-            className="flex flex-col gap-10"
-            onSubmit={(e) => e.preventDefault()}
-          >
-            {/* Section 1: Employee Details */}
+          {/* Header */}
+          <header className="mb-8 flex items-end justify-between max-sm:flex-col max-sm:items-start max-sm:gap-5">
             <div>
-              <h2 className="text-[13px] font-semibold uppercase tracking-[0.5px] text-rose-600 mb-5 flex items-center gap-2">
-                <UserRound size={16} /> Employee Details
-              </h2>
-              <div className="grid grid-cols-2 gap-5 max-sm:grid-cols-1">
-                <FormInput
-                  label="Employee Name"
-                  placeholder="Full Name"
-                  value={formData.employeeName}
-                  onChange={(v) => updateField("employeeName", String(v))}
-                />
-                <FormSelect
-                  label="Department"
-                  options={DEPARTMENTS}
-                  value={formData.department}
-                  onChange={(v) => updateField("department", v)}
-                />
-                <FormInput
-                  label="Designation"
-                  placeholder="Job Title"
-                  value={formData.designation}
-                  onChange={(v) => updateField("designation", String(v))}
-                />
-                <FormSelect
-                  label="Cost Centre"
-                  options={DEPARTMENTS}
-                  value={formData.costCentre}
-                  onChange={(v) => updateField("costCentre", v)}
-                />
-                <FormSelect
-                  label="Hod Approver"
-                  options={HOD_APPROVERS}
-                  value={formData.hodApprover}
-                  onChange={(v) => updateField("hodApprover", v)}
-                />
-              </div>
+              <h1 className="m-0 text-[28px] font-semibold tracking-[-0.5px] text-[#1e1b1b]">
+                Travel Requisition
+              </h1>
+              <p className="mt-1 text-[15px] text-[#7c5a5a]">
+                Submit your business travel details for approval.
+              </p>
             </div>
 
-            {/* Section 2: Trip Details */}
-            <div>
-              <h2 className="text-[13px] font-semibold uppercase tracking-[0.5px] text-rose-600 mb-5 flex items-center gap-2">
-                <MapPin size={16} /> Trip Information
-              </h2>
-              <div className="grid grid-cols-2 gap-5 max-sm:grid-cols-1">
-                <FormInput
-                  label="Destination"
-                  placeholder="City, Country"
-                  value={formData.destination}
-                  onChange={(v) => updateField("destination", String(v))}
-                />
-                <div className="flex flex-col gap-2">
-                  <label className="text-[13px] font-medium text-[#7c5a5a]">
-                    Departure Date <span className="text-red-500">*</span>
-                  </label>
-                  <DatePicker
-                    value={formData.departureDate}
-                    onChange={(v) => updateField("departureDate", v)}
-                  />
+            {/* User Info Card */}
+            <div className="flex items-center gap-4">
+              <SignOutButton />
+              <div className="flex items-center gap-3 rounded-2xl border border-white/80 bg-white/70 px-5 py-3 shadow-[0_8px_16px_rgba(160,60,60,0.06)] backdrop-blur-xl">
+                <div className="flex h-9 w-9 items-center justify-center rounded-[10px] border border-[rgba(255,200,200,0.5)] bg-white">
+                  <UserRound size={18} className="text-red-500" />
                 </div>
-                <div className="flex flex-col gap-2">
-                  <label className="text-[13px] font-medium text-[#7c5a5a]">
-                    Return Date <span className="text-red-500">*</span>
-                  </label>
-                  <DatePicker
-                    value={formData.returnDate}
-                    onChange={(v) => updateField("returnDate", v)}
-                  />
-                </div>
-                <FormSelect
-                  label="Travel Category"
-                  options={TRAVEL_CATEGORIES}
-                  value={formData.travelCategory}
-                  onChange={(v) => updateField("travelCategory", v)}
-                />
-              </div>
-            </div>
-
-            {/* Section 3: Logistics */}
-            <div className="col-span-full">
-              <h2 className="text-[13px] font-semibold uppercase tracking-[0.5px] text-rose-600 mb-5 flex items-center gap-2">
-                <Plane size={16} /> Logistics & Justification
-              </h2>
-              <div className="grid grid-cols-2 gap-5 max-sm:grid-cols-1">
-                <FormSelect
-                  label="Requested Mode of Travel"
-                  options={TRAVEL_MODES}
-                  value={formData.travelMode}
-                  onChange={(v) => updateField("travelMode", v)}
-                />
-                <FormSelect
-                  label="Within Budget?"
-                  options={BUDGET_STATUS}
-                  value={formData.withinBudget}
-                  onChange={(v) => updateField("withinBudget", v)}
-                />
-                <div className="flex flex-col gap-2 col-span-2 max-sm:col-span-1">
-                  <label className="text-[13px] font-medium text-[#7c5a5a]">
-                    Business Justification{" "}
-                    <span className="text-red-500">*</span>
-                  </label>
-                  <textarea
-                    className="h-25 px-3.5 py-3 rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 text-sm outline-none resize-none font-sans transition-all duration-200 focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
-                    placeholder="Describe the purpose of this trip..."
-                    value={formData.justification}
-                    onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
-                      updateField("justification", e.target.value)
-                    }
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Section 4: Cost Estimation */}
-            <div className="col-span-full">
-              <h2 className="text-[13px] font-semibold uppercase tracking-[0.5px] text-rose-600 mb-5 flex items-center gap-2">
-                <Wallet size={16} /> Estimated Costs (KES)
-              </h2>
-              <div className="grid grid-cols-4 gap-3.75 max-sm:grid-cols-1">
-                <FormInput
-                  type="number"
-                  label="Transport (2-way)"
-                  value={formData.transportCost}
-                  onChange={(v) => updateField("transportCost", Number(v))}
-                />
-                <FormInput
-                  type="number"
-                  label="Accommodation"
-                  value={formData.accommodationCost}
-                  onChange={(v) => updateField("accommodationCost", Number(v))}
-                />
-                <FormInput
-                  type="number"
-                  label="Others/Misc"
-                  value={formData.otherCost}
-                  onChange={(v) => updateField("otherCost", Number(v))}
-                />
-                <FormInput
-                  type="number"
-                  label="Per Diem Policy"
-                  value={formData.perDiem}
-                  onChange={(v) => updateField("perDiem", Number(v))}
-                />
-              </div>
-
-              <div className="grid mt-6 grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Total Cost - Deep Slate Red */}
-                <div className="px-5 py-5 bg-linear-to-r from-slate-800 to-rose-900 rounded-2xl text-white flex justify-between items-center font-semibold shadow-lg">
-                  <span>Total Estimated Cost</span>
-                  <span className="text-2xl">
-                    KES {totalCost.toLocaleString()}
+                <div className="flex flex-col">
+                  <span className="block text-[13px] font-semibold">
+                    {session?.user?.name ?? "Guest"}
+                  </span>
+                  <span className="block text-[11px] text-[#a18080]">
+                    {session?.user?.email ?? "Not logged in"}
                   </span>
                 </div>
-
-                {/* Approval Tier - Muted Rose Ash */}
-                <div className="px-5 py-5 bg-linear-to-r from-rose-900/80 to-rose-800/80 rounded-2xl text-rose-50 flex justify-between items-center font-semibold border border-rose-700/30">
-                  <span>Approval Tier</span>
-                  <span className="text-2xl">{generateAprovalTier}</span>
-                </div>
               </div>
             </div>
+          </header>
 
-            <button
-              type="submit"
-              disabled={buttonDisabled}
-              className="w-full flex items-center justify-center gap-2 py-4 bg-[#1e1b1b] text-white rounded-[14px] font-semibold cursor-pointer transition-all duration-200 border-none hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)] disabled:opacity-70 disabled:cursor-not-allowed"
+          {/* Form Card */}
+          <div className="rounded-3xl border border-white/85 bg-white/65 p-10 shadow-[0_24px_48px_rgba(160,60,60,0.10)] backdrop-blur-2xl">
+            <form
+              className="flex flex-col gap-10"
+              onSubmit={(e) => {
+                e.preventDefault();
+                setStep(2);
+                window.scrollTo({ top: 0, behavior: "instant" });
+              }}
             >
-              Submit Requisition
-              <Send className="h-4 w-4" />
-            </button>
-            <p className="text-left text-xs">**All fields are required**</p>
-          </form>
+              {/* Section 1: Employee Details */}
+              <div>
+                <h2 className="mb-5 flex items-center gap-2 text-[13px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
+                  <UserRound size={16} /> Employee Details
+                </h2>
+                <div className="grid grid-cols-2 gap-5 max-sm:grid-cols-1">
+                  <FormInput
+                    label="Employee Name"
+                    placeholder="Full Name"
+                    value={formData.employeeName}
+                    onChange={(v) => updateField("employeeName", String(v))}
+                  />
+                  <FormSelect
+                    label="Department"
+                    options={DEPARTMENTS}
+                    value={formData.department}
+                    onChange={(v) => updateField("department", v)}
+                  />
+                  <FormInput
+                    label="Designation"
+                    placeholder="Job Title"
+                    value={formData.designation}
+                    onChange={(v) => updateField("designation", String(v))}
+                  />
+                  <FormSelect
+                    label="Cost Centre"
+                    options={DEPARTMENTS}
+                    value={formData.costCentre}
+                    onChange={(v) => updateField("costCentre", v)}
+                  />
+                  <FormSelect
+                    label="Hod Approver"
+                    options={HOD_APPROVERS}
+                    value={formData.hodApprover}
+                    onChange={(v) => updateField("hodApprover", v)}
+                  />
+                </div>
+              </div>
+
+              {/* Section 2: Trip Details */}
+              <div>
+                <h2 className="mb-5 flex items-center gap-2 text-[13px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
+                  <MapPin size={16} /> Trip Information
+                </h2>
+                <div className="grid grid-cols-2 gap-5 max-sm:grid-cols-1">
+                  <FormInput
+                    label="Destination"
+                    placeholder="City, Country"
+                    value={formData.destination}
+                    onChange={(v) => updateField("destination", String(v))}
+                  />
+                  <div className="flex flex-col gap-2">
+                    <label className="text-[13px] font-medium text-[#7c5a5a]">
+                      Departure Date <span className="text-red-500">*</span>
+                    </label>
+                    <DatePicker
+                      value={formData.departureDate}
+                      onChange={(v) => updateField("departureDate", v)}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <label className="text-[13px] font-medium text-[#7c5a5a]">
+                      Return Date <span className="text-red-500">*</span>
+                    </label>
+                    <DatePicker
+                      value={formData.returnDate}
+                      onChange={(v) => updateField("returnDate", v)}
+                    />
+                  </div>
+                  <FormSelect
+                    label="Travel Category"
+                    options={TRAVEL_CATEGORIES}
+                    value={formData.travelCategory}
+                    onChange={(v) => updateField("travelCategory", v)}
+                  />
+                </div>
+              </div>
+
+              {/* Section 3: Logistics */}
+              <div className="col-span-full">
+                <h2 className="mb-5 flex items-center gap-2 text-[13px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
+                  <Plane size={16} /> Logistics & Justification
+                </h2>
+                <div className="grid grid-cols-2 gap-5 max-sm:grid-cols-1">
+                  <FormSelect
+                    label="Requested Mode of Travel"
+                    options={TRAVEL_MODES}
+                    value={formData.travelMode}
+                    onChange={(v) => updateField("travelMode", v)}
+                  />
+                  <FormSelect
+                    label="Within Budget?"
+                    options={BUDGET_STATUS}
+                    value={formData.withinBudget}
+                    onChange={(v) => updateField("withinBudget", v)}
+                  />
+                  <div className="col-span-2 flex flex-col gap-2 max-sm:col-span-1">
+                    <label className="text-[13px] font-medium text-[#7c5a5a]">
+                      Business Justification{" "}
+                      <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                      className="h-25 resize-none rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 py-3 font-sans text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
+                      placeholder="Describe the purpose of this trip..."
+                      value={formData.justification}
+                      onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+                        updateField("justification", e.target.value)
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 4: Cost Estimation */}
+              <div className="col-span-full">
+                <h2 className="mb-5 flex items-center gap-2 text-[13px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
+                  <Wallet size={16} /> Estimated Costs (KES)
+                </h2>
+                <div className="grid grid-cols-4 gap-3.75 max-sm:grid-cols-1">
+                  <FormInput
+                    type="number"
+                    label="Transport (2-way)"
+                    value={formData.transportCost}
+                    onChange={(v) => updateField("transportCost", Number(v))}
+                  />
+                  <FormInput
+                    type="number"
+                    label="Accommodation"
+                    value={formData.accommodationCost}
+                    onChange={(v) =>
+                      updateField("accommodationCost", Number(v))
+                    }
+                  />
+                  <FormInput
+                    type="number"
+                    label="Others/Misc"
+                    value={formData.otherCost}
+                    onChange={(v) => updateField("otherCost", Number(v))}
+                  />
+                  <FormInput
+                    type="number"
+                    label="Per Diem Per Day"
+                    value={formData.perDiem}
+                    onChange={(v) => updateField("perDiem", Number(v))}
+                  />
+                </div>
+
+                <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+                  {/* Total Cost - Deep Slate Red */}
+                  <div className="flex items-center justify-between rounded-2xl bg-linear-to-r from-slate-800 to-rose-900 px-5 py-5 font-semibold text-white shadow-lg">
+                    <span>Total Estimated Cost</span>
+                    <span className="text-2xl">
+                      KES {totalCost.toLocaleString()}
+                    </span>
+                  </div>
+
+                  {/* Approval Tier - Muted Rose Ash */}
+                  <div className="flex items-center justify-between rounded-2xl border border-rose-700/30 bg-linear-to-r from-rose-900/80 to-rose-800/80 px-5 py-5 font-semibold text-rose-50">
+                    <span>Approval Tier</span>
+                    <span className="text-2xl">{generatedAprovalTier}</span>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={buttonDisabled}
+                className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-[14px] border-none bg-[#1e1b1b] py-4 font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)] disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                Proceed
+                <ArrowRight className="h-4 w-4" />
+              </button>
+              <p className="text-left text-xs">**All fields are required**</p>
+            </form>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -360,7 +398,7 @@ function FormInput({
       </label>
       <input
         type={type}
-        className="h-10 px-3.5 rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 text-sm outline-none transition-all duration-200 focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
+        className="h-10 rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
         placeholder={placeholder}
         value={value}
         onChange={(e: ChangeEvent<HTMLInputElement>) => {
@@ -378,12 +416,12 @@ function FormSelect({ label, options, value, onChange }: FormSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="flex flex-col gap-2 relative">
+    <div className="relative flex flex-col gap-2">
       <label className="text-[13px] font-medium text-[#7c5a5a]">
         {label} <span className="text-red-500">*</span>
       </label>
       <div
-        className="h-10 px-3.5 rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 text-sm outline-none transition-all duration-200 flex items-center justify-between cursor-pointer"
+        className="flex h-10 cursor-pointer items-center justify-between rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none"
         onClick={() => setIsOpen(!isOpen)}
       >
         <span>{value || "Select..."}</span>
@@ -401,11 +439,11 @@ function FormSelect({ label, options, value, onChange }: FormSelectProps) {
             onClick={() => setIsOpen(false)}
           />
           {/* Dropdown */}
-          <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white rounded-xl border border-[rgba(240,180,180,0.6)] shadow-[0_10px_25px_rgba(160,60,60,0.1)] overflow-hidden p-1">
+          <div className="absolute top-full right-0 left-0 z-50 mt-1 overflow-hidden rounded-xl border border-[rgba(240,180,180,0.6)] bg-white p-1 shadow-[0_10px_25px_rgba(160,60,60,0.1)]">
             {options.map((opt) => (
               <div
                 key={opt}
-                className="px-3 py-2.5 text-sm cursor-pointer rounded-lg text-[#1e1b1b] transition-all duration-200 hover:bg-rose-50 hover:text-rose-600"
+                className="cursor-pointer rounded-lg px-3 py-2.5 text-sm text-[#1e1b1b] transition-all duration-200 hover:bg-rose-50 hover:text-rose-600"
                 onClick={() => {
                   onChange(opt);
                   setIsOpen(false);
