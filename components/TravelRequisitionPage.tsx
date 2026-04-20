@@ -22,6 +22,9 @@ import {
   BUDGET_STATUS,
 } from "@/public/assets";
 import TravelConfirmationModal from "./TravelConfirmationModal";
+import { ApiHandler } from "@/utils/ApiHandler";
+import SubmittingOverlay from "./SubmittingOverlay";
+import AlertModal from "./AlertModal";
 
 export interface TravelFormData {
   employeeName: string;
@@ -42,6 +45,30 @@ export interface TravelFormData {
   withinBudget: string;
 }
 
+const InitialFormState: TravelFormData = {
+  employeeName: "",
+  department: "",
+  designation: "",
+  hodApprover: "",
+  destination: "",
+  departureDate: "",
+  returnDate: "",
+  travelCategory: "",
+  justification: "",
+  travelMode: "",
+  transportCost: 0,
+  accommodationCost: 0,
+  otherCost: 0,
+  perDiem: 0,
+  costCentre: "",
+  withinBudget: "",
+};
+
+export interface AlertInfo {
+  alertType: "" | "success" | "error";
+  alertMessage: string;
+}
+
 interface FormInputProps {
   label: string;
   type?: "text" | "number";
@@ -60,26 +87,18 @@ interface FormSelectProps {
 export default function TravelRequisitionPage() {
   const { data: session } = useSession();
 
-  const [formData, setFormData] = useState<TravelFormData>({
-    employeeName: "",
-    department: "",
-    designation: "",
-    hodApprover: "",
-    destination: "",
-    departureDate: "",
-    returnDate: "",
-    travelCategory: "",
-    justification: "",
-    travelMode: "",
-    transportCost: 0,
-    accommodationCost: 0,
-    otherCost: 0,
-    perDiem: 0,
-    costCentre: "",
-    withinBudget: "",
-  });
+  const [formData, setFormData] = useState<TravelFormData>(InitialFormState);
 
   const [step, setStep] = useState(1);
+
+  //alert object
+  const [alertInfo, setAlertInfo] = useState<AlertInfo>({
+    alertType: "",
+    alertMessage: "",
+  });
+
+  // Submitting state
+  const [submitting, setSubmitting] = useState(false);
 
   const buttonDisabled = Object.values(formData).some((value) => !value);
 
@@ -115,7 +134,7 @@ export default function TravelRequisitionPage() {
 
   const handleSubmit = async () => {
     const payload = {
-      ...formData,
+      formData,
       totalCost,
       approvalTier: generatedAprovalTier,
       submittedBy: {
@@ -123,8 +142,52 @@ export default function TravelRequisitionPage() {
         email: session?.user?.email,
       },
     };
-    // await fetch('/api/travel-requisition', { method: 'POST', body: JSON.stringify(payload) });
-    console.log("Submitting:", payload);
+
+    setSubmitting(true);
+
+    // Posting the submitted data
+    try {
+      const response = await ApiHandler(
+        "/api/travelrequisition/submitrequisition",
+        "POST",
+        payload,
+      );
+
+      const data = await response.json();
+
+      if (!response.ok)
+        throw new Error(
+          data.message ||
+            "An error occurred while trying to submit your requisition",
+        );
+
+      // Response is ok - set the alert object
+      setAlertInfo({
+        alertType: "success",
+        alertMessage:
+          data.message ||
+          "Your requisition has been submitted successfully, you will receive a confirmation email shortly",
+      });
+
+      // Clear the form data
+      setFormData(InitialFormState);
+
+      // set step to to show final modal step
+      setStep(3);
+      // scroll to page top
+      window.scrollTo({ top: 0, behavior: "instant" });
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error("Error while trying to submit your requisition", error);
+        const errorString = error.toString();
+        setAlertInfo({ alertType: "error", alertMessage: errorString });
+
+        setStep(3);
+        window.scrollTo({ top: 0, behavior: "instant" });
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const updateField = <K extends keyof TravelFormData>(
@@ -136,6 +199,8 @@ export default function TravelRequisitionPage() {
 
   return (
     <div className="relative min-h-screen overflow-x-hidden p-5 font-sans">
+      {submitting && <SubmittingOverlay />}
+      {step === 3 && <AlertModal alertInfo={alertInfo} setStep={setStep} />}
       {step === 2 && (
         <TravelConfirmationModal
           formData={formData}
@@ -147,6 +212,7 @@ export default function TravelRequisitionPage() {
             window.scrollTo({ top: 0, behavior: "instant" });
           }}
           onSubmit={handleSubmit}
+          submitting={submitting}
         />
       )}
       {step === 1 && (
@@ -439,7 +505,7 @@ function FormSelect({ label, options, value, onChange }: FormSelectProps) {
             onClick={() => setIsOpen(false)}
           />
           {/* Dropdown */}
-          <div className="absolute top-full right-0 left-0 z-50 mt-1 overflow-hidden rounded-xl border border-[rgba(240,180,180,0.6)] bg-white p-1 shadow-[0_10px_25px_rgba(160,60,60,0.1)]">
+          <div className="absolute top-full right-0 left-0 z-50 mt-1 max-h-60 overflow-y-auto rounded-xl border border-[rgba(240,180,180,0.6)] bg-white p-1 shadow-[0_10px_25px_rgba(160,60,60,0.1)] [scrollbar-width:thin]">
             {options.map((opt) => (
               <div
                 key={opt}
