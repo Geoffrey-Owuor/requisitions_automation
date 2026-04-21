@@ -1,12 +1,13 @@
 "use client";
 import { useState, useMemo, useEffect } from "react";
 import { getTravelRequisitionData } from "@/serverActions/GetTravelRequisitionData";
-import { Search, PlaneLanding, PlaneTakeoff, Info } from "lucide-react";
+import { Search, PlaneLanding, PlaneTakeoff, Info, Plus } from "lucide-react";
 import { SkeletonTable } from "../Skeletons.tsx/SkeletonTabel";
 import { TablePagination } from "./TablePagination";
 import { TravelDetailsModal } from "./TravelDetailsModal";
 import StatusFormatter from "./StatusFormatter";
 import { QueryResultRow } from "pg";
+import Link from "next/link";
 
 export default function TravelRquisitionsTable({
   userEmail,
@@ -157,7 +158,7 @@ export default function TravelRquisitionsTable({
                     <StatusFormatter status={req.travel_hod_approval_status} />
                   </td>
                   <td className="px-6 py-5">
-                    <StatusFormatter status={req.travel_hod_approval_status} />
+                    <StatusFormatter status={req.travel_hr_approval_status} />
                   </td>
                   <td className="px-6 py-5">
                     <div className="flex items-center justify-between">
@@ -175,7 +176,7 @@ export default function TravelRquisitionsTable({
             ) : (
               /* --- FALLBACK UI --- */
               <tr>
-                <td colSpan={5} className="px-6 py-20">
+                <td colSpan={8} className="px-6 py-20">
                   <div className="flex flex-col items-center justify-center text-center">
                     {/* Glassmorphic Icon Circle */}
                     <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/80 bg-white/40 text-rose-300 shadow-[0_8px_16px_rgba(160,60,60,0.05)] backdrop-blur-md">
@@ -190,6 +191,17 @@ export default function TravelRquisitionsTable({
                         ? `We couldn't find anything matching "${searchTerm}". Try a different term.`
                         : "Your travel requisition history is currently empty."}
                     </p>
+
+                    {/* New Requisition Link, when returned data is empty */}
+                    {!searchTerm && (
+                      <Link
+                        href="/dashboard/travelrequisition"
+                        className="my-2 flex items-center gap-2 rounded-xl bg-neutral-900 px-3 py-2 text-sm text-white hover:bg-neutral-800"
+                      >
+                        <Plus className="h-4 w-4" />
+                        <span>New Requisition</span>
+                      </Link>
+                    )}
 
                     {/* Optional Action Button for Search Fallback */}
                     {searchTerm && (

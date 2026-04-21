@@ -37,9 +37,9 @@ export default function LoginPage() {
           <h1 className="mb-2.5 text-[22px] leading-tight font-semibold tracking-tight text-[#1a2340] sm:text-[20px]">
             Sign in to continue
           </h1>
-          <p className="text-[14px] leading-relaxed font-normal text-[#5a6480]">
-            Access to this form requires your company Microsoft&nbsp;365
-            account. Please sign in below to submit your requisition.
+          <p className="px-3 text-[14px] leading-relaxed font-normal text-[#5a6480]">
+            Access to this page requires your company Microsoft&nbsp;365
+            account. Please sign in below to continue.
           </p>
         </div>
 

@@ -40,6 +40,7 @@ export const DEPARTMENTS = [
 
 // Approvers
 export const HOD_APPROVERS = [
+  "Example Approver 01",
   "Example Approver 02",
   "Example Approver 03",
   "Example Approver 04",
@@ -63,6 +64,11 @@ export const BUDGET_STATUS = ["Yes", "No"];
 
 // HOD ARRAY
 export const HOD_ARRAY = [
+  {
+    name: "Example Approver 01",
+    email: `approver01${emailSuffix}`,
+    uuid: "00000000-0000-4000-8000-000000000001",
+  },
   {
     name: "Example Approver 02",
     email: `approver02${emailSuffix}`,
