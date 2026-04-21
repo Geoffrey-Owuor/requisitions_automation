@@ -40,6 +40,7 @@ export const DEPARTMENTS = [
 
 // Approvers
 export const HOD_APPROVERS = [
+  "Naheed Manjothi",
   "Pritesh Singadia",
   "Raj Kanani",
   "Peter Kiilu",
@@ -63,6 +64,11 @@ export const BUDGET_STATUS = ["Yes", "No"];
 
 // HOD ARRAY
 export const HOD_ARRAY = [
+  {
+    name: "Naheed Manjothi",
+    email: `naheed${emailSuffix}`,
+    uuid: "ec24c338-d1e0-491b-94fd-00e85cf740fc",
+  },
   {
     name: "Pritesh Singadia",
     email: `prs${emailSuffix}`,

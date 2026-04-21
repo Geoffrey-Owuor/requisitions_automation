@@ -53,8 +53,8 @@ const UserDashboard = () => {
 
         {/* THE TRAVEL REQUEST TABLE DATA */}
         {/* Heading */}
-        <span className="my-4 flex items-center gap-2">
-          <BriefcaseBusiness className="h-4 w-4" />
+        <span className="my-4 flex items-center gap-2 text-neutral-600">
+          <BriefcaseBusiness className="h-5 w-5" />
           Your Travel Requisitions
         </span>
         <TravelRquisitionsTable userEmail={userEmail} />
