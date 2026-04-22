@@ -1,9 +1,10 @@
 import Image from "next/image";
 import { assets } from "@/public/assets";
+import Link from "next/link";
 
 const Brand = () => {
   return (
-    <div className="flex items-center gap-1.5">
+    <Link href="/" className="flex items-center gap-1.5">
       <div className="relative h-6 w-6">
         <Image
           src={assets.hotpoint_logo}
@@ -19,7 +20,7 @@ const Brand = () => {
         </span>
         <span className="text-[10px] text-[#a18080]">Requisition Hub</span>
       </div>
-    </div>
+    </Link>
   );
 };
 

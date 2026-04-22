@@ -79,15 +79,23 @@ export default function HomePage() {
       <header className="relative z-20">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
           <Brand />
-          <a
-            href="http://192.168.0.27:10556"
-            target="_blank"
-            rel="noopener norefferer"
-            className="hidden items-center gap-2 rounded-xl bg-black px-3 py-2 text-sm text-white sm:flex"
-          >
-            Staff Purchase Portal
-            <ExternalLink className="h-4 w-4" />
-          </a>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/login"
+              className="hidden gap-2 rounded-xl px-3 py-2 text-sm hover:bg-rose-50 sm:block"
+            >
+              Login
+            </Link>
+            <a
+              href="http://192.168.0.27:10556"
+              target="_blank"
+              rel="noopener norefferer"
+              className="hidden items-center gap-2 rounded-xl bg-black px-3 py-2 text-sm text-white sm:flex"
+            >
+              Staff Purchase Portal
+              <ExternalLink className="h-4 w-4" />
+            </a>
+          </div>
         </div>
       </header>
 

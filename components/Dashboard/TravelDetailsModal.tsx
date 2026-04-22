@@ -23,9 +23,9 @@ export const TravelDetailsModal = ({ data, isOpen, onClose }: ModalProps) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/20 p-4 backdrop-blur-sm">
-      <div className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-white/80 bg-white/90 p-8 shadow-[0_32px_64px_rgba(160,60,60,0.15)] backdrop-blur-2xl">
+      <div className="relative w-full max-w-2xl rounded-2xl border border-white/80 bg-white/90 shadow-[0_32px_64px_rgba(160,60,60,0.15)] backdrop-blur-2xl">
         {/* Header */}
-        <div className="mb-8 flex items-center justify-between">
+        <div className="flex items-center justify-between border-b border-neutral-200 px-8 py-6">
           <div>
             <h2 className="text-xl font-semibold text-[#1e1b1b]">
               Requisition Details
@@ -36,13 +36,13 @@ export const TravelDetailsModal = ({ data, isOpen, onClose }: ModalProps) => {
           </div>
           <button
             onClick={onClose}
-            className="rounded-full p-2 text-rose-500 transition-colors hover:bg-rose-50"
+            className="rounded-full p-2 text-black transition-colors hover:bg-gray-200"
           >
             <X size={20} />
           </button>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="grid max-h-[80vh] grid-cols-1 gap-4 overflow-y-auto p-6 md:grid-cols-2">
           <DetailItem
             icon={UserRound}
             label="Employee"
@@ -74,7 +74,7 @@ export const TravelDetailsModal = ({ data, isOpen, onClose }: ModalProps) => {
             value={data.travel_cost_center}
           />
 
-          <div className="col-span-full mt-4 rounded-2xl bg-rose-900 p-4 text-white shadow-lg">
+          <div className="col-span-full mt-4 rounded-2xl bg-gray-200/50 p-4 text-black">
             <div className="mb-2 flex items-center gap-2">
               <MessageSquare size={16} />
               <span className="text-xs font-bold tracking-tighter uppercase">

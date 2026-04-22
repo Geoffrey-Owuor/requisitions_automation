@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
-import { HOD_ARRAY } from "@/public/assets";
+import { HOD_ARRAY } from "@/public/secretAssets";
 import { query } from "@/lib/db";
 
 export async function POST(request: NextRequest) {
@@ -32,7 +32,6 @@ export async function POST(request: NextRequest) {
       justification,
       travelMode,
       transportCost,
-      accommodationCost,
       otherCost,
       perDiem,
       costCentre,
@@ -68,14 +67,14 @@ export async function POST(request: NextRequest) {
     INSERT INTO travel_requisitions
     (submitter_email, submitter_name, employee_name, employee_department, employee_designation, 
     travel_destination, travel_departure_date, travel_return_date, travel_category,
-    travel_business_justification, travel_mode, travel_transport_cost, travel_accomodation_cost,
+    travel_business_justification, travel_mode, travel_transport_cost,
     travel_other_costs, travel_per_diem, travel_total_cost, travel_cost_center, travel_within_budget,
     travel_approval_tier, travel_hod_approval_status, travel_hr_approval_status,
     travel_director_approval_status, travel_hod_approver)
     VALUES 
     ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
     $11, $12, $13, $14, $15, $16, $17, $18,
-    $19, $20, $21, $22, $23) RETURNING request_id
+    $19, $20, $21, $22) RETURNING request_id
     `;
 
     // Insert params
@@ -92,7 +91,6 @@ export async function POST(request: NextRequest) {
       justification,
       travelMode,
       transportCost,
-      accommodationCost,
       otherCost,
       perDiem,
       totalCost,

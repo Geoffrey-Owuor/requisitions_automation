@@ -121,10 +121,9 @@ export default function TravelConfirmationModal({
         <p className="mb-3 text-[11px] font-semibold tracking-[0.4px] text-[#b0a0a0] uppercase">
           Cost Breakdown (KES)
         </p>
-        <div className="mb-3 grid grid-cols-4 gap-2 max-sm:grid-cols-2">
+        <div className="mb-3 grid grid-cols-3 gap-2 max-sm:grid-cols-2">
           {[
             { label: "Transport", value: formData.transportCost },
-            { label: "Accommodation", value: formData.accommodationCost },
             { label: "Others", value: formData.otherCost },
             { label: "Per Diem", value: formData.perDiem },
           ].map(({ label, value }) => (

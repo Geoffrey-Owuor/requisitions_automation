@@ -38,8 +38,8 @@ export default function LoginPage() {
             Sign in to continue
           </h1>
           <p className="px-3 text-[14px] leading-relaxed font-normal text-[#5a6480]">
-            Access to this page requires your company Microsoft&nbsp;365
-            account. Please sign in below to continue.
+            Sign in to your company Microsoft&nbsp;365 account to make
+            requisitions.
           </p>
         </div>
 
