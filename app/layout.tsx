@@ -13,8 +13,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Requisition Hub",
-  description: "Hotpoint Requisition hub",
+  title: {
+    default: "Requisition Hub",
+    template: `%s - Requisition Hub`,
+  },
+  description: "Hotpoint's hub for submitting internal requisition forms",
 };
 
 export default function RootLayout({

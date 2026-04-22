@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
-import { HOD_ARRAY } from "@/public/secretAssets";
+import { HOD_ARRAY, HR_ARRAY } from "@/public/secretAssets";
 import { query } from "@/lib/db";
+import { EmailSender } from "@/services/EmailSender";
 
 export async function POST(request: NextRequest) {
   try {
@@ -127,6 +128,65 @@ export async function POST(request: NextRequest) {
         requestUuid,
       ];
       await query(updateQuery, updateParams);
+
+      if (approvalTier === "Tier 1") {
+        EmailSender({
+          to: email,
+          requestId: requestUuid,
+          message:
+            "This is an automatic HOD approval for your travel requisition",
+          title: "Final Update: Travel Requisition Approved",
+          role: "user",
+          showPdfDownload: true,
+        });
+      } else {
+        // Send mail to HR Approvers
+        HR_ARRAY.forEach((hrApprover) => {
+          // Send Mail to HR
+          EmailSender({
+            to: hrApprover.email,
+            requestId: requestUuid,
+            message:
+              "A new travel requisition has been submitted and requires your approval",
+            title: "Action Required: New Travel Requisition",
+            role: "HR",
+            reviewLink: `?token=${hrApprover.uuid}&stage=hr`,
+          });
+        });
+
+        // Send confirmation email to HOD
+        EmailSender({
+          to: email,
+          requestId: requestUuid,
+          message:
+            "Your travel requisition has been successfully submitted and forwarded to HR for approval",
+          title: "Update: Travel requisition submitted successfully",
+          role: "user",
+        });
+      }
+    } else {
+      // Normal workflow - Normal user (Send email to user and HOD)
+
+      // HOD Send
+      EmailSender({
+        to: hodEmail,
+        requestId: requestUuid,
+        message:
+          "A new travel requisition has been submitted and requires your approval",
+        title: "Action Required: Travel Requisition Review",
+        role: "HOD",
+        reviewLink: `?token=${hodUuid}&stage=hod`,
+      });
+
+      // User Send
+      EmailSender({
+        to: email,
+        requestId: requestUuid,
+        message:
+          "Your travel requisition has been submitted successfully and forwarded to the HOD for approval.",
+        title: "Update: Travel Requisition Successfully Submitted",
+        role: "user",
+      });
     }
 
     // Return a success response

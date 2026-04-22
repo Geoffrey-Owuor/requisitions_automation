@@ -33,6 +33,7 @@ export const DEPARTMENTS = [
   "Engineering & HVAC",
   "Security",
   "Directorate",
+  "Retail Projects",
 ];
 
 export const TRAVEL_CATEGORIES = ["International", "Local"];

@@ -2,7 +2,7 @@ import { EmailDataValues } from "@/services/EmailSender";
 import { dateFormatter } from "@/public/assets";
 import { EmailDataProps } from "@/services/EmailSender";
 
-const PDF_WEB_APP_URL = process.env.NEXT_PUBLIC_BASE_URL;
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 interface TravelRequisitionProps extends EmailDataProps {
   emailData: EmailDataValues;
@@ -105,10 +105,10 @@ export function TravelRequisitionTemplate({
 
           <div style="margin-top: 32px; text-align: center;">
             <div style="${buttonStyle}">
-              <a href="${reviewLink}" style="background: #a31d1d; color: #ffffff; padding: 14px 36px; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 13px; display: inline-block; box-shadow: 0 4px 15px rgba(163,29,29,0.3);">Review Requisition</a>
+              <a href="${BASE_URL}/travelapproval/${requestId}${reviewLink}" style="background: #a31d1d; color: #ffffff; padding: 14px 36px; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 13px; display: inline-block; box-shadow: 0 4px 15px rgba(163,29,29,0.3);">Review Requisition</a>
             </div>
             <div style="${pdfButtonStyle} width: 100%;">
-              <a href="${PDF_WEB_APP_URL}/pdfdownload?requestId=${requestId}" style="color: #a31d1d; font-size: 12px; font-weight: 600; text-decoration: underline; display: inline-block; margin-top: 12px;">Download PDF Summary</a>
+              <a href="${BASE_URL}/pdfdownload?requestId=${requestId}" style="color: #a31d1d; font-size: 12px; font-weight: 600; text-decoration: underline; display: inline-block; margin-top: 12px;">Download PDF Summary</a>
             </div>
           </div>
 
