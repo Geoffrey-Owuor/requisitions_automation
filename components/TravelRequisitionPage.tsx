@@ -18,9 +18,9 @@ import {
   DEPARTMENTS,
   TRAVEL_CATEGORIES,
   TRAVEL_MODES,
-  HOD_APPROVERS,
   BUDGET_STATUS,
 } from "@/public/assets";
+import { HOD_APPROVERS } from "@/public/secretAssets";
 import TravelConfirmationModal from "./TravelConfirmationModal";
 import { ApiHandler } from "@/utils/ApiHandler";
 import SubmittingOverlay from "./SubmittingOverlay";
@@ -38,7 +38,6 @@ export interface TravelFormData {
   justification: string;
   travelMode: string;
   transportCost: number;
-  accommodationCost: number;
   otherCost: number;
   perDiem: number;
   costCentre: string;
@@ -57,7 +56,6 @@ const InitialFormState: TravelFormData = {
   justification: "",
   travelMode: "",
   transportCost: 0,
-  accommodationCost: 0,
   otherCost: 0,
   perDiem: 0,
   costCentre: "",
@@ -103,10 +101,7 @@ export default function TravelRequisitionPage() {
   const buttonDisabled = Object.values(formData).some((value) => !value);
 
   const totalCost =
-    formData.transportCost +
-    formData.accommodationCost +
-    formData.otherCost +
-    formData.perDiem;
+    formData.transportCost + formData.otherCost + formData.perDiem;
 
   // Generating an approval tier
   const generatedAprovalTier = useMemo(() => {
@@ -385,21 +380,14 @@ export default function TravelRequisitionPage() {
                 <h2 className="mb-5 flex items-center gap-2 text-[13px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
                   <Wallet size={16} /> Estimated Costs (KES)
                 </h2>
-                <div className="grid grid-cols-4 gap-3.75 max-sm:grid-cols-1">
+                <div className="grid grid-cols-3 gap-3.75 max-sm:grid-cols-1">
                   <FormInput
                     type="number"
                     label="Transport (2-way)"
                     value={formData.transportCost}
                     onChange={(v) => updateField("transportCost", Number(v))}
                   />
-                  <FormInput
-                    type="number"
-                    label="Accommodation"
-                    value={formData.accommodationCost}
-                    onChange={(v) =>
-                      updateField("accommodationCost", Number(v))
-                    }
-                  />
+
                   <FormInput
                     type="number"
                     label="Others/Misc"
@@ -408,7 +396,7 @@ export default function TravelRequisitionPage() {
                   />
                   <FormInput
                     type="number"
-                    label="Per Diem Per Day"
+                    label="Per Diem Entitlement"
                     value={formData.perDiem}
                     onChange={(v) => updateField("perDiem", Number(v))}
                   />

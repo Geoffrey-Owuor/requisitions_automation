@@ -1,6 +1,6 @@
 "use client";
 import { useSession } from "next-auth/react";
-import TravelRquisitionsTable from "./TravelRequisitionsTable";
+import TravelRequisitionsTable from "./TravelRequisitionsTable";
 import { BriefcaseBusiness } from "lucide-react";
 import SignOutButton from "../SignOutButton";
 
@@ -37,7 +37,7 @@ const UserDashboard = () => {
             <SignOutButton />
             <div className="flex shrink-0 items-center gap-4 rounded-2xl border border-white/80 bg-white/70 px-5 py-3 shadow-[0_8px_16px_rgba(160,60,60,0.06)] backdrop-blur-xl">
               {/* Initials Avatar */}
-              <div className="flex h-11 w-11 items-center justify-center rounded-full border border-[rgba(255,200,200,0.5)] bg-linear-to-br from-slate-800 to-rose-900 text-sm font-bold text-white shadow-sm">
+              <div className="flex h-11 w-11 items-center justify-center rounded-full border border-[rgba(255,200,200,0.5)] bg-linear-to-br from-slate-800 to-rose-900 text-sm font-semibold text-white shadow-sm">
                 {initials}
               </div>
               {/* Name & Email */}
@@ -57,7 +57,7 @@ const UserDashboard = () => {
           <BriefcaseBusiness className="h-5 w-5" />
           Your Travel Requisitions
         </span>
-        <TravelRquisitionsTable userEmail={userEmail} />
+        <TravelRequisitionsTable userEmail={userEmail} />
       </div>
     </div>
   );

@@ -2,14 +2,13 @@
 import { useState, useMemo, useEffect } from "react";
 import { getTravelRequisitionData } from "@/serverActions/GetTravelRequisitionData";
 import { Search, PlaneLanding, PlaneTakeoff, Info, Plus } from "lucide-react";
-import { SkeletonTable } from "../Skeletons.tsx/SkeletonTabel";
 import { TablePagination } from "./TablePagination";
 import { TravelDetailsModal } from "./TravelDetailsModal";
 import StatusFormatter from "./StatusFormatter";
 import { QueryResultRow } from "pg";
 import Link from "next/link";
 
-export default function TravelRquisitionsTable({
+export default function TravelRequisitionsTable({
   userEmail,
 }: {
   userEmail?: string;
@@ -20,21 +19,18 @@ export default function TravelRquisitionsTable({
     null,
   );
   const [initialData, setInitialData] = useState<QueryResultRow[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const itemsPerPage = 6;
 
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
+    if (!userEmail) return;
 
+    const fetchData = async () => {
       try {
         const fetchedData = await getTravelRequisitionData(userEmail);
         setInitialData(fetchedData);
       } catch (error) {
         console.error("Error fetching travel requisition data", error);
         setInitialData([]);
-      } finally {
-        setIsLoading(false);
       }
     };
 
@@ -58,15 +54,13 @@ export default function TravelRquisitionsTable({
     return filteredData.slice(start, start + itemsPerPage);
   }, [filteredData, currentPage]);
 
-  if (isLoading) return <SkeletonTable />;
-
   return (
     <div className="mt-2">
       {/* Search Input */}
-      <div className="relative mb-6 max-w-md">
+      <div className="relative mb-6 max-w-sm">
         <Search
-          className="absolute top-1/2 left-4 -translate-y-1/2 text-rose-300"
-          size={18}
+          className="absolute top-1/2 left-4 z-10 -translate-y-1/2 text-gray-400"
+          size={20}
         />
         <input
           type="text"
