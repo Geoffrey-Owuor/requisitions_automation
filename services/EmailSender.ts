@@ -1,6 +1,6 @@
-"use server";
 import { query } from "@/lib/db";
 import { TravelRequisitionTemplate } from "@/utils/templates/TravelRequisitionTemplate";
+import { sendEmail } from "./EmailService";
 
 export interface EmailDataValues {
   emailAddress: string;
@@ -35,12 +35,12 @@ export interface EmailDataValues {
 }
 
 export interface EmailDataProps {
-  to?: string;
+  to?: string | string[];
   requestId: string;
   message: string;
   title: string;
   role: string;
-  reviewLink: string;
+  reviewLink?: string;
   showPdfDownload?: boolean;
 }
 
@@ -101,4 +101,7 @@ export async function EmailSender({
     reviewLink,
     showPdfDownload,
   });
+
+  // Sending the email
+  await sendEmail({ to: to, subject: title, html: emailHtml });
 }
