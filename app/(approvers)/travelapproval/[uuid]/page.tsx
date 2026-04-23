@@ -1,9 +1,5 @@
-import { Suspense } from "react";
-import { query } from "@/lib/db";
-import { HOD_ARRAY } from "@/public/secretAssets";
-import { HR_ARRAY } from "@/public/secretAssets";
-import { DIRECTOR_ARRAY } from "@/public/secretAssets";
 import { Metadata } from "next";
+import TravelApprovalWrapper from "@/components/Approvers/TravelApprovers/TravelApprovalWrapper";
 
 type ApprovalPageProps = {
   params: Promise<{ uuid: string }>;
@@ -17,13 +13,16 @@ export const generateMetadata = async ({
   const { stage } = await searchParams;
   const upperCase = stage.toUpperCase();
   return {
-    title: `${upperCase} Stage`,
-    description: `${upperCase} Approval Stage`,
+    title: `${upperCase || "NO"} Stage`,
+    description: `${upperCase || "NO"} Approval Stage`,
   };
 };
 
-const page = async () => {
-  return <div>page</div>;
+const page = async ({ params, searchParams }: ApprovalPageProps) => {
+  const { uuid } = await params;
+  const { token, stage } = await searchParams;
+
+  return <TravelApprovalWrapper uuid={uuid} token={token} stage={stage} />;
 };
 
 export default page;
