@@ -309,7 +309,7 @@ export default function TravelRequisitionPage() {
                 <div className="grid grid-cols-2 gap-5 max-sm:grid-cols-1">
                   <FormInput
                     label="Destination"
-                    placeholder="City, Country"
+                    placeholder="City, Country, Place"
                     value={formData.destination}
                     onChange={(v) => updateField("destination", String(v))}
                   />
