@@ -77,12 +77,15 @@ const TravelApprovalWrapper = async ({
 
   // Our current approver
   const currentApprover = approverObject.name;
+  const currentApproverEmail = approverObject.email;
 
   return (
     <Suspense fallback={<TravelApprovalSkeleton />}>
       <TravelApprovalModal
+        uuid={uuid}
         stage={stage}
         approverName={currentApprover}
+        approverEmail={currentApproverEmail}
         employeeName={requestData.employee_name}
         employeeDepartment={requestData.employee_department}
         employeeDesignation={requestData.employee_designation}
