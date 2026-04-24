@@ -59,9 +59,9 @@ export async function POST(request: NextRequest) {
     const hodStatus = "pending";
     const hrStatus =
       approvalTier === "Tier 2" || approvalTier === "Tier 3"
-        ? "Pending"
+        ? "pending"
         : "N/A";
-    const directorStatus = approvalTier === "Tier 3" ? "Pending" : "N/A";
+    const directorStatus = approvalTier === "Tier 3" ? "pending" : "N/A";
 
     // Create the insert query
     const insertQuery = `

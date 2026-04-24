@@ -22,9 +22,9 @@ export default function NotFoundRequest() {
         </h2>
 
         <p className="mb-7 text-[13px] leading-relaxed text-[#7c5a5a]">
-          We couldn&apos;t locate the specific travel request you&apos;re
-          looking for. It may have been deleted, withdrawn, or the reference
-          link is incorrect.
+          We couldn&apos;t locate the specific request you&apos;re looking for.
+          It may have been deleted, withdrawn, or the reference link is
+          incorrect.
         </p>
 
         {/* Possible reasons card */}
