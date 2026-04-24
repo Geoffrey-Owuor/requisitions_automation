@@ -4,14 +4,12 @@ import Link from "next/link";
 import { CheckCircle2, XCircle } from "lucide-react";
 
 interface AlreadyProcessedProps {
-  processedAt?: string;
-  processedBy?: string;
-  status?: string;
+  processedBy: string;
+  status: string;
 }
 
 export default function AlreadyProcessed({
-  processedAt = "23 Apr 2026 at 10:45 AM",
-  processedBy = "Finance HOD",
+  processedBy = "",
   status = "approved",
 }: AlreadyProcessedProps) {
   // Logic to determine if the status is positive
@@ -55,7 +53,6 @@ export default function AlreadyProcessed({
           {[
             { label: "Decision", value: status },
             { label: "Processed by", value: processedBy },
-            { label: "Processed at", value: processedAt },
           ].map(({ label, value }) => (
             <div key={label} className="flex justify-between text-[13px]">
               <span className="text-[#7c5a5a]">{label}</span>

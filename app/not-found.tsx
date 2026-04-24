@@ -5,10 +5,10 @@ import { Home, Search, ArrowLeft } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-neutral-50 px-4 dark:bg-neutral-950">
-      <div className="mx-auto max-w-md rounded-3xl border border-gray-100 bg-white/65 p-10 text-center shadow-[0_24px_48px_rgba(160,60,60,0.10)] backdrop-blur-2xl dark:border-neutral-800 dark:bg-neutral-900/60">
+    <div className="flex min-h-screen w-full items-center justify-center bg-neutral-50 px-4">
+      <div className="mx-auto max-w-md rounded-3xl border border-gray-100 bg-white/65 p-10 text-center shadow-[0_24px_48px_rgba(160,60,60,0.10)] backdrop-blur-2xl">
         {/* Icon with a subtle "searching" animation pulse */}
-        <div className="relative mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-neutral-100 dark:bg-neutral-800">
+        <div className="relative mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-neutral-100">
           <Search className="h-8 w-8 text-neutral-400" />
           <div className="absolute inset-0 animate-ping rounded-full bg-neutral-400/10" />
         </div>
@@ -18,11 +18,11 @@ export default function NotFound() {
           Error 404
         </p>
 
-        <h1 className="mb-3 text-3xl font-bold tracking-tight text-[#1e1b1b] dark:text-white">
+        <h1 className="mb-3 text-3xl font-bold tracking-tight text-[#1e1b1b]">
           Lost in space?
         </h1>
 
-        <p className="mb-8 text-[14px] leading-relaxed text-[#7c5a5a] dark:text-neutral-400">
+        <p className="mb-8 text-[14px] leading-relaxed text-[#7c5a5a]">
           The page you are looking for doesn&apos;t seem to exist or has been
           moved. Let&apos;s get you back on track.
         </p>
@@ -31,7 +31,7 @@ export default function NotFound() {
         <div className="flex flex-col gap-3">
           <Link
             href="/"
-            className="flex w-full items-center justify-center gap-2 rounded-[14px] bg-[#1e1b1b] py-4 text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(30,27,27,0.3)] dark:bg-white dark:text-black"
+            className="flex w-full items-center justify-center gap-2 rounded-[14px] bg-[#1e1b1b] py-4 text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(30,27,27,0.3)]"
           >
             <Home size={18} />
             Return to Homepage
@@ -39,7 +39,7 @@ export default function NotFound() {
 
           <button
             onClick={() => window.history.back()}
-            className="flex w-full items-center justify-center gap-2 rounded-[14px] border border-neutral-200 bg-transparent py-4 text-[14px] font-semibold text-neutral-700 transition-all duration-200 hover:bg-neutral-50 dark:border-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-800"
+            className="flex w-full items-center justify-center gap-2 rounded-[14px] border border-neutral-200 bg-transparent py-4 text-[14px] font-semibold text-neutral-700 transition-all duration-200 hover:bg-neutral-50"
           >
             <ArrowLeft size={18} />
             Go back
