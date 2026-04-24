@@ -34,27 +34,7 @@ export interface EmailDataValues {
   directorapprovalstatus: string;
 }
 
-export interface EmailDataProps {
-  to: string | string[];
-  requestId: string;
-  message: string;
-  title: string;
-  role: string;
-  reviewLink?: string;
-  showPdfDownload?: boolean;
-}
-
-export async function EmailSender({
-  to,
-  requestId,
-  message,
-  title,
-  role,
-  reviewLink,
-  showPdfDownload = false,
-}: EmailDataProps) {
-  // Our base query
-  const baseQuery = `
+export const travelDataQuery = `
      SELECT 
        submitter_email AS emailaddress, 
        employee_name AS employeename, 
@@ -86,9 +66,31 @@ export async function EmailSender({
        travel_director_email AS directoremail,
        travel_director_comments AS directorcomments
        FROM travel_requisitions WHERE request_id = $1
-     `;
+`;
+
+export interface EmailDataProps {
+  to: string | string[];
+  requestId: string;
+  message: string;
+  title: string;
+  role: string;
+  reviewLink?: string;
+  showPdfDownload?: boolean;
+}
+
+export async function EmailSender({
+  to,
+  requestId,
+  message,
+  title,
+  role,
+  reviewLink,
+  showPdfDownload = false,
+}: EmailDataProps) {
   // Query the required email template values
-  const emailDataResult = await query<EmailDataValues>(baseQuery, [requestId]);
+  const emailDataResult = await query<EmailDataValues>(travelDataQuery, [
+    requestId,
+  ]);
   const emailData = emailDataResult[0];
 
   //Generate the email html

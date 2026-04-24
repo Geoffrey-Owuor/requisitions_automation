@@ -22,7 +22,7 @@ const DashboardHeader = () => {
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3.5">
         <Brand />
 
-        <nav className="flex items-center gap-1">
+        <nav className="no-print flex items-center gap-1">
           {links.map(({ href, label, Icon }) => {
             const isActive = pathname === href;
             return (
