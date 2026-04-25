@@ -122,7 +122,7 @@ export function TravelRequisitionTemplate({
               <a href="${BASE_URL}/travelapproval/${requestId}${reviewLink}" style="background-color: #a31d1d; color: #ffffff; padding: 14px 36px; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 13px; display: inline-block;">Review Requisition</a>
             </div>
             <div style="${pdfButtonStyle} width: 100%;">
-              <a href="${BASE_URL}/pdfdownload?requestId=${requestId}" style="color: #a31d1d; font-size: 12px; font-weight: 600; text-decoration: underline; display: inline-block; margin-top: 12px;">Download PDF Summary</a>
+              <a href="${BASE_URL}/travelapproval/${requestId}/pdfdownload" style="color: #a31d1d; font-size: 12px; font-weight: 600; text-decoration: underline; display: inline-block; margin-top: 12px;">Download PDF Summary</a>
             </div>
           </div>
 
