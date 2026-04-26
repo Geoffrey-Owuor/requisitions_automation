@@ -213,11 +213,11 @@ export default function TravelRequisitionPage() {
       {step === 1 && (
         <div className="relative z-10 mx-auto max-w-225">
           {/* Form Image */}
-          <div className="mb-4 h-70 overflow-hidden rounded-xl">
+          <div className="mb-4 overflow-hidden rounded-xl">
             <Image
               src={assets.form_image}
               sizes="100vh"
-              className="rounded-xl object-cover object-center" // or "object-cover" depending on your needs
+              className="rounded-xl object-contain object-center" // or "object-cover" depending on your needs
               priority // Use this if the image is above the fold
               alt="Form Image"
             />
@@ -225,10 +225,10 @@ export default function TravelRequisitionPage() {
           {/* Header */}
           <header className="mb-8 flex items-end justify-between max-sm:flex-col max-sm:items-start max-sm:gap-5">
             <div>
-              <h1 className="m-0 text-[28px] font-semibold tracking-[-0.5px] text-[#1e1b1b]">
+              <h1 className="m-0 text-2xl font-semibold tracking-[-0.5px] text-[#1e1b1b]">
                 Travel Requisition
               </h1>
-              <p className="mt-1 text-[15px] text-[#7c5a5a]">
+              <p className="mt-1 text-[14px] text-[#7c5a5a]">
                 Submit your business travel details for approval.
               </p>
             </div>
