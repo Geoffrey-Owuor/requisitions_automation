@@ -13,8 +13,8 @@ export const generateMetadata = async ({
   const { stage } = await searchParams;
   const upperCase = stage.toUpperCase();
   return {
-    title: `${upperCase || "NO"} Stage`,
-    description: `${upperCase || "NO"} Approval Stage`,
+    title: `Review | ${upperCase || "NO"} Stage`,
+    description: `Review | ${upperCase || "NO"} Approval Stage`,
   };
 };
 
