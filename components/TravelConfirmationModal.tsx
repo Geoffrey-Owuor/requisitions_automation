@@ -1,5 +1,6 @@
 import { ArrowLeft, Send } from "lucide-react";
 import { TravelFormData } from "./TravelRequisitionPage";
+import { dateFormatter } from "@/public/assets";
 
 interface ConfirmationModalProps {
   formData: TravelFormData;
@@ -39,8 +40,8 @@ export default function TravelConfirmationModal({
     ],
     [
       { label: "Destination", value: formData.destination },
-      { label: "Departure", value: formData.departureDate },
-      { label: "Return", value: formData.returnDate },
+      { label: "Departure", value: dateFormatter(formData.departureDate) },
+      { label: "Return", value: dateFormatter(formData.returnDate) },
       { label: "Category", value: formData.travelCategory },
       { label: "Travel Mode", value: formData.travelMode },
       { label: "Within Budget?", value: formData.withinBudget },

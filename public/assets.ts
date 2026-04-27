@@ -1,11 +1,13 @@
 import hotpoint_logo from "./web-app-manifest-192x192.png";
 import form_image from "./Form_Image.png";
 import hotpoint_background from "./hotpoint_logo.png";
+import it_form_image from "./it_form_image.png";
 
 export const assets = {
   hotpoint_logo,
   form_image,
   hotpoint_background,
+  it_form_image,
 };
 
 // Date formatter
