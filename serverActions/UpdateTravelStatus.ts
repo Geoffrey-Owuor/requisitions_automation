@@ -25,6 +25,7 @@ export async function UpdateTravelStatus(
   // Our base update query and params
   const baseUpdateQuery = `
     UPDATE travel_requisitions
+    SET travel_${payload.stage}_approval_date = CURRENT_TIMESTAMP,
     SET travel_${payload.stage}_approval_status = $1,
     travel_${payload.stage}_approver = $2,
     travel_${payload.stage}_email = $3,
