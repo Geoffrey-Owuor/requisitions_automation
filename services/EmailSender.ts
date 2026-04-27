@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { query } from "@/lib/db";
 import { TravelRequisitionTemplate } from "@/utils/templates/TravelRequisitionTemplate";
 import { sendEmail } from "./EmailService";
@@ -78,6 +79,12 @@ export interface EmailDataProps {
   showPdfDownload?: boolean;
 }
 
+// Cached query — repeated calls with the same requestId hit the DB only once
+export const getTravelEmailData = cache(async (requestId: string) => {
+  const result = await query<EmailDataValues>(travelDataQuery, [requestId]);
+  return result[0];
+});
+
 export async function EmailSender({
   to,
   requestId,
@@ -87,13 +94,8 @@ export async function EmailSender({
   reviewLink,
   showPdfDownload = false,
 }: EmailDataProps) {
-  // Query the required email template values
-  const emailDataResult = await query<EmailDataValues>(travelDataQuery, [
-    requestId,
-  ]);
-  const emailData = emailDataResult[0];
+  const emailData = await getTravelEmailData(requestId);
 
-  //Generate the email html
   const emailHtml = TravelRequisitionTemplate({
     requestId,
     message,
@@ -104,6 +106,5 @@ export async function EmailSender({
     showPdfDownload,
   });
 
-  // Sending the email
   await sendEmail({ to: to, subject: title, html: emailHtml });
 }
