@@ -115,6 +115,7 @@ export async function POST(request: NextRequest) {
       const updateQuery = `
         UPDATE travel_requisitions
         SET 
+        travel_hod_approval_date = CURRENT_TIMESTAMP,
         travel_hod_email = $1,
         travel_hod_approval_status = $2,
         travel_hod_comments = $3
