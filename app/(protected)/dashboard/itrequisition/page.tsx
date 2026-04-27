@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import ITRequisitionPage from "@/components/ITRequisition/ITRequisitionPage";
 
 export const metadata: Metadata = {
   title: "IT Requisition",
@@ -6,7 +7,7 @@ export const metadata: Metadata = {
 };
 
 const page = () => {
-  return <div>IT Requisition Page</div>;
+  return <ITRequisitionPage />;
 };
 
 export default page;
