@@ -12,6 +12,8 @@ export const assets = {
 
 // Date formatter
 export function dateFormatter(dateString: string) {
+  if (!dateString) return "—";
+
   const date = new Date(dateString);
   const dateResult = date.toLocaleDateString("en-GB", {
     day: "numeric",

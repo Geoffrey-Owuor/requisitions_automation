@@ -1,12 +1,13 @@
+"use client";
 import { ArrowLeft, Send } from "lucide-react";
 import { TravelFormData } from "./TravelRequisitionPage";
 import { dateFormatter } from "@/public/assets";
+import { useUser } from "@/context/UserContext";
 
 interface ConfirmationModalProps {
   formData: TravelFormData;
   totalCost: number;
   approvalTier: string;
-  session: { user?: { name?: string | null; email?: string | null } } | null;
   onBack: () => void;
   onSubmit: () => Promise<void>;
   submitting: boolean;
@@ -16,19 +17,19 @@ export default function TravelConfirmationModal({
   formData,
   totalCost,
   approvalTier,
-  session,
   onBack,
   onSubmit,
   submitting,
 }: ConfirmationModalProps) {
-  const userName = session?.user?.name ?? "Guest";
-  const userEmail = session?.user?.email ?? "";
+  const { username: userName, email: userEmail } = useUser();
   const initials = userName
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
+    ? userName
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2)
+    : "";
 
   const sections: { label: string; value: string }[][] = [
     [

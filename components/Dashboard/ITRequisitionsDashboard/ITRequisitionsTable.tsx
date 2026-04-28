@@ -1,10 +1,12 @@
 "use client";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
+import { SkeletonTable } from "@/components/Skeletons/SkeletonTabel";
 import { getITRequisitionData } from "@/serverActions/GetITRequisitionData";
-import { Search, Monitor, Plus, Info } from "lucide-react";
+import { Search, Monitor, Plus, Info, RotateCcw } from "lucide-react";
 import { TablePagination } from "../TablePagination";
 import { ITRequisitionModal } from "./ITRequisitionsModal";
 import StatusFormatter from "../StatusFormatter";
+import { useQuery } from "@tanstack/react-query";
 import { QueryResultRow } from "pg";
 import Link from "next/link";
 
@@ -18,22 +20,16 @@ export default function ITRequisitionsTable({
   const [selectedRequest, setSelectedRequest] = useState<QueryResultRow | null>(
     null,
   );
-  const [initialData, setInitialData] = useState<QueryResultRow[]>([]);
   const itemsPerPage = 6;
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const fetchedData = await getITRequisitionData(userEmail);
-        setInitialData(fetchedData);
-      } catch (error) {
-        console.error("Error fetching IT requisition data", error);
-        setInitialData([]);
-      }
-    };
-
-    fetchData();
-  }, [userEmail]);
+  const {
+    data: initialData = [],
+    isPending: loading,
+    refetch,
+  } = useQuery({
+    queryKey: ["ITRequisitionsData", userEmail],
+    queryFn: () => getITRequisitionData(userEmail),
+  });
 
   const filteredData = useMemo(() => {
     if (!searchTerm) return initialData;
@@ -49,24 +45,35 @@ export default function ITRequisitionsTable({
     return filteredData.slice(start, start + itemsPerPage);
   }, [filteredData, currentPage]);
 
+  if (loading) return <SkeletonTable />;
+
   return (
     <div className="mt-2">
-      {/* Search Input */}
-      <div className="relative mb-6 max-w-sm">
-        <Search
-          className="absolute top-1/2 left-4 z-10 -translate-y-1/2 text-gray-400"
-          size={20}
-        />
-        <input
-          type="text"
-          placeholder="Search employee, department or status..."
-          value={searchTerm}
-          onChange={(e) => {
-            setSearchTerm(e.target.value);
-            setCurrentPage(1);
-          }}
-          className="w-full rounded-2xl border border-gray-300 bg-white/60 py-3 pr-4 pl-12 text-sm shadow-[0_8px_16px_rgba(60,100,160,0.02)] outline-hidden backdrop-blur-xl transition-all focus:border-blue-400 focus:ring-4 focus:ring-blue-500/5"
-        />
+      {/* Search Input And Refresh */}
+      <div className="mb-6 flex items-center gap-2">
+        <div className="relative w-full max-w-xs">
+          <Search
+            className="absolute top-1/2 left-4 z-10 -translate-y-1/2 text-gray-400"
+            size={20}
+          />
+          <input
+            type="text"
+            placeholder="Search employee, department or status..."
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="w-full rounded-2xl border border-gray-300 bg-white/60 py-3 pr-4 pl-12 text-sm shadow-[0_8px_16px_rgba(60,100,160,0.02)] outline-hidden backdrop-blur-xl transition-all focus:border-blue-400 focus:ring-4 focus:ring-blue-500/5"
+          />
+        </div>
+        <button
+          onClick={() => refetch()}
+          className="inline-flex items-center gap-2 rounded-xl bg-neutral-900 p-3 text-sm text-white hover:bg-neutral-800"
+        >
+          <RotateCcw className="h-4 w-4" />
+          Refresh
+        </button>
       </div>
 
       {/* Table Container */}

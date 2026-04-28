@@ -10,6 +10,7 @@ import {
   UserRound,
 } from "lucide-react";
 import StatusFormatter from "../StatusFormatter";
+import { dateFormatter } from "@/public/assets";
 
 interface ITRequisitionModalProps {
   isOpen: boolean;
@@ -42,10 +43,10 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
       if (label === "Requirements") {
         const valueArray = value.toString().split(", ");
         return (
-          <span className="flex items-center gap-2">
+          <span className="flex flex-wrap items-center gap-2">
             {valueArray.map((value) => (
               <div
-                className="rounded-lg bg-neutral-200 px-2 py-1 text-xs"
+                className="rounded-lg bg-neutral-200 px-2 py-1 text-xs font-medium"
                 key={value}
               >
                 {value}
@@ -77,12 +78,6 @@ export function ITRequisitionModal({
 }: ITRequisitionModalProps) {
   if (!isOpen || !data) return null;
 
-  const formatDate = (val: unknown) => {
-    if (!val) return "—";
-    const d = new Date(val as string);
-    return isNaN(d.getTime()) ? String(val) : d.toLocaleDateString();
-  };
-
   const formatRequirements = (val: unknown) => {
     if (!val) return "—";
     if (Array.isArray(val)) return val.join(", ");
@@ -105,8 +100,8 @@ export function ITRequisitionModal({
                 IT Requisition
               </h2>
               <p className="text-[11px] text-gray-400">
-                #{data.request_id} &middot;{" "}
-                {formatDate(data.request_created_at)}
+                ID: {data.request_id} &middot;{" "}
+                {dateFormatter(data.request_created_at)}
               </p>
             </div>
           </div>
@@ -176,11 +171,11 @@ export function ITRequisitionModal({
             <div className="grid grid-cols-2 gap-4 rounded-2xl border border-gray-100 bg-white/60 p-4">
               <Field
                 label="Requisition Date"
-                value={formatDate(data.requisition_date)}
+                value={dateFormatter(data.requisition_date)}
               />
               <Field
                 label="Date of Joining"
-                value={formatDate(data.date_joining)}
+                value={dateFormatter(data.date_joining)}
               />
             </div>
           </section>
@@ -196,7 +191,7 @@ export function ITRequisitionModal({
               />
               <Field
                 label="Approval Date"
-                value={formatDate(data.hod_approval_date)}
+                value={dateFormatter(data.hod_approval_date)}
               />
               {data.hod_approver_comments && (
                 <Field label="Comments" value={data.hod_approver_comments} />
@@ -215,7 +210,7 @@ export function ITRequisitionModal({
               />
               <Field
                 label="Approval Date"
-                value={formatDate(data.it_approval_date)}
+                value={dateFormatter(data.it_approval_date)}
               />
               {data.it_approver_comments && (
                 <Field label="Comments" value={data.it_approver_comments} />
