@@ -1,6 +1,6 @@
 "use client";
 
-import { useSession } from "next-auth/react";
+import { useUser } from "@/context/UserContext";
 import { useState, ChangeEvent } from "react";
 import { DatePicker } from "../DatePicker";
 import SignOutButton from "../SignOutButton";
@@ -83,7 +83,7 @@ interface CheckboxGroupProps {
 
 // ---- Main Page ----
 export default function ITRequisitionPage() {
-  const { data: session } = useSession();
+  const { username, email } = useUser();
 
   const [formData, setFormData] = useState<ITFormData>(InitialFormState);
   const [step, setStep] = useState(1);
@@ -124,8 +124,8 @@ export default function ITRequisitionPage() {
           formData.otherRequirements || "No other requirements",
       },
       submittedBy: {
-        name: session?.user?.name,
-        email: session?.user?.email,
+        name: username,
+        email: email,
       },
     };
 
@@ -169,7 +169,7 @@ export default function ITRequisitionPage() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden p-5">
+    <div className="relative min-h-screen p-5">
       {submitting && <SubmittingOverlay />}
 
       {step === 3 && <AlertModal alertInfo={alertInfo} setStep={setStep} />}
@@ -177,7 +177,6 @@ export default function ITRequisitionPage() {
       {step === 2 && (
         <ITConfirmationModal
           formData={formData}
-          session={session}
           onBack={() => {
             setStep(1);
             window.scrollTo({ top: 0, behavior: "instant" });
@@ -220,10 +219,10 @@ export default function ITRequisitionPage() {
                 </div>
                 <div className="flex flex-col">
                   <span className="block text-[13px] font-semibold">
-                    {session?.user?.name ?? "Guest"}
+                    {username}
                   </span>
                   <span className="block text-[11px] text-[#a18080]">
-                    {session?.user?.email ?? "Not logged in"}
+                    {email}
                   </span>
                 </div>
               </div>

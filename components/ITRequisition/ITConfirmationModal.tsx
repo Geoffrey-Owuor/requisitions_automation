@@ -1,10 +1,11 @@
+"use client";
 import { ArrowLeft, Send } from "lucide-react";
 import { ITFormData } from "./ITRequisitionPage";
 import { dateFormatter } from "@/public/assets";
+import { useUser } from "@/context/UserContext";
 
 interface ITConfirmationModalProps {
   formData: ITFormData;
-  session: { user?: { name?: string | null; email?: string | null } } | null;
   onBack: () => void;
   onSubmit: () => Promise<void>;
   submitting: boolean;
@@ -12,19 +13,20 @@ interface ITConfirmationModalProps {
 
 export default function ITConfirmationModal({
   formData,
-  session,
   onBack,
   onSubmit,
   submitting,
 }: ITConfirmationModalProps) {
-  const userName = session?.user?.name ?? "Guest";
-  const userEmail = session?.user?.email ?? "";
+  const { username: userName, email: userEmail } = useUser();
+
   const initials = userName
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
+    ? userName
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2)
+    : "";
 
   const employeeDetails: { label: string; value: string }[] = [
     { label: "Name", value: formData.employeeName },
