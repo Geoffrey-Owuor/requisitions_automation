@@ -1,5 +1,4 @@
-import { NextResponse } from "next/server";
-import { NextRequest } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { HOD_ARRAY, HR_ARRAY } from "@/public/secretAssets";
 import { query } from "@/lib/db";
 import { EmailSender } from "@/services/EmailSender";
@@ -52,8 +51,18 @@ export async function POST(request: NextRequest) {
     const hodObject = HOD_ARRAY.find((hod) => hod.name === hodApprover);
 
     // get the hod uuid and email - or fall back to an invalid string
-    const hodUuid = hodObject ? hodObject.uuid : "invalid_uuid";
-    const hodEmail = hodObject ? hodObject.email : "invalid_email";
+    const hodUuid = hodObject?.uuid;
+    const hodEmail = hodObject?.email;
+
+    if (!hodUuid || !hodEmail) {
+      return NextResponse.json(
+        {
+          message:
+            "Could not find the selected HOD approver in current approval workflow, contact the admin for support",
+        },
+        { status: 404 },
+      );
+    }
 
     // Generate status for HOD Approval, HR Approval and Director Approval Statuses
     const hodStatus = "pending";
