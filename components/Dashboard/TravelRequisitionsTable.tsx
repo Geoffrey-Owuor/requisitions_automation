@@ -1,7 +1,7 @@
 "use client";
 import { useState, useMemo, useEffect } from "react";
 import { getTravelRequisitionData } from "@/serverActions/GetTravelRequisitionData";
-import { Search, PlaneLanding, PlaneTakeoff, Info, Plus } from "lucide-react";
+import { Search, PlaneLanding, Info, Plus } from "lucide-react";
 import { TablePagination } from "./TablePagination";
 import { TravelDetailsModal } from "./TravelDetailsModal";
 import StatusFormatter from "./StatusFormatter";
@@ -116,19 +116,13 @@ export default function TravelRequisitionsTable({
                     </span>
                   </td>
                   <td className="px-6 py-5">
-                    <div className="flex items-center gap-3">
-                      <div className="rounded-lg bg-white p-2 text-rose-500 shadow-sm">
-                        <PlaneLanding size={16} />
-                      </div>
-                      <span className="text-sm text-[#1e1b1b]">
-                        {req.travel_destination}
-                      </span>
-                    </div>
+                    <span className="text-sm text-[#1e1b1b]">
+                      {req.travel_destination}
+                    </span>
                   </td>
                   <td className="px-6 py-5">
                     <div className="flex flex-col text-[12px] font-medium text-[#a18080]">
-                      <span className="flex items-center gap-1">
-                        <PlaneTakeoff size={10} />{" "}
+                      <span>
                         {new Date(
                           req.travel_departure_date,
                         ).toLocaleDateString()}

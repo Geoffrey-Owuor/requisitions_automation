@@ -1,7 +1,8 @@
 "use client";
 import { useSession } from "next-auth/react";
 import TravelRequisitionsTable from "./TravelRequisitionsTable";
-import { BriefcaseBusiness, Laptop } from "lucide-react";
+import ITRequisitionsTable from "./ITRequisitionsDashboard/ITRequisitionsTable";
+import { BriefcaseBusiness, Laptop, Monitor } from "lucide-react";
 import SignOutButton from "../SignOutButton";
 import { IT_ARRAY } from "@/public/secretAssets";
 
@@ -59,22 +60,31 @@ const UserDashboard = () => {
 
         {/* DATA TABLES */}
 
-        {/* General IT Requisitions Heading */}
+        {/* All IT Requisitions */}
         {isITAdmin && (
           <div>
-            <span className="my-4 flex items-center gap-2 text-neutral-600">
+            <span className="my-4 flex items-center gap-2 font-medium text-neutral-600">
               <Laptop className="h-5 w-5" />
               Submitted IT Requisitions
             </span>
+            <ITRequisitionsTable />
           </div>
         )}
-        {/* Travel Requisitions Heading */}
+        {/* Travel Requisitions */}
         <div>
-          <span className="my-4 flex items-center gap-2 text-neutral-600">
+          <span className="my-4 flex items-center gap-2 font-medium text-neutral-600">
             <BriefcaseBusiness className="h-5 w-5" />
             Your Travel Requisitions
           </span>
-          <TravelRequisitionsTable userEmail={userEmail} />
+          {userEmail && <TravelRequisitionsTable userEmail={userEmail} />}
+        </div>
+        {/* User IT Requisitions */}
+        <div>
+          <span className="my-4 flex items-center gap-2 font-medium text-neutral-600">
+            <Monitor className="h-5 w-5" />
+            Your IT Requisitions
+          </span>
+          {userEmail && <ITRequisitionsTable userEmail={userEmail} />}
         </div>
       </div>
     </div>
