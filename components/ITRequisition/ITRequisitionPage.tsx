@@ -28,7 +28,7 @@ const IT_REQUIREMENTS = [
   "Desktop",
   "Email",
   "Orion",
-  "DMS (Document Management System)",
+  "DMS",
   "Qlik",
   "Phone Extension",
   "Dialing Code",
@@ -207,7 +207,7 @@ export default function ITRequisitionPage() {
                 IT Requisition
               </h1>
               <p className="mt-1 text-[14px] text-[#7c5a5a]">
-                Submit your IT equipment and access requirements for approval.
+                Submit your IT requirements for approval.
               </p>
             </div>
 
@@ -471,7 +471,7 @@ function CheckboxGroup({
                 checked={checked}
                 onChange={() => toggle(opt)}
               />
-              {opt}
+              {opt === "DMS" ? "DMS (Document Management System)" : opt}
             </label>
           );
         })}
