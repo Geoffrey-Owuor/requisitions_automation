@@ -1,6 +1,5 @@
-import { EmailDataValues } from "@/services/EmailSender";
+import { EmailDataValues, EmailDataProps } from "@/services/EmailSender";
 import { dateFormatter } from "@/public/assets";
-import { EmailDataProps } from "@/services/EmailSender";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 

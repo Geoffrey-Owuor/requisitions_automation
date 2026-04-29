@@ -98,6 +98,7 @@ const msalConfig: Configuration = {
 };
 
 interface EmailOptions {
+  from: string;
   to: string | string[];
   cc?: string | string[];
   subject: string;
@@ -119,6 +120,7 @@ async function getAccessToken() {
 }
 
 export const sendEmail = async ({
+  from,
   to,
   cc,
   subject,
@@ -168,7 +170,7 @@ export const sendEmail = async ({
 
     // Send via Fetch to Microsoft Graph
     const response = await fetch(
-      `https://graph.microsoft.com/v1.0/users/${process.env.EMAIL_SENDER}/sendMail`,
+      `https://graph.microsoft.com/v1.0/users/${from}/sendMail`,
       {
         method: "POST",
         headers: {
