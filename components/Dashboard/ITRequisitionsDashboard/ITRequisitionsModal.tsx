@@ -27,10 +27,10 @@ function SectionHeader({
 }) {
   return (
     <div className="mb-3 flex items-center gap-2">
-      <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 text-blue-400">
+      <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-red-50 text-red-400">
         <Icon size={14} />
       </div>
-      <h3 className="text-[11px] font-bold tracking-widest text-blue-400 uppercase">
+      <h3 className="text-[11px] font-bold tracking-widest text-red-400 uppercase">
         {title}
       </h3>
     </div>
@@ -46,7 +46,7 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
           <span className="flex flex-wrap items-center gap-2">
             {valueArray.map((value) => (
               <div
-                className="rounded-lg bg-neutral-200 px-2 py-1 text-xs font-medium"
+                className="rounded-lg bg-neutral-200/70 px-2 py-1 text-xs font-medium"
                 key={value}
               >
                 {value}
@@ -90,9 +90,9 @@ export function ITRequisitionModal({
       {/* Modal Panel */}
       <div className="relative w-full max-w-2xl rounded-2xl border border-b border-gray-200 bg-white/90 shadow-[0_32px_64px_rgba(60,100,160,0.15)] backdrop-blur-2xl">
         {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between rounded-t-3xl border-b border-blue-100/50 bg-blue-50/40 px-6 py-4 backdrop-blur-md">
+        <div className="sticky top-0 z-10 flex items-center justify-between rounded-t-3xl border-b border-neutral-100/50 bg-neutral-50/40 px-6 py-4 backdrop-blur-md">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-blue-400 shadow-sm">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-red-400 shadow-sm">
               <Monitor size={18} />
             </div>
             <div>
