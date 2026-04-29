@@ -8,7 +8,7 @@ import { hrApprovalStage } from "@/utils/TravelApprovalStages/hrApprovalStage";
 import { directorApprovalStage } from "@/utils/TravelApprovalStages/directorApprovalStage";
 import { EmailSender } from "@/services/EmailSender";
 
-type UpdateTravelStatusProps = {
+export type UpdateRequestStatusProps = {
   uuid: string;
   stage: string;
   status: string;
@@ -18,7 +18,7 @@ type UpdateTravelStatusProps = {
 };
 
 export async function UpdateTravelStatus(
-  payload: UpdateTravelStatusProps,
+  payload: UpdateRequestStatusProps,
 ): Promise<AlertInfo> {
   let client: PoolClient | undefined;
 
