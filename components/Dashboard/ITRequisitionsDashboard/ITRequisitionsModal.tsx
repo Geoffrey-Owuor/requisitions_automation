@@ -107,9 +107,9 @@ export function ITRequisitionModal({
           </div>
           <button
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-neutral-200 hover:text-gray-700"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-neutral-200 hover:text-gray-700"
           >
-            <X size={16} />
+            <X size={18} />
           </button>
         </div>
 
