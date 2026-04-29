@@ -80,7 +80,7 @@ export default function TravelRequisitionsTable({
       </div>
 
       {/* Table Container */}
-      <div className="overflow-x-auto rounded-3xl border border-gray-200 bg-white/50 shadow-[0_24px_48px_rgba(160,60,60,0.08)] backdrop-blur-2xl">
+      <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white/50 shadow-[0_24px_48px_rgba(160,60,60,0.08)] backdrop-blur-2xl">
         <table className="w-full border-collapse text-left">
           <thead>
             <tr className="border-b border-rose-100/50 bg-rose-50/30">

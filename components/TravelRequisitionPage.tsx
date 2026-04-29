@@ -193,7 +193,7 @@ export default function TravelRequisitionPage() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden p-5">
+    <div className="relative min-h-screen p-5">
       {submitting && <SubmittingOverlay />}
       {step === 3 && <AlertModal alertInfo={alertInfo} setStep={setStep} />}
       {step === 2 && (

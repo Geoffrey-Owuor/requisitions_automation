@@ -35,7 +35,7 @@ export default function RootLayout({
       <head>
         <meta name="apple-mobile-web-app-title" content="Requisition" />
       </head>
-      <body className="mx-auto flex min-h-screen max-w-7xl flex-col">
+      <body className="mx-auto flex min-h-screen max-w-7xl flex-col bg-[#fafafa]">
         {/* Page Content */}
         <QueryProvider>{children}</QueryProvider>
       </body>

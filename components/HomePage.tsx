@@ -1,368 +1,264 @@
 "use client";
 import Footer from "./Footer";
-
 import Link from "next/link";
 import {
   Plane,
   MapPin,
   Shield,
   Monitor,
+  ArrowRight,
   ArrowUpRight,
-  ChevronRight,
   CheckCircle2,
   CircleGauge,
   ShoppingBag,
   ExternalLink,
+  Sparkles,
 } from "lucide-react";
 import Brand from "./Brand";
+import { ReactNode } from "react";
 
 const requisitions = [
   {
     id: "travel",
     label: "Travel Requisition",
     description:
-      "Road trips, local flights, and international travel. Structured approval based on estimated cost.",
+      "Site visits, local flights, road travel, and international travel with automated multi-tier approvals.",
     href: "/dashboard/travelrequisition",
-    icon: <Plane size={20} />,
+    icon: <Plane size={22} />,
     accent: "from-rose-500 to-rose-600",
+    shadow: "shadow-rose-200",
     badge: "3 Approval Tiers",
-    badgeColor: "bg-rose-50 border-rose-200 text-rose-600",
-    workflow: [
-      { step: "Submit", detail: "Fill out travel details & cost estimate" },
-      { step: "HOD", detail: "Head of Department reviews & approves" },
-      { step: "HR / Director", detail: "Escalated based on travel tier" },
-    ],
+    workflow: ["Submit", "HOD", "HR", "Director"],
     tiers: [
-      {
-        label: "Local Road",
-        cost: "Under KES 30,000",
-        approvers: ["HOD"],
-        icon: <MapPin size={14} />,
-      },
-      {
-        label: "Local Air",
-        cost: "KES 30K – 100K",
-        approvers: ["HOD", "HR"],
-        icon: <Plane size={14} />,
-      },
-      {
-        label: "International",
-        cost: "Over KES 100,000",
-        approvers: ["HOD", "HR", "Director"],
-        icon: <Shield size={14} />,
-      },
+      { label: "Local", cost: "< 30K", icon: <MapPin size={12} /> },
+      { label: "Air", cost: "30K-100K", icon: <Plane size={12} /> },
+      { label: "Global", cost: "> 100K", icon: <Shield size={12} /> },
     ],
   },
   {
     id: "it",
     label: "IT Requisition",
     description:
-      "Laptops, peripherals, and IT equipment. Routed through your HOD then fulfilled by the IT department.",
+      "Request laptops, peripherals, and software. Routed to HOD then fulfilled by IT Support.",
     href: "/dashboard/itrequisition",
-    icon: <Monitor size={20} />,
-    accent: "from-slate-600 to-slate-700",
-    badge: "2-Step Process",
-    badgeColor: "bg-slate-100 border-slate-200 text-slate-600",
-    workflow: [
-      { step: "Submit", detail: "Specify equipment & business justification" },
-      { step: "HOD", detail: "Head of Department reviews & approves" },
-      { step: "IT Team", detail: "IT accepts and fulfils the request" },
-    ],
+    icon: <Monitor size={22} />,
+    accent: "from-slate-800 to-slate-900",
+    shadow: "shadow-slate-200",
+    badge: "Direct Process",
+    workflow: ["Submit", "HOD", "IT Fulfilment"],
     tiers: null,
   },
 ];
 
 export default function HomePage() {
   return (
-    <div className="relative min-h-screen overflow-x-hidden">
+    <div className="relative min-h-screen bg-[#fafafa] text-slate-900 selection:bg-rose-100 selection:text-rose-900">
+      {/* ── AMBIENT BACKGROUND ── */}
+      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+        <div className="absolute -top-[10%] -left-[10%] h-[40%] w-[40%] rounded-full bg-rose-100/50 blur-[120px]" />
+        <div className="absolute top-[20%] -right-[10%] h-[30%] w-[30%] rounded-full bg-blue-50/50 blur-[100px]" />
+      </div>
+
       {/* ── HEADER ── */}
-      <header className="relative z-20">
+      <header className="sticky top-0 z-50 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
           <Brand />
-          <div className="flex items-center gap-4">
+          <nav className="flex items-center gap-6">
             <Link
               href="/login"
-              className="hidden gap-2 rounded-xl px-3 py-2 text-sm hover:bg-rose-50 sm:block"
+              className="text-sm font-medium text-slate-600 transition-colors hover:text-rose-600"
             >
               Login
             </Link>
             <a
               href="http://192.168.0.27:10556"
               target="_blank"
-              rel="noopener norefferer"
-              className="hidden items-center gap-2 rounded-xl bg-black px-3 py-2 text-sm text-white sm:flex"
+              rel="noopener"
+              className="flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2 text-sm font-medium text-white transition-transform hover:scale-[1.02] active:scale-95"
             >
-              Staff Purchase Portal
-              <ExternalLink className="h-4 w-4" />
+              Purchase Portal
+              <ExternalLink size={14} />
             </a>
-          </div>
+          </nav>
         </div>
       </header>
 
-      {/* ── HERO ── */}
       <main className="relative z-10">
-        <section className="mx-auto max-w-6xl px-6 pt-16 pb-10">
-          <div className="flex flex-col gap-10 lg:flex-row lg:items-center lg:justify-between">
-            {/* Left — headline */}
-            <div className="max-w-xl">
-              <span className="mb-6 inline-block rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-[11px] font-semibold tracking-[2px] text-rose-600 uppercase">
-                Company Portal
-              </span>
-              <h2 className="mb-4 text-[40px] leading-[1.1] font-bold tracking-[-1.5px] text-[#1e1b1b] sm:text-[50px]">
-                Hotpoint Requisition
-                <br />
+        {/* ── HERO SECTION ── */}
+        <section className="mx-auto max-w-6xl px-6 pt-20 pb-16 text-center lg:text-left">
+          <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-5">
+            <div className="lg:col-span-3">
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-rose-100 bg-rose-50/50 px-4 py-1.5 text-[12px] font-bold tracking-wide text-rose-600 uppercase">
+                <Sparkles size={14} /> Internal Operations
+              </div>
+              <h1 className="mb-6 text-3xl font-semibold tracking-tight text-slate-900 sm:text-5xl">
+                Hotpoint{" "}
                 <span className="bg-linear-to-r from-rose-500 to-rose-700 bg-clip-text text-transparent">
-                  Hub
-                </span>
-              </h2>
-              <p className="max-w-lg text-[15px] leading-relaxed text-[#7c5a5a]">
-                Submit and track internal requisitions. All forms require you to
-                be signed into your company account and are routed automatically
-                through the appropriate approval chain.
+                  Requisition
+                </span>{" "}
+                Hub
+              </h1>
+              <p className="mx-auto max-w-xl text-lg leading-relaxed text-slate-500 lg:mx-0">
+                Submit and track internal requisitions. Some forms may require
+                you to be signed into your company account and are routed
+                automatically through the appropriate approval chain.
               </p>
             </div>
 
-            {/* Right — quick links */}
-            <div className="flex flex-col gap-3 lg:min-w-45">
-              <p className="mb-1 text-[10px] font-semibold tracking-[2px] text-[#a18080] uppercase">
-                Quick Access
-              </p>
-
-              <Link
-                href="/dashboard/travelrequisition"
-                className="group flex items-center justify-between gap-3 rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white/70 px-4 py-3.5 shadow-[0_4px_16px_rgba(160,60,60,0.07)] backdrop-blur-xl transition-transform hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(160,60,60,0.12)]"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-rose-500 to-rose-600 text-white">
-                    <Plane size={14} />
-                  </div>
-                  <div>
-                    <p className="text-[13px] leading-tight font-semibold text-[#1e1b1b]">
-                      Travel Requisition
-                    </p>
-                    <p className="text-[11px] text-[#a18080]">
-                      Road · Air · International
-                    </p>
-                  </div>
+            {/* Quick Stats/Links Card */}
+            <div className="lg:col-span-2">
+              <div className="rounded-3xl border border-slate-200 bg-white p-2 shadow-xl shadow-slate-200/50">
+                <div className="flex flex-col gap-1">
+                  <QuickLink
+                    href="/dashboard"
+                    icon={<CircleGauge size={18} />}
+                    label="View My Dashboard"
+                    sub="Track your requisitions"
+                  />
+                  <QuickLink
+                    href="http://192.168.0.27:10556"
+                    icon={<ShoppingBag size={18} />}
+                    label="Staff Purchase"
+                    sub="External portal"
+                    isExternal
+                  />
                 </div>
-                <ArrowUpRight
-                  size={14}
-                  className="shrink-0 text-[#c8a0a0] transition-colors group-hover:text-rose-500"
-                />
-              </Link>
-
-              <Link
-                href="/dashboard/itrequisition"
-                className="group flex items-center justify-between gap-3 rounded-2xl border border-[rgba(200,210,220,0.5)] bg-white/70 px-4 py-3.5 shadow-[0_4px_16px_rgba(100,110,130,0.06)] backdrop-blur-xl transition-transform hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(100,110,130,0.1)]"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-slate-600 to-slate-700 text-white">
-                    <Monitor size={14} />
-                  </div>
-                  <div>
-                    <p className="text-[13px] leading-tight font-semibold text-[#1e1b1b]">
-                      IT Requisition
-                    </p>
-                    <p className="text-[11px] text-[#a18080]">
-                      Laptops · Peripherals · Equipment
-                    </p>
-                  </div>
-                </div>
-                <ArrowUpRight
-                  size={14}
-                  className="shrink-0 text-[#b0b8c8] transition-colors group-hover:text-slate-500"
-                />
-              </Link>
-
-              <a
-                href="http://192.168.0.27:10556"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group flex items-center justify-between gap-3 rounded-2xl border border-[rgba(180,200,180,0.5)] bg-white/70 px-4 py-3.5 shadow-[0_4px_16px_rgba(60,120,60,0.05)] backdrop-blur-xl transition-transform hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(60,120,60,0.09)]"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-emerald-500 to-emerald-600 text-white">
-                    <ShoppingBag size={14} />
-                  </div>
-                  <div>
-                    <p className="text-[13px] leading-tight font-semibold text-[#1e1b1b]">
-                      Staff Purchase Portal
-                    </p>
-                    <p className="text-[11px] text-[#a18080]">
-                      External · Opens in new tab
-                    </p>
-                  </div>
-                </div>
-                <ExternalLink
-                  size={13}
-                  className="shrink-0 text-[#a8c0a8] transition-colors group-hover:text-emerald-500"
-                />
-              </a>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* Divider */}
-        <div className="mx-auto mb-8 max-w-6xl px-6">
-          <div className="flex items-center gap-4">
-            <div className="h-px flex-1 bg-linear-to-r from-transparent via-[rgba(240,180,180,0.5)] to-transparent" />
-            <span className="text-[11px] font-semibold tracking-[2px] text-[#a18080] uppercase">
-              Available Form Requisitions
-            </span>
-            <div className="h-px flex-1 bg-linear-to-r from-transparent via-[rgba(240,180,180,0.5)] to-transparent" />
+        {/* ── REQUISITION GRID ── */}
+        <section className="mx-auto max-w-6xl px-6 pb-32">
+          <div className="mb-10 flex items-center gap-4">
+            <h2 className="text-sm font-bold tracking-[0.2em] text-slate-400 uppercase">
+              Available Requisitions
+            </h2>
+            <div className="h-px flex-1 bg-slate-200" />
           </div>
-        </div>
 
-        {/* Requisition Cards */}
-        <section className="mx-auto max-w-6xl px-6 pb-24">
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
             {requisitions.map((req) => (
               <div
                 key={req.id}
-                className="group relative overflow-hidden rounded-3xl border border-white/85 bg-white/65 shadow-[0_16px_40px_rgba(160,60,60,0.07)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_rgba(160,60,60,0.13)]"
+                className="group relative flex flex-col justify-between overflow-hidden rounded-[2.5rem] border border-slate-200 bg-white p-8 transition-all duration-300 hover:border-rose-200 hover:shadow-2xl hover:shadow-rose-100"
               >
-                {/* Card Top */}
-                <div className="p-7 pb-5">
-                  <div className="mb-5 flex items-start justify-between">
+                <div>
+                  <div className="mb-8 flex items-start justify-between">
                     <div
-                      className={`h-11 w-11 rounded-xl bg-linear-to-br ${req.accent} flex items-center justify-center text-white shadow-md`}
+                      className={`flex h-14 w-14 items-center justify-center rounded-2xl bg-linear-to-br ${req.accent} text-white shadow-lg ${req.shadow}`}
                     >
                       {req.icon}
                     </div>
-                    <span
-                      className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold tracking-widest uppercase ${req.badgeColor}`}
-                    >
+                    <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-bold tracking-tight text-slate-500 uppercase">
                       {req.badge}
                     </span>
                   </div>
 
-                  <h3 className="mb-2 text-[22px] font-bold tracking-tight text-[#1e1b1b]">
+                  <h3 className="mb-3 text-2xl font-bold text-slate-900">
                     {req.label}
                   </h3>
-                  <p className="text-[14px] leading-relaxed text-[#7c5a5a]">
+                  <p className="mb-8 leading-relaxed text-slate-500">
                     {req.description}
                   </p>
-                </div>
 
-                {/* Workflow Steps */}
-                <div className="mx-7 mb-5 rounded-2xl border border-[rgba(240,180,180,0.3)] bg-white/40 p-4">
-                  <p className="mb-3 text-[10px] font-semibold tracking-widest text-[#a18080] uppercase">
-                    Approval Workflow
-                  </p>
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    {req.workflow.map((w, i) => (
-                      <div key={w.step} className="flex items-center gap-1.5">
-                        <div className="group/step relative flex items-center gap-1.5">
-                          <div className="flex items-center gap-1">
-                            <CheckCircle2
-                              size={12}
-                              className="shrink-0 text-rose-400"
-                            />
-                            <span className="text-[12px] font-semibold text-[#1e1b1b]">
-                              {w.step}
-                            </span>
-                          </div>
+                  {/* Visual Workflow Steps */}
+                  <div className="mb-8 flex items-center gap-2">
+                    {req.workflow.map((step, i) => (
+                      <div key={step} className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5 rounded-lg border border-slate-100 bg-slate-50/50 px-2.5 py-1">
+                          <CheckCircle2 size={12} className="text-rose-500" />
+                          <span className="text-[11px] font-semibold text-slate-700">
+                            {step}
+                          </span>
                         </div>
                         {i < req.workflow.length - 1 && (
-                          <ChevronRight
-                            size={12}
-                            className="shrink-0 text-[#c8a0a0]"
-                          />
+                          <div className="h-px w-4 bg-slate-200" />
                         )}
                       </div>
                     ))}
                   </div>
-                  {/* Workflow detail on hover — shown as subtle sub-text */}
-                  <div className="mt-3 space-y-1.5">
-                    {req.workflow.map((w) => (
-                      <div key={w.step} className="flex items-start gap-2">
-                        <span className="w-20 shrink-0 text-[11px] font-semibold text-[#1e1b1b]">
-                          {w.step}
-                        </span>
-                        <span className="text-[11px] text-[#a18080]">
-                          {w.detail}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
 
-                {/* Travel-only: Tier breakdown */}
-                {req.tiers && (
-                  <div className="mx-7 mb-5">
-                    <p className="mb-2 text-[10px] font-semibold tracking-widest text-[#a18080] uppercase">
-                      Cost-Based Tiers
-                    </p>
-                    <div className="space-y-1.5">
+                  {/* Tier Pills (If travel) */}
+                  {req.tiers && (
+                    <div className="mb-8 flex flex-wrap gap-2">
                       {req.tiers.map((tier) => (
                         <div
                           key={tier.label}
-                          className="flex items-center justify-between rounded-xl border border-[rgba(240,180,180,0.3)] bg-white/60 px-3.5 py-2.5"
+                          className="flex items-center gap-2 rounded-xl border border-slate-100 px-3 py-2 text-[12px]"
                         >
-                          <div className="flex items-center gap-2">
-                            <span className="text-rose-400">{tier.icon}</span>
-                            <span className="text-[12px] font-semibold text-[#1e1b1b]">
-                              {tier.label}
-                            </span>
-                            <span className="text-[11px] text-[#a18080]">
-                              · {tier.cost}
-                            </span>
-                          </div>
-                          <div className="flex gap-1">
-                            {tier.approvers.map((a) => (
-                              <span
-                                key={a}
-                                className="rounded-md border border-[rgba(240,180,180,0.5)] bg-[#fff1f2] px-2 py-0.5 text-[10px] font-medium text-[#1e1b1b]"
-                              >
-                                {a}
-                              </span>
-                            ))}
-                          </div>
+                          <span className="text-rose-500">{tier.icon}</span>
+                          <span className="font-bold text-slate-800">
+                            {tier.label}
+                          </span>
+                          <span className="text-slate-400">{tier.cost}</span>
                         </div>
                       ))}
                     </div>
-                  </div>
-                )}
-
-                {/* CTA */}
-                <div className="px-7 pb-7">
-                  <Link
-                    href={req.href}
-                    className={`flex w-full items-center justify-center gap-2 bg-linear-to-r py-3 ${req.accent} rounded-2xl text-[13px] font-bold text-white hover:-translate-y-0.5 hover:shadow-lg`}
-                  >
-                    Start {req.label} <ArrowUpRight size={14} />
-                  </Link>
-                  <p className="mt-2.5 text-center text-[11px] text-[#a18080]">
-                    Takes ~3 minutes · Requires company sign-in
-                  </p>
+                  )}
                 </div>
+
+                <Link
+                  href={req.href}
+                  className={`flex w-full items-center justify-center gap-2 rounded-2xl bg-linear-to-r ${req.accent} py-4 text-sm font-bold text-white transition-transform group-hover:scale-[1.01] active:scale-[0.98]`}
+                >
+                  Create New Request <ArrowRight size={16} />
+                </Link>
               </div>
             ))}
           </div>
 
-          {/* Info Banner */}
-          <div className="mt-8 flex flex-col items-center justify-between gap-5 rounded-3xl border border-[rgba(255,255,255,0.06)] bg-linear-to-r from-[#1e1b1b] to-[#2d2828] p-7 shadow-[0_20px_40px_rgba(0,0,0,0.15)] sm:flex-row">
-            <div>
-              <h4 className="text-[18px] font-bold tracking-tight text-white">
-                Compliance Requirements
-              </h4>
-              <p className="mt-1 text-[12px] text-white/40">
-                Compliance procedures for any requisition must be followed
-              </p>
-            </div>
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-1.5 rounded-xl bg-white px-3 py-2 text-sm text-black"
-            >
-              <CircleGauge className="h-4 w-4" />
-              Your Dashboard
-            </Link>
+          {/* COMPLIANCE FOOTNOTE */}
+          <div className="mt-12 flex items-center justify-center gap-3 text-slate-400">
+            <Shield size={16} />
+            <p className="text-sm">
+              Standard compliance and procedures apply to all requisitions.
+            </p>
           </div>
         </section>
       </main>
 
-      {/* ── FOOTER ── */}
       <Footer />
     </div>
+  );
+}
+
+type QuickLinkProps = {
+  href: string;
+  icon: ReactNode;
+  label: string;
+  sub: string;
+  isExternal?: boolean;
+};
+
+function QuickLink({
+  href,
+  icon,
+  label,
+  sub,
+  isExternal = false,
+}: QuickLinkProps) {
+  const Tag = isExternal ? "a" : Link;
+  return (
+    <Tag
+      href={href}
+      target={isExternal ? "_blank" : undefined}
+      className="group flex items-center justify-between rounded-2xl p-4 transition-colors hover:bg-slate-50"
+    >
+      <div className="flex items-center gap-4">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-50 text-rose-600 transition-colors group-hover:bg-rose-600 group-hover:text-white">
+          {icon}
+        </div>
+        <div>
+          <p className="text-sm font-bold text-slate-900">{label}</p>
+          <p className="text-xs text-slate-500">{sub}</p>
+        </div>
+      </div>
+      {isExternal ? (
+        <ExternalLink size={14} className="text-slate-300" />
+      ) : (
+        <ArrowUpRight size={14} className="text-slate-300" />
+      )}
+    </Tag>
   );
 }
