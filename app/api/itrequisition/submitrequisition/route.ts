@@ -1,7 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import { HOD_ARRAY, IT_ARRAY } from "@/public/secretAssets";
+import { ITEmailSender } from "@/services/ITEmailSender";
 import { query } from "@/lib/db";
-import { EmailSender } from "@/services/EmailSender";
 
 export async function POST(request: NextRequest) {
   try {
@@ -127,6 +127,50 @@ export async function POST(request: NextRequest) {
       ];
 
       await query(updateQuery, updateParams);
+
+      // Send mail to IT approvers
+      IT_ARRAY.forEach((itApprover) => {
+        ITEmailSender({
+          to: itApprover.email,
+          requestId: requestId,
+          message:
+            "A new IT Requisition has been submitted and requires your review",
+          title: "Action Required: New IT Requisition",
+          role: "IT",
+          reviewLink: `?token=${itApprover.uuid}&stage=it`,
+        });
+      });
+
+      // Send Email to the HOD approver
+      ITEmailSender({
+        to: email,
+        requestId: requestId,
+        message:
+          "Your IT requisition has been submitted successfully and forwaded to IT for review",
+        title: "Update: IT Requisition Submitted Successfully",
+        role: "user",
+      });
+    } else {
+      // Follow the normal workflow - send to HOD and User
+      ITEmailSender({
+        to: hodEmail,
+        requestId: requestId,
+        message:
+          "A new IT Requisition has been submitted and requires your review",
+        title: "Action Required: New IT Requisition",
+        role: "HOD",
+        reviewLink: `?token=${hodUuid}&stage=hod`,
+      });
+
+      // Send Email to the HOD approver
+      ITEmailSender({
+        to: email,
+        requestId: requestId,
+        message:
+          "Your IT requisition has been submitted successfully and forwaded to the HOD for review",
+        title: "Update: IT Requisition Submitted Successfully",
+        role: "user",
+      });
     }
 
     // Return a success response
