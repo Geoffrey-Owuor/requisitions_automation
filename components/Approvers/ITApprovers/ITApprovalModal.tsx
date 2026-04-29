@@ -16,13 +16,14 @@ import {
   Check,
   X,
   Mail,
-  User,
+  UserRound,
 } from "lucide-react";
 import { dateFormatter } from "@/public/assets";
 import SubmittingOverlay from "@/components/SubmittingOverlay";
 import { AlertInfo } from "@/components/TravelRequisitionPage";
 import { UpdateITRequisitionStatus } from "@/serverActions/UpdateITRequisitionStatus";
 import ApprovalAlert from "../TravelApprovers/ApprovalAlert";
+import { initialsHelper } from "@/public/assets";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -111,14 +112,6 @@ const ITApprovalModal = ({ data }: { data: ITRequisitionData }) => {
   });
   const [step, setStep] = useState(1);
 
-  // Initials for employee avatar
-  const initials = employeeName
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-
   const roleLabel = stageLabel[stage] ?? "Approver";
 
   const handleApproval = async (status: string) => {
@@ -204,12 +197,7 @@ const ITApprovalModal = ({ data }: { data: ITRequisitionData }) => {
             {/* Approver identity badge */}
             <div className="mb-7 flex items-center gap-3 rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white/80 px-4 py-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-rose-100 text-[13px] font-semibold text-rose-700">
-                {approverName
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")
-                  .toUpperCase()
-                  .slice(0, 2)}
+                {initialsHelper(approverName)}
               </div>
               <div>
                 <p className="text-[14px] font-semibold text-[#1e1b1b]">
@@ -230,8 +218,8 @@ const ITApprovalModal = ({ data }: { data: ITRequisitionData }) => {
                 <div className="flex flex-col gap-2.5">
                   {/* Employee avatar row */}
                   <div className="mb-1 flex items-center gap-2.5">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#1e1b1b]/8 text-[12px] font-semibold text-[#1e1b1b]">
-                      {initials}
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-100 text-[12px] font-semibold text-slate-800">
+                      {initialsHelper(employeeName)}
                     </div>
                     <div>
                       <p className="text-[13px] font-semibold text-[#1e1b1b]">
@@ -258,7 +246,7 @@ const ITApprovalModal = ({ data }: { data: ITRequisitionData }) => {
                     value={dateFormatter(requestCreatedAt)}
                   />
                   <DetailRow
-                    icon={User}
+                    icon={UserRound}
                     label="Requested By"
                     value={submitterName}
                   />
@@ -308,9 +296,9 @@ const ITApprovalModal = ({ data }: { data: ITRequisitionData }) => {
                 {requirements.split(", ").map((item) => (
                   <span
                     key={item}
-                    className="flex items-center gap-1.5 rounded-lg border border-[rgba(240,180,180,0.4)] bg-rose-50 px-3 py-1.5 text-[12px] font-medium text-rose-800"
+                    className="flex items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-1.5 text-[12px] font-medium text-slate-800"
                   >
-                    <Layers className="h-3 w-3 text-rose-400" />
+                    <Layers className="h-3 w-3 text-slate-500" />
                     {item}
                   </span>
                 ))}
@@ -363,7 +351,7 @@ const ITApprovalModal = ({ data }: { data: ITRequisitionData }) => {
                 type="button"
                 disabled={approving}
                 onClick={() => handleApproval("approved")}
-                className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-[14px] border-none bg-[#1e1b1b] py-4 text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)] active:scale-[0.98]"
+                className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-[14px] border-none bg-slate-900 py-4 text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)] active:scale-[0.98]"
               >
                 <Check className="h-4 w-4" />
                 {approving ? "Approving..." : "Approve"}

@@ -34,7 +34,7 @@ const DashboardHeader = () => {
                 className={`group relative flex items-center gap-2 rounded-full px-4 py-2 text-[13px] font-semibold transition-all duration-300 active:scale-95 ${
                   isActive
                     ? // Unified active state: White text and White icon
-                      "bg-linear-to-br from-slate-800 to-slate-900 text-white shadow-sm"
+                      "bg-slate-900 text-white shadow-sm"
                     : "text-slate-700 hover:text-rose-600"
                 }`}
               >
@@ -46,9 +46,7 @@ const DashboardHeader = () => {
                       : "text-slate-700 group-hover:text-rose-600"
                   }`}
                 />
-                <span className={isActive ? "text-white" : "hidden sm:inline"}>
-                  {label}
-                </span>
+                <span className="hidden sm:inline">{label}</span>
               </Link>
             );
           })}
