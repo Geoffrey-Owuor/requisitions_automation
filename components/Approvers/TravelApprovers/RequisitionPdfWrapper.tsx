@@ -6,7 +6,7 @@ import {
 } from "@/services/EmailSender";
 import NotFoundRequest from "./NotFoundRequest";
 import RequisitionPdfModal from "./RequisitionPdfModal";
-import RequisitionPdfSkeleton from "@/components/Skeletons.tsx/RequisitionPdfSkeleton";
+import RequisitionPdfSkeleton from "@/components/Skeletons/RequisitionPdfSkeleton";
 
 const RequisitionPdfWrapper = async ({ uuid }: { uuid: string }) => {
   if (!uuid) return <NotFoundRequest />;

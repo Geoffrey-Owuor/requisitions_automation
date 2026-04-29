@@ -1,12 +1,14 @@
 "use client";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { getTravelRequisitionData } from "@/serverActions/GetTravelRequisitionData";
-import { Search, PlaneLanding, PlaneTakeoff, Info, Plus } from "lucide-react";
+import { Search, PlaneLanding, Info, Plus, RotateCcw } from "lucide-react";
 import { TablePagination } from "./TablePagination";
 import { TravelDetailsModal } from "./TravelDetailsModal";
 import StatusFormatter from "./StatusFormatter";
 import { QueryResultRow } from "pg";
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
+import { SkeletonTable } from "../Skeletons/SkeletonTabel";
 
 export default function TravelRequisitionsTable({
   userEmail,
@@ -18,24 +20,16 @@ export default function TravelRequisitionsTable({
   const [selectedRequest, setSelectedRequest] = useState<QueryResultRow | null>(
     null,
   );
-  const [initialData, setInitialData] = useState<QueryResultRow[]>([]);
   const itemsPerPage = 6;
 
-  useEffect(() => {
-    if (!userEmail) return;
-
-    const fetchData = async () => {
-      try {
-        const fetchedData = await getTravelRequisitionData(userEmail);
-        setInitialData(fetchedData);
-      } catch (error) {
-        console.error("Error fetching travel requisition data", error);
-        setInitialData([]);
-      }
-    };
-
-    fetchData();
-  }, [userEmail]);
+  const {
+    data: initialData = [],
+    isPending: loading,
+    refetch,
+  } = useQuery({
+    queryKey: ["TravelRequisitionsData", userEmail],
+    queryFn: () => getTravelRequisitionData(userEmail),
+  });
 
   // 1. Shallow Search Logic using useMemo
   const filteredData = useMemo(() => {
@@ -54,21 +48,35 @@ export default function TravelRequisitionsTable({
     return filteredData.slice(start, start + itemsPerPage);
   }, [filteredData, currentPage]);
 
+  if (loading) return <SkeletonTable />;
+
   return (
     <div className="mt-2">
-      {/* Search Input */}
-      <div className="relative mb-6 max-w-sm">
-        <Search
-          className="absolute top-1/2 left-4 z-10 -translate-y-1/2 text-gray-400"
-          size={20}
-        />
-        <input
-          type="text"
-          placeholder="Search destination, employee or status..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full rounded-2xl border border-gray-300 bg-white/60 py-3 pr-4 pl-12 text-sm shadow-[0_8px_16px_rgba(160,60,60,0.02)] outline-hidden backdrop-blur-xl transition-all focus:border-rose-400 focus:ring-4 focus:ring-rose-500/5"
-        />
+      {/* Search Input And Refresh */}
+      <div className="mb-6 flex items-center gap-2">
+        <div className="relative w-full max-w-xs">
+          <Search
+            className="absolute top-1/2 left-4 z-10 -translate-y-1/2 text-gray-400"
+            size={20}
+          />
+          <input
+            type="text"
+            placeholder="Search employee, department or status..."
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="w-full rounded-xl border border-gray-300 bg-white/60 px-3 py-2.5 pr-4 pl-12 text-sm shadow-[0_8px_16px_rgba(60,100,160,0.02)] outline-hidden backdrop-blur-xl transition-all focus:border-blue-400 focus:ring-4 focus:ring-blue-500/5"
+          />
+        </div>
+        <button
+          onClick={() => refetch()}
+          className="inline-flex items-center gap-2 rounded-xl bg-neutral-900 px-3 py-2.5 text-sm text-white hover:bg-neutral-800"
+        >
+          <RotateCcw className="h-4 w-4" />
+          Refresh
+        </button>
       </div>
 
       {/* Table Container */}
@@ -116,19 +124,13 @@ export default function TravelRequisitionsTable({
                     </span>
                   </td>
                   <td className="px-6 py-5">
-                    <div className="flex items-center gap-3">
-                      <div className="rounded-lg bg-white p-2 text-rose-500 shadow-sm">
-                        <PlaneLanding size={16} />
-                      </div>
-                      <span className="text-sm text-[#1e1b1b]">
-                        {req.travel_destination}
-                      </span>
-                    </div>
+                    <span className="text-sm text-[#1e1b1b]">
+                      {req.travel_destination}
+                    </span>
                   </td>
                   <td className="px-6 py-5">
                     <div className="flex flex-col text-[12px] font-medium text-[#a18080]">
-                      <span className="flex items-center gap-1">
-                        <PlaneTakeoff size={10} />{" "}
+                      <span>
                         {new Date(
                           req.travel_departure_date,
                         ).toLocaleDateString()}
