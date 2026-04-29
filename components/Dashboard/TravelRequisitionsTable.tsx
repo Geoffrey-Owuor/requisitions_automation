@@ -8,7 +8,7 @@ import StatusFormatter from "./StatusFormatter";
 import { QueryResultRow } from "pg";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { SkeletonTable } from "../Skeletons/SkeletonTabel";
+import { SkeletonTable } from "../Skeletons/SkeletonTable";
 
 export default function TravelRequisitionsTable({
   userEmail,
@@ -53,7 +53,7 @@ export default function TravelRequisitionsTable({
   return (
     <div className="mt-2">
       {/* Search Input And Refresh */}
-      <div className="mb-6 flex items-center gap-2">
+      <div className="mb-6 flex flex-wrap items-center gap-2">
         <div className="relative w-full max-w-xs">
           <Search
             className="absolute top-1/2 left-4 z-10 -translate-y-1/2 text-gray-400"
@@ -72,7 +72,7 @@ export default function TravelRequisitionsTable({
         </div>
         <button
           onClick={() => refetch()}
-          className="inline-flex items-center gap-2 rounded-xl bg-neutral-900 px-3 py-2.5 text-sm text-white hover:bg-neutral-800"
+          className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-3 py-2.5 text-sm text-white hover:bg-slate-800"
         >
           <RotateCcw className="h-4 w-4" />
           Refresh
@@ -157,7 +157,7 @@ export default function TravelRequisitionsTable({
                     <StatusFormatter status={req.travel_hr_approval_status} />
                   </td>
                   <td className="px-6 py-5">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between gap-4">
                       <StatusFormatter
                         status={req.travel_director_approval_status}
                       />

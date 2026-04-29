@@ -3,6 +3,7 @@ import { ArrowLeft, Send } from "lucide-react";
 import { ITFormData } from "./ITRequisitionPage";
 import { dateFormatter } from "@/public/assets";
 import { useUser } from "@/context/UserContext";
+import { initialsHelper } from "@/public/assets";
 
 interface ITConfirmationModalProps {
   formData: ITFormData;
@@ -19,14 +20,7 @@ export default function ITConfirmationModal({
 }: ITConfirmationModalProps) {
   const { username: userName, email: userEmail } = useUser();
 
-  const initials = userName
-    ? userName
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .toUpperCase()
-        .slice(0, 2)
-    : "";
+  const nameString = userName ? userName : "";
 
   const employeeDetails: { label: string; value: string }[] = [
     { label: "Name", value: formData.employeeName },
@@ -59,7 +53,7 @@ export default function ITConfirmationModal({
       {/* User account card */}
       <div className="mb-6 flex items-center gap-3 rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white/80 px-4 py-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-rose-100 text-[13px] font-semibold text-rose-700">
-          {initials}
+          {initialsHelper(nameString)}
         </div>
         <div>
           <p className="text-[14px] font-semibold text-[#1e1b1b]">{userName}</p>
@@ -146,7 +140,7 @@ export default function ITConfirmationModal({
           type="button"
           onClick={onSubmit}
           disabled={submitting}
-          className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-[14px] border-none bg-[#1e1b1b] py-4 text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)] disabled:opacity-50"
+          className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-[14px] border-none bg-slate-900 py-4 text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)] disabled:opacity-50"
         >
           {submitting ? "Submitting..." : "Submit request"}
           <Send className="h-4 w-4" />

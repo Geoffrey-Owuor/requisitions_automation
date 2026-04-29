@@ -62,7 +62,7 @@ const RequisitionPdfModal = ({ pdfData }: { pdfData: TravelPdfValues }) => {
   );
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden p-5 font-sans">
+    <div className="relative min-h-screen p-5 font-sans">
       <div className="relative z-10 mx-auto max-w-180">
         {/* Toolbar — hidden in print */}
         <div className="no-print mb-6 flex items-center justify-between rounded-2xl border border-gray-100 bg-white/70 px-6 py-4 shadow-[0_8px_16px_rgba(160,60,60,0.06)] backdrop-blur-xl">
@@ -71,7 +71,7 @@ const RequisitionPdfModal = ({ pdfData }: { pdfData: TravelPdfValues }) => {
           </span>
           <button
             onClick={() => window.print()}
-            className="flex cursor-pointer items-center gap-2 rounded-[14px] border-none bg-[#1e1b1b] px-5 py-2.5 text-[13px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)]"
+            className="flex cursor-pointer items-center gap-2 rounded-[14px] border-none bg-slate-900 px-5 py-2.5 text-[13px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)]"
           >
             <Printer size={14} />
             Download PDF

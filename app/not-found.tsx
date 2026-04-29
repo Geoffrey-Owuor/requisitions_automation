@@ -31,7 +31,7 @@ export default function NotFound() {
         <div className="flex flex-col gap-3">
           <Link
             href="/"
-            className="flex w-full items-center justify-center gap-2 rounded-[14px] bg-[#1e1b1b] py-4 text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(30,27,27,0.3)]"
+            className="flex w-full items-center justify-center gap-2 rounded-[14px] bg-slate-900 py-4 text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(30,27,27,0.3)]"
           >
             <Home size={18} />
             Return to Homepage

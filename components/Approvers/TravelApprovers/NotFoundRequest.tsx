@@ -54,7 +54,7 @@ export default function NotFoundRequest() {
         {/* Action */}
         <Link
           href="/"
-          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-[14px] bg-[#1e1b1b] py-4 text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(30,27,27,0.3)]"
+          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-[14px] bg-slate-900 py-4 text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(30,27,27,0.3)]"
         >
           <Home size={16} />
           Go to Homepage

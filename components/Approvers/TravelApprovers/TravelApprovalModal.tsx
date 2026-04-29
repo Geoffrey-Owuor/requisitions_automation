@@ -25,6 +25,7 @@ import SubmittingOverlay from "@/components/SubmittingOverlay";
 import { AlertInfo } from "@/components/TravelRequisitionPage";
 import { UpdateTravelStatus } from "@/serverActions/UpdateTravelStatus";
 import ApprovalAlert from "./ApprovalAlert";
+import { initialsHelper } from "@/public/assets";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -124,14 +125,6 @@ const TravelApprovalModal = ({
   });
   const [step, setStep] = useState(1);
 
-  // Initials for employee avatar
-  const initials = employeeName
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-
   const roleLabel = stageLabel[stage] ?? "Approver";
 
   // Approval/ decline function
@@ -226,12 +219,7 @@ const TravelApprovalModal = ({
             {/* Approver identity badge */}
             <div className="mb-7 flex items-center gap-3 rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white/80 px-4 py-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-rose-100 text-[13px] font-semibold text-rose-700">
-                {approverName
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")
-                  .toUpperCase()
-                  .slice(0, 2)}
+                {initialsHelper(approverName)}
               </div>
               <div>
                 <p className="text-[14px] font-semibold text-[#1e1b1b]">
@@ -252,8 +240,8 @@ const TravelApprovalModal = ({
                 <div className="flex flex-col gap-2.5">
                   {/* Employee avatar row */}
                   <div className="mb-1 flex items-center gap-2.5">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#1e1b1b]/8 text-[12px] font-semibold text-[#1e1b1b]">
-                      {initials}
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-100 text-[12px] font-semibold text-slate-800">
+                      {initialsHelper(employeeName)}
                     </div>
                     <div>
                       <p className="text-[13px] font-semibold text-[#1e1b1b]">
@@ -359,7 +347,7 @@ const TravelApprovalModal = ({
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div className="flex items-center justify-between rounded-2xl bg-[#1e1b1b] px-5 py-4 text-white">
+                <div className="flex items-center justify-between rounded-2xl bg-linear-to-r from-slate-800 to-rose-900 px-5 py-4 text-white">
                   <div className="flex items-center gap-1.5">
                     <BadgeDollarSign className="h-4 w-4 text-white/60" />
                     <span className="text-[13px] text-white/70">Total</span>
@@ -420,7 +408,7 @@ const TravelApprovalModal = ({
                 type="button"
                 disabled={approving}
                 onClick={() => handleApproval("approved")}
-                className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-[14px] border-none bg-[#1e1b1b] py-4 text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)] active:scale-[0.98]"
+                className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-[14px] border-none bg-slate-900 py-4 text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)] active:scale-[0.98]"
               >
                 <Check className="h-4 w-4" />
                 {approving ? "Approving..." : "Approve"}

@@ -45,3 +45,14 @@ export const DEPARTMENTS = [
 export const TRAVEL_CATEGORIES = ["International", "Local"];
 export const TRAVEL_MODES = ["Road", "Air"];
 export const BUDGET_STATUS = ["Yes", "No"];
+
+export const initialsHelper = (userName: string) => {
+  const initials = userName
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+
+  return initials;
+};
