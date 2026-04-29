@@ -69,7 +69,7 @@ const UserDashboard = () => {
               <Laptop className="h-5 w-5" />
               Submitted IT Requisitions
             </span>
-            <ITRequisitionsTable />
+            <ITRequisitionsTable isITAdmin={isITAdmin} />
           </div>
         )}
         {/* User Travel Requisitions */}
@@ -89,7 +89,7 @@ const UserDashboard = () => {
               <Monitor className="h-5 w-5" />
               Your IT Requisitions
             </span>
-            <ITRequisitionsTable userEmail={userEmail} />
+            <ITRequisitionsTable userEmail={userEmail} isITAdmin={isITAdmin} />
           </div>
         )}
       </div>

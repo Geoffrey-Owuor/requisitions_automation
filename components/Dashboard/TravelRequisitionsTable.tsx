@@ -67,12 +67,12 @@ export default function TravelRequisitionsTable({
               setSearchTerm(e.target.value);
               setCurrentPage(1);
             }}
-            className="w-full rounded-2xl border border-gray-300 bg-white/60 py-3 pr-4 pl-12 text-sm shadow-[0_8px_16px_rgba(60,100,160,0.02)] outline-hidden backdrop-blur-xl transition-all focus:border-blue-400 focus:ring-4 focus:ring-blue-500/5"
+            className="w-full rounded-xl border border-gray-300 bg-white/60 px-3 py-2.5 pr-4 pl-12 text-sm shadow-[0_8px_16px_rgba(60,100,160,0.02)] outline-hidden backdrop-blur-xl transition-all focus:border-blue-400 focus:ring-4 focus:ring-blue-500/5"
           />
         </div>
         <button
           onClick={() => refetch()}
-          className="inline-flex items-center gap-2 rounded-xl bg-neutral-900 p-3 text-sm text-white hover:bg-neutral-800"
+          className="inline-flex items-center gap-2 rounded-xl bg-neutral-900 px-3 py-2.5 text-sm text-white hover:bg-neutral-800"
         >
           <RotateCcw className="h-4 w-4" />
           Refresh
