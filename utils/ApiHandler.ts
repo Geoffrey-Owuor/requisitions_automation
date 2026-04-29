@@ -2,7 +2,7 @@
 export async function ApiHandler(
   apiUrl: string,
   method: string,
-  payload: object,
+  payload?: object,
 ) {
   const response = await fetch(apiUrl, {
     method: method,

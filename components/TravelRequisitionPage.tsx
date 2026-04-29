@@ -1,6 +1,6 @@
 "use client";
 
-import { useSession } from "next-auth/react";
+import { useUser } from "@/context/UserContext";
 import { useState, ChangeEvent, useMemo } from "react";
 import { DatePicker } from "./DatePicker";
 import SignOutButton from "./SignOutButton";
@@ -83,7 +83,7 @@ interface FormSelectProps {
 }
 
 export default function TravelRequisitionPage() {
-  const { data: session } = useSession();
+  const { username, email } = useUser();
 
   const [formData, setFormData] = useState<TravelFormData>(InitialFormState);
 
@@ -133,8 +133,8 @@ export default function TravelRequisitionPage() {
       totalCost,
       approvalTier: generatedAprovalTier,
       submittedBy: {
-        name: session?.user?.name,
-        email: session?.user?.email,
+        name: username,
+        email: email,
       },
     };
 
@@ -201,7 +201,6 @@ export default function TravelRequisitionPage() {
           formData={formData}
           totalCost={totalCost}
           approvalTier={generatedAprovalTier}
-          session={session}
           onBack={() => {
             setStep(1);
             window.scrollTo({ top: 0, behavior: "instant" });
@@ -242,10 +241,10 @@ export default function TravelRequisitionPage() {
                 </div>
                 <div className="flex flex-col">
                   <span className="block text-[13px] font-semibold">
-                    {session?.user?.name ?? "Guest"}
+                    {username}
                   </span>
                   <span className="block text-[11px] text-[#a18080]">
-                    {session?.user?.email ?? "Not logged in"}
+                    {email}
                   </span>
                 </div>
               </div>

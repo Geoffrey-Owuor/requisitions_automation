@@ -1,7 +1,8 @@
 // app/(protected)/layout.tsx
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { AuthProvider } from "@/components/SessionProvider";
+
+import { UserProvider } from "@/context/UserContext";
 
 import DashboardWrapper from "@/components/Dashboard/DashboardWrapper";
 
@@ -17,9 +18,15 @@ export default async function ProtectedLayout({
     redirect("/login");
   }
 
+  // The user object
+  const userObject = {
+    username: session.user?.name,
+    email: session.user?.email,
+  };
+
   return (
-    <AuthProvider>
+    <UserProvider user={userObject}>
       <DashboardWrapper>{children}</DashboardWrapper>
-    </AuthProvider>
+    </UserProvider>
   );
 }

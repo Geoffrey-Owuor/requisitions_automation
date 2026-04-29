@@ -1,27 +1,24 @@
 "use client";
 import { ArrowLeft, Send } from "lucide-react";
-import { TravelFormData } from "./TravelRequisitionPage";
+import { ITFormData } from "./ITRequisitionPage";
 import { dateFormatter } from "@/public/assets";
 import { useUser } from "@/context/UserContext";
 
-interface ConfirmationModalProps {
-  formData: TravelFormData;
-  totalCost: number;
-  approvalTier: string;
+interface ITConfirmationModalProps {
+  formData: ITFormData;
   onBack: () => void;
   onSubmit: () => Promise<void>;
   submitting: boolean;
 }
 
-export default function TravelConfirmationModal({
+export default function ITConfirmationModal({
   formData,
-  totalCost,
-  approvalTier,
   onBack,
   onSubmit,
   submitting,
-}: ConfirmationModalProps) {
+}: ITConfirmationModalProps) {
   const { username: userName, email: userEmail } = useUser();
+
   const initials = userName
     ? userName
         .split(" ")
@@ -31,22 +28,17 @@ export default function TravelConfirmationModal({
         .slice(0, 2)
     : "";
 
-  const sections: { label: string; value: string }[][] = [
-    [
-      { label: "Name", value: formData.employeeName },
-      { label: "Department", value: formData.department },
-      { label: "Designation", value: formData.designation },
-      { label: "HOD Approver", value: formData.hodApprover },
-      { label: "Cost Centre", value: formData.costCentre },
-    ],
-    [
-      { label: "Destination", value: formData.destination },
-      { label: "Departure", value: dateFormatter(formData.departureDate) },
-      { label: "Return", value: dateFormatter(formData.returnDate) },
-      { label: "Category", value: formData.travelCategory },
-      { label: "Travel Mode", value: formData.travelMode },
-      { label: "Within Budget?", value: formData.withinBudget },
-    ],
+  const employeeDetails: { label: string; value: string }[] = [
+    { label: "Name", value: formData.employeeName },
+    { label: "Department", value: formData.department },
+    { label: "Staff Number", value: formData.staffNumber },
+    { label: "Replacement/New", value: formData.requestType },
+    { label: "HOD Approver", value: formData.hodApprover },
+  ];
+
+  const dateDetails: { label: string; value: string }[] = [
+    { label: "Requisition Date", value: formData.requisitionDate },
+    { label: "Date Joining", value: formData.dateJoining },
   ];
 
   return (
@@ -60,7 +52,7 @@ export default function TravelConfirmationModal({
           Review & confirm
         </h2>
         <p className="mt-1 text-[13px] text-[#7c5a5a]">
-          Please review your travel request before submitting.
+          Please review your IT requisition before submitting.
         </p>
       </div>
 
@@ -80,12 +72,13 @@ export default function TravelConfirmationModal({
 
       {/* Details grid */}
       <div className="mb-5 grid grid-cols-2 gap-6 max-sm:grid-cols-1">
+        {/* Employee Details */}
         <div>
           <p className="mb-2 text-[11px] font-semibold tracking-[0.4px] text-[#b0a0a0] uppercase">
             Employee Details
           </p>
           <div className="flex flex-col gap-1.5">
-            {sections[0].map(({ label, value }) => (
+            {employeeDetails.map(({ label, value }) => (
               <div key={label} className="flex justify-between text-[13px]">
                 <span className="text-[#7c5a5a]">{label}</span>
                 <span className="font-medium text-[#1e1b1b]">{value}</span>
@@ -93,66 +86,50 @@ export default function TravelConfirmationModal({
             ))}
           </div>
         </div>
+
+        {/* Date Details */}
         <div>
           <p className="mb-2 text-[11px] font-semibold tracking-[0.4px] text-[#b0a0a0] uppercase">
-            Trip Information
+            Dates
           </p>
           <div className="flex flex-col gap-1.5">
-            {sections[1].map(({ label, value }) => (
+            {dateDetails.map(({ label, value }) => (
               <div key={label} className="flex justify-between text-[13px]">
                 <span className="text-[#7c5a5a]">{label}</span>
-                <span className="font-medium text-[#1e1b1b]">{value}</span>
+                <span className="font-medium text-[#1e1b1b]">
+                  {dateFormatter(value)}
+                </span>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Justification */}
-      <div className="mb-5 border-t border-[rgba(240,180,180,0.4)] pt-5">
-        <p className="mb-2 text-[11px] font-semibold tracking-[0.4px] text-[#b0a0a0] uppercase">
-          Business Justification
-        </p>
-        <p className="rounded-xl bg-white/60 py-3 text-[13px] leading-relaxed text-[#1e1b1b]">
-          {formData.justification}
-        </p>
-      </div>
-
-      {/* Cost breakdown */}
+      {/* Requirements */}
       <div className="mb-5 border-t border-[rgba(240,180,180,0.4)] pt-5">
         <p className="mb-3 text-[11px] font-semibold tracking-[0.4px] text-[#b0a0a0] uppercase">
-          Cost Breakdown (KES)
+          Requirements
         </p>
-        <div className="mb-3 grid grid-cols-3 gap-2 max-sm:grid-cols-2">
-          {[
-            { label: "Transport", value: formData.transportCost },
-            { label: "Others", value: formData.otherCost },
-            { label: "Per Diem", value: formData.perDiem },
-          ].map(({ label, value }) => (
-            <div
-              key={label}
-              className="rounded-xl bg-gray-100 px-3 py-2.5 text-center"
+        <div className="flex flex-wrap gap-2">
+          {formData.requirements.map((req) => (
+            <span
+              key={req}
+              className="rounded-lg bg-rose-100 px-3 py-1 text-[12px] font-medium text-rose-700"
             >
-              <p className="text-[11px] text-[#7c5a5a]">{label}</p>
-              <p className="mt-0.5 text-[15px] font-semibold text-[#1e1b1b]">
-                {value.toLocaleString()}
-              </p>
-            </div>
+              {req}
+            </span>
           ))}
         </div>
+      </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <div className="flex items-center justify-between rounded-2xl bg-[#1e1b1b] px-5 py-4 text-white">
-            <span className="text-[13px] text-white/70">Total</span>
-            <span className="text-[16px] font-semibold">
-              KES {totalCost.toLocaleString()}
-            </span>
-          </div>
-          <div className="flex items-center justify-between rounded-2xl bg-rose-900/80 px-5 py-4 text-rose-50">
-            <span className="text-[13px] text-rose-200">Approval Tier</span>
-            <span className="text-[16px] font-semibold">{approvalTier}</span>
-          </div>
-        </div>
+      {/* Other Requirements */}
+      <div className="mb-5 border-t border-[rgba(240,180,180,0.4)] pt-5">
+        <p className="mb-2 text-[11px] font-semibold tracking-[0.4px] text-[#b0a0a0] uppercase">
+          Other Requirements
+        </p>
+        <p className="rounded-xl bg-white/60 py-3 text-[13px] leading-relaxed text-[#1e1b1b]">
+          {formData.otherRequirements || "No other requirements"}
+        </p>
       </div>
 
       {/* Actions */}

@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { query } from "@/lib/db";
 import { HOD_ARRAY, HR_ARRAY, DIRECTOR_ARRAY } from "@/public/secretAssets";
 import TravelApprovalModal from "./TravelApprovalModal";
-import TravelApprovalSkeleton from "@/components/Skeletons.tsx/TravelApprovalSkeleton";
+import TravelApprovalSkeleton from "@/components/Skeletons/TravelApprovalSkeleton";
 import AlreadyProcessed from "./AlreadyProcessed";
 import InvalidToken from "./InvalidToken";
 import NotFoundRequest from "./NotFoundRequest";

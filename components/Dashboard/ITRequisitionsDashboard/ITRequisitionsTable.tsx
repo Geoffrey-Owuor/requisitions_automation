@@ -1,19 +1,22 @@
 "use client";
 import { useState, useMemo } from "react";
-import { getTravelRequisitionData } from "@/serverActions/GetTravelRequisitionData";
-import { Search, PlaneLanding, Info, Plus, RotateCcw } from "lucide-react";
-import { TablePagination } from "./TablePagination";
-import { TravelDetailsModal } from "./TravelDetailsModal";
-import StatusFormatter from "./StatusFormatter";
-import { QueryResultRow } from "pg";
+import { SkeletonTable } from "@/components/Skeletons/SkeletonTabel";
+import { getITRequisitionData } from "@/serverActions/GetITRequisitionData";
+import { Search, Monitor, Plus, Info, RotateCcw } from "lucide-react";
+import { TablePagination } from "../TablePagination";
+import { ITRequisitionModal } from "./ITRequisitionsModal";
+import StatusFormatter from "../StatusFormatter";
 import { useQuery } from "@tanstack/react-query";
+import { QueryResultRow } from "pg";
+import ITDataExport from "./ITDataExport";
 import Link from "next/link";
-import { SkeletonTable } from "../Skeletons/SkeletonTabel";
 
-export default function TravelRequisitionsTable({
+export default function ITRequisitionsTable({
   userEmail,
+  isITAdmin,
 }: {
   userEmail?: string;
+  isITAdmin: boolean;
 }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -27,14 +30,12 @@ export default function TravelRequisitionsTable({
     isPending: loading,
     refetch,
   } = useQuery({
-    queryKey: ["TravelRequisitionsData", userEmail],
-    queryFn: () => getTravelRequisitionData(userEmail),
+    queryKey: ["ITRequisitionsData", userEmail],
+    queryFn: () => getITRequisitionData(userEmail),
   });
 
-  // 1. Shallow Search Logic using useMemo
   const filteredData = useMemo(() => {
     if (!searchTerm) return initialData;
-
     return initialData.filter((item) =>
       Object.values(item).some((val) =>
         String(val).toLowerCase().includes(searchTerm.toLowerCase()),
@@ -42,7 +43,6 @@ export default function TravelRequisitionsTable({
     );
   }, [searchTerm, initialData]);
 
-  // 2. Pagination Logic
   const paginatedData = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
     return filteredData.slice(start, start + itemsPerPage);
@@ -67,7 +67,7 @@ export default function TravelRequisitionsTable({
               setSearchTerm(e.target.value);
               setCurrentPage(1);
             }}
-            className="w-full rounded-xl border border-gray-300 bg-white/60 px-3 py-2.5 pr-4 pl-12 text-sm shadow-[0_8px_16px_rgba(60,100,160,0.02)] outline-hidden backdrop-blur-xl transition-all focus:border-blue-400 focus:ring-4 focus:ring-blue-500/5"
+            className="w-full rounded-xl border border-gray-300 bg-white/60 py-2.5 pr-4 pl-12 text-sm shadow-[0_8px_16px_rgba(60,100,160,0.02)] outline-hidden backdrop-blur-xl transition-all focus:border-blue-400 focus:ring-4 focus:ring-blue-500/5"
           />
         </div>
         <button
@@ -77,121 +77,130 @@ export default function TravelRequisitionsTable({
           <RotateCcw className="h-4 w-4" />
           Refresh
         </button>
+        {isITAdmin && <ITDataExport />}
       </div>
 
       {/* Table Container */}
-      <div className="overflow-x-auto rounded-3xl border border-gray-200 bg-white/50 shadow-[0_24px_48px_rgba(160,60,60,0.08)] backdrop-blur-2xl">
+      <div className="overflow-x-auto rounded-3xl border border-gray-200 bg-white/50 shadow-[0_24px_48px_rgba(60,100,160,0.08)] backdrop-blur-2xl">
         <table className="w-full border-collapse text-left">
           <thead>
-            <tr className="border-b border-rose-100/50 bg-rose-50/30">
-              <th className="px-6 py-4 text-[11px] font-bold tracking-widest text-rose-400 uppercase">
-                Employee
-              </th>
-              <th className="px-6 py-4 text-[11px] font-bold tracking-widest text-rose-400 uppercase">
-                Destination
-              </th>
-              <th className="px-6 py-4 text-[11px] font-bold tracking-widest text-rose-400 uppercase">
-                Dates
-              </th>
-              <th className="px-6 py-4 text-[11px] font-bold tracking-widest text-rose-400 uppercase">
-                Mode
-              </th>
-              <th className="px-6 py-4 text-[11px] font-bold tracking-widest text-rose-400 uppercase">
-                Total Cost
-              </th>
-              <th className="px-6 py-4 text-[11px] font-bold tracking-widest text-rose-400 uppercase">
-                HOD Status
-              </th>
-              <th className="px-6 py-4 text-[11px] font-bold tracking-widest text-rose-400 uppercase">
-                HR Status
-              </th>
-              <th className="px-6 py-4 text-[11px] font-bold tracking-widest text-rose-400 uppercase">
-                Director Status
-              </th>
+            <tr className="border-b border-blue-100/50 bg-blue-50/30">
+              {[
+                "Employee",
+                "Department",
+                "Type",
+                "HOD",
+                "Requisition Date",
+                "HOD Status",
+                "IT Status",
+                "Completion",
+              ].map((col) => (
+                <th
+                  key={col}
+                  className="px-6 py-4 text-[11px] font-bold tracking-widest text-blue-400 uppercase"
+                >
+                  {col}
+                </th>
+              ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-rose-50">
+          <tbody className="divide-y divide-blue-50">
             {filteredData.length > 0 ? (
               paginatedData.map((req) => (
                 <tr
                   key={req.request_id}
                   onClick={() => setSelectedRequest(req)}
-                  className="group cursor-pointer transition-colors hover:bg-rose-50/50"
+                  className="group cursor-pointer transition-colors hover:bg-blue-50/50"
                 >
+                  {/* Employee */}
                   <td className="px-6 py-5">
-                    <span className="text-sm text-[#1e1b1b]">
-                      {req.employee_name}
-                    </span>
-                  </td>
-                  <td className="px-6 py-5">
-                    <span className="text-sm text-[#1e1b1b]">
-                      {req.travel_destination}
-                    </span>
-                  </td>
-                  <td className="px-6 py-5">
-                    <div className="flex flex-col text-[12px] font-medium text-[#a18080]">
-                      <span>
-                        {new Date(
-                          req.travel_departure_date,
-                        ).toLocaleDateString()}
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium text-[#1e1b1b]">
+                        {req.employee_name}
                       </span>
-                      <span>
-                        {new Date(req.travel_return_date).toLocaleDateString()}
+                      <span className="text-[11px] text-gray-400">
+                        #{req.employee_staff_number}
                       </span>
                     </div>
                   </td>
+
+                  {/* Department */}
                   <td className="px-6 py-5">
-                    <span className="text-sm font-medium text-[#1e1b1b]">
-                      {req.travel_mode}
+                    <span className="text-sm text-[#1e1b1b]">
+                      {req.employee_department}
                     </span>
                   </td>
+
+                  {/* Replacement / New */}
                   <td className="px-6 py-5">
-                    <span className="text-sm font-semibold">
-                      KES {req.travel_total_cost}
+                    <span
+                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
+                        req.replacement_new === "New"
+                          ? "bg-emerald-50 text-emerald-600"
+                          : "bg-amber-50 text-amber-600"
+                      }`}
+                    >
+                      {req.replacement_new}
                     </span>
                   </td>
-                  <td className="px-6 py-5">
-                    <StatusFormatter status={req.travel_hod_approval_status} />
+
+                  {/* Requirements */}
+                  <td className="max-w-50 px-6 py-5">
+                    <span className="text-sm text-[#1e1b1b]">
+                      {req.hod_approver_name}
+                    </span>
                   </td>
+
+                  {/* Requisition Date */}
                   <td className="px-6 py-5">
-                    <StatusFormatter status={req.travel_hr_approval_status} />
+                    <span className="text-sm text-[#a18080]">
+                      {new Date(req.requisition_date).toLocaleDateString()}
+                    </span>
                   </td>
+
+                  {/* HOD Status */}
                   <td className="px-6 py-5">
-                    <div className="flex items-center justify-between">
-                      <StatusFormatter
-                        status={req.travel_director_approval_status}
-                      />
+                    <StatusFormatter status={req.hod_approver_status} />
+                  </td>
+
+                  {/* IT Status */}
+                  <td className="px-6 py-5">
+                    <StatusFormatter status={req.it_approver_status} />
+                  </td>
+
+                  {/* Completion */}
+                  <td className="px-6 py-5">
+                    <div className="flex items-center justify-between gap-4">
+                      <StatusFormatter status={req.completion_status} />
                       <Info
                         size={14}
-                        className="text-rose-200 transition-colors group-hover:text-rose-400"
+                        className="text-blue-200 transition-colors group-hover:text-blue-400"
                       />
                     </div>
                   </td>
                 </tr>
               ))
             ) : (
-              /* --- FALLBACK UI --- */
+              /* Fallback UI */
               <tr>
                 <td colSpan={8} className="px-6 py-20">
                   <div className="flex flex-col items-center justify-center text-center">
-                    {/* Glassmorphic Icon Circle */}
-                    <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/80 bg-white/40 text-rose-300 shadow-[0_8px_16px_rgba(160,60,60,0.05)] backdrop-blur-md">
-                      <PlaneLanding size={32} strokeWidth={1.5} />
+                    <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/80 bg-white/40 text-blue-300 shadow-[0_8px_16px_rgba(60,100,160,0.05)] backdrop-blur-md">
+                      <Monitor size={32} strokeWidth={1.5} />
                     </div>
-
                     <h3 className="text-base font-semibold text-[#1e1b1b]">
                       {searchTerm ? "No matches found" : "No requisitions yet"}
                     </h3>
                     <p className="mt-1 max-w-60 text-[13px] leading-relaxed text-[#a18080]">
                       {searchTerm
                         ? `We couldn't find anything matching "${searchTerm}". Try a different term.`
-                        : "Your travel requisition history is currently empty."}
+                        : "Your IT requisition history is currently empty."}
                     </p>
 
-                    {/* New Requisition Link, when returned data is empty */}
-                    {!searchTerm && (
+                    {/* Only show new requisition link when email prop is available and no search term */}
+                    {!searchTerm && userEmail && (
                       <Link
-                        href="/dashboard/travelrequisition"
+                        href="/dashboard/itrequisition"
                         className="my-2 flex items-center gap-2 rounded-xl bg-neutral-900 px-3 py-2 text-sm text-white hover:bg-neutral-800"
                       >
                         <Plus className="h-4 w-4" />
@@ -199,11 +208,10 @@ export default function TravelRequisitionsTable({
                       </Link>
                     )}
 
-                    {/* Optional Action Button for Search Fallback */}
                     {searchTerm && (
                       <button
                         onClick={() => setSearchTerm("")}
-                        className="mt-5 text-[12px] font-bold tracking-wider text-rose-600 uppercase transition-colors hover:text-rose-700"
+                        className="mt-5 text-[12px] font-bold tracking-wider text-blue-600 uppercase transition-colors hover:text-blue-700"
                       >
                         Clear search
                       </button>
@@ -225,7 +233,7 @@ export default function TravelRequisitionsTable({
       />
 
       {/* Details Modal */}
-      <TravelDetailsModal
+      <ITRequisitionModal
         isOpen={!!selectedRequest}
         data={selectedRequest}
         onClose={() => setSelectedRequest(null)}

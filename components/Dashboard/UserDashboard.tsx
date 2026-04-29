@@ -1,15 +1,17 @@
 "use client";
-import { useSession } from "next-auth/react";
+
+import { useUser } from "@/context/UserContext";
 import TravelRequisitionsTable from "./TravelRequisitionsTable";
-import { BriefcaseBusiness } from "lucide-react";
+import ITRequisitionsTable from "./ITRequisitionsDashboard/ITRequisitionsTable";
+import { BriefcaseBusiness, Laptop, Monitor } from "lucide-react";
 import SignOutButton from "../SignOutButton";
+import { IT_ARRAY } from "@/public/secretAssets";
 
 const UserDashboard = () => {
-  const { data: session } = useSession();
-  const userName = session?.user?.name ?? "Guest";
+  const { username, email: userEmail } = useUser();
+  const userName = username ?? "Guest";
   const firstName = userName.split(" ")[0];
 
-  const userEmail = session?.user?.email ?? "Not logged in";
   const initials = userName
     .split(" ")
     .map((n) => n[0])
@@ -17,8 +19,13 @@ const UserDashboard = () => {
     .toUpperCase()
     .slice(0, 2);
 
+  // Check if the user is an admin
+  const isITAdmin = IT_ARRAY.some(
+    (itApprover) => itApprover.email === userEmail,
+  );
+
   return (
-    <div className="relative min-h-screen overflow-x-hidden">
+    <div className="relative min-h-screen">
       <div className="mx-auto max-w-6xl px-6">
         {/* WELCOME AREA */}
         <div className="flex items-center justify-between gap-6 max-sm:flex-col max-sm:items-start">
@@ -45,19 +52,46 @@ const UserDashboard = () => {
                 <span className="text-[13px] font-semibold text-[#1e1b1b]">
                   {userName}
                 </span>
-                <span className="text-[11px] text-[#a18080]">{userEmail}</span>
+                <span className="text-[11px] text-[#a18080]">
+                  {userEmail || "Not logged in"}
+                </span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* THE TRAVEL REQUEST TABLE DATA */}
-        {/* Heading */}
-        <span className="my-4 flex items-center gap-2 text-neutral-600">
-          <BriefcaseBusiness className="h-5 w-5" />
-          Your Travel Requisitions
-        </span>
-        <TravelRequisitionsTable userEmail={userEmail} />
+        {/* DATA TABLES */}
+
+        {/* All IT Requisitions */}
+        {isITAdmin && (
+          <div>
+            <span className="my-4 flex items-center gap-2 font-medium text-neutral-600">
+              <Laptop className="h-5 w-5" />
+              Submitted IT Requisitions
+            </span>
+            <ITRequisitionsTable isITAdmin={isITAdmin} />
+          </div>
+        )}
+        {/* User Travel Requisitions */}
+        {userEmail && (
+          <div>
+            <span className="my-4 flex items-center gap-2 font-medium text-neutral-600">
+              <BriefcaseBusiness className="h-5 w-5" />
+              Your Travel Requisitions
+            </span>
+            <TravelRequisitionsTable userEmail={userEmail} />
+          </div>
+        )}
+        {/* User IT Requisitions */}
+        {userEmail && (
+          <div>
+            <span className="my-4 flex items-center gap-2 font-medium text-neutral-600">
+              <Monitor className="h-5 w-5" />
+              Your IT Requisitions
+            </span>
+            <ITRequisitionsTable userEmail={userEmail} isITAdmin={isITAdmin} />
+          </div>
+        )}
       </div>
     </div>
   );
