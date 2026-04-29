@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { QueryResultRow } from "pg";
 import StatusFormatter from "./StatusFormatter";
+import { dateFormatter } from "@/public/assets";
 
 interface ModalProps {
   data: QueryResultRow | null;
@@ -30,8 +31,9 @@ export const TravelDetailsModal = ({ data, isOpen, onClose }: ModalProps) => {
             <h2 className="text-xl font-semibold text-[#1e1b1b]">
               Requisition Details
             </h2>
-            <p className="text-xs font-medium text-rose-400">
-              ID: {data.request_id}
+            <p className="text-xs font-medium text-neutral-500">
+              ID: {data.request_id} &middot;{" "}
+              {dateFormatter(data.request_created_at)}
             </p>
           </div>
           <button
@@ -56,12 +58,12 @@ export const TravelDetailsModal = ({ data, isOpen, onClose }: ModalProps) => {
           <DetailItem
             icon={Calendar}
             label="Departure"
-            value={new Date(data.travel_departure_date).toLocaleDateString()}
+            value={dateFormatter(data.travel_departure_date)}
           />
           <DetailItem
             icon={Calendar}
             label="Return"
-            value={new Date(data.travel_return_date).toLocaleDateString()}
+            value={dateFormatter(data.travel_return_date)}
           />
           <DetailItem
             icon={CreditCard}

@@ -18,6 +18,9 @@ export const getITRequisitionData = async (email?: string) => {
     baseParams.push(email);
   }
 
+  // Final base query
+  baseQuery += ` ORDER BY request_created_at DESC`;
+
   try {
     const result = await query(baseQuery, baseParams);
     return result;
