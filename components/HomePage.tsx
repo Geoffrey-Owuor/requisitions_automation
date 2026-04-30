@@ -13,9 +13,10 @@ import {
   ShoppingBag,
   ExternalLink,
   Sparkles,
+  BookText,
 } from "lucide-react";
-import Brand from "./Brand";
 import { ReactNode } from "react";
+import Header from "./Header";
 
 const requisitions = [
   {
@@ -59,30 +60,8 @@ export default function HomePage() {
         <div className="absolute top-[20%] -right-[10%] h-[40%] w-[40%] rounded-full bg-blue-50/50 blur-[80px] sm:h-[30%] sm:w-[30%] sm:blur-[100px]" />
       </div>
 
-      {/* ── HEADER ── */}
-      <header className="sticky top-0 z-50 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-          <Brand />
-          <nav className="flex items-center gap-4 sm:gap-6">
-            <Link
-              href="/login"
-              className="text-xs font-medium text-slate-600 transition-colors hover:text-rose-600 sm:text-sm"
-            >
-              Login
-            </Link>
-            <a
-              href="http://192.168.0.27:10556"
-              target="_blank"
-              rel="noopener"
-              className="flex items-center gap-1.5 rounded-full bg-slate-900 px-3 py-1.5 text-xs font-medium text-white transition-transform hover:scale-[1.02] active:scale-95 sm:gap-2 sm:px-5 sm:py-2 sm:text-sm"
-            >
-              <span className="hidden sm:inline">Purchase Portal</span>
-              <span className="sm:hidden">Portal</span>
-              <ExternalLink size={14} className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-            </a>
-          </nav>
-        </div>
-      </header>
+      {/* Header */}
+      <Header />
 
       <main className="relative z-10">
         {/* ── HERO SECTION ── */}
@@ -100,11 +79,17 @@ export default function HomePage() {
                 </span>{" "}
                 Hub
               </h1>
-              <p className="mx-auto max-w-xl text-sm leading-relaxed text-slate-500 sm:text-base lg:mx-0">
-                Submit and track internal requisitions. Some forms may require
-                you to be signed into your company account. Requisitions are
-                routed automatically through the appropriate approval chain.
-              </p>
+              <ul className="mx-auto max-w-xl list-none space-y-2 px-4 text-sm leading-relaxed text-slate-500 sm:px-0 sm:text-base lg:mx-0">
+                <li>Submit and track internal requisitions.</li>
+                <li>
+                  Some forms may require you to be signed into your company
+                  account.
+                </li>
+                <li className="font-semibold">
+                  See the requisition guidelines page if you need clarification
+                  on a certain requisition.
+                </li>
+              </ul>
             </div>
 
             {/* Quick Stats/Links Card */}
@@ -117,12 +102,19 @@ export default function HomePage() {
                     label="View My Dashboard"
                     sub="Track your requisitions"
                   />
+
                   <QuickLink
                     href="http://192.168.0.27:10556"
                     icon={<ShoppingBag size={18} />}
                     label="Staff Purchase"
                     sub="External portal"
                     isExternal
+                  />
+                  <QuickLink
+                    href="/guidelines"
+                    icon={<BookText size={18} />}
+                    label="Requisition Guidelines"
+                    sub="Read Requisition Guidelines"
                   />
                 </div>
               </div>
