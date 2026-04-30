@@ -25,6 +25,15 @@ import { UpdateITRequisitionStatus } from "@/serverActions/UpdateITRequisitionSt
 import ApprovalAlert from "../TravelApprovers/ApprovalAlert";
 import { initialsHelper } from "@/public/assets";
 
+interface StageStatuses {
+  acceptLoading: string;
+  acceptDefault: string;
+  acceptStatus: string;
+  declineLoading: string;
+  declineDefault: string;
+  declineStatus: string;
+}
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface ITRequisitionData {
@@ -114,8 +123,33 @@ const ITApprovalModal = ({ data }: { data: ITRequisitionData }) => {
 
   const roleLabel = stageLabel[stage] ?? "Approver";
 
+  // Which statuses to pass to the functions and buttons
+  const statusMapping: Record<string, StageStatuses> = {
+    hod: {
+      acceptLoading: "Approving",
+      acceptDefault: "Approve",
+      acceptStatus: "approved",
+      declineLoading: "Declining",
+      declineDefault: "Decline",
+      declineStatus: "declined",
+    },
+    it: {
+      acceptLoading: "Accepting",
+      acceptDefault: "Accept",
+      acceptStatus: "accepted",
+      declineLoading: "Rejecting",
+      declineDefault: "Reject",
+      declineStatus: "rejected",
+    },
+  };
+
+  const stageObject = statusMapping[stage];
+
   const handleApproval = async (status: string) => {
-    const setSubmitting = status === "approved" ? setApproving : setDeclining;
+    const setSubmitting =
+      status === "approved" || status === "accepted"
+        ? setApproving
+        : setDeclining;
     setSubmitting(true);
 
     const commentsPayload =
@@ -340,21 +374,25 @@ const ITApprovalModal = ({ data }: { data: ITRequisitionData }) => {
               <button
                 type="button"
                 disabled={declining}
-                onClick={() => handleApproval("declined")}
+                onClick={() => handleApproval(stageObject.declineStatus)}
                 className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-[14px] border border-rose-200 bg-white/80 py-4 text-[14px] font-semibold text-rose-700 transition-all duration-200 hover:border-rose-300 hover:bg-rose-50 active:scale-[0.98]"
               >
                 <X className="h-4 w-4" />
-                {declining ? "Declining..." : "Decline"}
+                {declining
+                  ? stageObject.declineLoading
+                  : stageObject.declineDefault}
               </button>
 
               <button
                 type="button"
                 disabled={approving}
-                onClick={() => handleApproval("approved")}
+                onClick={() => handleApproval(stageObject.acceptStatus)}
                 className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-[14px] border-none bg-slate-900 py-4 text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)] active:scale-[0.98]"
               >
                 <Check className="h-4 w-4" />
-                {approving ? "Approving..." : "Approve"}
+                {approving
+                  ? stageObject.acceptLoading
+                  : stageObject.acceptDefault}
               </button>
             </div>
           </div>
