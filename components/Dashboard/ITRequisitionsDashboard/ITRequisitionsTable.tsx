@@ -201,7 +201,7 @@ export default function ITRequisitionsTable({
                     {!searchTerm && userEmail && (
                       <Link
                         href="/dashboard/itrequisition"
-                        className="my-2 flex items-center gap-2 rounded-xl bg-neutral-900 px-3 py-2 text-sm text-white hover:bg-neutral-800"
+                        className="my-2 flex items-center gap-2 rounded-xl bg-slate-900 px-3 py-2 text-sm text-white hover:bg-slate-800"
                       >
                         <Plus className="h-4 w-4" />
                         <span>New Requisition</span>
