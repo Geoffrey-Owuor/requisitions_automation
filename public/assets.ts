@@ -1,5 +1,5 @@
 import hotpoint_logo from "./web-app-manifest-192x192.png";
-import form_image from "./Form_Image.png";
+import form_image from "./form_image.png";
 import hotpoint_background from "./hotpoint_logo.png";
 import it_form_image from "./it_form_image.png";
 

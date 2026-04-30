@@ -93,7 +93,7 @@ export default function HomePage() {
                 <Sparkles size={14} className="h-3 w-3 sm:h-3.5 sm:w-3.5" />{" "}
                 Internal Operations
               </div>
-              <h1 className="mb-4 text-3xl font-semibold tracking-tight text-slate-900 sm:mb-6 sm:text-4xl md:text-5xl lg:text-[3.5rem] lg:leading-[1.1]">
+              <h1 className="mb-4 text-3xl font-semibold tracking-tight text-slate-900 sm:mb-6 sm:text-[42px]">
                 Hotpoint{" "}
                 <span className="bg-linear-to-r from-rose-500 to-rose-700 bg-clip-text text-transparent">
                   Requisition
@@ -102,8 +102,8 @@ export default function HomePage() {
               </h1>
               <p className="mx-auto max-w-xl text-sm leading-relaxed text-slate-500 sm:text-base lg:mx-0">
                 Submit and track internal requisitions. Some forms may require
-                you to be signed into your company account and are routed
-                automatically through the appropriate approval chain.
+                you to be signed into your company account. Requisitions are
+                routed automatically through the appropriate approval chain.
               </p>
             </div>
 
