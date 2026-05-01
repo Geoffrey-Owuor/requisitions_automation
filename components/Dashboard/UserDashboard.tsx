@@ -4,9 +4,8 @@ import { useUser } from "@/context/UserContext";
 import TravelRequisitionsTable from "./TravelRequisitionsTable";
 import ITRequisitionsTable from "./ITRequisitionsDashboard/ITRequisitionsTable";
 import { BriefcaseBusiness, Laptop, Monitor } from "lucide-react";
-import SignOutButton from "../SignOutButton";
-import UserCard from "../UserCard";
 import { initialsHelper } from "@/public/assets";
+import UserDropdown from "../UserDropDown";
 import { IT_ARRAY } from "@/public/secretAssets";
 
 const UserDashboard = () => {
@@ -34,16 +33,13 @@ const UserDashboard = () => {
             </h1>
           </div>
 
-          {/* User Card */}
-          <div className="flex w-full items-center justify-between gap-4 md:w-auto">
-            <SignOutButton />
-            {/* User Card */}
-            <UserCard
-              initials={initialsHelper(userName)}
-              userName={userName}
-              userEmail={userEmail}
-            />
-          </div>
+          {/* User DropDown */}
+
+          <UserDropdown
+            initials={initialsHelper(userName)}
+            userName={userName}
+            userEmail={userEmail}
+          />
         </div>
 
         {/* DATA TABLES */}

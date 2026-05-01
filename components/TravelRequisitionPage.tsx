@@ -3,7 +3,6 @@
 import { useUser } from "@/context/UserContext";
 import { useState, ChangeEvent, useMemo } from "react";
 import { DatePicker } from "./DatePicker";
-import SignOutButton from "./SignOutButton";
 import {
   ChevronDown,
   Plane,
@@ -14,7 +13,6 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { assets, initialsHelper } from "@/public/assets";
-import UserCard from "./UserCard";
 import {
   DEPARTMENTS,
   TRAVEL_CATEGORIES,
@@ -26,6 +24,7 @@ import TravelConfirmationModal from "./TravelConfirmationModal";
 import { ApiHandler } from "@/utils/ApiHandler";
 import SubmittingOverlay from "./SubmittingOverlay";
 import AlertModal from "./AlertModal";
+import UserDropdown from "./UserDropDown";
 
 export interface TravelFormData {
   employeeName: string;
@@ -236,14 +235,11 @@ export default function TravelRequisitionPage() {
             </div>
 
             {/* User Info Card */}
-            <div className="flex w-full items-center justify-between gap-4 md:w-auto">
-              <SignOutButton />
-              <UserCard
-                initials={initialsHelper(nameString)}
-                userName={username}
-                userEmail={email}
-              />
-            </div>
+            <UserDropdown
+              initials={initialsHelper(nameString)}
+              userName={username}
+              userEmail={email}
+            />
           </header>
 
           {/* Form Card */}
