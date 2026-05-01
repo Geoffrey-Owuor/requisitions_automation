@@ -1,7 +1,7 @@
 "use client";
 import { useState, useMemo } from "react";
 import { getTravelRequisitionData } from "@/serverActions/GetTravelRequisitionData";
-import { Search, PlaneLanding, Info, Plus, RotateCcw } from "lucide-react";
+import { Search, PlaneLanding, Info, Plus, RotateCcw, X } from "lucide-react";
 import { TablePagination } from "./TablePagination";
 import { TravelDetailsModal } from "./TravelDetailsModal";
 import StatusFormatter from "./StatusFormatter";
@@ -67,8 +67,19 @@ export default function TravelRequisitionsTable({
               setSearchTerm(e.target.value);
               setCurrentPage(1);
             }}
-            className="w-full rounded-xl border border-gray-300 bg-white/60 px-3 py-2.5 pr-4 pl-12 text-sm shadow-[0_8px_16px_rgba(60,100,160,0.02)] outline-hidden backdrop-blur-xl transition-all focus:border-blue-400 focus:ring-4 focus:ring-blue-500/5"
+            className="w-full rounded-xl border border-gray-300 bg-white/60 px-3 py-2.5 pr-4 pl-12 text-sm shadow-[0_8px_16px_rgba(60,100,160,0.02)] outline-hidden backdrop-blur-xl transition-all focus:border-red-400 focus:ring-4 focus:ring-red-500/5"
           />
+          {searchTerm && (
+            <button
+              onClick={() => {
+                setSearchTerm("");
+                setCurrentPage(1);
+              }}
+              className="absolute top-1/2 right-4 z-10 -translate-y-1/2 rounded-full p-1 hover:bg-gray-200"
+            >
+              <X className="h-3 w-3" />
+            </button>
+          )}
         </div>
         <button
           onClick={() => refetch()}
