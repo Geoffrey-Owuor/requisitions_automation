@@ -209,8 +209,7 @@ const TravelApprovalModal = ({
               {employeeName}&apos;s Requisition
             </h1>
             <p className="mt-1 text-[14px] text-[#7c5a5a]">
-              Submitted {dateFormatter(requestCreatedAt)} · Pending your
-              approval
+              Submitted {dateFormatter(requestCreatedAt)} · Pending your review
             </p>
           </div>
 

@@ -29,24 +29,24 @@ export const TablePagination = ({
         </span>{" "}
         of <span className="text-slate-950">{totalItems}</span>
       </p>
-      {/* {totalItems > 6 && ( */}
-      <div className="flex gap-2">
-        <button
-          onClick={() => onPageChange(currentPage - 1)}
-          disabled={currentPage === 1}
-          className="rounded-full bg-slate-900 p-2 text-white shadow-sm transition-all active:scale-95 disabled:opacity-50"
-        >
-          <ChevronLeft size={18} />
-        </button>
-        <button
-          onClick={() => onPageChange(currentPage + 1)}
-          disabled={currentPage === totalPages}
-          className="rounded-full bg-slate-900 p-2 text-white shadow-sm transition-all active:scale-95 disabled:opacity-50"
-        >
-          <ChevronRight size={18} />
-        </button>
-      </div>
-      {/*  )} */}
+      {totalItems > 6 && (
+        <div className="flex gap-2">
+          <button
+            onClick={() => onPageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="rounded-full bg-slate-900 p-2 text-white shadow-sm transition-all active:scale-95 disabled:opacity-50"
+          >
+            <ChevronLeft size={18} />
+          </button>
+          <button
+            onClick={() => onPageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="rounded-full bg-slate-900 p-2 text-white shadow-sm transition-all active:scale-95 disabled:opacity-50"
+          >
+            <ChevronRight size={18} />
+          </button>
+        </div>
+      )}
     </div>
   );
 };
