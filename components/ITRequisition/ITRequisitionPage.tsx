@@ -3,7 +3,6 @@
 import { useUser } from "@/context/UserContext";
 import { useState, ChangeEvent } from "react";
 import { DatePicker } from "../DatePicker";
-import SignOutButton from "../SignOutButton";
 import {
   ChevronDown,
   UserRound,
@@ -19,7 +18,7 @@ import { ApiHandler } from "@/utils/ApiHandler";
 import SubmittingOverlay from "../SubmittingOverlay";
 import AlertModal from "../AlertModal";
 import { AlertInfo } from "../TravelRequisitionPage";
-import UserCard from "../UserCard";
+import UserDropdown from "../UserDropDown";
 
 // ---- Constants ----
 const REQUEST_TYPES = ["Replacement", "New"];
@@ -213,15 +212,12 @@ export default function ITRequisitionPage() {
               </p>
             </div>
 
-            {/* User Info Card */}
-            <div className="flex w-full items-center justify-between gap-4 md:w-auto">
-              <SignOutButton />
-              <UserCard
-                initials={initialsHelper(nameString)}
-                userName={username}
-                userEmail={email}
-              />
-            </div>
+            {/* User Dropdown */}
+            <UserDropdown
+              initials={initialsHelper(nameString)}
+              userName={username}
+              userEmail={email}
+            />
           </header>
 
           {/* Form Card */}
