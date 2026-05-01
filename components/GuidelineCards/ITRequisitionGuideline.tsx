@@ -12,7 +12,7 @@ export default function ITRequisitionGuideline() {
     <div className="mx-auto max-w-4xl space-y-10 pb-16">
       <div className="space-y-3">
         <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-100/80 px-3 py-1.5 text-[11px] font-semibold tracking-wide text-slate-700 uppercase">
-          <Monitor size={14} /> IT Policy
+          <Monitor size={14} /> IT Requisition Policy
         </div>
         <h2 className="text-3xl font-semibold tracking-tight text-slate-900">
           IT Requisition Guidelines

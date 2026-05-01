@@ -221,8 +221,7 @@ const ITApprovalModal = ({ data }: { data: ITRequisitionData }) => {
               IT Requisition - {employeeName}
             </h1>
             <p className="mt-1 text-[14px] text-[#7c5a5a]">
-              Submitted {dateFormatter(requestCreatedAt)} · Pending your
-              approval
+              Submitted {dateFormatter(requestCreatedAt)} · Pending your review
             </p>
           </div>
 
@@ -379,7 +378,7 @@ const ITApprovalModal = ({ data }: { data: ITRequisitionData }) => {
               >
                 <X className="h-4 w-4" />
                 {declining
-                  ? stageObject.declineLoading
+                  ? `${stageObject.declineLoading}...`
                   : stageObject.declineDefault}
               </button>
 
@@ -391,7 +390,7 @@ const ITApprovalModal = ({ data }: { data: ITRequisitionData }) => {
               >
                 <Check className="h-4 w-4" />
                 {approving
-                  ? stageObject.acceptLoading
+                  ? `${stageObject.acceptLoading}...`
                   : stageObject.acceptDefault}
               </button>
             </div>

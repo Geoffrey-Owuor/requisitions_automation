@@ -40,7 +40,7 @@ export async function UpdateITRequisitionStatus(
     // Check if the requisition has already been acted upon
     const { rows: reviewedResult } = await client.query(
       `
-      SELECT ${payload.stage}_approval_status AS approval_status,
+      SELECT ${payload.stage}_approver_status AS approval_status,
       ${payload.stage}_approver_name AS approver,
       submitter_email, hod_approver_email
       FROM it_requisitions WHERE request_id = $1 FOR UPDATE

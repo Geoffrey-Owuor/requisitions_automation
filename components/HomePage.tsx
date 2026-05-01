@@ -72,7 +72,7 @@ export default function HomePage() {
                 <Sparkles size={14} className="h-3 w-3 sm:h-3.5 sm:w-3.5" />{" "}
                 Internal Operations
               </div>
-              <h1 className="mb-4 text-3xl font-semibold tracking-tight text-slate-900 sm:mb-6 sm:text-[42px]">
+              <h1 className="mb-2 text-3xl font-semibold tracking-tight text-slate-900 sm:mb-6 sm:text-[42px]">
                 Hotpoint{" "}
                 <span className="bg-linear-to-r from-rose-500 to-rose-700 bg-clip-text text-transparent">
                   Requisition

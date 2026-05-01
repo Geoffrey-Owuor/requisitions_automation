@@ -167,12 +167,12 @@ function itStatusCard(
   let color = "#854d0e";
   let bg = "#fef9c3";
   let border = "1px solid #854d0e"; // Pending
-  if (lower.includes("approved")) {
+  if (lower.includes("approved") || lower.includes("accepted")) {
     color = "#166534";
     bg = "#dcfce7";
     border = "1px solid #166534";
   }
-  if (lower.includes("declined")) {
+  if (lower.includes("declined") || lower.includes("rejected")) {
     color = "#991b1b";
     bg = "#fee2e2";
     border = "1px solid #991b1b";
