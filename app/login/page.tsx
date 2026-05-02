@@ -3,12 +3,7 @@ import Link from "next/link";
 
 export default function LoginPage() {
   return (
-    <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[#EEF2FA] p-4 selection:bg-blue-100">
-      {/* Ambient background orbs */}
-      <div className="pointer-events-none absolute -top-30 -left-25 h-120 w-120 rounded-full bg-[radial-gradient(circle,rgba(99,140,255,0.28)_0%,transparent_70%)] blur-[80px]" />
-      <div className="pointer-events-none absolute -right-20 -bottom-20 h-100 w-100 rounded-full bg-[radial-gradient(circle,rgba(160,110,255,0.18)_0%,transparent_70%)] blur-[80px]" />
-      <div className="-tran5slate-x-1/2 pointer-events-none absolute top-1/2 left-[60%] h-75 w-7 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(80,210,200,0.14)_0%,transparent_70%)] blur-[80px]" />
-
+    <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden p-4">
       {/* Glass card */}
       <div className="relative flex w-full max-w-105 flex-col items-center rounded-3xl border border-white/85 bg-white/60 px-9 py-10 shadow-[inset_0_2px_0_0_rgba(255,255,255,0.9),inset_0_-1px_0_0_rgba(180,190,220,0.25),0_24px_48px_rgba(60,80,160,0.10),0_8px_16px_rgba(60,80,160,0.06)] backdrop-blur-xl backdrop-saturate-160 sm:px-6 sm:py-8">
         {/* Logo mark */}
@@ -38,8 +33,8 @@ export default function LoginPage() {
             Sign in to continue
           </h1>
           <p className="px-3 text-[14px] leading-relaxed font-normal text-[#5a6480]">
-            Sign in to your company Microsoft&nbsp;365 account to make
-            requisitions.
+            Sign in to your company Microsoft&nbsp;365 account to access your
+            dashboard and make requisitions.
           </p>
         </div>
 
@@ -65,13 +60,21 @@ export default function LoginPage() {
           </button>
         </form>
 
-        {/* Footer note */}
+        {/* Back link */}
         <Link
           href="/"
           className="mt-5 text-[12px] leading-normal text-[#8a95b0] underline decoration-[#8a95b0]/30 underline-offset-4 transition-colors hover:text-[#3B6EE8]"
         >
           Back to HomePage
         </Link>
+      </div>
+
+      {/* Global Footer Placeholder */}
+      <div className="absolute bottom-6 w-full px-4 text-center">
+        <p className="text-[13px] text-[#8a95b0]">
+          &copy; {new Date().getFullYear()} Hotpoint Appliances Ltd · Internal
+          Use Only
+        </p>
       </div>
     </div>
   );

@@ -4,20 +4,14 @@ import { useUser } from "@/context/UserContext";
 import TravelRequisitionsTable from "./TravelRequisitionsTable";
 import ITRequisitionsTable from "./ITRequisitionsDashboard/ITRequisitionsTable";
 import { BriefcaseBusiness, Laptop, Monitor } from "lucide-react";
-import SignOutButton from "../SignOutButton";
+import { initialsHelper } from "@/public/assets";
+import UserDropdown from "../UserDropDown";
 import { IT_ARRAY } from "@/public/secretAssets";
 
 const UserDashboard = () => {
   const { username, email: userEmail } = useUser();
   const userName = username ?? "Guest";
   const firstName = userName.split(" ")[0];
-
-  const initials = userName
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
 
   // Check if the user is an admin
   const isITAdmin = IT_ARRAY.some(
@@ -39,25 +33,13 @@ const UserDashboard = () => {
             </h1>
           </div>
 
-          {/* User Card */}
-          <div className="flex items-center gap-4">
-            <SignOutButton />
-            <div className="flex shrink-0 items-center gap-4 rounded-2xl border border-white/80 bg-white/70 px-5 py-3 shadow-[0_8px_16px_rgba(160,60,60,0.06)] backdrop-blur-xl">
-              {/* Initials Avatar */}
-              <div className="flex h-11 w-11 items-center justify-center rounded-full border border-[rgba(255,200,200,0.5)] bg-linear-to-br from-slate-800 to-rose-900 text-sm font-semibold text-white shadow-sm">
-                {initials}
-              </div>
-              {/* Name & Email */}
-              <div className="flex flex-col">
-                <span className="text-[13px] font-semibold text-[#1e1b1b]">
-                  {userName}
-                </span>
-                <span className="text-[11px] text-[#a18080]">
-                  {userEmail || "Not logged in"}
-                </span>
-              </div>
-            </div>
-          </div>
+          {/* User DropDown */}
+
+          <UserDropdown
+            initials={initialsHelper(userName)}
+            userName={userName}
+            userEmail={userEmail}
+          />
         </div>
 
         {/* DATA TABLES */}

@@ -74,7 +74,7 @@ export default function AlreadyProcessed({
         {/* Action */}
         <Link
           href="/"
-          className="block w-full cursor-pointer rounded-[14px] bg-[#1e1b1b] py-4 text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(30,27,27,0.3)]"
+          className="block w-full cursor-pointer rounded-[14px] bg-slate-900 py-4 text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(30,27,27,0.3)]"
         >
           Go to Homepage
         </Link>

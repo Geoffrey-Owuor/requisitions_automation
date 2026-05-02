@@ -106,5 +106,10 @@ export async function EmailSender({
     showPdfDownload,
   });
 
-  await sendEmail({ to: to, subject: title, html: emailHtml });
+  await sendEmail({
+    from: process.env.EMAIL_SENDER!,
+    to: to,
+    subject: title,
+    html: emailHtml,
+  });
 }

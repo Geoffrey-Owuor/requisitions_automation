@@ -3,7 +3,6 @@
 import { useUser } from "@/context/UserContext";
 import { useState, ChangeEvent, useMemo } from "react";
 import { DatePicker } from "./DatePicker";
-import SignOutButton from "./SignOutButton";
 import {
   ChevronDown,
   Plane,
@@ -13,7 +12,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import Image from "next/image";
-import { assets } from "@/public/assets";
+import { assets, initialsHelper } from "@/public/assets";
 import {
   DEPARTMENTS,
   TRAVEL_CATEGORIES,
@@ -25,6 +24,7 @@ import TravelConfirmationModal from "./TravelConfirmationModal";
 import { ApiHandler } from "@/utils/ApiHandler";
 import SubmittingOverlay from "./SubmittingOverlay";
 import AlertModal from "./AlertModal";
+import UserDropdown from "./UserDropDown";
 
 export interface TravelFormData {
   employeeName: string;
@@ -84,6 +84,8 @@ interface FormSelectProps {
 
 export default function TravelRequisitionPage() {
   const { username, email } = useUser();
+
+  const nameString = username ? username : "";
 
   const [formData, setFormData] = useState<TravelFormData>(InitialFormState);
 
@@ -193,7 +195,7 @@ export default function TravelRequisitionPage() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden p-5">
+    <div className="relative min-h-screen p-5">
       {submitting && <SubmittingOverlay />}
       {step === 3 && <AlertModal alertInfo={alertInfo} setStep={setStep} />}
       {step === 2 && (
@@ -233,22 +235,11 @@ export default function TravelRequisitionPage() {
             </div>
 
             {/* User Info Card */}
-            <div className="flex items-center gap-4">
-              <SignOutButton />
-              <div className="flex items-center gap-3 rounded-2xl border border-white/80 bg-white/70 px-5 py-3 shadow-[0_8px_16px_rgba(160,60,60,0.06)] backdrop-blur-xl">
-                <div className="flex h-9 w-9 items-center justify-center rounded-[10px] border border-[rgba(255,200,200,0.5)] bg-white">
-                  <UserRound size={18} className="text-red-500" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="block text-[13px] font-semibold">
-                    {username}
-                  </span>
-                  <span className="block text-[11px] text-[#a18080]">
-                    {email}
-                  </span>
-                </div>
-              </div>
-            </div>
+            <UserDropdown
+              initials={initialsHelper(nameString)}
+              userName={username}
+              userEmail={email}
+            />
           </header>
 
           {/* Form Card */}
@@ -421,7 +412,7 @@ export default function TravelRequisitionPage() {
               <button
                 type="submit"
                 disabled={buttonDisabled}
-                className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-[14px] border-none bg-[#1e1b1b] py-4 font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)] disabled:cursor-not-allowed disabled:opacity-70"
+                className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-[14px] border-none bg-slate-900 py-4 font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)] disabled:cursor-not-allowed disabled:opacity-70"
               >
                 Proceed
                 <ArrowRight className="h-4 w-4" />
