@@ -1,8 +1,8 @@
 "use client";
 import { useState, useMemo } from "react";
-import { SkeletonTable } from "@/components/Skeletons/SkeletonTabel";
+import { SkeletonTable } from "@/components/Skeletons/SkeletonTable";
 import { getITRequisitionData } from "@/serverActions/GetITRequisitionData";
-import { Search, Monitor, Plus, Info, RotateCcw } from "lucide-react";
+import { Search, Monitor, Plus, Info, RotateCcw, X } from "lucide-react";
 import { TablePagination } from "../TablePagination";
 import { ITRequisitionModal } from "./ITRequisitionsModal";
 import StatusFormatter from "../StatusFormatter";
@@ -53,7 +53,7 @@ export default function ITRequisitionsTable({
   return (
     <div className="mt-2">
       {/* Search Input And Refresh */}
-      <div className="mb-6 flex items-center gap-2">
+      <div className="mb-6 flex flex-wrap items-center gap-2">
         <div className="relative w-full max-w-xs">
           <Search
             className="absolute top-1/2 left-4 z-10 -translate-y-1/2 text-gray-400"
@@ -67,12 +67,23 @@ export default function ITRequisitionsTable({
               setSearchTerm(e.target.value);
               setCurrentPage(1);
             }}
-            className="w-full rounded-xl border border-gray-300 bg-white/60 py-2.5 pr-4 pl-12 text-sm shadow-[0_8px_16px_rgba(60,100,160,0.02)] outline-hidden backdrop-blur-xl transition-all focus:border-blue-400 focus:ring-4 focus:ring-blue-500/5"
+            className="w-full rounded-xl border border-gray-300 bg-white/60 py-2.5 pr-4 pl-12 text-sm shadow-[0_8px_16px_rgba(60,100,160,0.02)] outline-hidden backdrop-blur-xl transition-all focus:border-red-400 focus:ring-4 focus:ring-red-500/5"
           />
+          {searchTerm && (
+            <button
+              onClick={() => {
+                setSearchTerm("");
+                setCurrentPage(1);
+              }}
+              className="absolute top-1/2 right-4 z-10 -translate-y-1/2 rounded-full p-1 hover:bg-gray-200"
+            >
+              <X className="h-3 w-3" />
+            </button>
+          )}
         </div>
         <button
           onClick={() => refetch()}
-          className="inline-flex items-center gap-2 rounded-xl bg-neutral-900 px-3 py-2.5 text-sm text-white hover:bg-neutral-800"
+          className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-3 py-2.5 text-sm text-white hover:bg-slate-800"
         >
           <RotateCcw className="h-4 w-4" />
           Refresh
@@ -81,10 +92,10 @@ export default function ITRequisitionsTable({
       </div>
 
       {/* Table Container */}
-      <div className="overflow-x-auto rounded-3xl border border-gray-200 bg-white/50 shadow-[0_24px_48px_rgba(60,100,160,0.08)] backdrop-blur-2xl">
+      <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white/50 shadow-[0_24px_48px_rgba(160,60,60,0.08)] backdrop-blur-2xl">
         <table className="w-full border-collapse text-left">
           <thead>
-            <tr className="border-b border-blue-100/50 bg-blue-50/30">
+            <tr className="border-b border-neutral-200/50 bg-neutral-100/30">
               {[
                 "Employee",
                 "Department",
@@ -97,20 +108,20 @@ export default function ITRequisitionsTable({
               ].map((col) => (
                 <th
                   key={col}
-                  className="px-6 py-4 text-[11px] font-bold tracking-widest text-blue-400 uppercase"
+                  className="px-6 py-4 text-[11px] font-bold tracking-widest text-neutral-500 uppercase"
                 >
                   {col}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-blue-50">
+          <tbody className="divide-y divide-red-50">
             {filteredData.length > 0 ? (
               paginatedData.map((req) => (
                 <tr
                   key={req.request_id}
                   onClick={() => setSelectedRequest(req)}
-                  className="group cursor-pointer transition-colors hover:bg-blue-50/50"
+                  className="group cursor-pointer transition-colors hover:bg-gray-200/30"
                 >
                   {/* Employee */}
                   <td className="px-6 py-5">
@@ -174,7 +185,7 @@ export default function ITRequisitionsTable({
                       <StatusFormatter status={req.completion_status} />
                       <Info
                         size={14}
-                        className="text-blue-200 transition-colors group-hover:text-blue-400"
+                        className="text-red-200 transition-colors group-hover:text-red-400"
                       />
                     </div>
                   </td>
@@ -185,7 +196,7 @@ export default function ITRequisitionsTable({
               <tr>
                 <td colSpan={8} className="px-6 py-20">
                   <div className="flex flex-col items-center justify-center text-center">
-                    <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/80 bg-white/40 text-blue-300 shadow-[0_8px_16px_rgba(60,100,160,0.05)] backdrop-blur-md">
+                    <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/80 bg-white/40 text-red-300 shadow-[0_8px_16px_rgba(60,100,160,0.05)] backdrop-blur-md">
                       <Monitor size={32} strokeWidth={1.5} />
                     </div>
                     <h3 className="text-base font-semibold text-[#1e1b1b]">
@@ -201,7 +212,7 @@ export default function ITRequisitionsTable({
                     {!searchTerm && userEmail && (
                       <Link
                         href="/dashboard/itrequisition"
-                        className="my-2 flex items-center gap-2 rounded-xl bg-neutral-900 px-3 py-2 text-sm text-white hover:bg-neutral-800"
+                        className="my-2 flex items-center gap-2 rounded-xl bg-slate-900 px-3 py-2 text-sm text-white hover:bg-slate-800"
                       >
                         <Plus className="h-4 w-4" />
                         <span>New Requisition</span>
@@ -211,7 +222,7 @@ export default function ITRequisitionsTable({
                     {searchTerm && (
                       <button
                         onClick={() => setSearchTerm("")}
-                        className="mt-5 text-[12px] font-bold tracking-wider text-blue-600 uppercase transition-colors hover:text-blue-700"
+                        className="mt-5 text-[12px] font-bold tracking-wider text-red-600 uppercase transition-colors hover:text-red-700"
                       >
                         Clear search
                       </button>

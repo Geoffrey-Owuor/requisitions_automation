@@ -26,11 +26,9 @@ export const TravelDetailsModal = ({ data, isOpen, onClose }: ModalProps) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/20 p-4 backdrop-blur-sm">
       <div className="relative w-full max-w-2xl rounded-2xl border border-white/80 bg-white/90 shadow-[0_32px_64px_rgba(160,60,60,0.15)] backdrop-blur-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-neutral-200 px-8 py-6">
+        <div className="flex items-center justify-between overflow-hidden border-b border-neutral-200 px-8 py-4">
           <div>
-            <h2 className="text-xl font-semibold text-[#1e1b1b]">
-              Requisition Details
-            </h2>
+            <h2 className="font-semibold text-[#1e1b1b]">Travel Requisition</h2>
             <p className="text-xs font-medium text-neutral-500">
               ID: {data.request_id} &middot;{" "}
               {dateFormatter(data.request_created_at)}
@@ -38,9 +36,9 @@ export const TravelDetailsModal = ({ data, isOpen, onClose }: ModalProps) => {
           </div>
           <button
             onClick={onClose}
-            className="rounded-full p-2 text-black transition-colors hover:bg-gray-200"
+            className="rounded-full p-2 text-gray-600 transition-colors hover:bg-gray-200 hover:text-gray-900"
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
 

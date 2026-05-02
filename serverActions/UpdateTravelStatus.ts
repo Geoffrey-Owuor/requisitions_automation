@@ -8,7 +8,7 @@ import { hrApprovalStage } from "@/utils/TravelApprovalStages/hrApprovalStage";
 import { directorApprovalStage } from "@/utils/TravelApprovalStages/directorApprovalStage";
 import { EmailSender } from "@/services/EmailSender";
 
-type UpdateTravelStatusProps = {
+export type UpdateRequestStatusProps = {
   uuid: string;
   stage: string;
   status: string;
@@ -18,7 +18,7 @@ type UpdateTravelStatusProps = {
 };
 
 export async function UpdateTravelStatus(
-  payload: UpdateTravelStatusProps,
+  payload: UpdateRequestStatusProps,
 ): Promise<AlertInfo> {
   let client: PoolClient | undefined;
 
@@ -26,7 +26,7 @@ export async function UpdateTravelStatus(
   const baseUpdateQuery = `
     UPDATE travel_requisitions
     SET travel_${payload.stage}_approval_date = CURRENT_TIMESTAMP,
-    SET travel_${payload.stage}_approval_status = $1,
+    travel_${payload.stage}_approval_status = $1,
     travel_${payload.stage}_approver = $2,
     travel_${payload.stage}_email = $3,
     travel_${payload.stage}_comments = $4

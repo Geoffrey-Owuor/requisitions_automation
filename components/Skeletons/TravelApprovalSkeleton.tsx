@@ -75,7 +75,7 @@ export default function TravelApprovalSkeleton() {
               ))}
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div className="h-14.5 rounded-2xl bg-[#1e1b1b]/10" />
+              <div className="h-14.5 rounded-2xl bg-slate-900/10" />
               <div className="h-14.5 rounded-2xl bg-rose-900/10" />
             </div>
           </div>
@@ -89,7 +89,7 @@ export default function TravelApprovalSkeleton() {
           {/* Action buttons */}
           <div className="flex gap-3">
             <div className="h-13.5 flex-1 rounded-[14px] bg-rose-100/60" />
-            <div className="h-13.5 flex-1 rounded-[14px] bg-[#1e1b1b]/10" />
+            <div className="h-13.5 flex-1 rounded-[14px] bg-slate-900/10" />
           </div>
         </div>
       </div>

@@ -10,13 +10,16 @@ export async function GET() {
   TO_CHAR(request_created_at, 'YYYY-MM-DD HH24:MI:SS') AS request_created_at,
   submitter_email, submitter_name,
   employee_department, employee_staff_number, replacement_new,
-  requirements, other_requirements, requisition_date, date_joining,
+  requirements, other_requirements, 
+  TO_CHAR(requisition_date, 'YYYY-MM-DD HH24:MI:SS') AS requisition_date,
+  TO_CHAR(date_joining, 'YYYY-MM-DD HH24:MI:SS') AS date_joining,
   hod_approver_name, hod_approver_email, hod_approver_status,
   hod_approver_comments, 
   TO_CHAR(hod_approval_date, 'YYYY-MM-DD HH24:MI:SS') AS hod_approval_date,
   it_approver_name, it_approver_email,
   it_approver_status, it_approver_comments, 
   TO_CHAR(it_approval_date, 'YYYY-MM-DD HH24:MI:SS') AS it_approval_date, 
+  TO_CHAR(date_completed, 'YYYY-MM-DD HH24:MI:SS') AS date_completed, 
   completion_status
   FROM it_requisitions ORDER BY request_created_at DESC
   `;
@@ -39,7 +42,7 @@ export async function GET() {
           .join(" "),
         key: key,
         width: 20,
-        numFmt: ["ated_at", "approval_date"].some((str) => key.includes(str))
+        numFmt: ["ated_at", "date"].some((str) => key.includes(str))
           ? "yyyy-mm-dd hh:mm:ss"
           : undefined,
       }));

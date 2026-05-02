@@ -21,8 +21,8 @@ export default function AlertModal({ alertInfo, setStep }: AlertModalProps) {
     heading: isSuccess ? "Requisition submitted!" : "Submission failed",
     buttonLabel: isSuccess ? "Submit another" : "Try again",
     buttonStyle: isSuccess
-      ? "bg-[#1e1b1b] text-white hover:shadow-[0_8px_20px_rgba(16,185,129,0.25)]"
-      : "bg-[#1e1b1b] text-white hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)]",
+      ? "bg-slate-900 text-white hover:shadow-[0_8px_20px_rgba(16,185,129,0.25)]"
+      : "bg-slate-900 text-white hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)]",
   };
 
   const Icon = config.icon;
