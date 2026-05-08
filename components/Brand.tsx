@@ -16,9 +16,11 @@ const Brand = () => {
       </div>
       <div className="flex flex-col gap-px leading-none">
         <span className="text-[13px] font-semibold text-[#1e1b1b]">
+          Requisition Hub
+        </span>
+        <span className="text-[10px] text-[#a18080]">
           Hotpoint Appliances Ltd
         </span>
-        <span className="text-[10px] text-[#a18080]">Requisition Hub</span>
       </div>
     </Link>
   );

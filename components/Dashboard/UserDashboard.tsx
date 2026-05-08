@@ -25,11 +25,11 @@ const UserDashboard = () => {
         <div className="flex items-center justify-between gap-6 max-sm:flex-col max-sm:items-start">
           {/* Welcome Text */}
           <div>
-            <p className="mb-1 text-[13px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
-              Welcome back
+            <p className="mb-1 font-mono text-[13px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
+              Welcome aboard!
             </p>
             <h1 className="text-lg font-semibold tracking-[-0.5px] text-[#1e1b1b]">
-              Good to see you, {firstName} 👋
+              {firstName}, look who showed up 👀
             </h1>
           </div>
 

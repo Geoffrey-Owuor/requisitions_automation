@@ -12,8 +12,8 @@ import {
   CircleGauge,
   ShoppingBag,
   ExternalLink,
-  Sparkles,
   BookText,
+  ArrowLeftRight,
 } from "lucide-react";
 import { ReactNode } from "react";
 import Header from "./Header";
@@ -69,8 +69,11 @@ export default function HomePage() {
           <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-5 lg:gap-12">
             <div className="lg:col-span-3">
               <div className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-rose-100 bg-rose-50/50 px-3 py-1 text-[9px] font-bold tracking-wide text-rose-600 uppercase sm:mb-6 sm:gap-2 sm:px-4 sm:py-1.5 sm:text-[10px]">
-                <Sparkles size={14} className="h-3 w-3 sm:h-3.5 sm:w-3.5" />{" "}
-                Internal Operations
+                <ArrowLeftRight
+                  size={14}
+                  className="h-3 w-3 sm:h-3.5 sm:w-3.5"
+                />{" "}
+                Internal Requisitions
               </div>
               <h1 className="mb-2 text-3xl font-semibold tracking-tight text-slate-900 sm:mb-6 sm:text-[42px]">
                 Hotpoint{" "}
@@ -106,7 +109,7 @@ export default function HomePage() {
                   <QuickLink
                     href="http://192.168.0.27:10556"
                     icon={<ShoppingBag size={18} />}
-                    label="Staff Purchase"
+                    label="Staff Product Purchase"
                     sub="External portal"
                     isExternal
                   />
