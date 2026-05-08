@@ -24,24 +24,6 @@ export function dateFormatter(dateString: string) {
   return dateResult;
 }
 
-// --- Constants ---
-export const DEPARTMENTS = [
-  "IT & Projects",
-  "Finance",
-  "Marketing",
-  "Operations",
-  "Commercial",
-  "HR & Admin",
-  "Modern Trade",
-  "Retail",
-  "B2B",
-  "Internal Audit",
-  "Engineering & HVAC",
-  "Security",
-  "Directorate",
-  "Retail Projects",
-];
-
 export const TRAVEL_CATEGORIES = ["International", "Local"];
 export const TRAVEL_MODES = ["Road", "Air"];
 export const BUDGET_STATUS = ["Yes", "No"];

@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from "next/server";
-import { HOD_ARRAY, IT_ARRAY } from "@/public/secretAssets";
+import { HOD_ARRAY, IT_ARRAY } from "@/secretAssets";
 import { ITEmailSender } from "@/services/ITEmailSender";
 import { query } from "@/lib/db";
 

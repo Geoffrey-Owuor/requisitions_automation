@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { query } from "@/lib/db";
-import { HOD_ARRAY, HR_ARRAY, DIRECTOR_ARRAY } from "@/public/secretAssets";
+import { HOD_ARRAY, HR_ARRAY, DIRECTOR_ARRAY } from "@/secretAssets";
 import TravelApprovalModal from "./TravelApprovalModal";
 import TravelApprovalSkeleton from "@/components/Skeletons/TravelApprovalSkeleton";
 import AlreadyProcessed from "./AlreadyProcessed";
