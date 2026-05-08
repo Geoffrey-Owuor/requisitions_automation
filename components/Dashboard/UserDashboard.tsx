@@ -6,7 +6,7 @@ import ITRequisitionsTable from "./ITRequisitionsDashboard/ITRequisitionsTable";
 import { BriefcaseBusiness, Laptop, Monitor } from "lucide-react";
 import { initialsHelper } from "@/public/assets";
 import UserDropdown from "../UserDropDown";
-import { IT_ARRAY } from "@/public/secretAssets";
+import { IT_ARRAY } from "@/secretAssets";
 
 const UserDashboard = () => {
   const { username, email: userEmail } = useUser();

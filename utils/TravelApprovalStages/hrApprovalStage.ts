@@ -1,4 +1,4 @@
-import { DIRECTOR_ARRAY } from "@/public/secretAssets";
+import { DIRECTOR_ARRAY } from "@/secretAssets";
 import { EmailSender } from "@/services/EmailSender";
 
 type HrApprovalStageProps = {

@@ -11,8 +11,8 @@ import {
   Check,
 } from "lucide-react";
 import Image from "next/image";
-import { assets, DEPARTMENTS, initialsHelper } from "@/public/assets";
-import { HOD_APPROVERS } from "@/public/secretAssets";
+import { assets, initialsHelper } from "@/public/assets";
+import { HOD_APPROVERS, DEPARTMENTS } from "@/secretAssets";
 import ITConfirmationModal from "./ITConfirmationModal";
 import { ApiHandler } from "@/utils/ApiHandler";
 import SubmittingOverlay from "../SubmittingOverlay";

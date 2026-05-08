@@ -1,5 +1,5 @@
 import { ITEmailSender } from "@/services/ITEmailSender";
-import { IT_ARRAY } from "@/public/secretAssets";
+import { IT_ARRAY } from "@/secretAssets";
 
 type HodApprovalStageProps = {
   uuid: string;

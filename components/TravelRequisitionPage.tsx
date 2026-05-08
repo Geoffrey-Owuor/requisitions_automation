@@ -14,12 +14,11 @@ import {
 import Image from "next/image";
 import { assets, initialsHelper } from "@/public/assets";
 import {
-  DEPARTMENTS,
   TRAVEL_CATEGORIES,
   TRAVEL_MODES,
   BUDGET_STATUS,
 } from "@/public/assets";
-import { HOD_APPROVERS } from "@/public/secretAssets";
+import { HOD_APPROVERS, DEPARTMENTS } from "@/secretAssets";
 import TravelConfirmationModal from "./TravelConfirmationModal";
 import { ApiHandler } from "@/utils/ApiHandler";
 import SubmittingOverlay from "./SubmittingOverlay";
