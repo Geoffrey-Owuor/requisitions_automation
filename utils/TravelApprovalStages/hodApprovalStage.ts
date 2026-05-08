@@ -1,5 +1,5 @@
 import { EmailSender } from "@/services/EmailSender";
-import { HR_ARRAY } from "@/secretAssets";
+import { loadHrArray } from "@/lib/loadAppData";
 
 type HodApprovalStageProps = {
   uuid: string;
@@ -9,7 +9,7 @@ type HodApprovalStageProps = {
   approverName: string;
   approvalTier: string;
 };
-export function hodApprovalStage({
+export async function hodApprovalStage({
   uuid,
   userEmail,
   status,
@@ -17,6 +17,8 @@ export function hodApprovalStage({
   approverName,
   approvalTier,
 }: HodApprovalStageProps) {
+  const HR_ARRAY = await loadHrArray();
+
   // HOD declined the request - Notify the HOD and submitter
   if (status === "declined") {
     // Hod

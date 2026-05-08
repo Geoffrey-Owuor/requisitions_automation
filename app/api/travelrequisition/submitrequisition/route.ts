@@ -1,9 +1,11 @@
 import { NextResponse, NextRequest } from "next/server";
-import { HOD_ARRAY, HR_ARRAY } from "@/secretAssets";
+import { loadHodArray, loadHrArray } from "@/lib/loadAppData";
 import { query } from "@/lib/db";
 import { EmailSender } from "@/services/EmailSender";
 
 export async function POST(request: NextRequest) {
+  const HOD_ARRAY = await loadHodArray();
+  const HR_ARRAY = await loadHrArray();
   try {
     const { formData, totalCost, approvalTier, submittedBy } =
       await request.json();

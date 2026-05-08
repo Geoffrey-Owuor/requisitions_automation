@@ -36,6 +36,7 @@ yarn-error.log*
 # hide the schema file and secret assets
 /schemas/
 secretAssets.ts
+/data/
 
 # vercel
 .vercel

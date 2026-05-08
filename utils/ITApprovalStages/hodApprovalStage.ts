@@ -1,5 +1,5 @@
 import { ITEmailSender } from "@/services/ITEmailSender";
-import { IT_ARRAY } from "@/secretAssets";
+import { loadITArray } from "@/lib/loadAppData";
 
 type HodApprovalStageProps = {
   uuid: string;
@@ -16,6 +16,8 @@ export async function hodApprovalStage({
   approverEmail,
   approverName,
 }: HodApprovalStageProps) {
+  const IT_ARRAY = await loadITArray();
+
   // Hod declined the request - Notify the HOD and submitter
   if (status === "declined") {
     // Hod

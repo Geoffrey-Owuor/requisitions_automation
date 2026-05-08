@@ -1,4 +1,4 @@
-import { DIRECTOR_ARRAY } from "@/secretAssets";
+import { loadDirectorArray } from "@/lib/loadAppData";
 import { EmailSender } from "@/services/EmailSender";
 
 type HrApprovalStageProps = {
@@ -10,7 +10,7 @@ type HrApprovalStageProps = {
   approverName: string;
   approvalTier: string;
 };
-export function hrApprovalStage({
+export async function hrApprovalStage({
   uuid,
   userEmail,
   hodEmail,
@@ -19,6 +19,7 @@ export function hrApprovalStage({
   approverName,
   approvalTier,
 }: HrApprovalStageProps) {
+  const DIRECTOR_ARRAY = await loadDirectorArray();
   if (status === "declined") {
     // Hr
     EmailSender({
