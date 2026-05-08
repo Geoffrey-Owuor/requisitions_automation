@@ -1,9 +1,13 @@
 import { NextResponse, NextRequest } from "next/server";
-import { HOD_ARRAY, IT_ARRAY } from "@/secretAssets";
+import { loadHodArray, loadITArray } from "@/lib/loadAppData";
 import { ITEmailSender } from "@/services/ITEmailSender";
 import { query } from "@/lib/db";
 
 export async function POST(request: NextRequest) {
+  // Get the data
+  const HOD_ARRAY = await loadHodArray();
+  const IT_ARRAY = await loadITArray();
+
   try {
     // Getting our payload
     const { formData, submittedBy } = await request.json();
