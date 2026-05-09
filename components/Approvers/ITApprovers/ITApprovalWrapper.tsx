@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { query } from "@/lib/db";
-import { HOD_ARRAY, IT_ARRAY } from "@/public/secretAssets";
+import { loadHodArray, loadITArray } from "@/lib/loadAppData";
 import NotFoundRequest from "../TravelApprovers/NotFoundRequest";
 import InvalidToken from "../TravelApprovers/InvalidToken";
 import AlreadyProcessed from "../TravelApprovers/AlreadyProcessed";
@@ -20,6 +20,9 @@ const ITApprovalWrapper = async ({
 }: ITApprovalWrapperProps) => {
   // First fallback - one of our props is missing/falsy
   if (!uuid || !token || !stage) return <NotFoundRequest />;
+
+  const HOD_ARRAY = await loadHodArray();
+  const IT_ARRAY = await loadITArray();
 
   const APPROVERS_ARRAY = stage === "hod" ? HOD_ARRAY : IT_ARRAY;
 

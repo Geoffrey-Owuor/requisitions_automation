@@ -14,12 +14,12 @@ import {
 import Image from "next/image";
 import { assets, initialsHelper } from "@/public/assets";
 import {
-  DEPARTMENTS,
   TRAVEL_CATEGORIES,
   TRAVEL_MODES,
   BUDGET_STATUS,
 } from "@/public/assets";
-import { HOD_APPROVERS } from "@/public/secretAssets";
+import { useQuery } from "@tanstack/react-query";
+import { loadHodApprovers, loadBaseDepartments } from "@/lib/loadAppData";
 import TravelConfirmationModal from "./TravelConfirmationModal";
 import { ApiHandler } from "@/utils/ApiHandler";
 import SubmittingOverlay from "./SubmittingOverlay";
@@ -84,6 +84,18 @@ interface FormSelectProps {
 
 export default function TravelRequisitionPage() {
   const { username, email } = useUser();
+
+  // Load departments
+  const { data: DEPARTMENTS = [] } = useQuery({
+    queryKey: ["BaseDepartmentsData"],
+    queryFn: loadBaseDepartments,
+  });
+
+  // Load HODS
+  const { data: HOD_APPROVERS = [] } = useQuery({
+    queryKey: ["BaseHodApproversData"],
+    queryFn: loadHodApprovers,
+  });
 
   const nameString = username ? username : "";
 

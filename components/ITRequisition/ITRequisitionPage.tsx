@@ -11,8 +11,9 @@ import {
   Check,
 } from "lucide-react";
 import Image from "next/image";
-import { assets, DEPARTMENTS, initialsHelper } from "@/public/assets";
-import { HOD_APPROVERS } from "@/public/secretAssets";
+import { assets, initialsHelper } from "@/public/assets";
+import { useQuery } from "@tanstack/react-query";
+import { loadHodApprovers, loadBaseDepartments } from "@/lib/loadAppData";
 import ITConfirmationModal from "./ITConfirmationModal";
 import { ApiHandler } from "@/utils/ApiHandler";
 import SubmittingOverlay from "../SubmittingOverlay";
@@ -84,6 +85,18 @@ interface CheckboxGroupProps {
 // ---- Main Page ----
 export default function ITRequisitionPage() {
   const { username, email } = useUser();
+
+  // Load departments
+  const { data: DEPARTMENTS = [] } = useQuery({
+    queryKey: ["BaseDepartmentsData"],
+    queryFn: loadBaseDepartments,
+  });
+
+  // Load HODS
+  const { data: HOD_APPROVERS = [] } = useQuery({
+    queryKey: ["BaseHodApproversData"],
+    queryFn: loadHodApprovers,
+  });
 
   const nameString = username ? username : "";
 
