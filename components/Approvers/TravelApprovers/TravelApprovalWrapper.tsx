@@ -1,6 +1,10 @@
 import { Suspense } from "react";
 import { query } from "@/lib/db";
-import { HOD_ARRAY, HR_ARRAY, DIRECTOR_ARRAY } from "@/public/secretAssets";
+import {
+  loadHodArray,
+  loadHrArray,
+  loadDirectorArray,
+} from "@/lib/loadAppData";
 import TravelApprovalModal from "./TravelApprovalModal";
 import TravelApprovalSkeleton from "@/components/Skeletons/TravelApprovalSkeleton";
 import AlreadyProcessed from "./AlreadyProcessed";
@@ -19,6 +23,10 @@ const TravelApprovalWrapper = async ({
 }: TravelApprovalWrapperProps) => {
   // First fallback - one of our props is missing/falsy
   if (!uuid || !token || !stage) return <NotFoundRequest />;
+
+  const HOD_ARRAY = await loadHodArray();
+  const HR_ARRAY = await loadHrArray();
+  const DIRECTOR_ARRAY = await loadDirectorArray();
 
   // Which approver are we looking for (HOD or HR or Director)
   let APPROVERS_ARRAY;
