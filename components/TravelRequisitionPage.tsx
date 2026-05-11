@@ -12,7 +12,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import Image from "next/image";
-import { assets, initialsHelper } from "@/public/assets";
+import { assets } from "@/public/assets";
 import {
   TRAVEL_CATEGORIES,
   TRAVEL_MODES,
@@ -24,7 +24,6 @@ import TravelConfirmationModal from "./TravelConfirmationModal";
 import { ApiHandler } from "@/utils/ApiHandler";
 import SubmittingOverlay from "./SubmittingOverlay";
 import AlertModal from "./AlertModal";
-import UserDropdown from "./UserDropDown";
 
 export interface TravelFormData {
   employeeName: string;
@@ -96,8 +95,6 @@ export default function TravelRequisitionPage() {
     queryKey: ["BaseHodApproversData"],
     queryFn: loadHodApprovers,
   });
-
-  const nameString = username ? username : "";
 
   const [formData, setFormData] = useState<TravelFormData>(InitialFormState);
 
@@ -207,7 +204,7 @@ export default function TravelRequisitionPage() {
   };
 
   return (
-    <div className="relative min-h-screen p-5">
+    <div className="relative py-4">
       {submitting && <SubmittingOverlay />}
       {step === 3 && <AlertModal alertInfo={alertInfo} setStep={setStep} />}
       {step === 2 && (
@@ -245,13 +242,6 @@ export default function TravelRequisitionPage() {
                 Submit your business travel details for approval.
               </p>
             </div>
-
-            {/* User Info Card */}
-            <UserDropdown
-              initials={initialsHelper(nameString)}
-              userName={username}
-              userEmail={email}
-            />
           </header>
 
           {/* Form Card */}

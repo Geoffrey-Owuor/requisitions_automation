@@ -189,7 +189,7 @@ const ITApprovalModal = ({ data }: { data: ITRequisitionData }) => {
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden p-5">
+    <div className="relative py-4">
       {(approving || declining) && <SubmittingOverlay />}
 
       {step === 2 && (
