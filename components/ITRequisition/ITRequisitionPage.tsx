@@ -11,7 +11,7 @@ import {
   Check,
 } from "lucide-react";
 import Image from "next/image";
-import { assets, initialsHelper } from "@/public/assets";
+import { assets } from "@/public/assets";
 import { useQuery } from "@tanstack/react-query";
 import { loadHodApprovers, loadBaseDepartments } from "@/lib/loadAppData";
 import ITConfirmationModal from "./ITConfirmationModal";
@@ -19,7 +19,6 @@ import { ApiHandler } from "@/utils/ApiHandler";
 import SubmittingOverlay from "../SubmittingOverlay";
 import AlertModal from "../AlertModal";
 import { AlertInfo } from "../TravelRequisitionPage";
-import UserDropdown from "../UserDropDown";
 
 // ---- Constants ----
 const REQUEST_TYPES = ["Replacement", "New"];
@@ -97,8 +96,6 @@ export default function ITRequisitionPage() {
     queryKey: ["BaseHodApproversData"],
     queryFn: loadHodApprovers,
   });
-
-  const nameString = username ? username : "";
 
   const [formData, setFormData] = useState<ITFormData>(InitialFormState);
   const [step, setStep] = useState(1);
@@ -184,7 +181,7 @@ export default function ITRequisitionPage() {
   };
 
   return (
-    <div className="relative min-h-screen p-5">
+    <div className="relative py-4">
       {submitting && <SubmittingOverlay />}
 
       {step === 3 && <AlertModal alertInfo={alertInfo} setStep={setStep} />}
@@ -224,13 +221,6 @@ export default function ITRequisitionPage() {
                 Submit your IT requirements for approval.
               </p>
             </div>
-
-            {/* User Dropdown */}
-            <UserDropdown
-              initials={initialsHelper(nameString)}
-              userName={username}
-              userEmail={email}
-            />
           </header>
 
           {/* Form Card */}
