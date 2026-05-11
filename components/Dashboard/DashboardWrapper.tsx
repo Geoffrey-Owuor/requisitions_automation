@@ -11,7 +11,7 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
       {/* Mobile header handles screens below lg */}
       <MobileHeader />
       {/* <DashboardHeader /> */}
-      <div className="fixed top-16 right-1 bottom-0 left-1 overflow-y-auto rounded-3xl border border-[#eceef1] [scrollbar-gutter:stable] sm:bottom-1 sm:rounded-2xl lg:top-1 lg:left-20">
+      <div className="fixed top-16 right-1 bottom-0 left-1 overflow-y-auto rounded-3xl border border-slate-200/70 [scrollbar-gutter:stable] sm:bottom-1 sm:rounded-2xl lg:top-1 lg:left-20">
         <div className="flex h-full flex-col">
           {/* Content */}
           <main className="mx-auto w-full max-w-7xl flex-1 px-4">
