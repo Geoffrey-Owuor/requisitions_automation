@@ -13,7 +13,8 @@ import {
   ShoppingBag,
   ExternalLink,
   BookText,
-  ArrowLeftRight,
+  ShieldAlert,
+  Workflow,
 } from "lucide-react";
 import { ReactNode } from "react";
 import Header from "./Header";
@@ -69,10 +70,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-5 lg:gap-12">
             <div className="lg:col-span-3">
               <div className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-rose-100 bg-rose-50/50 px-3 py-1 text-[9px] font-bold tracking-wide text-rose-600 uppercase sm:mb-6 sm:gap-2 sm:px-4 sm:py-1.5 sm:text-[10px]">
-                <ArrowLeftRight
-                  size={14}
-                  className="h-3 w-3 sm:h-3.5 sm:w-3.5"
-                />{" "}
+                <Workflow size={14} className="h-3 w-3 sm:h-3.5 sm:w-3.5" />{" "}
                 Internal Requisitions
               </div>
               <h1 className="mb-2 text-3xl font-semibold tracking-tight text-slate-900 sm:mb-6 sm:text-[42px]">
@@ -206,9 +204,9 @@ export default function HomePage() {
           </div>
 
           {/* COMPLIANCE FOOTNOTE */}
-          <div className="mt-8 flex items-center justify-center gap-2 text-slate-400 sm:mt-12 sm:gap-3">
-            <Shield size={16} className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
-            <p className="text-xs sm:text-sm">
+          <div className="mt-8 flex items-center justify-center gap-2 text-slate-500 sm:mt-12 sm:gap-3">
+            <ShieldAlert size={16} className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
+            <p className="text-xs italic sm:text-sm">
               Standard compliance and procedures apply to all requisitions.
             </p>
           </div>
