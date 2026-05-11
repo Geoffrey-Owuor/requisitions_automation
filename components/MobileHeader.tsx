@@ -87,7 +87,7 @@ const MobileHeader = () => {
                   >
                     <Icon
                       size={18}
-                      className={isActive ? "text-white" : "text-slate-400"}
+                      className={isActive ? "text-white" : "text-slate-600"}
                     />
                     {label}
                   </Link>

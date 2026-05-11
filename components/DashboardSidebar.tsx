@@ -40,7 +40,7 @@ const DashboardSidebar = () => {
               className={`group flex w-full flex-col items-center justify-center gap-1.5 rounded-2xl py-3 transition-all duration-300 active:scale-95 ${
                 isActive
                   ? "bg-slate-900 text-white shadow-sm"
-                  : "text-slate-500 hover:bg-rose-50 hover:text-rose-600"
+                  : "text-slate-600 hover:bg-rose-50 hover:text-rose-600"
               }`}
             >
               <Icon
@@ -48,7 +48,7 @@ const DashboardSidebar = () => {
                 className={`transition-colors ${
                   isActive
                     ? "text-white"
-                    : "text-slate-400 group-hover:text-rose-600"
+                    : "text-slate-600 group-hover:text-rose-600"
                 }`}
               />
               <span className="text-center text-[10px] leading-tight font-semibold tracking-wide">
