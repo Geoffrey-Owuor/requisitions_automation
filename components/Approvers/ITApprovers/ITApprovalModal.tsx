@@ -86,7 +86,9 @@ function DetailRow({
         <Icon className="h-3.5 w-3.5 text-rose-400" />
         {label}
       </span>
-      <span className="text-right font-medium text-[#1e1b1b]">{value}</span>
+      <span className="max-w-50 truncate text-right font-medium text-[#1e1b1b]">
+        {value}
+      </span>
     </div>
   );
 }
@@ -189,7 +191,7 @@ const ITApprovalModal = ({ data }: { data: ITRequisitionData }) => {
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden p-5">
+    <div className="relative py-4">
       {(approving || declining) && <SubmittingOverlay />}
 
       {step === 2 && (
@@ -228,17 +230,19 @@ const ITApprovalModal = ({ data }: { data: ITRequisitionData }) => {
           {/* ── Card ── */}
           <div className="rounded-3xl border border-gray-100 bg-white/65 p-10 shadow-[0_24px_48px_rgba(160,60,60,0.10)] backdrop-blur-2xl">
             {/* Approver identity badge */}
-            <div className="mb-7 flex items-center gap-3 rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white/80 px-4 py-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-rose-100 text-[13px] font-semibold text-rose-700">
-                {initialsHelper(approverName)}
+            <div className="mb-7 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white/80 px-4 py-3">
+              <div className="inline-flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-rose-100 text-[13px] font-semibold text-rose-700">
+                  {initialsHelper(approverName)}
+                </div>
+                <div>
+                  <p className="text-[14px] font-semibold text-[#1e1b1b]">
+                    {approverName}
+                  </p>
+                  <p className="text-[12px] text-[#a18080]">{roleLabel}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-[14px] font-semibold text-[#1e1b1b]">
-                  {approverName}
-                </p>
-                <p className="text-[12px] text-[#a18080]">{roleLabel}</p>
-              </div>
-              <span className="ml-auto rounded-lg bg-rose-100 px-3 py-1 text-[11px] font-medium text-rose-700">
+              <span className="rounded-lg bg-rose-100 px-3 py-1 text-[11px] font-medium text-rose-700">
                 Reviewing
               </span>
             </div>

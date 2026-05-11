@@ -4,8 +4,6 @@ import { useUser } from "@/context/UserContext";
 import TravelRequisitionsTable from "./TravelRequisitionsTable";
 import ITRequisitionsTable from "./ITRequisitionsDashboard/ITRequisitionsTable";
 import { BriefcaseBusiness, Laptop, Monitor } from "lucide-react";
-import { initialsHelper } from "@/public/assets";
-import UserDropdown from "../UserDropDown";
 import { useQuery } from "@tanstack/react-query";
 import { loadITArray } from "@/lib/loadAppData";
 
@@ -24,8 +22,8 @@ const UserDashboard = () => {
     IT_ARRAY.some((itApprover) => itApprover.email === userEmail);
 
   return (
-    <div className="relative min-h-screen">
-      <div className="mx-auto max-w-6xl px-6">
+    <div className="relative">
+      <div className="mx-auto max-w-7xl py-4">
         {/* WELCOME AREA */}
         <div className="flex items-center justify-between gap-6 max-sm:flex-col max-sm:items-start">
           {/* Welcome Text */}
@@ -37,14 +35,6 @@ const UserDashboard = () => {
               {firstName}, look who showed up 👀
             </h1>
           </div>
-
-          {/* User DropDown */}
-
-          <UserDropdown
-            initials={initialsHelper(userName)}
-            userName={userName}
-            userEmail={userEmail}
-          />
         </div>
 
         {/* DATA TABLES */}

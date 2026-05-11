@@ -6,11 +6,11 @@ const Header = () => {
   return (
     <header className="sticky top-0 z-50 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-        <Brand />
+        <Brand showText={true} />
         <nav className="flex items-center gap-4">
           <Link
             href="/login"
-            className="rounded-full px-4 py-2 text-xs font-medium text-slate-600 transition-colors hover:bg-rose-100 hover:text-slate-800 sm:text-sm"
+            className="rounded-full px-4 py-2 text-xs font-medium text-slate-600 transition-colors hover:bg-rose-50 hover:text-rose-600 sm:text-sm"
           >
             Login
           </Link>

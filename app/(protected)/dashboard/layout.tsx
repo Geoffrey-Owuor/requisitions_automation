@@ -1,9 +1,7 @@
 // app/(protected)/layout.tsx
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-
 import { UserProvider } from "@/context/UserContext";
-
 import DashboardWrapper from "@/components/Dashboard/DashboardWrapper";
 
 export default async function ProtectedLayout({
