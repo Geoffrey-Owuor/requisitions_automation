@@ -86,7 +86,9 @@ function DetailRow({
         <Icon className="h-3.5 w-3.5 text-rose-400" />
         {label}
       </span>
-      <span className="text-right font-medium text-[#1e1b1b]">{value}</span>
+      <span className="max-w-50 truncate text-right font-medium text-[#1e1b1b]">
+        {value}
+      </span>
     </div>
   );
 }
@@ -206,7 +208,7 @@ const TravelApprovalModal = ({
               {roleLabel} Review
             </p>
             <h1 className="text-2xl leading-tight font-semibold tracking-[-0.5px] text-[#1e1b1b]">
-              {employeeName}&apos;s Requisition
+              Travel Requisition - {employeeName}
             </h1>
             <p className="mt-1 text-[14px] text-[#7c5a5a]">
               Submitted {dateFormatter(requestCreatedAt)} · Pending your review
@@ -346,7 +348,7 @@ const TravelApprovalModal = ({
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div className="flex items-center justify-between rounded-2xl bg-linear-to-r from-slate-800 to-rose-900 px-5 py-4 text-white">
+                <div className="flex flex-wrap items-center justify-between rounded-2xl bg-linear-to-r from-slate-800 to-rose-900 px-5 py-4 text-white">
                   <div className="flex items-center gap-1.5">
                     <BadgeDollarSign className="h-4 w-4 text-white/60" />
                     <span className="text-[13px] text-white/70">Total</span>
@@ -355,7 +357,7 @@ const TravelApprovalModal = ({
                     KES {travelTotalCost.toLocaleString()}
                   </span>
                 </div>
-                <div className="flex items-center justify-between rounded-2xl bg-rose-900/80 px-5 py-4 text-rose-50">
+                <div className="flex flex-wrap items-center justify-between rounded-2xl bg-rose-900/80 px-5 py-4 text-rose-50">
                   <div className="flex items-center gap-1.5">
                     <TrendingUp className="h-4 w-4 text-rose-300" />
                     <span className="text-[13px] text-rose-200">
