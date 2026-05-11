@@ -5,7 +5,6 @@ export const metadata: Metadata = {
   title: "Dashboard",
   description: "User requisitions dashboard",
 };
-
 const page = () => {
   return <UserDashboard />;
 };
