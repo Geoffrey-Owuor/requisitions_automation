@@ -25,7 +25,7 @@ const DashboardSidebar = () => {
   return (
     <aside className="fixed top-1 bottom-1 left-1 z-50 hidden w-18 flex-col items-center py-4 lg:flex">
       {/* Brand (Icon Only) */}
-      <div className="mb-8">
+      <div className="mb-6">
         <Brand showText={false} />
       </div>
 

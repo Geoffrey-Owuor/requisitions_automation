@@ -223,7 +223,7 @@ export default function TravelRequisitionPage() {
       {step === 1 && (
         <div className="relative z-10 mx-auto max-w-225">
           {/* Form Image */}
-          <div className="mb-4 overflow-hidden rounded-xl">
+          <div className="mb-4 overflow-hidden rounded-3xl">
             <Image
               src={assets.form_image}
               sizes="100vh"
