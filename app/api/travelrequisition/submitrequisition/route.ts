@@ -1,10 +1,9 @@
 import { NextResponse, NextRequest } from "next/server";
-import { loadHodArray, loadHrArray } from "@/lib/loadAppData";
+import { loadHrArray } from "@/lib/loadAppDataV2";
 import { query } from "@/lib/db";
 import { EmailSender } from "@/services/EmailSender";
 
 export async function POST(request: NextRequest) {
-  const HOD_ARRAY = await loadHodArray();
   const HR_ARRAY = await loadHrArray();
   try {
     const { formData, totalCost, approvalTier, submittedBy } =
@@ -49,14 +48,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get the hod object from the HOD's array
-    const hodObject = HOD_ARRAY.find((hod) => hod.name === hodApprover);
+    const hodApproverResult = await query(
+      `
+      SELECT hod_uuid AS uuid, 
+      hod_email AS email
+      FROM hod_array WHERE hod_name = $1 LIMIT 1
+      `,
+      [hodApprover],
+    );
 
-    // get the hod uuid and email - or fall back to an invalid string
-    const hodUuid = hodObject?.uuid;
-    const hodEmail = hodObject?.email;
-
-    if (!hodUuid || !hodEmail) {
+    if (hodApproverResult.length === 0) {
       return NextResponse.json(
         {
           message:
@@ -65,6 +66,10 @@ export async function POST(request: NextRequest) {
         { status: 404 },
       );
     }
+
+    // get the hod uuid and email - or fall back to an invalid string
+    const hodUuid = hodApproverResult[0].uuid;
+    const hodEmail = hodApproverResult[0].email;
 
     // Generate status for HOD Approval, HR Approval and Director Approval Statuses
     const hodStatus = "pending";
@@ -141,6 +146,7 @@ export async function POST(request: NextRequest) {
       ];
       await query(updateQuery, updateParams);
 
+      // EMAIL SERVICE
       if (approvalTier === "Tier 1") {
         EmailSender({
           to: email,

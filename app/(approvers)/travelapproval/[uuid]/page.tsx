@@ -3,11 +3,6 @@ import { Suspense } from "react";
 import DashboardWrapper from "@/components/Dashboard/DashboardWrapper";
 import { UserProvider } from "@/context/UserContext";
 import { query } from "@/lib/db";
-import {
-  loadHodArray,
-  loadHrArray,
-  loadDirectorArray,
-} from "@/lib/loadAppData";
 import TravelApprovalModal from "@/components/Approvers/TravelApprovers/TravelApprovalModal";
 import TravelApprovalSkeleton from "@/components/Skeletons/TravelApprovalSkeleton";
 import AlreadyProcessed from "@/components/Approvers/TravelApprovers/AlreadyProcessed";
@@ -38,33 +33,16 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
   // First fallback - one of our props is missing/falsy
   if (!uuid || !token || !stage) return <NotFoundRequest />;
 
-  const HOD_ARRAY = await loadHodArray();
-  const HR_ARRAY = await loadHrArray();
-  const DIRECTOR_ARRAY = await loadDirectorArray();
-
-  // Which approver are we looking for (HOD or HR or Director)
-  let APPROVERS_ARRAY;
-
-  switch (stage) {
-    case "hod":
-      APPROVERS_ARRAY = HOD_ARRAY;
-      break;
-    case "hr":
-      APPROVERS_ARRAY = HR_ARRAY;
-      break;
-    case "director":
-      APPROVERS_ARRAY = DIRECTOR_ARRAY;
-      break;
-    default: //Assign default array to directors
-      APPROVERS_ARRAY = DIRECTOR_ARRAY;
-      break;
-  }
-
-  const approverObject = APPROVERS_ARRAY.find(
-    (approver) => approver.uuid === token,
+  const validApprover = await query(
+    `SELECT ${stage}_email AS email, 
+       ${stage}_name AS name 
+       FROM ${stage}_array WHERE ${stage}_uuid = $1`,
+    [token],
   );
 
-  if (!approverObject) return <InvalidToken />;
+  if (validApprover.length === 0) return <InvalidToken />;
+
+  const approverDetails = validApprover[0];
 
   // Token is valid - lets query the database for the travel data
   const baseQuery = `
@@ -98,8 +76,8 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
     );
 
   // Our current approver
-  const currentApprover = approverObject.name;
-  const currentApproverEmail = approverObject.email;
+  const currentApprover = approverDetails.name;
+  const currentApproverEmail = approverDetails.email;
 
   // context object
   const contextObject = {
