@@ -65,6 +65,21 @@ export async function UpdateTravelStatus(
       };
     }
 
+    // Check if the approver exists in our table array data set
+    const { rows: approverResult } = await client.query(
+      `SELECT id FROM ${payload.stage}_array WHERE ${payload.stage}_email = $1 FOR UPDATE`,
+      [payload.approverEmail],
+    );
+
+    if (approverResult.length === 0) {
+      await client.query("ROLLBACK");
+      return {
+        alertType: "error",
+        alertMessage:
+          "Could not verify the current approver, please contact your admin for support",
+      };
+    }
+
     const isReviewed = reviewedResult[0].approval_status;
     const previousApprover = reviewedResult[0].approver;
 
@@ -83,6 +98,14 @@ export async function UpdateTravelStatus(
     }
 
     await client.query(baseUpdateQuery, baseParams);
+
+    // Rotate the approver's uuid
+    await client.query(
+      `UPDATE ${payload.stage}_array 
+      SET ${payload.stage}_uuid = gen_random_uuid()
+      WHERE ${payload.stage}_email = $1`,
+      [payload.approverEmail],
+    );
 
     await client.query("COMMIT");
 

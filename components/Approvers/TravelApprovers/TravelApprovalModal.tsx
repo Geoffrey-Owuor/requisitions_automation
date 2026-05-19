@@ -131,6 +131,8 @@ const TravelApprovalModal = ({
 
   // Approval/ decline function
   const handleApproval = async (status: string) => {
+    const dashboardDiv = document.getElementById("dashboard-wrapper");
+
     const setSubmitting = status === "approved" ? setApproving : setDeclining;
 
     setSubmitting(true);
@@ -162,7 +164,7 @@ const TravelApprovalModal = ({
       setStep(2);
 
       // scroll to page top
-      window.scrollTo({ top: 0, behavior: "instant" });
+      dashboardDiv?.scrollTo({ top: 0, behavior: "instant" });
     } catch (error) {
       if (error instanceof Error) {
         console.error(
@@ -173,7 +175,7 @@ const TravelApprovalModal = ({
         setAlertInfo({ alertType: "error", alertMessage: errorString });
 
         setStep(2);
-        window.scrollTo({ top: 0, behavior: "instant" });
+        dashboardDiv?.scrollTo({ top: 0, behavior: "instant" });
       }
     } finally {
       setSubmitting(false);

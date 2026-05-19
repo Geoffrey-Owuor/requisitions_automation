@@ -148,6 +148,8 @@ const ITApprovalModal = ({ data }: { data: ITRequisitionData }) => {
   const stageObject = statusMapping[stage];
 
   const handleApproval = async (status: string) => {
+    const dashboardDiv = document.getElementById("dashboard-wrapper");
+
     const setSubmitting =
       status === "approved" || status === "accepted"
         ? setApproving
@@ -174,7 +176,7 @@ const ITApprovalModal = ({ data }: { data: ITRequisitionData }) => {
 
       setComments("");
       setStep(2);
-      window.scrollTo({ top: 0, behavior: "instant" });
+      dashboardDiv?.scrollTo({ top: 0, behavior: "instant" });
     } catch (error) {
       if (error instanceof Error) {
         console.error(
@@ -183,7 +185,7 @@ const ITApprovalModal = ({ data }: { data: ITRequisitionData }) => {
         );
         setAlertInfo({ alertType: "error", alertMessage: error.toString() });
         setStep(2);
-        window.scrollTo({ top: 0, behavior: "instant" });
+        dashboardDiv?.scrollTo({ top: 0, behavior: "instant" });
       }
     } finally {
       setSubmitting(false);

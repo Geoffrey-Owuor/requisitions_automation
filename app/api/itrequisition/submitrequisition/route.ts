@@ -1,11 +1,10 @@
 import { NextResponse, NextRequest } from "next/server";
-import { loadHodArray, loadITArray } from "@/lib/loadAppDataV2";
+import { loadITArray } from "@/lib/loadAppDataV2";
 import { ITEmailSender } from "@/services/ITEmailSender";
 import { query } from "@/lib/db";
 
 export async function POST(request: NextRequest) {
   // Get the data
-  const HOD_ARRAY = await loadHodArray();
   const IT_ARRAY = await loadITArray();
 
   try {
@@ -61,14 +60,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get the hod object from the array
-    const hodObject = HOD_ARRAY.find((hod) => hod.name === hodApprover);
+    const hodApproverResult = await query(
+      `
+      SELECT hod_uuid AS uuid, 
+      hod_email AS email
+      FROM hod_array WHERE hod_name = $1 LIMIT 1
+      `,
+      [hodApprover],
+    );
 
-    // get the hod uuid and email - or fall back to an invalid string
-    const hodUuid = hodObject?.uuid;
-    const hodEmail = hodObject?.email;
-
-    if (!hodUuid || !hodEmail) {
+    if (hodApproverResult.length === 0) {
       return NextResponse.json(
         {
           message:
@@ -77,6 +78,10 @@ export async function POST(request: NextRequest) {
         { status: 404 },
       );
     }
+
+    // get the hod uuid and email - or fall back to an invalid string
+    const hodUuid = hodApproverResult[0].uuid;
+    const hodEmail = hodApproverResult[0].email;
 
     //Join the requirements array into one text separated by comas
     const joinedRequirements = requirements.join(", ");
