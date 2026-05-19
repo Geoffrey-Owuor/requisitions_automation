@@ -8,6 +8,8 @@ export interface ApproversObject {
   uuid: string;
 }
 
+// FUNCTIONS FOR LOADING DATA FROM JSON FILES
+
 // Base Departments
 export async function loadBaseDepartments(): Promise<string[]> {
   const filePath = path.join(process.cwd(), "data", "base-departments.json");

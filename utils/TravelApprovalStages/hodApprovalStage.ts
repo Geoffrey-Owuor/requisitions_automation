@@ -1,5 +1,5 @@
 import { EmailSender } from "@/services/EmailSender";
-import { loadHrArray } from "@/lib/loadAppData";
+import { loadHrArray } from "@/lib/loadAppDataV2";
 
 type HodApprovalStageProps = {
   uuid: string;

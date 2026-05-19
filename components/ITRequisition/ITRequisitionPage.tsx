@@ -13,7 +13,7 @@ import {
 import Image from "next/image";
 import { assets } from "@/public/assets";
 import { useQuery } from "@tanstack/react-query";
-import { loadHodApprovers, loadBaseDepartments } from "@/lib/loadAppData";
+import { loadHodApprovers, loadBaseDepartments } from "@/lib/loadAppDataV2";
 import ITConfirmationModal from "./ITConfirmationModal";
 import { ApiHandler } from "@/utils/ApiHandler";
 import SubmittingOverlay from "../SubmittingOverlay";
@@ -71,6 +71,7 @@ interface FormSelectProps {
   label: string;
   options: string[];
   value: string;
+  loading?: boolean;
   onChange: (value: string) => void;
 }
 
@@ -86,13 +87,13 @@ export default function ITRequisitionPage() {
   const { username, email } = useUser();
 
   // Load departments
-  const { data: DEPARTMENTS = [] } = useQuery({
+  const { data: DEPARTMENTS = [], isLoading: departmentsLoading } = useQuery({
     queryKey: ["BaseDepartmentsData"],
     queryFn: loadBaseDepartments,
   });
 
   // Load HODS
-  const { data: HOD_APPROVERS = [] } = useQuery({
+  const { data: HOD_APPROVERS = [], isLoading: hodsLoading } = useQuery({
     queryKey: ["BaseHodApproversData"],
     queryFn: loadHodApprovers,
   });
@@ -249,6 +250,7 @@ export default function ITRequisitionPage() {
                     label="Department"
                     options={DEPARTMENTS}
                     value={formData.department}
+                    loading={departmentsLoading}
                     onChange={(v) => updateField("department", v)}
                   />
                   <FormInput
@@ -267,6 +269,7 @@ export default function ITRequisitionPage() {
                     label="HOD Approver"
                     options={HOD_APPROVERS}
                     value={formData.hodApprover}
+                    loading={hodsLoading}
                     onChange={(v) => updateField("hodApprover", v)}
                   />
 
@@ -365,7 +368,13 @@ function FormInput({ label, placeholder, value, onChange }: FormInputProps) {
   );
 }
 
-function FormSelect({ label, options, value, onChange }: FormSelectProps) {
+function FormSelect({
+  label,
+  options,
+  value,
+  onChange,
+  loading,
+}: FormSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -373,9 +382,11 @@ function FormSelect({ label, options, value, onChange }: FormSelectProps) {
       <label className="text-[13px] font-medium text-[#7c5a5a]">
         {label} <span className="text-red-500">*</span>
       </label>
-      <div
-        className="flex h-10 cursor-pointer items-center justify-between rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none"
+      <button
+        type="button"
+        className="flex h-10 cursor-pointer items-center justify-between rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none disabled:cursor-progress"
         onClick={() => setIsOpen(!isOpen)}
+        disabled={loading}
       >
         <span className={value ? "text-[#1e1b1b]" : "text-[#a18080]"}>
           {value || "Select..."}
@@ -384,7 +395,7 @@ function FormSelect({ label, options, value, onChange }: FormSelectProps) {
           size={14}
           className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
         />
-      </div>
+      </button>
 
       {isOpen && (
         <>
