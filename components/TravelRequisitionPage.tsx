@@ -140,6 +140,8 @@ export default function TravelRequisitionPage() {
   }, [formData.travelCategory, formData.travelMode, totalCost]);
 
   const handleSubmit = async () => {
+    const dashboardDiv = document.getElementById("dashboard-wrapper");
+
     const payload = {
       formData,
       totalCost,
@@ -182,7 +184,7 @@ export default function TravelRequisitionPage() {
       // set step to to show final modal step
       setStep(3);
       // scroll to page top
-      window.scrollTo({ top: 0, behavior: "instant" });
+      dashboardDiv?.scrollTo({ top: 0, behavior: "instant" });
     } catch (error) {
       if (error instanceof Error) {
         console.error("Error while trying to submit your requisition", error);
@@ -190,7 +192,7 @@ export default function TravelRequisitionPage() {
         setAlertInfo({ alertType: "error", alertMessage: errorString });
 
         setStep(3);
-        window.scrollTo({ top: 0, behavior: "instant" });
+        dashboardDiv?.scrollTo({ top: 0, behavior: "instant" });
       }
     } finally {
       setSubmitting(false);
@@ -215,7 +217,8 @@ export default function TravelRequisitionPage() {
           approvalTier={generatedAprovalTier}
           onBack={() => {
             setStep(1);
-            window.scrollTo({ top: 0, behavior: "instant" });
+            const dashboardDiv = document.getElementById("dashboard-wrapper");
+            dashboardDiv?.scrollTo({ top: 0, behavior: "instant" });
           }}
           onSubmit={handleSubmit}
           submitting={submitting}
@@ -252,7 +255,9 @@ export default function TravelRequisitionPage() {
               onSubmit={(e) => {
                 e.preventDefault();
                 setStep(2);
-                window.scrollTo({ top: 0, behavior: "instant" });
+                const dashboardDiv =
+                  document.getElementById("dashboard-wrapper");
+                dashboardDiv?.scrollTo({ top: 0, behavior: "instant" });
               }}
             >
               {/* Section 1: Employee Details */}

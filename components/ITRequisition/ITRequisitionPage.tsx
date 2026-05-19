@@ -129,6 +129,8 @@ export default function ITRequisitionPage() {
   };
 
   const handleSubmit = async () => {
+    const dashboardDiv = document.getElementById("dashboard-wrapper");
+
     const payload = {
       formData: {
         ...formData,
@@ -168,13 +170,13 @@ export default function ITRequisitionPage() {
 
       setFormData(InitialFormState);
       setStep(3);
-      window.scrollTo({ top: 0, behavior: "instant" });
+      dashboardDiv?.scrollTo({ top: 0, behavior: "instant" });
     } catch (error) {
       if (error instanceof Error) {
         console.error("Error while trying to submit IT requisition", error);
         setAlertInfo({ alertType: "error", alertMessage: error.toString() });
         setStep(3);
-        window.scrollTo({ top: 0, behavior: "instant" });
+        dashboardDiv?.scrollTo({ top: 0, behavior: "instant" });
       }
     } finally {
       setSubmitting(false);
@@ -192,7 +194,8 @@ export default function ITRequisitionPage() {
           formData={formData}
           onBack={() => {
             setStep(1);
-            window.scrollTo({ top: 0, behavior: "instant" });
+            const dashboardDiv = document.getElementById("dashboard-wrapper");
+            dashboardDiv?.scrollTo({ top: 0, behavior: "instant" });
           }}
           onSubmit={handleSubmit}
           submitting={submitting}
@@ -231,7 +234,9 @@ export default function ITRequisitionPage() {
               onSubmit={(e) => {
                 e.preventDefault();
                 setStep(2);
-                window.scrollTo({ top: 0, behavior: "instant" });
+                const dashboardDiv =
+                  document.getElementById("dashboard-wrapper");
+                dashboardDiv?.scrollTo({ top: 0, behavior: "instant" });
               }}
             >
               {/* Section 1: Employee Details */}
