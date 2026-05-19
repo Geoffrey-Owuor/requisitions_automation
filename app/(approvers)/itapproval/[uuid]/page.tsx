@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { query } from "@/lib/db";
 import DashboardWrapper from "@/components/Dashboard/DashboardWrapper";
 import { UserProvider } from "@/context/UserContext";
-import { loadHodArray, loadITArray } from "@/lib/loadAppData";
+import { loadHodArray, loadITArray } from "@/lib/loadAppDataV2";
 import InvalidToken from "@/components/Approvers/TravelApprovers/InvalidToken";
 import AlreadyProcessed from "@/components/Approvers/TravelApprovers/AlreadyProcessed";
 import ITApprovalSkeleton from "@/components/Skeletons/ITApprovalSkeleton";

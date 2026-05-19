@@ -19,7 +19,7 @@ import {
   BUDGET_STATUS,
 } from "@/public/assets";
 import { useQuery } from "@tanstack/react-query";
-import { loadHodApprovers, loadBaseDepartments } from "@/lib/loadAppData";
+import { loadBaseDepartments, loadHodApprovers } from "@/lib/loadAppDataV2";
 import TravelConfirmationModal from "./TravelConfirmationModal";
 import { ApiHandler } from "@/utils/ApiHandler";
 import SubmittingOverlay from "./SubmittingOverlay";
@@ -78,6 +78,7 @@ interface FormSelectProps {
   label: string;
   options: string[];
   value: string;
+  loading?: boolean;
   onChange: (value: string) => void;
 }
 
@@ -85,13 +86,13 @@ export default function TravelRequisitionPage() {
   const { username, email } = useUser();
 
   // Load departments
-  const { data: DEPARTMENTS = [] } = useQuery({
+  const { data: DEPARTMENTS = [], isLoading: departmentsLoading } = useQuery({
     queryKey: ["BaseDepartmentsData"],
     queryFn: loadBaseDepartments,
   });
 
   // Load HODS
-  const { data: HOD_APPROVERS = [] } = useQuery({
+  const { data: HOD_APPROVERS = [], isLoading: hodsLoading } = useQuery({
     queryKey: ["BaseHodApproversData"],
     queryFn: loadHodApprovers,
   });
@@ -270,6 +271,7 @@ export default function TravelRequisitionPage() {
                     label="Department"
                     options={DEPARTMENTS}
                     value={formData.department}
+                    loading={departmentsLoading}
                     onChange={(v) => updateField("department", v)}
                   />
                   <FormInput
@@ -282,12 +284,14 @@ export default function TravelRequisitionPage() {
                     label="Cost Centre"
                     options={DEPARTMENTS}
                     value={formData.costCentre}
+                    loading={departmentsLoading}
                     onChange={(v) => updateField("costCentre", v)}
                   />
                   <FormSelect
                     label="Hod Approver"
                     options={HOD_APPROVERS}
                     value={formData.hodApprover}
+                    loading={hodsLoading}
                     onChange={(v) => updateField("hodApprover", v)}
                   />
                 </div>
@@ -458,7 +462,13 @@ function FormInput({
   );
 }
 
-function FormSelect({ label, options, value, onChange }: FormSelectProps) {
+function FormSelect({
+  label,
+  options,
+  value,
+  onChange,
+  loading,
+}: FormSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -466,8 +476,10 @@ function FormSelect({ label, options, value, onChange }: FormSelectProps) {
       <label className="text-[13px] font-medium text-[#7c5a5a]">
         {label} <span className="text-red-500">*</span>
       </label>
-      <div
-        className="flex h-10 cursor-pointer items-center justify-between rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none"
+      <button
+        disabled={loading}
+        type="button"
+        className="flex h-10 cursor-pointer items-center justify-between rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none disabled:cursor-progress"
         onClick={() => setIsOpen(!isOpen)}
       >
         <span>{value || "Select..."}</span>
@@ -475,7 +487,7 @@ function FormSelect({ label, options, value, onChange }: FormSelectProps) {
           size={14}
           className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
         />
-      </div>
+      </button>
 
       {isOpen && (
         <>

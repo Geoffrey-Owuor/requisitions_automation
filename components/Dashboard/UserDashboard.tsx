@@ -5,7 +5,7 @@ import TravelRequisitionsTable from "./TravelRequisitionsTable";
 import ITRequisitionsTable from "./ITRequisitionsDashboard/ITRequisitionsTable";
 import { BriefcaseBusiness, Laptop, Monitor } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { loadITArray } from "@/lib/loadAppData";
+import { loadITArray } from "@/lib/loadAppDataV2";
 
 const UserDashboard = () => {
   const { username, email: userEmail } = useUser();

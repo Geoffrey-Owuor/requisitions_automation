@@ -7,7 +7,7 @@ import {
   loadHodArray,
   loadHrArray,
   loadDirectorArray,
-} from "@/lib/loadAppData";
+} from "@/lib/loadAppDataV2";
 import TravelApprovalModal from "@/components/Approvers/TravelApprovers/TravelApprovalModal";
 import TravelApprovalSkeleton from "@/components/Skeletons/TravelApprovalSkeleton";
 import AlreadyProcessed from "@/components/Approvers/TravelApprovers/AlreadyProcessed";
