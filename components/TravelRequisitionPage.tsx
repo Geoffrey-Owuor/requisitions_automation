@@ -19,7 +19,7 @@ import {
   BUDGET_STATUS,
 } from "@/public/assets";
 import { useQuery } from "@tanstack/react-query";
-import { loadHodApprovers, loadBaseDepartments } from "@/lib/loadAppData";
+import { loadBaseDepartments, loadHodApprovers } from "@/lib/loadAppDataV2";
 import TravelConfirmationModal from "./TravelConfirmationModal";
 import { ApiHandler } from "@/utils/ApiHandler";
 import SubmittingOverlay from "./SubmittingOverlay";
@@ -78,6 +78,7 @@ interface FormSelectProps {
   label: string;
   options: string[];
   value: string;
+  loading?: boolean;
   onChange: (value: string) => void;
 }
 
@@ -85,13 +86,13 @@ export default function TravelRequisitionPage() {
   const { username, email } = useUser();
 
   // Load departments
-  const { data: DEPARTMENTS = [] } = useQuery({
+  const { data: DEPARTMENTS = [], isLoading: departmentsLoading } = useQuery({
     queryKey: ["BaseDepartmentsData"],
     queryFn: loadBaseDepartments,
   });
 
   // Load HODS
-  const { data: HOD_APPROVERS = [] } = useQuery({
+  const { data: HOD_APPROVERS = [], isLoading: hodsLoading } = useQuery({
     queryKey: ["BaseHodApproversData"],
     queryFn: loadHodApprovers,
   });
@@ -139,6 +140,8 @@ export default function TravelRequisitionPage() {
   }, [formData.travelCategory, formData.travelMode, totalCost]);
 
   const handleSubmit = async () => {
+    const dashboardDiv = document.getElementById("dashboard-wrapper");
+
     const payload = {
       formData,
       totalCost,
@@ -181,7 +184,7 @@ export default function TravelRequisitionPage() {
       // set step to to show final modal step
       setStep(3);
       // scroll to page top
-      window.scrollTo({ top: 0, behavior: "instant" });
+      dashboardDiv?.scrollTo({ top: 0, behavior: "instant" });
     } catch (error) {
       if (error instanceof Error) {
         console.error("Error while trying to submit your requisition", error);
@@ -189,7 +192,7 @@ export default function TravelRequisitionPage() {
         setAlertInfo({ alertType: "error", alertMessage: errorString });
 
         setStep(3);
-        window.scrollTo({ top: 0, behavior: "instant" });
+        dashboardDiv?.scrollTo({ top: 0, behavior: "instant" });
       }
     } finally {
       setSubmitting(false);
@@ -214,7 +217,8 @@ export default function TravelRequisitionPage() {
           approvalTier={generatedAprovalTier}
           onBack={() => {
             setStep(1);
-            window.scrollTo({ top: 0, behavior: "instant" });
+            const dashboardDiv = document.getElementById("dashboard-wrapper");
+            dashboardDiv?.scrollTo({ top: 0, behavior: "instant" });
           }}
           onSubmit={handleSubmit}
           submitting={submitting}
@@ -223,7 +227,7 @@ export default function TravelRequisitionPage() {
       {step === 1 && (
         <div className="relative z-10 mx-auto max-w-225">
           {/* Form Image */}
-          <div className="mb-4 overflow-hidden rounded-xl">
+          <div className="mb-4 overflow-hidden rounded-3xl">
             <Image
               src={assets.form_image}
               sizes="100vh"
@@ -251,7 +255,9 @@ export default function TravelRequisitionPage() {
               onSubmit={(e) => {
                 e.preventDefault();
                 setStep(2);
-                window.scrollTo({ top: 0, behavior: "instant" });
+                const dashboardDiv =
+                  document.getElementById("dashboard-wrapper");
+                dashboardDiv?.scrollTo({ top: 0, behavior: "instant" });
               }}
             >
               {/* Section 1: Employee Details */}
@@ -270,6 +276,7 @@ export default function TravelRequisitionPage() {
                     label="Department"
                     options={DEPARTMENTS}
                     value={formData.department}
+                    loading={departmentsLoading}
                     onChange={(v) => updateField("department", v)}
                   />
                   <FormInput
@@ -282,12 +289,14 @@ export default function TravelRequisitionPage() {
                     label="Cost Centre"
                     options={DEPARTMENTS}
                     value={formData.costCentre}
+                    loading={departmentsLoading}
                     onChange={(v) => updateField("costCentre", v)}
                   />
                   <FormSelect
                     label="Hod Approver"
                     options={HOD_APPROVERS}
                     value={formData.hodApprover}
+                    loading={hodsLoading}
                     onChange={(v) => updateField("hodApprover", v)}
                   />
                 </div>
@@ -458,7 +467,13 @@ function FormInput({
   );
 }
 
-function FormSelect({ label, options, value, onChange }: FormSelectProps) {
+function FormSelect({
+  label,
+  options,
+  value,
+  onChange,
+  loading,
+}: FormSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -466,8 +481,10 @@ function FormSelect({ label, options, value, onChange }: FormSelectProps) {
       <label className="text-[13px] font-medium text-[#7c5a5a]">
         {label} <span className="text-red-500">*</span>
       </label>
-      <div
-        className="flex h-10 cursor-pointer items-center justify-between rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none"
+      <button
+        disabled={loading}
+        type="button"
+        className="flex h-10 cursor-pointer items-center justify-between rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none disabled:cursor-progress"
         onClick={() => setIsOpen(!isOpen)}
       >
         <span>{value || "Select..."}</span>
@@ -475,7 +492,7 @@ function FormSelect({ label, options, value, onChange }: FormSelectProps) {
           size={14}
           className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
         />
-      </div>
+      </button>
 
       {isOpen && (
         <>

@@ -3,7 +3,6 @@ import { Suspense } from "react";
 import { query } from "@/lib/db";
 import DashboardWrapper from "@/components/Dashboard/DashboardWrapper";
 import { UserProvider } from "@/context/UserContext";
-import { loadHodArray, loadITArray } from "@/lib/loadAppData";
 import InvalidToken from "@/components/Approvers/TravelApprovers/InvalidToken";
 import AlreadyProcessed from "@/components/Approvers/TravelApprovers/AlreadyProcessed";
 import ITApprovalSkeleton from "@/components/Skeletons/ITApprovalSkeleton";
@@ -36,16 +35,16 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
   // First fallback - one of our props is missing/falsy
   if (!uuid || !token || !stage) return <NotFoundRequest />;
 
-  const HOD_ARRAY = await loadHodArray();
-  const IT_ARRAY = await loadITArray();
-
-  const APPROVERS_ARRAY = stage === "hod" ? HOD_ARRAY : IT_ARRAY;
-
-  const approverObject = APPROVERS_ARRAY.find(
-    (approver) => approver.uuid === token,
+  const validApprover = await query(
+    `SELECT ${stage}_email AS email, 
+     ${stage}_name AS name 
+     FROM ${stage}_array WHERE ${stage}_uuid = $1`,
+    [token],
   );
 
-  if (!approverObject) return <InvalidToken />;
+  if (validApprover.length === 0) return <InvalidToken />;
+
+  const approverDetails = validApprover[0];
 
   // Valid approval token - query the database for the IT requisition data
   const baseQuery = `
@@ -70,22 +69,22 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
   const approvalStatus = requestData.approval_status;
   const approverName = requestData.approver_name;
 
-  const contextObject = {
-    username: approverObject.name,
-    email: approverObject.email,
-  };
-
   if (approvalStatus !== "pending")
     return (
       <AlreadyProcessed processedBy={approverName} status={approvalStatus} />
     );
 
+  const contextObject = {
+    username: approverDetails.name,
+    email: approverDetails.email,
+  };
+
   // Build the single data object passed to the modal
   const modalData: ITRequisitionData = {
     uuid,
     stage,
-    approverName: approverObject.name,
-    approverEmail: approverObject.email,
+    approverName: approverDetails.name,
+    approverEmail: approverDetails.email,
     submitterName: requestData.submitter_name,
     submitterEmail: requestData.submitter_email,
     employeeName: requestData.employee_name,
