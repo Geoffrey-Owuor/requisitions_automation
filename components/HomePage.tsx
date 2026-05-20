@@ -66,7 +66,7 @@ export default function HomePage() {
 
       <main className="relative z-10">
         {/* ── HERO SECTION ── */}
-        <section className="mx-auto max-w-6xl px-4 pt-12 pb-12 text-center sm:px-6 sm:pt-20 sm:pb-16 lg:text-left">
+        <section className="mx-auto max-w-6xl px-4 py-12 text-center sm:px-6 sm:py-16 lg:text-left">
           <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-5 lg:gap-12">
             <div className="lg:col-span-3">
               <div className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-rose-100 bg-rose-50/50 px-3 py-1 text-[9px] font-bold tracking-wide text-rose-600 uppercase sm:mb-6 sm:gap-2 sm:px-4 sm:py-1.5 sm:text-[10px]">
