@@ -5,11 +5,14 @@ import { useState, ChangeEvent, useMemo } from "react";
 import { DatePicker } from "./DatePicker";
 import {
   ChevronDown,
-  Plane,
-  MapPin,
   Wallet,
   UserRound,
   ArrowRight,
+  Info,
+  MapPin,
+  Plane,
+  Globe,
+  CheckCircle2,
 } from "lucide-react";
 import Image from "next/image";
 import { assets } from "@/public/assets";
@@ -247,6 +250,105 @@ export default function TravelRequisitionPage() {
               </p>
             </div>
           </header>
+
+          {/* Compact Travel Approval Tiers Guideline Card */}
+          <div className="mb-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
+            {/* Header Area */}
+            <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-4 py-3">
+              <Info className="h-4 w-4 text-slate-500" />
+              <h3 className="text-sm font-bold tracking-tight text-slate-800">
+                Travel Approval Tiers
+              </h3>
+            </div>
+
+            {/* Tiers List (Horizontal/Compact rows) */}
+            <div className="flex flex-col divide-y divide-slate-100">
+              {/* Tier 1 */}
+              <div className="flex flex-col justify-between gap-3 p-3.5 transition-colors hover:bg-slate-50 sm:flex-row sm:items-center">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+                    <MapPin className="h-4 w-4" />
+                  </div>
+                  <div className="text-sm">
+                    <span className="font-semibold text-slate-800">
+                      Tier 1: Local Road
+                    </span>
+                    <span className="mx-2 hidden text-slate-300 sm:inline">
+                      |
+                    </span>
+                    <span className="block text-xs text-slate-500 sm:inline sm:text-sm">
+                      Under KES 30,000
+                    </span>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-1.5 sm:shrink-0 sm:justify-end">
+                  <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-600">
+                    <CheckCircle2 className="h-3 w-3 text-emerald-500" /> HOD
+                  </span>
+                </div>
+              </div>
+
+              {/* Tier 2 */}
+              <div className="flex flex-col justify-between gap-3 p-3.5 transition-colors hover:bg-slate-50 sm:flex-row sm:items-center">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+                    <Plane className="h-4 w-4" />
+                  </div>
+                  <div className="text-sm">
+                    <span className="font-semibold text-slate-800">
+                      Tier 2: Local Air
+                    </span>
+                    <span className="mx-2 hidden text-slate-300 sm:inline">
+                      |
+                    </span>
+                    <span className="block text-xs text-slate-500 sm:inline sm:text-sm">
+                      KES 30,000 - 100,000
+                    </span>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-1.5 sm:shrink-0 sm:justify-end">
+                  <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-600">
+                    <CheckCircle2 className="h-3 w-3 text-blue-500" /> HOD
+                  </span>
+                  <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-600">
+                    <CheckCircle2 className="h-3 w-3 text-blue-500" /> HR
+                  </span>
+                </div>
+              </div>
+
+              {/* Tier 3 */}
+              <div className="flex flex-col justify-between gap-3 p-3.5 transition-colors hover:bg-slate-50 sm:flex-row sm:items-center">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-100 text-violet-600">
+                    <Globe className="h-4 w-4" />
+                  </div>
+                  <div className="text-sm">
+                    <span className="font-semibold text-slate-800">
+                      Tier 3: International
+                    </span>
+                    <span className="mx-2 hidden text-slate-300 sm:inline">
+                      |
+                    </span>
+                    <span className="block text-xs text-slate-500 sm:inline sm:text-sm">
+                      Over KES 100,000
+                    </span>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-1.5 sm:shrink-0 sm:justify-end">
+                  <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-600">
+                    <CheckCircle2 className="h-3 w-3 text-violet-500" /> HOD
+                  </span>
+                  <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-600">
+                    <CheckCircle2 className="h-3 w-3 text-violet-500" /> HR
+                  </span>
+                  <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-600">
+                    <CheckCircle2 className="h-3 w-3 text-violet-500" />{" "}
+                    Director
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
 
           {/* Form Card */}
           <div className="rounded-3xl border border-white/85 bg-white/65 p-10 shadow-[0_24px_48px_rgba(160,60,60,0.10)] backdrop-blur-2xl">
