@@ -9,8 +9,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       issuer: `https://login.microsoftonline.com/${process.env.AUTH_MICROSOFT_ENTRA_ID_TENANT_ID}/v2.0`,
     }),
   ],
-  // If you are using a proxy, it's sometimes helpful to explicitly trust the host
-  trustHost: true,
   pages: {
     signIn: "/login", // your own custom page at app/login/page.tsx
   },
