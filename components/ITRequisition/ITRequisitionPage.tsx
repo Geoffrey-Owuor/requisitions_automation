@@ -9,6 +9,7 @@ import {
   ArrowRight,
   CheckSquare,
   Check,
+  Lightbulb,
 } from "lucide-react";
 import Image from "next/image";
 import { assets } from "@/public/assets";
@@ -226,6 +227,23 @@ export default function ITRequisitionPage() {
               </p>
             </div>
           </header>
+
+          {/* Advance Notice Tip Card */}
+          <div className="mb-8 flex items-start gap-3 rounded-2xl border border-amber-200/60 bg-linear-to-br from-amber-50 to-orange-50 p-4 shadow-xs">
+            <div className="flex shrink-0 items-center justify-center rounded-xl bg-amber-100/50 p-2">
+              <Lightbulb className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+            </div>
+            <div className="pt-0.5">
+              <h4 className="text-sm font-bold tracking-tight text-amber-900">
+                Advance Notice Recommended
+              </h4>
+              <p className="mt-1 text-[13px] leading-relaxed text-amber-800">
+                IT recommends making a requisition at least{" "}
+                <strong>2 weeks prior</strong> to facilitate proper planning and
+                preparation for the requested equipment.
+              </p>
+            </div>
+          </div>
 
           {/* Form Card */}
           <div className="rounded-3xl border border-white/85 bg-white/65 p-10 shadow-[0_24px_48px_rgba(160,60,60,0.10)] backdrop-blur-2xl">
