@@ -130,8 +130,6 @@ export default function ITRequisitionPage() {
   };
 
   const handleSubmit = async () => {
-    const dashboardDiv = document.getElementById("dashboard-wrapper");
-
     const payload = {
       formData: {
         ...formData,
@@ -171,13 +169,11 @@ export default function ITRequisitionPage() {
 
       setFormData(InitialFormState);
       setStep(3);
-      dashboardDiv?.scrollTo({ top: 0, behavior: "instant" });
     } catch (error) {
       if (error instanceof Error) {
         console.error("Error while trying to submit IT requisition", error);
         setAlertInfo({ alertType: "error", alertMessage: error.toString() });
         setStep(3);
-        dashboardDiv?.scrollTo({ top: 0, behavior: "instant" });
       }
     } finally {
       setSubmitting(false);
@@ -234,7 +230,7 @@ export default function ITRequisitionPage() {
               <Lightbulb className="h-5 w-5 text-amber-600 dark:text-amber-400" />
             </div>
             <div className="pt-0.5">
-              <h4 className="text-sm font-bold tracking-tight text-amber-900">
+              <h4 className="text-sm font-semibold tracking-tight text-amber-900">
                 Advance Notice Recommended
               </h4>
               <p className="mt-1 text-[13px] leading-relaxed text-amber-800">
