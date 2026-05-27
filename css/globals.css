@@ -3,12 +3,3 @@
 html {
   scrollbar-color: #a3a3a3 transparent;
 }
-
-@media print {
-  .no-print {
-    display: none !important;
-  }
-  body {
-    background: white;
-  }
-}
