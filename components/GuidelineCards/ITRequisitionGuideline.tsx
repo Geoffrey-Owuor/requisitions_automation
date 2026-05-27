@@ -1,7 +1,7 @@
 import {
   Briefcase,
   CheckCircle2,
-  Clock,
+  Lightbulb,
   Monitor,
   UserCircle,
 } from "lucide-react";
@@ -28,7 +28,7 @@ export default function ITRequisitionGuideline() {
       {/* Planning Callout */}
       <div className="flex items-start gap-4 rounded-2xl border border-rose-100 bg-rose-50 p-5">
         <div className="rounded-full bg-rose-100 p-2 text-rose-600">
-          <Clock size={20} />
+          <Lightbulb size={20} />
         </div>
         <div>
           <h4 className="font-semibold text-rose-900">

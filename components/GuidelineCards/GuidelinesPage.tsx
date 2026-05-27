@@ -20,10 +20,10 @@ export const GeneralNote = () => (
   <div className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-xs">
     <AlertCircle size={18} className="mt-0.5 shrink-0 text-slate-400" />
     <p className="text-sm text-slate-600">
-      <strong className="text-slate-800">Important: </strong> Requisitions are
-      inherently tied to the named employee&apos;s information. This remains
-      true even if the requisition is raised on behalf of another employee who
-      does not have access to a company email account.
+      <span className="font-semibold text-slate-800">Important: </span>{" "}
+      Requisitions are inherently tied to the named employee&apos;s information.
+      This remains true even if the requisition is raised on behalf of another
+      employee who does not have access to a company email account.
     </p>
   </div>
 );
