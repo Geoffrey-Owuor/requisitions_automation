@@ -29,7 +29,7 @@ const UserDashboard = () => {
           {/* Welcome Text */}
           <div>
             <p className="mb-1 font-mono text-[13px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
-              Welcome aboard!
+              Welcome!
             </p>
             <h1 className="text-lg font-semibold tracking-[-0.5px] text-[#1e1b1b]">
               {firstName}, look who showed up 👀
@@ -41,11 +41,11 @@ const UserDashboard = () => {
             href="https://outlook.office.com/mail/"
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex items-center gap-2 rounded-xl border border-slate-200 bg-white/60 px-4 py-2 text-[13px] font-medium text-slate-600 shadow-[0_1px_2px_rgba(0,0,0,0.02)] backdrop-blur-xs transition-all duration-200 hover:border-rose-200 hover:bg-rose-50/50 hover:text-rose-700 hover:shadow-xs active:scale-95"
+            className="group flex items-center gap-2 rounded-xl border border-neutral-200 bg-white/60 px-4 py-2 text-[13px] font-medium text-neutral-600 shadow-[0_1px_2px_rgba(0,0,0,0.02)] backdrop-blur-xs transition-all duration-200 hover:border-rose-200 hover:bg-rose-50/50 hover:text-rose-700 hover:shadow-xs active:scale-95"
           >
             <Mail
               size={15}
-              className="text-slate-600 transition-colors group-hover:text-rose-500"
+              className="text-neutral-600 transition-colors group-hover:text-rose-500"
             />
             <span>Open Outlook</span>
           </a>
