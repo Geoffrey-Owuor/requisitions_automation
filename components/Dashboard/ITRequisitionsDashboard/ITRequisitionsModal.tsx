@@ -8,10 +8,13 @@ import {
   ClipboardList,
   CheckCircle2,
   UserRound,
+  ArrowUpRight,
 } from "lucide-react";
 import StatusFormatter from "../StatusFormatter";
 import { dateFormatter } from "@/public/assets";
+import { useLoadingStore } from "@/store/useLoadingStore";
 import ClientPortal from "@/components/ClientPortal";
+import Link from "next/link";
 
 interface ITRequisitionModalProps {
   isOpen: boolean;
@@ -77,7 +80,12 @@ export function ITRequisitionModal({
   data,
   onClose,
 }: ITRequisitionModalProps) {
-  if (!isOpen || !data) return null;
+  const setLoadingLine = useLoadingStore((state) => state.setLoadingLine);
+
+  const handlePdfLink = () => {
+    onClose();
+    setLoadingLine(true);
+  };
 
   const formatRequirements = (val: unknown) => {
     if (!val) return "—";
@@ -85,14 +93,16 @@ export function ITRequisitionModal({
     return String(val);
   };
 
+  if (!isOpen || !data) return null;
+
   return (
     <ClientPortal>
       {/* Backdrop */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 p-4 backdrop-blur-sm">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
         {/* Modal Panel */}
         <div className="relative w-full max-w-2xl rounded-[20px] border border-b border-gray-200 bg-white/90 shadow-[0_32px_64px_rgba(60,100,160,0.15)] backdrop-blur-2xl">
           {/* Header */}
-          <div className="sticky top-0 z-10 flex items-center justify-between rounded-t-3xl border-b border-neutral-100/50 bg-neutral-50/40 px-6 py-4 backdrop-blur-md">
+          <div className="sticky top-0 z-10 flex items-center justify-between rounded-t-[20px] border-b border-neutral-100/50 bg-neutral-50/40 px-6 py-4 backdrop-blur-md">
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-red-400 shadow-sm">
                 <Monitor size={18} />
@@ -107,12 +117,23 @@ export function ITRequisitionModal({
                 </p>
               </div>
             </div>
-            <button
-              onClick={onClose}
-              className="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-neutral-200 hover:text-gray-700"
-            >
-              <X size={18} />
-            </button>
+
+            <div className="flex items-center gap-4">
+              <Link
+                href={`/itapproval/${data.request_id}/pdfdownload`}
+                onClick={handlePdfLink}
+                className="flex items-center gap-1 rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white transition-colors duration-200 hover:bg-slate-800"
+              >
+                Goto pdf
+                <ArrowUpRight className="h-3.5 w-3.5" />
+              </Link>
+              <button
+                onClick={onClose}
+                className="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-neutral-200 hover:text-gray-700"
+              >
+                <X size={18} />
+              </button>
+            </div>
           </div>
 
           {/* Body */}
