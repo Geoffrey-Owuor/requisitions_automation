@@ -8,11 +8,13 @@ import {
   MessageSquare,
   LucideIcon,
   UserRound,
+  ArrowUpRight,
 } from "lucide-react";
 import { QueryResultRow } from "pg";
 import StatusFormatter from "./StatusFormatter";
 import { dateFormatter } from "@/public/assets";
 import ClientPortal from "../ClientPortal";
+import Link from "next/link";
 
 interface ModalProps {
   data: QueryResultRow | null;
@@ -38,12 +40,22 @@ export const TravelDetailsModal = ({ data, isOpen, onClose }: ModalProps) => {
                 {dateFormatter(data.request_created_at)}
               </p>
             </div>
-            <button
-              onClick={onClose}
-              className="rounded-full p-2 text-gray-600 transition-colors hover:bg-gray-200 hover:text-gray-900"
-            >
-              <X size={18} />
-            </button>
+            <div className="flex items-center gap-4">
+              <Link
+                href={`/travelapproval/${data.request_id}/pdfdownload`}
+                onClick={onClose}
+                className="flex items-center gap-1 rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white transition-colors duration-200 hover:bg-slate-800"
+              >
+                Goto pdf
+                <ArrowUpRight className="h-3.5 w-3.5" />
+              </Link>
+              <button
+                onClick={onClose}
+                className="rounded-full p-2 text-gray-600 transition-colors hover:bg-gray-200 hover:text-gray-900"
+              >
+                <X size={18} />
+              </button>
+            </div>
           </div>
 
           <div className="grid max-h-[80vh] grid-cols-1 gap-4 overflow-y-auto p-6 md:grid-cols-2">

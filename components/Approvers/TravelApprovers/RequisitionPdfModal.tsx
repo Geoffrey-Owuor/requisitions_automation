@@ -6,6 +6,7 @@ import { dateFormatter } from "@/public/assets";
 
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { TravelRequisitionPdf } from "./pdf/TravelRequisitionPdf";
+import { useEffect, useState } from "react";
 
 const Field = ({ label, value }: { label: string; value: string | number }) => (
   <div className="flex flex-col gap-1">
@@ -56,6 +57,11 @@ const tierStageCount: Record<string, number> = {
 };
 
 const RequisitionPdfModal = ({ pdfData }: { pdfData: TravelPdfValues }) => {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    Promise.resolve().then(() => setMounted(true));
+  }, []);
   const formatCost = (val: string | number) =>
     `KES ${Number(val).toLocaleString()}`;
 
@@ -66,31 +72,38 @@ const RequisitionPdfModal = ({ pdfData }: { pdfData: TravelPdfValues }) => {
 
   return (
     <div className="relative py-4 font-sans">
-      <div className="relative z-10 mx-auto max-w-180">
+      <div className="relative z-10 mx-auto max-w-3xl">
         {/* Toolbar — hidden in print */}
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-gray-100 bg-white/70 px-6 py-4 shadow-[0_8px_16px_rgba(160,60,60,0.06)] backdrop-blur-xl">
           <span className="text-[13px] font-medium text-[#7c5a5a]">
             Travel Requisition - {pdfData.employeename}
           </span>
           {/* 2. Replace the window.print() button with the PDFDownloadLink */}
-          <PDFDownloadLink
-            document={<TravelRequisitionPdf pdfData={pdfData} />}
-            fileName={`Travel_Requisition_${pdfData.employeename.replace(/\s+/g, "_")}_${new Date().toLocaleDateString("en-GB")}.pdf`}
-            className="flex cursor-pointer items-center gap-2 rounded-[14px] border-none bg-slate-900 px-5 py-2.5 text-[13px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)]"
-          >
-            {({ loading }) => (
-              <>
-                <Printer size={14} />
-                {loading ? "Preparing PDF..." : "Download PDF"}
-              </>
-            )}
-          </PDFDownloadLink>
+          {mounted ? (
+            <PDFDownloadLink
+              document={<TravelRequisitionPdf pdfData={pdfData} />}
+              fileName={`Travel_Requisition_${pdfData.employeename.replace(/\s+/g, "_")}_${new Date().toLocaleDateString("en-GB")}.pdf`}
+              className="flex cursor-pointer items-center gap-2 rounded-[14px] border-none bg-slate-900 px-5 py-2.5 text-[13px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)]"
+            >
+              <Printer size={14} />
+              <span>Download PDF</span>
+            </PDFDownloadLink>
+          ) : (
+            // 5. Provide a fallback button that looks identical while the server is rendering
+            <button
+              disabled
+              className="flex cursor-not-allowed items-center gap-2 rounded-[14px] border-none bg-slate-700 px-5 py-2.5 text-[13px] font-semibold text-white/70"
+            >
+              <Printer size={14} />
+              Loading...
+            </button>
+          )}
         </div>
 
         {/* Document */}
         <div
           id="printable-area"
-          className="rounded-3xl border border-white/85 bg-white/65 px-10 py-10 shadow-[0_24px_48px_rgba(160,60,60,0.10)] backdrop-blur-2xl print:rounded-none print:border-none print:bg-white print:px-0 print:py-0 print:shadow-none"
+          className="rounded-3xl border border-white/85 bg-white/65 px-10 py-10 shadow-[0_24px_48px_rgba(160,60,60,0.10)] backdrop-blur-2xl"
         >
           {/* Doc header */}
 

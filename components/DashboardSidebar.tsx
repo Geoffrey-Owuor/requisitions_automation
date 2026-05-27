@@ -3,8 +3,8 @@
 import Link from "next/link";
 import Brand from "./Brand";
 import UserDropdown from "./UserDropDown";
-import { LayoutDashboard, Monitor, Plane } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { ChevronLeft, LayoutDashboard, Monitor, Plane } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
 import { initialsHelper } from "@/public/assets";
 import { useUser } from "@/context/UserContext";
 
@@ -18,6 +18,8 @@ const links = [
 const DashboardSidebar = () => {
   const pathname = usePathname();
 
+  const router = useRouter();
+
   const { username, email } = useUser();
 
   const initials = initialsHelper(username ? username : "GU");
@@ -30,7 +32,7 @@ const DashboardSidebar = () => {
       </div>
 
       {/* Vertical Navigation */}
-      <nav className="flex w-full flex-col items-center gap-3 px-1">
+      <nav className="flex w-full flex-col items-center gap-2 px-1">
         {links.map(({ href, label, Icon }) => {
           const isActive = pathname === href;
           return (
@@ -57,6 +59,17 @@ const DashboardSidebar = () => {
             </Link>
           );
         })}
+
+        {/* Go back button */}
+        <button
+          onClick={() => router.back()}
+          className="group flex w-full flex-col items-center justify-center gap-1.5 rounded-2xl py-3 text-slate-600 transition-all duration-300 hover:bg-rose-50 hover:text-rose-600 active:scale-95"
+        >
+          <ChevronLeft size={20} />
+          <span className="text-center text-[10px] leading-tight font-semibold tracking-wide">
+            Back
+          </span>
+        </button>
       </nav>
 
       {/* User Dropdown at the Bottom */}

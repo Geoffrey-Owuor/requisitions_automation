@@ -200,7 +200,7 @@ export function DatePicker({
           <button
             type="button"
             onClick={() => onChange("")}
-            className="absolute right-12 cursor-pointer rounded-full p-0.5 hover:bg-neutral-300"
+            className="absolute right-12 cursor-pointer rounded-full p-0.5 hover:bg-neutral-200"
           >
             <X className="h-3 w-3 text-neutral-500" />
           </button>
@@ -249,39 +249,41 @@ export function DatePicker({
             </button>
           </div>
 
-          <div className="mb-1 grid grid-cols-7">
-            {DAYS.map((d) => (
-              <div
-                key={d}
-                className="py-1 text-center text-xs font-medium text-neutral-400"
-              >
-                {d}
-              </div>
-            ))}
-          </div>
-
-          <div className="grid grid-cols-7 border-b border-neutral-100 pb-1">
-            {cells.map((day, i) => {
-              if (!day) return <div key={i} />;
-              const sel = isSelected(day);
-              const tod = isToday(day);
-              return (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => selectDay(day)}
-                  className={`flex h-8 w-full items-center justify-center rounded-lg text-sm transition ${
-                    sel
-                      ? "bg-red-500 font-medium text-white"
-                      : tod
-                        ? "font-medium text-red-500 hover:bg-red-50"
-                        : "text-neutral-700 hover:bg-neutral-100"
-                  }`}
+          <div className="pl-3">
+            <div className="mb-1 grid grid-cols-7">
+              {DAYS.map((d) => (
+                <div
+                  key={d}
+                  className="h-8 w-8 py-1 text-center text-xs font-medium text-neutral-400"
                 >
-                  {day}
-                </button>
-              );
-            })}
+                  {d}
+                </div>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-7 border-b border-neutral-100 pb-1">
+              {cells.map((day, i) => {
+                if (!day) return <div key={i} />;
+                const sel = isSelected(day);
+                const tod = isToday(day);
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => selectDay(day)}
+                    className={`flex h-8 w-8 items-center justify-center rounded-lg text-sm transition ${
+                      sel
+                        ? "bg-red-500 font-medium text-white"
+                        : tod
+                          ? "font-medium text-red-500 hover:bg-red-50"
+                          : "text-neutral-700 hover:bg-neutral-100"
+                    }`}
+                  >
+                    {day}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           <div className="mt-2">
