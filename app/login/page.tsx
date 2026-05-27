@@ -1,13 +1,22 @@
-import { signIn } from "@/lib/auth";
+import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Metadata } from "next";
+import { handleSignIn } from "@/serverActions/SignIn";
 
 export const metadata: Metadata = {
   title: "Login",
   description: "The login page for requisition hub",
 };
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const session = await auth();
+
+  // If no session exists, redirect to the public login page
+  if (session) {
+    redirect("/dashboard");
+  }
+
   return (
     <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden p-4">
       {/* Glass card */}
@@ -47,16 +56,7 @@ export default function LoginPage() {
         {/* Divider */}
         <div className="mb-6 h-px w-full bg-linear-to-r from-transparent via-[#A0AFDC]/35 to-transparent" />
 
-        {/* Auth form */}
-        <form
-          className="w-full"
-          action={async () => {
-            "use server";
-            await signIn("microsoft-entra-id", {
-              redirectTo: "/dashboard",
-            });
-          }}
-        >
+        <form action={handleSignIn}>
           <button
             type="submit"
             className="group flex w-full cursor-pointer items-center justify-center gap-2.75 rounded-xl border border-[#B4C3F0]/60 bg-white/85 px-5 py-3.25 text-[14.5px] font-medium text-[#1a2340] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.95),0_4px_14px_rgba(59,110,232,0.10),0_1px_3px_rgba(60,80,160,0.08)] transition-all duration-200 hover:border-[#648CFF]/45 hover:bg-white/95 hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,1),0_6px_20px_rgba(59,110,232,0.16),0_2px_6px_rgba(60,80,160,0.10)] active:translate-y-0 active:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.9),0_2px_8px_rgba(59,110,232,0.10)]"
