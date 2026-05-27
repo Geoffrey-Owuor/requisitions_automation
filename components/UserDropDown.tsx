@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { LogOut } from "lucide-react";
-import { SignOut } from "@/serverActions/SignOut";
+import { signOut } from "next-auth/react";
 
 type UserDropdownProps = {
   initials?: string;
@@ -68,20 +68,20 @@ export default function UserDropdown({
           </div>
 
           <div className="my-1 h-px w-full bg-slate-100" />
-
-          {/* Action: Sign Out Form */}
-          <form action={SignOut}>
-            <button
-              type="submit"
-              className="group flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-[13px] font-semibold text-slate-600 transition-all hover:bg-rose-50 hover:text-rose-600 active:scale-[0.98]"
-            >
-              <LogOut
-                size={16}
-                className="text-slate-400 transition-colors group-hover:text-rose-500"
-              />
-              Sign Out
-            </button>
-          </form>
+          <button
+            onClick={() =>
+              signOut({
+                callbackUrl: "/",
+              })
+            }
+            className="group flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-[13px] font-semibold text-slate-600 transition-all hover:bg-rose-50 hover:text-rose-600 active:scale-[0.98]"
+          >
+            <LogOut
+              size={16}
+              className="text-slate-400 transition-colors group-hover:text-rose-500"
+            />
+            Sign Out
+          </button>
         </div>
       )}
     </div>
