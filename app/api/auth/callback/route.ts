@@ -2,10 +2,11 @@
 import { MicrosoftEntraId } from "arctic";
 import { cookies } from "next/headers";
 import { createSession } from "@/lib/session";
+import { getRequestOrigin } from "@/lib/getRequestOrigin";
 
 export async function GET(req: Request) {
-  const requestUrl = new URL(req.url);
-  const dynamicRedirectURI = `${requestUrl.origin}/api/auth/callback`;
+  const origin = await getRequestOrigin(req);
+  const dynamicRedirectURI = `${origin}/api/auth/callback`;
 
   const entraId = new MicrosoftEntraId(
     process.env.AUTH_MICROSOFT_ENTRA_ID_TENANT_ID!,
@@ -14,6 +15,7 @@ export async function GET(req: Request) {
     dynamicRedirectURI,
   );
 
+  const requestUrl = new URL(req.url);
   const code = requestUrl.searchParams.get("code");
   const state = requestUrl.searchParams.get("state");
 
@@ -59,7 +61,7 @@ export async function GET(req: Request) {
     cookieStore.delete("oauth_state");
     cookieStore.delete("oauth_code_verifier");
 
-    return Response.redirect(new URL("/dashboard", req.url));
+    return Response.redirect(new URL("/dashboard", origin));
   } catch (error) {
     console.error("Authentication handshake error:", error);
     return new Response("Authentication failed", { status: 500 });

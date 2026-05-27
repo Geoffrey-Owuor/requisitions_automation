@@ -1,10 +1,12 @@
 // app/api/auth/login/route.ts
 import { MicrosoftEntraId, generateState, generateCodeVerifier } from "arctic";
 import { cookies } from "next/headers";
+import { getRequestOrigin } from "@/lib/getRequestOrigin";
 
 export async function GET(req: Request) {
-  const requestUrl = new URL(req.url);
-  const dynamicRedirectURI = `${requestUrl.origin}/api/auth/callback`;
+  // 1. Get the true origin via our helper
+  const origin = await getRequestOrigin(req);
+  const dynamicRedirectURI = `${origin}/api/auth/callback`;
 
   // Instantiate Arctic uniquely for the current domain
   const entraId = new MicrosoftEntraId(
