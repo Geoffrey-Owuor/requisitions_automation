@@ -1,106 +1,92 @@
 // app/login/page.tsx
-import { getSession } from "@/lib/session"; // Updated import
+import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Metadata } from "next";
+import LoginWrapper from "@/components/LoginWrapper";
+import Brand from "@/components/Brand";
+import Footer from "@/components/Footer";
+import { FileText } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Login",
-  description: "The login page for requisition hub",
+  title: "Login | Requisition Hub",
+  description: "Secure corporate portal for Hotpoint Appliances Ltd",
 };
 
 export default async function LoginPage() {
-  // Check the secure cookie using our jose helper
   const session = await getSession();
 
-  // If a session exists, push them straight to the dashboard
   if (session) {
     redirect("/dashboard");
   }
 
   return (
-    <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden p-4">
-      {/* Glass card */}
-      <div className="relative flex w-full max-w-105 flex-col items-center rounded-3xl border border-white/85 bg-white/60 px-9 py-10 shadow-[inset_0_2px_0_0_rgba(255,255,255,0.9),inset_0_-1px_0_0_rgba(180,190,220,0.25),0_24px_48px_rgba(60,80,160,0.10),0_8px_16px_rgba(60,80,160,0.06)] backdrop-blur-xl backdrop-saturate-160 sm:px-6 sm:py-8">
-        {/* Logo mark */}
-        <div className="mb-6">
-          <div className="flex h-15 w-15 items-center justify-center rounded-2xl border border-[#B4C8FF]/50 bg-white/90 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.95),0_4px_12px_rgba(59,110,232,0.12)]">
-            <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-              <path
-                d="M14 3L24 8.5V19.5L14 25L4 19.5V8.5L14 3Z"
-                stroke="#3B6EE8"
-                strokeWidth="1.8"
-                fill="none"
-              />
-              <path
-                d="M14 8L19 10.75V16.25L14 19L9 16.25V10.75L14 8Z"
-                fill="#3B6EE8"
-                fillOpacity="0.18"
-                stroke="#3B6EE8"
-                strokeWidth="1.2"
-              />
-            </svg>
+    <div className="relative min-h-screen w-full bg-radial from-rose-50/40 via-slate-50 to-slate-100/80 selection:bg-rose-100 selection:text-rose-900">
+      {/* Structural Central Container */}
+      <div className="mx-auto flex min-h-screen max-w-6xl flex-col px-4">
+        {/* ── ENTERPRISE HEADER ── */}
+        <header className="flex h-16 items-center justify-between">
+          <div className="flex items-center transition-transform duration-200 active:scale-98">
+            <Brand showText={true} />
           </div>
-        </div>
 
-        {/* Heading group */}
-        <div className="mb-6 text-center">
-          <h1 className="mb-2.5 text-[22px] leading-tight font-semibold tracking-tight text-[#1a2340] sm:text-[20px]">
-            Sign in to continue
-          </h1>
-          <p className="px-3 text-[14px] leading-relaxed font-normal text-[#5a6480]">
-            Sign in to your company Microsoft&nbsp;365 account to access your
-            dashboard and make requisitions.
-          </p>
-        </div>
-
-        {/* Divider */}
-        <div className="mb-6 h-px w-full bg-linear-to-r from-transparent via-[#A0AFDC]/35 to-transparent" />
-
-        {/* CHANGE: Point the form directly to your custom API handler */}
-        <form action="/api/auth/login" method="GET" className="w-full">
-          <button
-            type="submit"
-            className="group flex w-full cursor-pointer items-center justify-center gap-2.75 rounded-xl border border-[#B4C3F0]/60 bg-white/85 px-5 py-3.25 text-[14.5px] font-medium text-[#1a2340] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.95),0_4px_14px_rgba(59,110,232,0.10),0_1px_3px_rgba(60,80,160,0.08)] transition-all duration-200 hover:border-[#648CFF]/45 hover:bg-white/95 hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,1),0_6px_20px_rgba(59,110,232,0.16),0_2px_6px_rgba(60,80,160,0.10)] active:translate-y-0 active:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.9),0_2px_8px_rgba(59,110,232,0.10)]"
+          <Link
+            href="/guidelines"
+            className="group flex items-center gap-1.5 rounded-full border border-slate-200 bg-white/60 px-3.5 py-1.5 text-[13px] font-medium text-slate-600 shadow-[0_1px_2px_rgba(0,0,0,0.02)] backdrop-blur-xs transition-all duration-200 hover:border-rose-200 hover:bg-rose-50/50 hover:text-rose-700 hover:shadow-xs"
           >
-            <MicrosoftIcon />
-            <span>Sign in with Microsoft 365</span>
-          </button>
-        </form>
+            <FileText
+              size={14}
+              className="text-slate-500 transition-colors group-hover:text-rose-500"
+            />
+            <span>Requisition Guidelines</span>
+          </Link>
+        </header>
 
-        {/* Back link */}
-        <Link
-          href="/"
-          className="mt-5 text-[12px] leading-normal text-[#8a95b0] underline decoration-[#8a95b0]/30 underline-offset-4 transition-colors hover:text-[#3B6EE8]"
-        >
-          Back to HomePage
-        </Link>
-      </div>
+        {/* ── MAIN CONTENT LAYER ── */}
+        <main className="flex flex-1 items-center justify-center py-14 sm:py-10">
+          {/* Neomorphic Enterprise Card */}
+          <div className="relative w-full max-w-sm rounded-2xl border border-rose-100/50 bg-white p-8 shadow-[0_1px_3px_rgba(0,0,0,0.02),0_16px_32px_rgba(140,40,60,0.04),0_2px_8px_rgba(140,40,60,0.02),inset_0_1px_0_rgba(255,255,255,0.9)] sm:p-6">
+            {/* Subtle Brand Ambient Backlight */}
+            <div className="absolute -top-10 left-1/2 -z-10 h-24 w-40 -translate-x-1/2 rounded-full bg-rose-400/10 blur-2xl" />
 
-      {/* Global Footer Placeholder */}
-      <div className="absolute bottom-6 w-full px-4 text-center">
-        <p className="text-[13px] text-[#8a95b0]">
-          &copy; {new Date().getFullYear()} Hotpoint Appliances Ltd · Internal
-          Use Only
-        </p>
+            {/* Embedded Logo Core */}
+            <div className="mb-6 flex justify-center">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-rose-100/60 bg-rose-50/30 shadow-[inset_0_1.5px_0_rgba(255,255,255,0.95),0_4px_10px_rgba(225,29,72,0.04)]">
+                <Brand />
+              </div>
+            </div>
+
+            {/* Typography Header Group */}
+            <div className="mb-6 text-center">
+              <h1 className="mb-2 text-[20px] leading-tight font-semibold tracking-tight text-slate-900">
+                Sign in to continue
+              </h1>
+              <p className="px-1 text-[13.5px] leading-relaxed font-normal text-slate-500">
+                Valid work account required. Authenticate using your Microsoft
+                365 account to proceed.
+              </p>
+            </div>
+
+            {/* Linear Segment Divider */}
+            <div className="mb-6 h-px w-full bg-linear-to-r from-transparent via-rose-100/60 to-transparent" />
+
+            {/* Dynamic Handshake Interface Trigger */}
+            <LoginWrapper />
+
+            {/* Fallback Utility Link */}
+            <div className="mt-5 text-center">
+              <Link
+                href="/"
+                className="text-[12px] text-slate-500 underline decoration-slate-200 decoration-1 underline-offset-4 transition-colors hover:text-rose-600 hover:decoration-rose-300"
+              >
+                Back to Homepage
+              </Link>
+            </div>
+          </div>
+        </main>
+
+        <Footer />
       </div>
     </div>
-  );
-}
-
-function MicrosoftIcon() {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 21 21"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <rect x="1" y="1" width="9" height="9" fill="#F25022" />
-      <rect x="11" y="1" width="9" height="9" fill="#7FBA00" />
-      <rect x="1" y="11" width="9" height="9" fill="#00A4EF" />
-      <rect x="11" y="11" width="9" height="9" fill="#FFB900" />
-    </svg>
   );
 }
