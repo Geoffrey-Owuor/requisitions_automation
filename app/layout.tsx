@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../css/globals.css";
 import QueryProvider from "@/components/QueryProvider";
+import LoadingLine from "@/components/LoadingLine";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,6 +37,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="Requisition" />
       </head>
       <body className="mx-auto flex min-h-screen max-w-7xl flex-col bg-[#fafafa]">
+        <LoadingLine />
         {/* Page Content */}
         <QueryProvider>{children}</QueryProvider>
       </body>

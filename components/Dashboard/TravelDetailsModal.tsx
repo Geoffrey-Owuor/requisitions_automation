@@ -15,6 +15,7 @@ import StatusFormatter from "./StatusFormatter";
 import { dateFormatter } from "@/public/assets";
 import ClientPortal from "../ClientPortal";
 import Link from "next/link";
+import { useLoadingStore } from "@/store/useLoadingStore";
 
 interface ModalProps {
   data: QueryResultRow | null;
@@ -23,6 +24,13 @@ interface ModalProps {
 }
 
 export const TravelDetailsModal = ({ data, isOpen, onClose }: ModalProps) => {
+  const setLoadingLine = useLoadingStore((state) => state.setLoadingLine);
+
+  const handlePdfLink = () => {
+    setLoadingLine(true);
+    onClose();
+  };
+
   if (!isOpen || !data) return null;
 
   return (
@@ -43,7 +51,7 @@ export const TravelDetailsModal = ({ data, isOpen, onClose }: ModalProps) => {
             <div className="flex items-center gap-4">
               <Link
                 href={`/travelapproval/${data.request_id}/pdfdownload`}
-                onClick={onClose}
+                onClick={handlePdfLink}
                 className="flex items-center gap-1 rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white transition-colors duration-200 hover:bg-slate-800"
               >
                 Goto pdf
