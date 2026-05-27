@@ -11,7 +11,7 @@ import RequisitionPdfSkeleton from "@/components/Skeletons/RequisitionPdfSkeleto
 import DashboardWrapper from "@/components/Dashboard/DashboardWrapper";
 import { UserProvider } from "@/context/UserContext";
 
-type PdfDownloadProps = {
+export type PdfDownloadProps = {
   params: Promise<{ uuid: string }>;
 };
 

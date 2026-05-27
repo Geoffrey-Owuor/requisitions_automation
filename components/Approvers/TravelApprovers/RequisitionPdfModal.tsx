@@ -95,7 +95,7 @@ const RequisitionPdfModal = ({ pdfData }: { pdfData: TravelPdfValues }) => {
               className="flex cursor-not-allowed items-center gap-2 rounded-[14px] border-none bg-slate-700 px-5 py-2.5 text-[13px] font-semibold text-white/70"
             >
               <Printer size={14} />
-              Loading...
+              Download PDF
             </button>
           )}
         </div>

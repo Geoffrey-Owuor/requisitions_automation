@@ -1,5 +1,4 @@
 // TravelApprovalSkeleton.tsx
-// Displayed via Suspense while travel approval data is being fetched
 
 export default function TravelApprovalSkeleton() {
   return (
