@@ -69,7 +69,7 @@ function CustomDropdown({ options, value, onChange }: CustomDropdownProps) {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-1 rounded-lg px-1.5 py-1 text-sm font-medium text-neutral-700 transition hover:bg-neutral-100 hover:text-red-500  "
+        className="flex items-center gap-1 rounded-lg px-1.5 py-1 text-sm font-medium text-neutral-700 transition hover:bg-neutral-100 hover:text-red-500"
       >
         {selectedLabel}
         <ChevronDown
@@ -81,7 +81,7 @@ function CustomDropdown({ options, value, onChange }: CustomDropdownProps) {
       {open && (
         <ul
           ref={listRef}
-          className="default-scrollbar absolute top-full left-1/2 z-60 mt-1 max-h-48 w-32 -translate-x-1/2 overflow-y-auto rounded-xl border border-neutral-200 bg-white p-1 py-1 shadow-lg "
+          className="default-scrollbar absolute top-full left-1/2 z-60 mt-1 max-h-48 w-32 -translate-x-1/2 overflow-y-auto rounded-xl border border-neutral-200 bg-white p-1 py-1 shadow-lg"
         >
           {options.map((opt) => {
             const isActive = opt.value === value;
@@ -97,7 +97,7 @@ function CustomDropdown({ options, value, onChange }: CustomDropdownProps) {
                   className={`w-full rounded-lg px-3 py-1.5 text-left text-sm transition ${
                     isActive
                       ? "bg-red-500 font-medium text-white"
-                      : "text-neutral-700 hover:bg-neutral-100 "
+                      : "text-neutral-700 hover:bg-neutral-100"
                   }`}
                 >
                   {opt.label}
@@ -200,7 +200,7 @@ export function DatePicker({
           <button
             type="button"
             onClick={() => onChange("")}
-            className="absolute right-12 cursor-pointer rounded-full p-0.5 hover:bg-neutral-300"
+            className="absolute right-12 cursor-pointer rounded-full p-0.5 hover:bg-neutral-200"
           >
             <X className="h-3 w-3 text-neutral-500" />
           </button>
@@ -216,7 +216,7 @@ export function DatePicker({
       </div>
 
       {open && (
-        <div className="absolute top-full left-0 z-50 mt-2 w-72 rounded-2xl border border-neutral-200 bg-white p-4 shadow-lg">
+        <div className="absolute top-full left-0 z-50 mt-2 w-full rounded-2xl border border-neutral-200 bg-white p-4 shadow-lg">
           <div className="mb-3 flex items-center justify-between">
             <button
               type="button"
@@ -227,7 +227,7 @@ export function DatePicker({
             </button>
 
             {/* Custom dropdowns for Month and Year */}
-            <div className="flex items-center gap-0.5">
+            <div className="flex items-center gap-2">
               <CustomDropdown
                 options={monthOptions}
                 value={month}
@@ -249,42 +249,44 @@ export function DatePicker({
             </button>
           </div>
 
-          <div className="mb-1 grid grid-cols-7">
-            {DAYS.map((d) => (
-              <div
-                key={d}
-                className="py-1 text-center text-xs font-medium text-neutral-400"
-              >
-                {d}
-              </div>
-            ))}
-          </div>
-
-          <div className="grid grid-cols-7">
-            {cells.map((day, i) => {
-              if (!day) return <div key={i} />;
-              const sel = isSelected(day);
-              const tod = isToday(day);
-              return (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => selectDay(day)}
-                  className={`flex h-8 w-full items-center justify-center rounded-lg text-sm transition ${
-                    sel
-                      ? "bg-red-500 font-medium text-white"
-                      : tod
-                        ? "font-medium text-red-500 hover:bg-red-50"
-                        : "text-neutral-700 hover:bg-neutral-100"
-                  }`}
+          <div className="pl-3">
+            <div className="mb-1 grid grid-cols-7">
+              {DAYS.map((d) => (
+                <div
+                  key={d}
+                  className="h-8 w-8 py-1 text-center text-xs font-medium text-neutral-400"
                 >
-                  {day}
-                </button>
-              );
-            })}
+                  {d}
+                </div>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-7 border-b border-neutral-100 pb-1">
+              {cells.map((day, i) => {
+                if (!day) return <div key={i} />;
+                const sel = isSelected(day);
+                const tod = isToday(day);
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => selectDay(day)}
+                    className={`flex h-8 w-8 items-center justify-center rounded-lg text-sm transition ${
+                      sel
+                        ? "bg-red-500 font-medium text-white"
+                        : tod
+                          ? "font-medium text-red-500 hover:bg-red-50"
+                          : "text-neutral-700 hover:bg-neutral-100"
+                    }`}
+                  >
+                    {day}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
-          <div className="mt-3 border-t border-neutral-100 pt-3 ">
+          <div className="mt-2">
             <button
               type="button"
               onClick={() => {
@@ -292,7 +294,7 @@ export function DatePicker({
                 onChange(iso);
                 setOpen(false);
               }}
-              className="w-full rounded-lg py-1.5 text-sm text-red-500 transition hover:bg-red-50 "
+              className="w-full rounded-lg py-2.5 text-sm text-red-500 transition hover:bg-red-50"
             >
               Today
             </button>

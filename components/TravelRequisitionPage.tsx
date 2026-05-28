@@ -143,8 +143,6 @@ export default function TravelRequisitionPage() {
   }, [formData.travelCategory, formData.travelMode, totalCost]);
 
   const handleSubmit = async () => {
-    const dashboardDiv = document.getElementById("dashboard-wrapper");
-
     const payload = {
       formData,
       totalCost,
@@ -186,8 +184,6 @@ export default function TravelRequisitionPage() {
 
       // set step to to show final modal step
       setStep(3);
-      // scroll to page top
-      dashboardDiv?.scrollTo({ top: 0, behavior: "instant" });
     } catch (error) {
       if (error instanceof Error) {
         console.error("Error while trying to submit your requisition", error);
@@ -195,7 +191,6 @@ export default function TravelRequisitionPage() {
         setAlertInfo({ alertType: "error", alertMessage: errorString });
 
         setStep(3);
-        dashboardDiv?.scrollTo({ top: 0, behavior: "instant" });
       }
     } finally {
       setSubmitting(false);
@@ -256,7 +251,7 @@ export default function TravelRequisitionPage() {
             {/* Header Area */}
             <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-4 py-3">
               <Info className="h-4 w-4 text-slate-500" />
-              <h3 className="text-sm font-bold tracking-tight text-slate-800">
+              <h3 className="text-sm font-semibold tracking-tight text-slate-800">
                 Travel Approval Tiers
               </h3>
             </div>
