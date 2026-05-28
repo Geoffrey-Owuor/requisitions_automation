@@ -20,6 +20,7 @@ export async function GET(request: NextRequest) {
         SET completion_status = $1,
         date_completed = CURRENT_TIMESTAMP
         WHERE completion_status = $2
+        AND it_approver_status = $3
         RETURNING request_id, submitter_email, date_completed
         `;
 
@@ -32,14 +33,15 @@ export async function GET(request: NextRequest) {
     // Lock rows for update
     await client.query(
       `SELECT request_id FROM it_requisitions
-        WHERE completion_status = $1 FOR UPDATE`,
-      ["incomplete"],
+        WHERE completion_status = $1 AND it_approver_status = $2 FOR UPDATE`,
+      ["incomplete", "accepted"],
     );
 
     // Running the update query
     const { rows } = await client.query(updateQuery, [
       "completed",
       "incomplete",
+      "accepted",
     ]);
 
     // Commit the transaction
