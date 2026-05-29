@@ -27,6 +27,7 @@ import TravelConfirmationModal from "./TravelConfirmationModal";
 import { ApiHandler } from "@/utils/ApiHandler";
 import SubmittingOverlay from "./SubmittingOverlay";
 import AlertModal from "./AlertModal";
+import { EngineeringJobFields, EngineeringJob } from "./EngineeringJobFields";
 
 export interface TravelFormData {
   employeeName: string;
@@ -44,6 +45,7 @@ export interface TravelFormData {
   perDiem: number;
   costCentre: string;
   withinBudget: string;
+  engineeringJobs: EngineeringJob[];
 }
 
 const InitialFormState: TravelFormData = {
@@ -62,6 +64,7 @@ const InitialFormState: TravelFormData = {
   perDiem: 0,
   costCentre: "",
   withinBudget: "",
+  engineeringJobs: [{ id: "init-1", title: "", amount: 0 }],
 };
 
 export interface AlertInfo {
@@ -113,8 +116,19 @@ export default function TravelRequisitionPage() {
   // Submitting state
   const [submitting, setSubmitting] = useState(false);
 
-  const buttonDisabled = Object.values(formData).some((value) => !value);
+  // Check if department is engineering
+  const isEngineering = formData.department === "Engineering & HVAC";
 
+  // More robust validation logic
+  const buttonDisabled =
+    Object.entries(formData).some(([key, value]) => {
+      if (key === "engineeringJobs") return false; // Handle this separately below
+      return !value;
+    }) ||
+    (isEngineering &&
+      formData.engineeringJobs.some((job) => !job.title || job.amount === 0));
+
+  // Getting the total cost
   const totalCost =
     formData.transportCost + formData.otherCost + formData.perDiem;
 
@@ -142,9 +156,33 @@ export default function TravelRequisitionPage() {
     return approvalTier;
   }, [formData.travelCategory, formData.travelMode, totalCost]);
 
+  // Calculate total engineering job costs
+  const totalEngineeringCost = useMemo(() => {
+    // Only calculate if they are in the Engineering department
+    if (formData.department !== "Engineering & HVAC") return 0;
+
+    return formData.engineeringJobs.reduce((sum, job) => {
+      return sum + job.amount;
+    }, 0); // 0 is the starting value of the some here
+  }, [formData.department, formData.engineeringJobs]);
+
   const handleSubmit = async () => {
+    // 1. Format the engineering jobs array into the required text format
+    let formattedEngineeringJobs = "";
+    if (formData.department === "Engineering & HVAC") {
+      formattedEngineeringJobs = formData.engineeringJobs
+        .map(
+          (job) => `${job.title.trim()} - KES ${job.amount.toLocaleString()}`,
+        )
+        .join("\n");
+    }
+
     const payload = {
-      formData,
+      formData: {
+        ...formData,
+        // We override this property specifically for the database string
+        engineeringJobs: formattedEngineeringJobs,
+      },
       totalCost,
       approvalTier: generatedAprovalTier,
       submittedBy: {
@@ -220,6 +258,7 @@ export default function TravelRequisitionPage() {
           }}
           onSubmit={handleSubmit}
           submitting={submitting}
+          totalEngineeringAmount={totalEngineeringCost}
         />
       )}
       {step === 1 && (
@@ -500,6 +539,15 @@ export default function TravelRequisitionPage() {
                   />
                 </div>
 
+                {/* NEW: Conditional Engineering Jobs Component */}
+                {formData.department === "Engineering & HVAC" && (
+                  <EngineeringJobFields
+                    jobs={formData.engineeringJobs}
+                    totalAmount={totalEngineeringCost}
+                    onChange={(jobs) => updateField("engineeringJobs", jobs)}
+                  />
+                )}
+
                 <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
                   {/* Total Cost - Deep Slate Red */}
                   <div className="flex items-center justify-between rounded-2xl bg-linear-to-r from-slate-800 to-rose-900 px-5 py-5 font-semibold text-white shadow-lg">
@@ -525,7 +573,9 @@ export default function TravelRequisitionPage() {
                 Proceed
                 <ArrowRight className="h-4 w-4" />
               </button>
-              <p className="text-left text-xs">**All fields are required**</p>
+              <p className="text-left text-xs text-[#7c5a5a]">
+                **All fields are required**
+              </p>
             </form>
           </div>
         </div>
