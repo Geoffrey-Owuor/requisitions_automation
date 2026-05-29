@@ -11,6 +11,7 @@ interface ConfirmationModalProps {
   onBack: () => void;
   onSubmit: () => Promise<void>;
   submitting: boolean;
+  totalEngineeringAmount: number;
 }
 
 export default function TravelConfirmationModal({
@@ -20,6 +21,7 @@ export default function TravelConfirmationModal({
   onBack,
   onSubmit,
   submitting,
+  totalEngineeringAmount,
 }: ConfirmationModalProps) {
   const { username: userName, email: userEmail } = useUser();
   const nameString = userName ? userName : "";
@@ -133,6 +135,41 @@ export default function TravelConfirmationModal({
             </div>
           ))}
         </div>
+
+        {/* --- NEW: Engineering Jobs Breakdown --- */}
+        {formData.department === "Engineering & HVAC" &&
+          formData.engineeringJobs && (
+            <div className="mb-3 rounded-2xl border border-rose-100 bg-rose-50/50 p-4">
+              <p className="mb-3 text-[11px] font-semibold tracking-[0.4px] text-rose-800 uppercase">
+                Engineering Job Allocations
+              </p>
+              <div className="flex flex-col gap-2.5">
+                {formData.engineeringJobs.map((job, idx) => (
+                  <div
+                    key={job.id || idx}
+                    className="flex items-center justify-between border-b border-rose-100/50 pb-2 text-[13px] last:border-0 last:pb-0"
+                  >
+                    <span className="font-medium text-[#7c5a5a]">
+                      {job.title || "Unnamed Job"}
+                    </span>
+                    <span className="font-semibold text-[#1e1b1b]">
+                      KES {Number(job.amount || 0).toLocaleString()}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Engineering Subtotal Placeholder */}
+              <div className="mt-3 flex items-center justify-between border-t border-rose-200/80 pt-3">
+                <span className="text-[13px] font-semibold tracking-wide text-rose-700">
+                  Job Allocations Subtotal
+                </span>
+                <span className="text-[15px] font-bold text-rose-900">
+                  KES {totalEngineeringAmount.toLocaleString()}
+                </span>
+              </div>
+            </div>
+          )}
 
         <div className="grid grid-cols-2 gap-3">
           <div className="flex items-center justify-between rounded-2xl bg-linear-to-r from-slate-800 to-rose-900 px-5 py-4 text-white">
