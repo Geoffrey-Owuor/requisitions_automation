@@ -171,9 +171,7 @@ export default function TravelRequisitionPage() {
     let formattedEngineeringJobs = "";
     if (formData.department === "Engineering & HVAC") {
       formattedEngineeringJobs = formData.engineeringJobs
-        .map(
-          (job) => `${job.title.trim()} - KES ${job.amount.toLocaleString()}`,
-        )
+        .map((job) => `${job.title.trim()} - ${job.amount}`)
         .join("\n");
     }
 
