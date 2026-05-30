@@ -33,6 +33,7 @@ export interface EmailDataValues {
   hodapprovalstatus: string;
   hrapprovalstatus: string;
   directorapprovalstatus: string;
+  engineeringjobs: string;
 }
 
 export const travelDataQuery = `
@@ -65,7 +66,8 @@ export const travelDataQuery = `
        travel_hr_comments AS hrcomments,
        travel_director_approver AS directorapprover,
        travel_director_email AS directoremail,
-       travel_director_comments AS directorcomments
+       travel_director_comments AS directorcomments,
+       engineering_jobs AS engineeringjobs
        FROM travel_requisitions WHERE request_id = $1
 `;
 

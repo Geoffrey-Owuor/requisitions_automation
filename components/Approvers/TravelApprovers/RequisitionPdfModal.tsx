@@ -3,6 +3,7 @@ import { EmailDataValues as TravelPdfValues } from "@/services/EmailSender";
 import { Printer } from "lucide-react";
 import StatusFormatter from "@/components/Dashboard/StatusFormatter";
 import { dateFormatter } from "@/public/assets";
+import EngineeringJobSummaryCard from "./EngineeringJobSummaryCard";
 
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { TravelRequisitionPdf } from "./pdf/TravelRequisitionPdf";
@@ -166,7 +167,14 @@ const RequisitionPdfModal = ({ pdfData }: { pdfData: TravelPdfValues }) => {
           <div className="mb-8 border-t border-[rgba(240,180,180,0.4)] pt-8">
             <SectionHeading title="Estimated Costs (KES)" />
 
-            <div className="rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white/60 px-6 py-6">
+            {/* Engineering Job Summary Card */}
+            {pdfData.department === "Engineering & HVAC" && (
+              <EngineeringJobSummaryCard
+                jobDetailsString={pdfData.engineeringjobs}
+              />
+            )}
+
+            <div className="my-6 rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white/60 p-6">
               <p className="mb-4 text-[10px] font-bold tracking-[2px] text-rose-600 uppercase">
                 Budget Summary
               </p>

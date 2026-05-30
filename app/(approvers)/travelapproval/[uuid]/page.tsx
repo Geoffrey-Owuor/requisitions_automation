@@ -54,7 +54,8 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
         travel_return_date, travel_category, travel_business_justification, 
         travel_mode, travel_transport_cost, travel_other_costs, 
         travel_per_diem, travel_total_cost, travel_cost_center, 
-        travel_within_budget, travel_approval_tier 
+        travel_within_budget, travel_approval_tier,
+        engineering_jobs 
         FROM travel_requisitions
         WHERE request_id = $1
       `;
@@ -113,6 +114,7 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
             travelWithinBudget={requestData.travel_within_budget}
             travelApprovalTier={requestData.travel_approval_tier}
             requestCreatedAt={requestData.request_created_at}
+            engineeringJobs={requestData.engineering_jobs}
           />
         </Suspense>
       </DashboardWrapper>
