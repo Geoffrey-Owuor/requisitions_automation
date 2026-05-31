@@ -175,7 +175,7 @@ const RequisitionPdfModal = ({ pdfData }: { pdfData: TravelPdfValues }) => {
             )}
 
             <div className="my-6 rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white/60 p-6">
-              <p className="mb-4 text-[10px] font-bold tracking-[2px] text-rose-600 uppercase">
+              <p className="mb-4 text-[11px] font-bold tracking-[2px] text-rose-600 uppercase">
                 Budget Summary
               </p>
 

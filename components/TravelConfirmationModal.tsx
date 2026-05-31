@@ -1,5 +1,5 @@
 "use client";
-import { ArrowLeft, Send } from "lucide-react";
+import { ArrowLeft, Send, Wrench } from "lucide-react";
 import { TravelFormData } from "./TravelRequisitionPage";
 import { dateFormatter, initialsHelper } from "@/public/assets";
 import { useUser } from "@/context/UserContext";
@@ -140,9 +140,10 @@ export default function TravelConfirmationModal({
         {formData.department === "Engineering & HVAC" &&
           formData.engineeringJobs && (
             <div className="mb-3 rounded-2xl border border-rose-100 bg-rose-50/50 p-4">
-              <p className="mb-3 text-[11px] font-semibold tracking-[0.4px] text-rose-800 uppercase">
+              <span className="mb-3 flex items-center gap-2 text-[11px] font-semibold tracking-[0.4px] text-rose-800 uppercase">
+                <Wrench className="h-3.5 w-3.5" />
                 Engineering Job Allocations
-              </p>
+              </span>
               <div className="flex flex-col gap-2.5">
                 {formData.engineeringJobs.map((job, idx) => (
                   <div
@@ -161,8 +162,8 @@ export default function TravelConfirmationModal({
 
               {/* Engineering Subtotal Placeholder */}
               <div className="mt-3 flex items-center justify-between border-t border-rose-200/80 pt-3">
-                <span className="text-[13px] font-semibold tracking-wide text-rose-700">
-                  Job Allocations Subtotal
+                <span className="text-[14px] font-semibold tracking-wide text-rose-700">
+                  Allocations Subtotal
                 </span>
                 <span className="text-[15px] font-bold text-rose-900">
                   KES {totalEngineeringAmount.toLocaleString()}

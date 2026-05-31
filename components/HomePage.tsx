@@ -15,6 +15,7 @@ import {
   BookText,
   ShieldAlert,
   Workflow,
+  BriefcaseBusiness,
 } from "lucide-react";
 import { ReactNode } from "react";
 import Header from "./Header";
@@ -26,7 +27,7 @@ const requisitions = [
     description:
       "Site visits, local flights, road travel, and international travel with automated multi-tier approvals.",
     href: "/dashboard/travelrequisition",
-    icon: <Plane size={22} className="h-5 w-5 sm:h-6 sm:w-6" />,
+    icon: <BriefcaseBusiness size={22} className="h-5 w-5 sm:h-6 sm:w-6" />,
     accent: "from-rose-500 to-rose-600",
     shadow: "shadow-rose-200",
     badge: "3 Approval Tiers",
@@ -246,7 +247,9 @@ function QuickLink({
         </div>
         <div>
           <p className="text-sm font-semibold text-slate-900">{label}</p>
-          <p className="text-[10px] text-slate-500 sm:text-xs">{sub}</p>
+          <p className="text-left text-[10px] text-slate-500 sm:text-xs">
+            {sub}
+          </p>
         </div>
       </div>
       {isExternal ? (
