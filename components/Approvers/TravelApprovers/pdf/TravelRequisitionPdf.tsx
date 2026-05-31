@@ -84,6 +84,22 @@ export const TravelRequisitionPdf = ({
     tierStageCount[pdfData.approvaltier] ?? 1,
   );
 
+  // --- NEW: Parse Engineering Jobs for PDF ---
+  let engineeringJobs: { title: string; amount: number }[] = [];
+  let totalEngineeringCost = 0;
+
+  if (pdfData.department === "Engineering & HVAC" && pdfData.engineeringjobs) {
+    const lines = pdfData.engineeringjobs
+      .split("\n")
+      .filter((line) => line.trim() !== "");
+    engineeringJobs = lines.map((line) => {
+      const [title, amountString] = line.split(" - ");
+      const amount = Number(amountString) || 0;
+      totalEngineeringCost += amount;
+      return { title: title?.trim() || "Unknown Job", amount };
+    });
+  }
+
   return (
     <Document>
       {/* Reduced padding from p-10 to py-8 px-8 */}
@@ -146,6 +162,55 @@ export const TravelRequisitionPdf = ({
         {/* Costs - Reduced padding inside the card */}
         <View style={tw("mb-5 border-t border-[#f0b4b4] pt-4")}>
           <PdfSectionHeading title="Estimated Costs (KES)" />
+
+          {/* --- NEW: Engineering Job Allocations PDF Card --- */}
+          {pdfData.department === "Engineering & HVAC" &&
+            engineeringJobs.length > 0 && (
+              <View
+                style={tw(
+                  "mb-3 rounded-xl border border-[#f0b4b4] bg-[#fafafa] p-3",
+                )}
+              >
+                <Text
+                  style={tw(
+                    "mb-2 text-[9px] font-bold text-[#e11d48] uppercase",
+                  )}
+                >
+                  Engineering Job Allocations
+                </Text>
+
+                {engineeringJobs.map((job, idx) => (
+                  <View
+                    key={idx}
+                    style={tw("flex flex-row justify-between pb-1.5 mb-1.5")}
+                  >
+                    <Text style={tw("text-[10px] text-[#7c5a5a]")}>
+                      {job.title}
+                    </Text>
+                    <Text
+                      style={tw("text-[10px] font-semibold text-[#1e1b1b]")}
+                    >
+                      {formatCost(job.amount)}
+                    </Text>
+                  </View>
+                ))}
+
+                <View
+                  style={tw(
+                    "flex flex-row border-t border-[#f0b4b4] justify-between pt-3 mt-3",
+                  )}
+                >
+                  <Text style={tw("text-[10px] text-[#1e1b1b] font-semibold")}>
+                    Allocations Subtotal
+                  </Text>
+                  <Text style={tw("text-[12px] font-bold text-[#be123c]")}>
+                    {formatCost(totalEngineeringCost)}
+                  </Text>
+                </View>
+              </View>
+            )}
+
+          {/* Regular Budget Summary */}
           <View
             style={tw("rounded-xl border border-[#f0b4b4] bg-[#fafafa] p-4")}
           >

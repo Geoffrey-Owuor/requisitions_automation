@@ -60,7 +60,7 @@ export default function EngineeringJobSummaryCard({
             key={job.id}
             className="flex items-center justify-between border-b border-rose-100/60 pb-2.5 text-[13px] last:border-0 last:pb-0"
           >
-            <span className="font-medium text-[#7c5a5a]">{job.title}</span>
+            <span className="text-[#7c5a5a]">{job.title}</span>
             <span className="font-semibold text-[#1e1b1b]">
               KES {job.amount.toLocaleString()}
             </span>
@@ -70,10 +70,10 @@ export default function EngineeringJobSummaryCard({
 
       {/* Calculated Total Footer */}
       <div className="mt-4 flex items-center justify-between border-t border-rose-200/80 pt-3">
-        <span className="text-[13px] font-semibold tracking-wide text-rose-700">
+        <span className="font-semibold tracking-wide text-rose-700">
           Allocations Total
         </span>
-        <span className="text-[16px] font-bold tracking-tight text-rose-900">
+        <span className="text-[18px] font-bold tracking-tight text-rose-900">
           KES {totalAmount.toLocaleString()}
         </span>
       </div>

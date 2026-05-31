@@ -9,8 +9,8 @@ import {
   LucideIcon,
   UserRound,
   ArrowUpRight,
-  Plane,
   Workflow,
+  BriefcaseBusiness,
 } from "lucide-react";
 import { QueryResultRow } from "pg";
 import StatusFormatter from "./StatusFormatter";
@@ -49,7 +49,7 @@ export const TravelDetailsModal = ({ data, isOpen, onClose }: ModalProps) => {
           <div className="flex items-center justify-between overflow-hidden rounded-t-[20px] bg-white px-8 py-4">
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-red-400 shadow-sm">
-                <Plane size={18} />
+                <BriefcaseBusiness size={18} />
               </div>
               <div>
                 <h2 className="text-sm font-semibold text-[#1e1b1b]">

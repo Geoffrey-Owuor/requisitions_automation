@@ -3,7 +3,13 @@
 import Link from "next/link";
 import Brand from "./Brand";
 import UserDropdown from "./UserDropDown";
-import { ChevronLeft, LayoutDashboard, Monitor, Plane } from "lucide-react";
+import {
+  BriefcaseBusiness,
+  ChevronLeft,
+  CircleQuestionMark,
+  LayoutDashboard,
+  Monitor,
+} from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { initialsHelper } from "@/public/assets";
 import { useUser } from "@/context/UserContext";
@@ -12,7 +18,11 @@ import { useUser } from "@/context/UserContext";
 const links = [
   { href: "/dashboard", label: "Home", Icon: LayoutDashboard },
   { href: "/dashboard/itrequisition", label: "IT Req", Icon: Monitor },
-  { href: "/dashboard/travelrequisition", label: "Travel", Icon: Plane },
+  {
+    href: "/dashboard/travelrequisition",
+    label: "Travel",
+    Icon: BriefcaseBusiness,
+  },
 ];
 
 const DashboardSidebar = () => {
@@ -74,13 +84,22 @@ const DashboardSidebar = () => {
 
       {/* User Dropdown at the Bottom */}
       <div className="mt-auto">
-        {/* TODO: Pass actual user auth states here instead of hardcoded strings */}
-        <UserDropdown
-          direction="up"
-          initials={initials}
-          userName={username}
-          userEmail={email}
-        />
+        <div className="flex flex-col items-center justify-center gap-4">
+          <a
+            href="/guidelines"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-full p-2 text-blue-600 hover:bg-blue-100/60"
+          >
+            <CircleQuestionMark className="h-5 w-5" />
+          </a>
+          <UserDropdown
+            direction="up"
+            initials={initials}
+            userName={username}
+            userEmail={email}
+          />
+        </div>
       </div>
     </aside>
   );
