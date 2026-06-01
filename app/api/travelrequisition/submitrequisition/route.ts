@@ -195,24 +195,24 @@ export async function POST(request: NextRequest) {
     } else {
       // Normal workflow - Normal user (Send email to user and HOD)
       // HOD Send
-      // EmailSender({
-      //   to: hodEmail,
-      //   requestId: requestUuid,
-      //   message:
-      //     "A new travel requisition has been submitted and requires your approval",
-      //   title: "Action Required: Travel Requisition Review",
-      //   role: "HOD",
-      //   reviewLink: `?token=${hodUuid}&stage=hod`,
-      // });
+      EmailSender({
+        to: hodEmail,
+        requestId: requestUuid,
+        message:
+          "A new travel requisition has been submitted and requires your approval",
+        title: "Action Required: Travel Requisition Review",
+        role: "HOD",
+        reviewLink: `?token=${hodUuid}&stage=hod`,
+      });
       // // User Send
-      // EmailSender({
-      //   to: email,
-      //   requestId: requestUuid,
-      //   message:
-      //     "Your travel requisition has been submitted successfully and forwarded to the HOD for approval.",
-      //   title: "Update: Travel Requisition Successfully Submitted",
-      //   role: "user",
-      // });
+      EmailSender({
+        to: email,
+        requestId: requestUuid,
+        message:
+          "Your travel requisition has been submitted successfully and forwarded to the HOD for approval.",
+        title: "Update: Travel Requisition Successfully Submitted",
+        role: "user",
+      });
     }
 
     // Return a success response
