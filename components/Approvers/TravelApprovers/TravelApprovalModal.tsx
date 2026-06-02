@@ -14,11 +14,11 @@ import {
   TrendingUp,
   Tag,
   ShieldCheck,
-  MessageSquare,
   Clock,
   Layers,
   Check,
   X,
+  MessageSquareText,
 } from "lucide-react";
 import { dateFormatter } from "@/public/assets";
 import SubmittingOverlay from "@/components/SubmittingOverlay";
@@ -26,6 +26,7 @@ import { AlertInfo } from "@/components/TravelRequisitionPage";
 import { UpdateTravelStatus } from "@/serverActions/UpdateTravelStatus";
 import ApprovalAlert from "./ApprovalAlert";
 import { initialsHelper } from "@/public/assets";
+import EngineeringJobSummaryCard from "./EngineeringJobSummaryCard";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -51,6 +52,7 @@ export interface TravelApprovalModalProps {
   travelWithinBudget: string;
   travelApprovalTier: string;
   requestCreatedAt: string;
+  engineeringJobs: string;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -117,6 +119,7 @@ const TravelApprovalModal = ({
   travelWithinBudget,
   travelApprovalTier,
   requestCreatedAt,
+  engineeringJobs,
 }: TravelApprovalModalProps) => {
   const [comments, setComments] = useState("");
   const [approving, setApproving] = useState(false);
@@ -345,6 +348,11 @@ const TravelApprovalModal = ({
                 ))}
               </div>
 
+              {/* Showing the engineering jobs area */}
+              {employeeDepartment === "Engineering & HVAC" && (
+                <EngineeringJobSummaryCard jobDetailsString={engineeringJobs} />
+              )}
+
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-wrap items-center justify-between rounded-2xl bg-linear-to-r from-slate-800 to-rose-900 px-5 py-4 text-white">
                   <div className="flex items-center gap-1.5">
@@ -372,7 +380,7 @@ const TravelApprovalModal = ({
             {/* ── Approver Comments ── */}
             <div className="mb-6 border-t border-[rgba(240,180,180,0.4)] pt-6">
               <div className="flex items-center gap-1.5">
-                <MessageSquare className="mb-2.5 h-3.5 w-3.5 text-rose-400" />
+                <MessageSquareText className="mb-2.5 h-3.5 w-3.5 text-rose-400" />
                 <SectionLabel>Comments</SectionLabel>
               </div>
               <textarea

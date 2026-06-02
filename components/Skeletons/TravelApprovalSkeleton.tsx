@@ -5,7 +5,7 @@ export default function TravelApprovalSkeleton() {
     <div className="relative min-h-screen overflow-x-hidden p-5">
       <div className="relative z-10 mx-auto max-w-225 animate-pulse">
         {/* Image placeholder */}
-        <div className="mb-4 h-70 rounded-xl bg-rose-100/60" />
+        <div className="mb-4 h-30 rounded-xl bg-rose-100/60" />
 
         {/* Header placeholder */}
         <div className="mb-8">
