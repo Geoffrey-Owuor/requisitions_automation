@@ -3,11 +3,11 @@ import { Fragment, ReactNode, useState } from "react";
 import Header from "../Header";
 import Footer from "../Footer";
 import {
-  Plane,
   Monitor,
   CheckCircle2,
   AlertCircle,
   ChevronRight,
+  BriefcaseBusiness,
 } from "lucide-react";
 import ITRequisitionGuideline from "./ITRequisitionGuideline";
 import TravelRequisitionGuideline from "./TravelRequisitionGuideline";
@@ -102,7 +102,11 @@ export default function GuidelinesPage() {
   const [activeTab, setActiveTab] = useState<TabId>("travel");
 
   const tabs = [
-    { id: "travel", label: "Travel Requisition", icon: <Plane size={14} /> },
+    {
+      id: "travel",
+      label: "Travel Requisition",
+      icon: <BriefcaseBusiness size={14} />,
+    },
     { id: "it", label: "IT Requisition", icon: <Monitor size={14} /> },
   ] as const;
 

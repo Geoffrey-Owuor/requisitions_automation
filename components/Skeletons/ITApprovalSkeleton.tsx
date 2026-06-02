@@ -3,7 +3,7 @@ const ITApprovalSkeleton = () => {
     <div className="relative min-h-screen overflow-x-hidden p-5">
       <div className="relative z-10 mx-auto max-w-225 animate-pulse">
         {/* Banner image placeholder */}
-        <div className="mb-4 h-48 rounded-xl bg-gray-200" />
+        <div className="mb-4 h-30 rounded-xl bg-gray-200" />
 
         {/* Page header */}
         <div className="mb-8 space-y-2">

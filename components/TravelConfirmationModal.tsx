@@ -1,5 +1,5 @@
 "use client";
-import { ArrowLeft, Send } from "lucide-react";
+import { ArrowLeft, Send, Wrench } from "lucide-react";
 import { TravelFormData } from "./TravelRequisitionPage";
 import { dateFormatter, initialsHelper } from "@/public/assets";
 import { useUser } from "@/context/UserContext";
@@ -11,6 +11,7 @@ interface ConfirmationModalProps {
   onBack: () => void;
   onSubmit: () => Promise<void>;
   submitting: boolean;
+  totalEngineeringAmount: number;
 }
 
 export default function TravelConfirmationModal({
@@ -20,6 +21,7 @@ export default function TravelConfirmationModal({
   onBack,
   onSubmit,
   submitting,
+  totalEngineeringAmount,
 }: ConfirmationModalProps) {
   const { username: userName, email: userEmail } = useUser();
   const nameString = userName ? userName : "";
@@ -133,6 +135,42 @@ export default function TravelConfirmationModal({
             </div>
           ))}
         </div>
+
+        {/* --- NEW: Engineering Jobs Breakdown --- */}
+        {formData.department === "Engineering & HVAC" &&
+          formData.engineeringJobs && (
+            <div className="mb-3 rounded-2xl border border-rose-100 bg-rose-50/50 p-4">
+              <span className="mb-3 flex items-center gap-2 text-[11px] font-semibold tracking-[0.4px] text-rose-800 uppercase">
+                <Wrench className="h-3.5 w-3.5" />
+                Engineering Job Allocations
+              </span>
+              <div className="flex flex-col gap-2.5">
+                {formData.engineeringJobs.map((job, idx) => (
+                  <div
+                    key={job.id || idx}
+                    className="flex items-center justify-between border-b border-rose-100/50 pb-2 text-[13px] last:border-0 last:pb-0"
+                  >
+                    <span className="font-medium text-[#7c5a5a]">
+                      {job.title || "Unnamed Job"}
+                    </span>
+                    <span className="font-semibold text-[#1e1b1b]">
+                      KES {Number(job.amount || 0).toLocaleString()}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Engineering Subtotal Placeholder */}
+              <div className="mt-3 flex items-center justify-between border-t border-rose-200/80 pt-3">
+                <span className="text-[14px] font-semibold tracking-wide text-rose-700">
+                  Allocations Subtotal
+                </span>
+                <span className="text-[15px] font-bold text-rose-900">
+                  KES {totalEngineeringAmount.toLocaleString()}
+                </span>
+              </div>
+            </div>
+          )}
 
         <div className="grid grid-cols-2 gap-3">
           <div className="flex items-center justify-between rounded-2xl bg-linear-to-r from-slate-800 to-rose-900 px-5 py-4 text-white">

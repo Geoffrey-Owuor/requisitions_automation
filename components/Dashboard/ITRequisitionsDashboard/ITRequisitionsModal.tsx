@@ -98,9 +98,15 @@ export function ITRequisitionModal({
   return (
     <ClientPortal>
       {/* Backdrop */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div
+        onClick={onClose}
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      >
         {/* Modal Panel */}
-        <div className="relative w-full max-w-2xl rounded-[20px] border border-b border-gray-200 bg-white/90 shadow-[0_32px_64px_rgba(60,100,160,0.15)] backdrop-blur-2xl">
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className="relative w-full max-w-2xl rounded-[20px] border border-b border-gray-200 bg-white/90 shadow-[0_32px_64px_rgba(60,100,160,0.15)] backdrop-blur-2xl"
+        >
           {/* Header */}
           <div className="sticky top-0 z-10 flex items-center justify-between rounded-t-[20px] border-b border-neutral-100/50 bg-neutral-50/40 px-6 py-4 backdrop-blur-md">
             <div className="flex items-center gap-3">

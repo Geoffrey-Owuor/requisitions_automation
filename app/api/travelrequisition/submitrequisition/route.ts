@@ -37,9 +37,18 @@ export async function POST(request: NextRequest) {
       perDiem,
       costCentre,
       withinBudget,
+      engineeringJobs,
     } = formData;
 
-    const missingFields = Object.values(formData).some((value) => !value);
+    const isEngineering = department === "Engineering & HVAC";
+
+    const missingFields =
+      Object.entries(formData).some(([key, value]) => {
+        if (key === "engineeringJobs") return false;
+
+        return !value;
+      }) ||
+      (isEngineering && !engineeringJobs);
 
     if (missingFields) {
       return NextResponse.json(
@@ -87,11 +96,11 @@ export async function POST(request: NextRequest) {
     travel_business_justification, travel_mode, travel_transport_cost,
     travel_other_costs, travel_per_diem, travel_total_cost, travel_cost_center, travel_within_budget,
     travel_approval_tier, travel_hod_approval_status, travel_hr_approval_status,
-    travel_director_approval_status, travel_hod_approver)
+    travel_director_approval_status, travel_hod_approver, engineering_jobs)
     VALUES 
     ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
     $11, $12, $13, $14, $15, $16, $17, $18,
-    $19, $20, $21, $22) RETURNING request_id
+    $19, $20, $21, $22, $23) RETURNING request_id
     `;
 
     // Insert params
@@ -118,6 +127,7 @@ export async function POST(request: NextRequest) {
       hrStatus,
       directorStatus,
       hodApprover,
+      engineeringJobs || null,
     ];
 
     // Run the query
@@ -184,7 +194,6 @@ export async function POST(request: NextRequest) {
       }
     } else {
       // Normal workflow - Normal user (Send email to user and HOD)
-
       // HOD Send
       EmailSender({
         to: hodEmail,
@@ -195,8 +204,7 @@ export async function POST(request: NextRequest) {
         role: "HOD",
         reviewLink: `?token=${hodUuid}&stage=hod`,
       });
-
-      // User Send
+      // // User Send
       EmailSender({
         to: email,
         requestId: requestUuid,

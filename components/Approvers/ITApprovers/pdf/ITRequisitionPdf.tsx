@@ -101,7 +101,7 @@ const ITRequisitionPdf = ({ pdfData }: { pdfData: ITPdfValues }) => {
                 requirementsList.map((req, index) => (
                   <View
                     key={index}
-                    style={tw("rounded-lg bg-slate-100 px-2 py-1")}
+                    style={tw("rounded-md bg-slate-100 px-2 py-1")}
                   >
                     <Text style={tw("text-[9px] font-medium text-slate-700")}>
                       {req}
