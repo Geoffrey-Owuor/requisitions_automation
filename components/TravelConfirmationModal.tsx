@@ -115,27 +115,6 @@ export default function TravelConfirmationModal({
 
       {/* Cost breakdown */}
       <div className="mb-5 border-t border-[rgba(240,180,180,0.4)] pt-5">
-        <p className="mb-3 text-[11px] font-semibold tracking-[0.4px] text-[#b0a0a0] uppercase">
-          Cost Breakdown (KES)
-        </p>
-        <div className="mb-3 grid grid-cols-3 gap-2 max-sm:grid-cols-2">
-          {[
-            { label: "Transport", value: formData.transportCost },
-            { label: "Others", value: formData.otherCost },
-            { label: "Per Diem", value: formData.perDiem },
-          ].map(({ label, value }) => (
-            <div
-              key={label}
-              className="rounded-xl bg-gray-100 px-3 py-2.5 text-center"
-            >
-              <p className="text-[11px] text-[#7c5a5a]">{label}</p>
-              <p className="mt-0.5 text-[15px] font-semibold text-[#1e1b1b]">
-                {value.toLocaleString()}
-              </p>
-            </div>
-          ))}
-        </div>
-
         {/* --- NEW: Engineering Jobs Breakdown --- */}
         {formData.department === "Engineering & HVAC" &&
           formData.engineeringJobs && (
@@ -171,6 +150,26 @@ export default function TravelConfirmationModal({
               </div>
             </div>
           )}
+        <p className="mb-3 text-[11px] font-semibold tracking-[0.4px] text-[#b0a0a0] uppercase">
+          Cost Breakdown (KES)
+        </p>
+        <div className="mb-3 grid grid-cols-3 gap-2 max-sm:grid-cols-2">
+          {[
+            { label: "Transport", value: formData.transportCost },
+            { label: "Others", value: formData.otherCost },
+            { label: "Per Diem", value: formData.perDiem },
+          ].map(({ label, value }) => (
+            <div
+              key={label}
+              className="rounded-xl bg-gray-100 px-3 py-2.5 text-center"
+            >
+              <p className="text-[11px] text-[#7c5a5a]">{label}</p>
+              <p className="mt-0.5 text-[15px] font-semibold text-[#1e1b1b]">
+                {value.toLocaleString()}
+              </p>
+            </div>
+          ))}
+        </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div className="flex items-center justify-between rounded-2xl bg-linear-to-r from-slate-800 to-rose-900 px-5 py-4 text-white">
