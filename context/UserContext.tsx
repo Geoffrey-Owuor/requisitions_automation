@@ -1,8 +1,10 @@
 "use client";
 
 import { createContext, useContext } from "react";
+import { Roles } from "@/serverActions/GetUserRoles";
 
 interface UserDetails {
+  roles: Roles;
   username: string | null | undefined;
   email: string | null | undefined;
 }
@@ -15,6 +17,7 @@ const UserContext = createContext<UserDetails | null>(null);
 
 export const UserProvider = ({ user, children }: UserProviderProps) => {
   const value: UserDetails = {
+    roles: user.roles,
     username: user.username,
     email: user.email,
   };
