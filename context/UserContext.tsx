@@ -5,8 +5,8 @@ import { Roles } from "@/serverActions/GetUserRoles";
 
 interface UserDetails {
   roles: Roles;
-  username: string | null | undefined;
-  email: string | null | undefined;
+  username: string;
+  email: string;
 }
 type UserProviderProps = {
   user: UserDetails;

@@ -11,8 +11,6 @@ import {
   Monitor,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
-import { initialsHelper } from "@/public/assets";
-import { useUser } from "@/context/UserContext";
 
 // Summarized labels for tight vertical sidebar space
 const links = [
@@ -29,10 +27,6 @@ const DashboardSidebar = () => {
   const pathname = usePathname();
 
   const router = useRouter();
-
-  const { username, email } = useUser();
-
-  const initials = initialsHelper(username ? username : "GU");
 
   return (
     <aside className="fixed top-1 bottom-1 left-1 z-50 hidden w-18 flex-col items-center py-4 lg:flex">
@@ -93,12 +87,7 @@ const DashboardSidebar = () => {
           >
             <CircleQuestionMark className="h-5 w-5" />
           </a>
-          <UserDropdown
-            direction="up"
-            initials={initials}
-            userName={username}
-            userEmail={email}
-          />
+          <UserDropdown direction="up" />
         </div>
       </div>
     </aside>
