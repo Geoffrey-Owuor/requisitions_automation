@@ -84,6 +84,7 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
   const contextObject = {
     username: currentApprover,
     email: currentApproverEmail,
+    roles: [stage],
   };
 
   return (

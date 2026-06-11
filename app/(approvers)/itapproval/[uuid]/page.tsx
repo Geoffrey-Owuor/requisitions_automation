@@ -77,6 +77,7 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
   const contextObject = {
     username: approverDetails.name,
     email: approverDetails.email,
+    roles: [stage],
   };
 
   // Build the single data object passed to the modal

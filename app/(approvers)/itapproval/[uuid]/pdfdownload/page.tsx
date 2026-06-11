@@ -32,6 +32,7 @@ const page = async ({ params }: PdfDownloadProps) => {
   const guestObject = {
     username: "Guest Account",
     email: "noreply@hotpoint.co.ke",
+    roles: ["guest"],
   };
 
   return (
