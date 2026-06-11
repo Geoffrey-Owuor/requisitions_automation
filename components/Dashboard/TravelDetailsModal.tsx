@@ -46,7 +46,7 @@ export const TravelDetailsModal = ({ data, isOpen, onClose }: ModalProps) => {
           className="relative w-full max-w-2xl rounded-[20px] border border-white/80 bg-white/90 shadow-[0_32px_64px_rgba(160,60,60,0.15)] backdrop-blur-2xl"
         >
           {/* Header */}
-          <div className="flex items-center justify-between overflow-hidden rounded-t-[20px] bg-white px-8 py-4">
+          <div className="flex flex-wrap items-center justify-between gap-2 overflow-hidden rounded-t-[20px] bg-white px-8 py-4">
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-red-400 shadow-sm">
                 <BriefcaseBusiness size={18} />

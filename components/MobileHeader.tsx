@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import DashboardBrand from "./DashboardBrand";
+import Brand from "./Brand";
 import UserDropdown from "./UserDropDown";
 import {
   Menu,
@@ -38,7 +39,7 @@ const MobileHeader = () => {
       >
         {/* Backdrop */}
         <div
-          className={`fixed inset-0 bg-red-950/40 backdrop-blur-sm transition-opacity duration-200 ${
+          className={`fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-200 ${
             sidebarOpen ? "opacity-100" : "opacity-0"
           }`}
           onClick={() => setSidebarOpen(false)}
@@ -51,7 +52,7 @@ const MobileHeader = () => {
           } flex w-64 flex-col bg-white shadow-2xl transition-transform duration-200`}
         >
           <div className="flex h-16 items-center justify-between border-b border-slate-100 px-6">
-            <DashboardBrand showText={true} />
+            <Brand showText={true} />
             <button
               onClick={() => setSidebarOpen(false)}
               className="rounded-full p-1.5 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-950"
