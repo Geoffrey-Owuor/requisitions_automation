@@ -47,7 +47,7 @@ export default function UserDropdown({
       {/* ── TRIGGER BUTTON ── */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-slate-800 to-rose-900 text-[11px] font-semibold text-white hover:shadow-sm active:scale-95 md:h-8 md:w-8"
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-slate-50 to-rose-100 text-[11px] font-semibold text-red-950 hover:shadow-sm active:scale-95 md:h-8 md:w-8"
         aria-expanded={isOpen}
       >
         {initials || "NA"}

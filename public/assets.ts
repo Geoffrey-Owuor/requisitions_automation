@@ -1,12 +1,14 @@
 import hotpoint_logo from "./hotpoint_icon.png";
 import form_image from "./form_image.png";
 import hotpoint_background from "./hotpoint_logo.png";
+import hotpoint_black_logo from "./hotpoint_black_logo.png";
 import it_form_image from "./it_form_image.png";
 
 export const assets = {
   hotpoint_logo,
   form_image,
   hotpoint_background,
+  hotpoint_black_logo,
   it_form_image,
 };
 
