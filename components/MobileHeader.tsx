@@ -13,8 +13,6 @@ import {
   CircleQuestionMark,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { initialsHelper } from "@/public/assets";
-import { useUser } from "@/context/UserContext";
 
 const links = [
   { href: "/dashboard", label: "Dashboard", Icon: LayoutDashboard },
@@ -27,11 +25,8 @@ const links = [
 ];
 
 const MobileHeader = () => {
-  const { username, email } = useUser();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
-
-  const initials = initialsHelper(username ? username : "GU");
 
   return (
     <>
@@ -110,12 +105,7 @@ const MobileHeader = () => {
           >
             <CircleQuestionMark className="h-5 w-5" />
           </a>
-          <UserDropdown
-            direction="down"
-            initials={initials}
-            userName={username}
-            userEmail={email}
-          />
+          <UserDropdown direction="down" />
         </div>
       </header>
     </>
