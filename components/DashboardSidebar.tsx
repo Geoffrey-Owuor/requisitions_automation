@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import Brand from "./Brand";
+
+import DashboardBrand from "./DashboardBrand";
 import UserDropdown from "./UserDropDown";
 import {
   BriefcaseBusiness,
@@ -32,7 +33,7 @@ const DashboardSidebar = () => {
     <aside className="fixed top-1 bottom-1 left-1 z-50 hidden w-18 flex-col items-center py-4 lg:flex">
       {/* Brand (Icon Only) */}
       <div className="mb-6">
-        <Brand showText={false} />
+        <DashboardBrand showText={false} />
       </div>
 
       {/* Vertical Navigation */}
@@ -45,16 +46,16 @@ const DashboardSidebar = () => {
               href={href}
               className={`group flex w-full flex-col items-center justify-center gap-1.5 rounded-2xl py-3 transition-all duration-300 active:scale-95 ${
                 isActive
-                  ? "bg-slate-900 text-white shadow-sm"
-                  : "text-slate-600 hover:bg-rose-50 hover:text-rose-600"
+                  ? "bg-white text-red-950 shadow-md"
+                  : "text-white/70 hover:bg-white/10 hover:text-white"
               }`}
             >
               <Icon
                 size={20}
                 className={`transition-colors ${
                   isActive
-                    ? "text-white"
-                    : "text-slate-600 group-hover:text-rose-600"
+                    ? "text-red-950"
+                    : "text-white/70 group-hover:text-white"
                 }`}
               />
               <span className="text-center text-[10px] leading-tight font-semibold tracking-wide">
@@ -67,7 +68,7 @@ const DashboardSidebar = () => {
         {/* Go back button */}
         <button
           onClick={() => router.back()}
-          className="group flex w-full flex-col items-center justify-center gap-1.5 rounded-2xl py-3 text-slate-600 transition-all duration-300 hover:bg-rose-50 hover:text-rose-600 active:scale-95"
+          className="group flex w-full flex-col items-center justify-center gap-1.5 rounded-2xl py-3 text-white/70 transition-all duration-300 hover:bg-white/10 hover:text-white active:scale-95"
         >
           <ChevronLeft size={20} />
           <span className="text-center text-[10px] leading-tight font-semibold tracking-wide">
@@ -83,7 +84,7 @@ const DashboardSidebar = () => {
             href="/guidelines"
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-full p-2 text-blue-600 hover:bg-blue-100/60"
+            className="rounded-full p-2 text-white/70 transition-colors hover:bg-white/10 hover:text-white"
           >
             <CircleQuestionMark className="h-5 w-5" />
           </a>
