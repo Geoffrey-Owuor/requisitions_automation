@@ -1,5 +1,29 @@
 @import "tailwindcss";
 
 html {
+  overflow: hidden;
+}
+
+/* Default pages scrollbar navigations */
+.layout-scrollbar {
   scrollbar-color: #a3a3a3 transparent;
+  overflow-y: auto;
+}
+
+/* Sidebar scrollbar navigation styles */
+.sidebar-nav {
+  overflow-y: auto;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+  width: 3px;
+}
+
+.sidebar-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background-color: #d1d5db; /* white */
+  border-radius: 999px;
 }
