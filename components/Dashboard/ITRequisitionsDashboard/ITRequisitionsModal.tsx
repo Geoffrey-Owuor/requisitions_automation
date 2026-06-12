@@ -145,7 +145,7 @@ export function ITRequisitionModal({
           </div>
 
           {/* Body */}
-          <div className="max-h-[80vh] space-y-6 overflow-y-auto px-6 py-6">
+          <div className="layout-scrollbar max-h-[80vh] space-y-6 px-6 py-6">
             {/* — Submitter Info — */}
             <section>
               <SectionHeader icon={UserRound} title="Submitted By" />

@@ -10,6 +10,7 @@ import {
   CircleQuestionMark,
   LayoutDashboard,
   Monitor,
+  ShoppingBag,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -21,6 +22,11 @@ const links = [
     href: "/dashboard/travelrequisition",
     label: "Travel",
     Icon: BriefcaseBusiness,
+  },
+  {
+    href: "/dashboard/staffproductpurchase",
+    label: "Purchase",
+    Icon: ShoppingBag,
   },
 ];
 
@@ -37,7 +43,7 @@ const DashboardSidebar = () => {
       </div>
 
       {/* Vertical Navigation */}
-      <nav className="flex w-full flex-col items-center gap-2 px-1">
+      <nav className="sidebar-nav mb-2 flex w-full flex-1 flex-col items-center gap-2 px-1">
         {links.map(({ href, label, Icon }) => {
           const isActive = pathname === href;
           return (

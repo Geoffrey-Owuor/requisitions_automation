@@ -79,7 +79,7 @@ export const TravelDetailsModal = ({ data, isOpen, onClose }: ModalProps) => {
             </div>
           </div>
 
-          <div className="grid max-h-[80vh] grid-cols-1 gap-4 overflow-y-auto p-6 md:grid-cols-2">
+          <div className="layout-scrollbar grid max-h-[80vh] grid-cols-1 gap-4 p-6 md:grid-cols-2">
             <DetailItem
               icon={UserRound}
               label="Employee"
