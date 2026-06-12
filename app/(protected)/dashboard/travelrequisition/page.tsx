@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import TravelRequisitionPage from "@/components/TravelRequisitionPage";
+import RequisitionPagesWrapper from "@/components/Dashboard/RequisitionPagesWrapper";
 
 export const metadata: Metadata = {
   title: "Travel Requisition",
@@ -7,7 +8,11 @@ export const metadata: Metadata = {
 };
 
 const page = () => {
-  return <TravelRequisitionPage />;
+  return (
+    <RequisitionPagesWrapper>
+      <TravelRequisitionPage />
+    </RequisitionPagesWrapper>
+  );
 };
 
 export default page;

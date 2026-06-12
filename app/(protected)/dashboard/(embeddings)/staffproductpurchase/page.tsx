@@ -7,11 +7,10 @@ export const metadata: Metadata = {
 const page = () => {
   return (
     <iframe
-      src="http://192.0.2.27:10556" // Replace with your app's URL
+      src="https://192.0.2.11:4443/login" // Reverse proxy login page
       title="Staff Product Purchase"
       className="h-full w-full border-0 bg-white dark:bg-black"
       sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-      allow="clipboard-read; clipboard-write" // Add permissions if your app needs them
     />
   );
 };

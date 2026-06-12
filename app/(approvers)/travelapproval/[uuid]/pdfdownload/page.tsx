@@ -9,6 +9,7 @@ import NotFoundRequest from "@/components/Approvers/TravelApprovers/NotFoundRequ
 import RequisitionPdfModal from "@/components/Approvers/TravelApprovers/RequisitionPdfModal";
 import RequisitionPdfSkeleton from "@/components/Skeletons/RequisitionPdfSkeleton";
 import DashboardWrapper from "@/components/Dashboard/DashboardWrapper";
+import RequisitionPagesWrapper from "@/components/Dashboard/RequisitionPagesWrapper";
 import { UserProvider } from "@/context/UserContext";
 
 export type PdfDownloadProps = {
@@ -41,9 +42,11 @@ const page = async ({ params }: PdfDownloadProps) => {
   return (
     <UserProvider user={guestObject}>
       <DashboardWrapper>
-        <Suspense fallback={<RequisitionPdfSkeleton />}>
-          <RequisitionPdfModal pdfData={pdfData} />
-        </Suspense>
+        <RequisitionPagesWrapper>
+          <Suspense fallback={<RequisitionPdfSkeleton />}>
+            <RequisitionPdfModal pdfData={pdfData} />
+          </Suspense>
+        </RequisitionPagesWrapper>
       </DashboardWrapper>
     </UserProvider>
   );
