@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import ITRequisitionPage from "@/components/ITRequisition/ITRequisitionPage";
+import RequisitionPagesWrapper from "@/components/Dashboard/RequisitionPagesWrapper";
 
 export const metadata: Metadata = {
   title: "IT Requisition",
@@ -7,7 +8,11 @@ export const metadata: Metadata = {
 };
 
 const page = () => {
-  return <ITRequisitionPage />;
+  return (
+    <RequisitionPagesWrapper>
+      <ITRequisitionPage />
+    </RequisitionPagesWrapper>
+  );
 };
 
 export default page;

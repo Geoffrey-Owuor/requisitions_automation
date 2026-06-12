@@ -14,7 +14,7 @@ const UserDashboard = () => {
 
   return (
     <div className="relative">
-      <div className="mx-auto max-w-7xl py-4">
+      <div className="mx-auto max-w-7xl p-4">
         {/* WELCOME AREA */}
         <div className="flex flex-wrap items-center justify-between gap-6 max-sm:flex-col max-sm:items-start">
           {/* Welcome Text */}

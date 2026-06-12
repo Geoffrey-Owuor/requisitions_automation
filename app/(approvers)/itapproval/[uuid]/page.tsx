@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { Suspense } from "react";
 import { query } from "@/lib/db";
 import DashboardWrapper from "@/components/Dashboard/DashboardWrapper";
+import RequisitionPagesWrapper from "@/components/Dashboard/RequisitionPagesWrapper";
 import { UserProvider } from "@/context/UserContext";
 import InvalidToken from "@/components/Approvers/TravelApprovers/InvalidToken";
 import AlreadyProcessed from "@/components/Approvers/TravelApprovers/AlreadyProcessed";
@@ -102,9 +103,11 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
   return (
     <UserProvider user={contextObject}>
       <DashboardWrapper>
-        <Suspense fallback={<ITApprovalSkeleton />}>
-          <ITApprovalModal data={modalData} />
-        </Suspense>
+        <RequisitionPagesWrapper>
+          <Suspense fallback={<ITApprovalSkeleton />}>
+            <ITApprovalModal data={modalData} />
+          </Suspense>
+        </RequisitionPagesWrapper>
       </DashboardWrapper>
     </UserProvider>
   );
