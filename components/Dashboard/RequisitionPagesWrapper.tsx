@@ -6,9 +6,9 @@ const RequisitionPagesWrapper = ({
   children: React.ReactNode;
 }) => {
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full w-full flex-col">
       {/* Content */}
-      <main className="mx-auto max-w-7xl flex-1">{children}</main>
+      <main className="mx-auto w-full max-w-7xl flex-1">{children}</main>
       <Footer />
     </div>
   );

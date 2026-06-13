@@ -109,7 +109,7 @@ export default function HomePage() {
                     href="http://192.168.0.27:10556"
                     icon={<ShoppingBag size={18} />}
                     label="Staff Product Purchase"
-                    sub="External portal"
+                    sub="Go to External portal"
                     isExternal
                   />
                   <QuickLink
