@@ -27,3 +27,35 @@ html {
   background-color: #d1d5db; /* white */
   border-radius: 999px;
 }
+
+/* Dashboard Alert Styles */
+
+@keyframes slideInTopCenter {
+  0% {
+    transform: translate(-50%, -150%);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutTopCenter {
+  0% {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -150%);
+    opacity: 0;
+  }
+}
+
+.animate-slide-in-top {
+  animation: slideInTopCenter 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slide-out-top {
+  animation: slideOutTopCenter 0.4s cubic-bezier(0.7, 0, 0.84, 0) forwards;
+}
