@@ -11,27 +11,79 @@ import {
   ArrowUpRight,
   Workflow,
   BriefcaseBusiness,
+  ShieldUser,
 } from "lucide-react";
 import { QueryResultRow } from "pg";
 import StatusFormatter from "./StatusFormatter";
 import { dateFormatter } from "@/public/assets";
 import ClientPortal from "../ClientPortal";
 import Link from "next/link";
+import { useUser } from "@/context/UserContext";
+import { getApproverLink } from "@/serverActions/GetApproverLink";
 import { useLoadingStore } from "@/store/useLoadingStore";
+import { useEffect, useState } from "react";
 
 interface ModalProps {
   data: QueryResultRow | null;
   isOpen: boolean;
+  dataFlag: "userData" | "hodPending" | "hrPending" | "directorPending";
   onClose: () => void;
 }
 
-export const TravelDetailsModal = ({ data, isOpen, onClose }: ModalProps) => {
-  const setLoadingLine = useLoadingStore((state) => state.setLoadingLine);
+export type TravelStageLevels = "hod" | "hr" | "director" | "user";
 
-  const handlePdfLink = () => {
+export const TravelDetailsModal = ({
+  data,
+  isOpen,
+  onClose,
+  dataFlag,
+}: ModalProps) => {
+  const setLoadingLine = useLoadingStore((state) => state.setLoadingLine);
+  const { email } = useUser();
+  const [loading, setLoading] = useState(false);
+  const [link, setLink] = useState("#");
+
+  const handleLinkClick = () => {
     setLoadingLine(true);
     onClose();
   };
+
+  // Get token based on the data flag
+
+  const STAGE_LEVELS: Record<typeof dataFlag, TravelStageLevels> = {
+    hodPending: "hod",
+    hrPending: "hr",
+    directorPending: "director",
+    userData: "user", // We have to make sure this is never used as it it not yet available in our data
+  };
+
+  const stage = STAGE_LEVELS[dataFlag];
+
+  useEffect(() => {
+    const getApprovalLink = async () => {
+      try {
+        if (!data) return; //do not run when data is not available
+        if (
+          stage === "user" ||
+          data[`travel_${stage}_approval_status`] !== "pending"
+        )
+          return; //do not run when we are viewing user data or approver status is not pending
+
+        setLoading(true);
+
+        const uuid = data.request_id;
+        const resolvedLink = await getApproverLink({ email, stage, uuid });
+
+        setLink(resolvedLink);
+      } catch (error) {
+        console.error("Error fetching approver link:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getApprovalLink();
+  }, [data, stage, email]);
 
   if (!isOpen || !data) return null;
 
@@ -62,9 +114,26 @@ export const TravelDetailsModal = ({ data, isOpen, onClose }: ModalProps) => {
               </div>
             </div>
             <div className="flex items-center gap-4">
+              {stage !== "user" &&
+                data[`travel_${stage}_approval_status`] === "pending" && (
+                  <>
+                    {loading ? (
+                      <div className="h-5 w-12 animate-pulse rounded-full bg-gray-300" />
+                    ) : (
+                      <Link
+                        href={link}
+                        onClick={handleLinkClick}
+                        className="flex items-center gap-1 rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white transition-colors duration-200 hover:bg-slate-800"
+                      >
+                        <ShieldUser className="h-3.5 w-3.5" />
+                        Review
+                      </Link>
+                    )}
+                  </>
+                )}
               <Link
                 href={`/travelapproval/${data.request_id}/pdfdownload`}
-                onClick={handlePdfLink}
+                onClick={handleLinkClick}
                 className="flex items-center gap-1 rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white transition-colors duration-200 hover:bg-slate-800"
               >
                 Pdf

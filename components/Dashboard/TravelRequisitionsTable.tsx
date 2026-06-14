@@ -275,6 +275,7 @@ export default function TravelRequisitionsTable({
             <TravelDetailsModal
               isOpen={!!selectedRequest}
               data={selectedRequest}
+              dataFlag={dataFlag}
               onClose={() => setSelectedRequest(null)}
             />
           </div>
