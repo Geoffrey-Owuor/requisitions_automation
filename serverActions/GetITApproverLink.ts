@@ -1,18 +1,19 @@
 "use server";
 import { query } from "@/lib/db";
-import { TravelStageLevels } from "@/components/Dashboard/TravelDetailsModal";
 
-interface TravelApproverLinkProps {
+export type ITStageLevels = "hod" | "it" | "user";
+
+interface ITApproverLinkProps {
   email: string;
   uuid: string;
-  stage: TravelStageLevels;
+  stage: ITStageLevels;
 }
 
-export async function getTravelApproverLink({
+export async function getITApproverLink({
   email,
   uuid,
   stage,
-}: TravelApproverLinkProps): Promise<string> {
+}: ITApproverLinkProps): Promise<string> {
   const baseQuery = `SELECT ${stage}_uuid AS token 
                      FROM ${stage}_array WHERE ${stage}_email = $1 LIMIT 1`;
 
@@ -22,7 +23,7 @@ export async function getTravelApproverLink({
     const token = result[0].token;
 
     // Construct the link
-    const approvalLink = `/travelapproval/${uuid}?token=${token}&stage=${stage}`;
+    const approvalLink = `/itapproval/${uuid}?token=${token}&stage=${stage}`;
 
     return approvalLink;
   } catch (error) {

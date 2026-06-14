@@ -269,6 +269,7 @@ export default function ITRequisitionsTable({
             <ITRequisitionModal
               isOpen={!!selectedRequest}
               data={selectedRequest}
+              dataFlag={dataFlag}
               onClose={() => setSelectedRequest(null)}
             />
           </div>

@@ -9,15 +9,23 @@ import {
   CheckCircle2,
   UserRound,
   ArrowUpRight,
+  ShieldUser,
 } from "lucide-react";
 import StatusFormatter from "../StatusFormatter";
 import { dateFormatter } from "@/public/assets";
 import { useLoadingStore } from "@/store/useLoadingStore";
 import ClientPortal from "@/components/ClientPortal";
+import {
+  getITApproverLink,
+  ITStageLevels,
+} from "@/serverActions/GetITApproverLink";
+import { useUser } from "@/context/UserContext";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
 interface ITRequisitionModalProps {
   isOpen: boolean;
+  dataFlag: "userData" | "hodPending" | "itPending" | "itAll";
   data: QueryResultRow | null;
   onClose: () => void;
 }
@@ -81,10 +89,15 @@ export function ITRequisitionModal({
   isOpen,
   data,
   onClose,
+  dataFlag,
 }: ITRequisitionModalProps) {
   const setLoadingLine = useLoadingStore((state) => state.setLoadingLine);
 
-  const handlePdfLink = () => {
+  const { email } = useUser();
+  const [loading, setLoading] = useState(false);
+  const [link, setLink] = useState("#");
+
+  const handleLinkClick = () => {
     onClose();
     setLoadingLine(true);
   };
@@ -94,6 +107,44 @@ export function ITRequisitionModal({
     if (Array.isArray(val)) return val.join(", ");
     return String(val);
   };
+
+  // Get token based on the data flag
+
+  const STAGE_LEVELS: Record<typeof dataFlag, ITStageLevels> = {
+    hodPending: "hod",
+    itPending: "it",
+    userData: "user", // We have to make sure this is never used as it it not yet available in our data
+    itAll: "it",
+  };
+
+  const stage = STAGE_LEVELS[dataFlag];
+
+  useEffect(() => {
+    const getApprovalLink = async () => {
+      try {
+        if (!data) return; //do not run when data is not available
+        if (stage === "user" || data[`${stage}_approver_status`] !== "pending")
+          return; //do not run when we are viewing user data or approver status is not pending
+
+        setLoading(true);
+
+        const uuid = data.request_id;
+        const resolvedLink = await getITApproverLink({
+          email,
+          stage,
+          uuid,
+        });
+
+        setLink(resolvedLink);
+      } catch (error) {
+        console.error("Error fetching approver link:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getApprovalLink();
+  }, [data, stage, email]);
 
   if (!isOpen || !data) return null;
 
@@ -127,9 +178,26 @@ export function ITRequisitionModal({
             </div>
 
             <div className="flex items-center gap-4">
+              {stage !== "user" &&
+                data[`${stage}_approver_status`] === "pending" && (
+                  <>
+                    {loading ? (
+                      <div className="h-5 w-12 animate-pulse rounded-full bg-gray-300" />
+                    ) : (
+                      <Link
+                        href={link}
+                        onClick={handleLinkClick}
+                        className="flex items-center gap-1 rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white transition-colors duration-200 hover:bg-slate-800"
+                      >
+                        <ShieldUser className="h-3.5 w-3.5" />
+                        Review
+                      </Link>
+                    )}
+                  </>
+                )}
               <Link
                 href={`/itapproval/${data.request_id}/pdfdownload`}
-                onClick={handlePdfLink}
+                onClick={handleLinkClick}
                 className="flex items-center gap-1 rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white transition-colors duration-200 hover:bg-slate-800"
               >
                 Pdf
