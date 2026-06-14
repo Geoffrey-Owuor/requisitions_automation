@@ -2,7 +2,7 @@
 import { query } from "@/lib/db";
 import { TravelStageLevels } from "@/components/Dashboard/TravelDetailsModal";
 
-interface ApproverTokenProps {
+interface TravelApproverLinkProps {
   email: string;
   uuid: string;
   stage: TravelStageLevels;
@@ -12,7 +12,7 @@ export async function getTravelApproverLink({
   email,
   uuid,
   stage,
-}: ApproverTokenProps): Promise<string> {
+}: TravelApproverLinkProps): Promise<string> {
   const baseQuery = `SELECT ${stage}_uuid AS token 
                      FROM ${stage}_array WHERE ${stage}_email = $1 LIMIT 1`;
 
