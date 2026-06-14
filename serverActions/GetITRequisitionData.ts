@@ -29,11 +29,13 @@ export const getITRequisitionData = async ({
       baseParams.push(userEmail);
       break;
     case "hodPending":
-      baseQuery += ` WHERE hod_approver_email = $${baseParams.length + 1} AND hod_approver_status = $${baseParams.length + 2}`;
+      baseQuery += ` WHERE hod_approver_email = $${baseParams.length + 1} AND 
+                     hod_approver_status = $${baseParams.length + 2}`;
       baseParams.push(hodEmail, "pending");
       break;
     case "itPending":
-      baseQuery += ` WHERE it_approver_status = $${baseParams.length + 1} AND hod_approver_status = $${baseParams.length + 2}`;
+      baseQuery += ` WHERE it_approver_status = $${baseParams.length + 1} AND 
+                     hod_approver_status = $${baseParams.length + 2}`;
       baseParams.push("pending", "approved");
       break;
   }
