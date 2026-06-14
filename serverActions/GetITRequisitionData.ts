@@ -1,7 +1,17 @@
 "use server";
 import { query } from "@/lib/db";
 
-export const getITRequisitionData = async (email?: string) => {
+export interface ITRequisitionDataProps {
+  dataFlag: "userData" | "hodPending" | "itPending" | "itAll";
+  userEmail?: string;
+  hodEmail?: string;
+}
+
+export const getITRequisitionData = async ({
+  dataFlag,
+  userEmail,
+  hodEmail,
+}: ITRequisitionDataProps) => {
   const baseParams = [];
 
   let baseQuery = `
@@ -13,9 +23,19 @@ export const getITRequisitionData = async (email?: string) => {
     FROM it_requisitions
     `;
 
-  if (email) {
-    baseQuery += ` WHERE submitter_email = $1`;
-    baseParams.push(email);
+  switch (dataFlag) {
+    case "userData":
+      baseQuery += ` WHERE submitter_email = $${baseParams.length + 1}`;
+      baseParams.push(userEmail);
+      break;
+    case "hodPending":
+      baseQuery += ` WHERE hod_approver_email = $${baseParams.length + 1} AND hod_approver_status = $${baseParams.length + 2}`;
+      baseParams.push(hodEmail, "pending");
+      break;
+    case "itPending":
+      baseQuery += ` WHERE it_approver_status = $${baseParams.length + 1} AND hod_approver_status = $${baseParams.length + 2}`;
+      baseParams.push("pending", "approved");
+      break;
   }
 
   // Final base query

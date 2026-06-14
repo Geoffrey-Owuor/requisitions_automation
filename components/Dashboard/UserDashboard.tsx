@@ -3,14 +3,15 @@
 import { useUser } from "@/context/UserContext";
 import TravelRequisitionsTable from "./TravelRequisitionsTable";
 import ITRequisitionsTable from "./ITRequisitionsDashboard/ITRequisitionsTable";
-import { BriefcaseBusiness, Laptop, Monitor, Mail } from "lucide-react";
+import { BriefcaseBusiness, Mail } from "lucide-react";
 
 const UserDashboard = () => {
   const { username, email: userEmail, roles } = useUser();
   const firstName = username.split(" ")[0];
 
-  // Check user roles
+  // Check user active roles
   const isITAdmin = roles.includes("it");
+  const isHod = roles.includes("hod");
 
   return (
     <div className="p-4">
@@ -52,25 +53,21 @@ const UserDashboard = () => {
         <TravelRequisitionsTable userEmail={userEmail} />
       </div>
 
+      {/* IT REQUISITIONS */}
+
       {/* User IT Requisitions */}
-      <div>
-        <span className="my-4 flex items-center gap-2 font-medium text-neutral-600">
-          <Monitor className="h-5 w-5" />
-          Your IT Requisitions
-        </span>
-        <ITRequisitionsTable userEmail={userEmail} isITAdmin={false} />
-      </div>
+      <ITRequisitionsTable dataFlag="userData" userEmail={userEmail} />
+
+      {/* IT Requisitions Pending HOD Approval */}
+      {isHod && (
+        <ITRequisitionsTable dataFlag="hodPending" hodEmail={userEmail} />
+      )}
+
+      {/* IT Requisitions Pending IT Approval */}
+      {isITAdmin && <ITRequisitionsTable dataFlag="itPending" />}
 
       {/* All IT Requisitions */}
-      {isITAdmin && (
-        <div>
-          <span className="my-4 flex items-center gap-2 font-medium text-neutral-600">
-            <Laptop className="h-5 w-5" />
-            Submitted IT Requisitions
-          </span>
-          <ITRequisitionsTable isITAdmin={isITAdmin} />
-        </div>
-      )}
+      {isITAdmin && <ITRequisitionsTable dataFlag="itAll" />}
     </div>
   );
 };
