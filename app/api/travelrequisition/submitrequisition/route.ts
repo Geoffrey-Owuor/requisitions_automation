@@ -96,11 +96,11 @@ export async function POST(request: NextRequest) {
     travel_business_justification, travel_mode, travel_transport_cost,
     travel_other_costs, travel_per_diem, travel_total_cost, travel_cost_center, travel_within_budget,
     travel_approval_tier, travel_hod_approval_status, travel_hr_approval_status,
-    travel_director_approval_status, travel_hod_approver, engineering_jobs)
+    travel_director_approval_status, travel_hod_approver, travel_hod_email, engineering_jobs)
     VALUES 
     ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
     $11, $12, $13, $14, $15, $16, $17, $18,
-    $19, $20, $21, $22, $23) RETURNING request_id
+    $19, $20, $21, $22, $23, $24) RETURNING request_id
     `;
 
     // Insert params
@@ -127,6 +127,7 @@ export async function POST(request: NextRequest) {
       hrStatus,
       directorStatus,
       hodApprover,
+      hodEmail,
       engineeringJobs || null,
     ];
 
