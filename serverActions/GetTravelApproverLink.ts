@@ -8,7 +8,7 @@ interface ApproverTokenProps {
   stage: TravelStageLevels;
 }
 
-export async function getApproverLink({
+export async function getTravelApproverLink({
   email,
   uuid,
   stage,

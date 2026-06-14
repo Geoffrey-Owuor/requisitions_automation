@@ -19,7 +19,7 @@ import { dateFormatter } from "@/public/assets";
 import ClientPortal from "../ClientPortal";
 import Link from "next/link";
 import { useUser } from "@/context/UserContext";
-import { getApproverLink } from "@/serverActions/GetApproverLink";
+import { getTravelApproverLink } from "@/serverActions/GetTravelApproverLink";
 import { useLoadingStore } from "@/store/useLoadingStore";
 import { useEffect, useState } from "react";
 
@@ -72,7 +72,11 @@ export const TravelDetailsModal = ({
         setLoading(true);
 
         const uuid = data.request_id;
-        const resolvedLink = await getApproverLink({ email, stage, uuid });
+        const resolvedLink = await getTravelApproverLink({
+          email,
+          stage,
+          uuid,
+        });
 
         setLink(resolvedLink);
       } catch (error) {

@@ -6,32 +6,40 @@ import ClientPortal from "../ClientPortal";
 import { getDailyGreeting } from "@/public/assets";
 
 const DashboardAlert = () => {
-  const [isVisible, setIsVisible] = useState(true);
-  const [isExiting, setIsExiting] = useState(false);
+  //  Check if the alert has already been shown in this session
+  const [isVisible, setIsVisible] = useState(() => {
+    if (typeof window !== "undefined") {
+      const hasShown = sessionStorage.getItem("dashboard_greeting_shown");
+      return hasShown !== "true"; // Visible only if NOT shown yet
+    }
+    return false; // Default to false for SSR/Next.js hydration safety
+  });
 
-  // React will only run this function
-  // exactly once during the initial render, locking in the greeting.
+  const [isExiting, setIsExiting] = useState(false);
   const [greeting] = useState(() => getDailyGreeting());
 
-  // Handle the exit animation and unmounting
   const handleClose = () => {
     setIsExiting(true);
-    // Wait for the slide-out animation to finish (400ms) before removing from DOM
     setTimeout(() => {
       setIsVisible(false);
+      // Mark as shown so it never triggers again this session
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("dashboard_greeting_shown", "true");
+      }
     }, 400);
   };
 
   useEffect(() => {
-    // Auto-close after 6 seconds
+    if (!isVisible) return;
+
     const timer = setTimeout(() => {
       handleClose();
     }, 6000);
 
-    return () => clearTimeout(timer); // Cleanup if the component unmounts early
-  }, []);
+    return () => clearTimeout(timer);
+  }, [isVisible]);
 
-  // Completely unmount the component when it's no longer visible
+  // If already shown in this session, render absolutely nothing
   if (!isVisible) return null;
 
   return (
@@ -40,19 +48,13 @@ const DashboardAlert = () => {
         className={`fixed top-4 left-1/2 z-9999 hidden items-center gap-3 rounded-full border border-white/10 bg-black/85 px-5 py-3 text-white shadow-2xl sm:flex ${isExiting ? "animate-slide-out-top" : "animate-slide-in-top"} `}
         role="alert"
       >
-        {/* Notification Icon */}
         <div className="flex items-center justify-center rounded-full bg-white/20 p-1.5">
           <Bell className="h-4 w-4 text-white" />
         </div>
-
-        {/* Greeting Text */}
         <p className="pr-2 text-sm font-medium tracking-wide">{greeting}</p>
-
-        {/* Close Button */}
         <button
           onClick={handleClose}
-          className="rounded-full p-1 transition-colors hover:bg-white/20 focus:ring-2 focus:ring-white/50 focus:outline-none"
-          aria-label="Close alert"
+          className="rounded-full p-1 transition-colors hover:bg-white/20"
         >
           <X className="h-4 w-4 text-gray-300 hover:text-white" />
         </button>
