@@ -119,5 +119,15 @@ export function directorApprovalStage({
         showPdfDownload: true,
       });
     }
+
+    // Finance
+    EmailSender({
+      to: process.env.FIRST_FINANCE_EMAIL!,
+      requestId: uuid,
+      message: `This travel requisition has been approved by ${approverName}`,
+      title: `Final Update: Travel Requisition Approved By ${approverName}`,
+      role: "user",
+      showPdfDownload: true,
+    });
   }
 }

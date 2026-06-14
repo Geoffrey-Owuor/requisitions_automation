@@ -63,6 +63,16 @@ export async function hodApprovalStage({
         role: "user",
         showPdfDownload: true,
       });
+
+      // Finance
+      EmailSender({
+        to: process.env.FIRST_FINANCE_EMAIL!,
+        requestId: uuid,
+        message: `This travel requisition has been approved by ${approverName}`,
+        title: `Final Update: Travel Requisition Approved By ${approverName}`,
+        role: "user",
+        showPdfDownload: true,
+      });
     } else {
       //  Requisition requires the next approval - HR
       HR_ARRAY.forEach((hrApprover) => {
