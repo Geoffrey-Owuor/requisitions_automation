@@ -1,13 +1,9 @@
 import DashboardSidebar from "../DashboardSidebar";
 import MobileHeader from "../MobileHeader";
-import DashboardAlert from "./DashboardAlert";
 
 const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="min-h-screen bg-linear-to-br from-red-950 via-red-950 to-red-900">
-      {/* The dashboard alert */}
-      <DashboardAlert />
-
       {/* Mobile header handles screens below lg */}
       <MobileHeader />
 

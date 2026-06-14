@@ -11,6 +11,7 @@ import {
   ShoppingBag,
 } from "lucide-react";
 import Link from "next/link";
+import DashboardAlert from "./DashboardAlert";
 
 const quickLinks: { icon: LucideIcon; link: string; title: string }[] = [
   {
@@ -42,6 +43,9 @@ const UserDashboard = () => {
 
   return (
     <div className="p-4">
+      {/* The dashboard alert */}
+      <DashboardAlert />
+
       {/* WELCOME AREA */}
       <div className="flex flex-wrap items-center justify-between gap-6 max-sm:flex-col max-sm:items-start">
         {/* Welcome Text */}
