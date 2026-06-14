@@ -2,7 +2,7 @@
 import { Loader2, ShoppingBag } from "lucide-react";
 import { useState } from "react";
 
-const PurchaseIframeWrapper = () => {
+const PurchaseIframeWrapper = ({ ssoUrl }: { ssoUrl: string }) => {
   const [isLoading, setIsLoading] = useState(true);
   return (
     <div className="relative h-full w-full bg-white dark:bg-gray-950">
@@ -28,12 +28,12 @@ const PurchaseIframeWrapper = () => {
       )}
 
       <iframe
-        src="https://192.168.34.234:4443/login" // Reverse proxy login page
+        src={ssoUrl} // Reverse proxy login page
         title="Staff Product Purchase"
         className={`h-full w-full border-none transition-opacity duration-500 ${
           isLoading ? "opacity-0" : "opacity-100"
         }`}
-        sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+        allow="clipboard-read; clipboard-write"
         onLoad={() => setIsLoading(false)}
       />
     </div>
