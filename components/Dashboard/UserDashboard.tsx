@@ -3,7 +3,7 @@
 import { useUser } from "@/context/UserContext";
 import TravelRequisitionsTable from "./TravelRequisitionsTable";
 import ITRequisitionsTable from "./ITRequisitionsDashboard/ITRequisitionsTable";
-import { BriefcaseBusiness, Mail } from "lucide-react";
+import { Mail } from "lucide-react";
 
 const UserDashboard = () => {
   const { username, email: userEmail, roles } = useUser();
@@ -12,6 +12,8 @@ const UserDashboard = () => {
   // Check user active roles
   const isITAdmin = roles.includes("it");
   const isHod = roles.includes("hod");
+  const isHr = roles.includes("hr");
+  const isDirector = roles.includes("director");
 
   return (
     <div className="p-4">
@@ -20,7 +22,7 @@ const UserDashboard = () => {
         {/* Welcome Text */}
         <div>
           <p className="mb-1 font-mono text-[14px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
-            Welcome!
+            Howdy!
           </p>
           <h1 className="text-sm font-semibold tracking-[-0.5px] text-[#1e1b1b]">
             {firstName}, look who showed up 👀
@@ -42,16 +44,23 @@ const UserDashboard = () => {
         </a>
       </div>
 
-      {/* DATA TABLES */}
+      {/* ----------DATA TABLES------------ */}
+
+      {/* TRAVEL REQUISITIONS */}
 
       {/* User Travel Requisitions */}
-      <div>
-        <span className="my-4 flex items-center gap-2 font-medium text-neutral-600">
-          <BriefcaseBusiness className="h-5 w-5" />
-          Your Travel Requisitions
-        </span>
-        <TravelRequisitionsTable userEmail={userEmail} />
-      </div>
+      <TravelRequisitionsTable dataFlag="userData" userEmail={userEmail} />
+
+      {/* Travel Requisitions Pending HOD Approval */}
+      {isHod && (
+        <TravelRequisitionsTable dataFlag="hodPending" hodEmail={userEmail} />
+      )}
+
+      {/* Travel Requisitions Pending HR Approval */}
+      {isHr && <TravelRequisitionsTable dataFlag="hrPending" />}
+
+      {/* Travel Requisitions Pending Director Approval */}
+      {isDirector && <TravelRequisitionsTable dataFlag="directorPending" />}
 
       {/* IT REQUISITIONS */}
 
