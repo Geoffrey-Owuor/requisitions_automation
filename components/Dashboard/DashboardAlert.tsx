@@ -6,15 +6,17 @@ import ClientPortal from "../ClientPortal";
 import { getDailyGreeting } from "@/public/assets";
 
 const DashboardAlert = () => {
-  //  Check if the alert has already been shown in this session
+  // Check if it has been shown in this session
   const [isVisible, setIsVisible] = useState(() => {
     if (typeof window !== "undefined") {
       const hasShown = sessionStorage.getItem("dashboard_greeting_shown");
-      return hasShown !== "true"; // Visible only if NOT shown yet
+      return hasShown !== "true";
     }
     return false; // Default to false for SSR/Next.js hydration safety
   });
 
+  // 1. Add a state to control the actual slide-in trigger
+  const [shouldRender, setShouldRender] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
   const [greeting] = useState(() => getDailyGreeting());
 
@@ -22,7 +24,6 @@ const DashboardAlert = () => {
     setIsExiting(true);
     setTimeout(() => {
       setIsVisible(false);
-      // Mark as shown so it never triggers again this session
       if (typeof window !== "undefined") {
         sessionStorage.setItem("dashboard_greeting_shown", "true");
       }
@@ -32,15 +33,24 @@ const DashboardAlert = () => {
   useEffect(() => {
     if (!isVisible) return;
 
-    const timer = setTimeout(() => {
-      handleClose();
-    }, 6000);
+    // 2. Wait 1 second before showing the alert
+    const entryTimer = setTimeout(() => {
+      setShouldRender(true);
+    }, 1000);
 
-    return () => clearTimeout(timer);
+    // 3. Keep the alert open for 6 seconds AFTER it renders (1000ms delay + 6000ms open time = 7000ms total)
+    const autoCloseTimer = setTimeout(() => {
+      handleClose();
+    }, 7000);
+
+    return () => {
+      clearTimeout(entryTimer);
+      clearTimeout(autoCloseTimer);
+    };
   }, [isVisible]);
 
-  // If already shown in this session, render absolutely nothing
-  if (!isVisible) return null;
+  // If already shown in this session, or we are still waiting out the 1s delay, render nothing
+  if (!isVisible || !shouldRender) return null;
 
   return (
     <ClientPortal>
