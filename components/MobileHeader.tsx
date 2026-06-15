@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import DashboardBrand from "./DashboardBrand";
 import Brand from "./Brand";
 import UserDropdown from "./UserDropDown";
 import {
@@ -13,8 +14,6 @@ import {
   CircleQuestionMark,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { initialsHelper } from "@/public/assets";
-import { useUser } from "@/context/UserContext";
 
 const links = [
   { href: "/dashboard", label: "Dashboard", Icon: LayoutDashboard },
@@ -27,11 +26,8 @@ const links = [
 ];
 
 const MobileHeader = () => {
-  const { username, email } = useUser();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
-
-  const initials = initialsHelper(username ? username : "GU");
 
   return (
     <>
@@ -43,7 +39,7 @@ const MobileHeader = () => {
       >
         {/* Backdrop */}
         <div
-          className={`fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-200 ${
+          className={`fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-200 ${
             sidebarOpen ? "opacity-100" : "opacity-0"
           }`}
           onClick={() => setSidebarOpen(false)}
@@ -51,13 +47,15 @@ const MobileHeader = () => {
 
         {/* Sliding Panel */}
         <aside
-          className={`relative z-10 h-full ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} flex w-64 flex-col bg-white shadow-2xl transition-transform duration-200`}
+          className={`relative z-10 h-full ${
+            sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } flex w-64 flex-col bg-white shadow-2xl transition-transform duration-200`}
         >
           <div className="flex h-16 items-center justify-between border-b border-slate-100 px-6">
             <Brand showText={true} />
             <button
               onClick={() => setSidebarOpen(false)}
-              className="rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+              className="rounded-full p-1.5 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-950"
             >
               <X size={20} />
             </button>
@@ -71,15 +69,19 @@ const MobileHeader = () => {
                   key={href}
                   href={href}
                   onClick={() => setSidebarOpen(false)}
-                  className={`flex items-center gap-3 rounded-xl px-4 py-3 text-[14px] font-semibold transition-all ${
+                  className={`group flex items-center gap-3 rounded-xl px-4 py-3 text-[14px] font-semibold transition-all ${
                     isActive
-                      ? "bg-slate-900 text-white"
-                      : "text-slate-600 hover:bg-rose-50 hover:text-rose-600"
+                      ? "bg-red-950 text-white shadow-md"
+                      : "text-slate-600 hover:bg-red-50 hover:text-red-950"
                   }`}
                 >
                   <Icon
                     size={18}
-                    className={isActive ? "text-white" : "text-slate-600"}
+                    className={`transition-colors ${
+                      isActive
+                        ? "text-white"
+                        : "text-slate-500 group-hover:text-red-950"
+                    }`}
                   />
                   {label}
                 </Link>
@@ -88,16 +90,18 @@ const MobileHeader = () => {
           </nav>
         </aside>
       </div>
+
+      {/* Top Header - Sits directly on the red-950 background */}
       <header className="fixed top-0 right-0 left-0 z-40 flex h-16 items-center justify-between px-4 lg:hidden">
         {/* Left Side: Menu Toggle + Icon Brand */}
         <div className="flex items-center gap-4">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="rounded-full p-1.5 text-slate-600 transition-all hover:bg-slate-200/60 active:scale-95"
+            className="rounded-full p-1.5 text-white/80 transition-all hover:bg-white/10 hover:text-white active:scale-95"
           >
             <Menu size={24} />
           </button>
-          <Brand showText={false} />
+          <DashboardBrand showText={false} />
         </div>
 
         {/* Right Side: User Dropdown and Guidelines Link */}
@@ -106,16 +110,11 @@ const MobileHeader = () => {
             href="/guidelines"
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-full p-1.5 text-blue-600 hover:bg-blue-100/60"
+            className="rounded-full p-1.5 text-white/80 transition-all hover:bg-white/10 hover:text-white"
           >
             <CircleQuestionMark className="h-5 w-5" />
           </a>
-          <UserDropdown
-            direction="down"
-            initials={initials}
-            userName={username}
-            userEmail={email}
-          />
+          <UserDropdown direction="down" />
         </div>
       </header>
     </>

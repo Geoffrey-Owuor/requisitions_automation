@@ -7,6 +7,7 @@ import { Suspense } from "react";
 import { query } from "@/lib/db";
 import NotFoundRequest from "@/components/Approvers/TravelApprovers/NotFoundRequest";
 import DashboardWrapper from "@/components/Dashboard/DashboardWrapper";
+import RequisitionPagesWrapper from "@/components/Dashboard/RequisitionPagesWrapper";
 import { UserProvider } from "@/context/UserContext";
 import ITReqPdfSkeleton from "@/components/Skeletons/ITReqPdfSkeleton";
 import ITReqPdfModal from "@/components/Approvers/ITApprovers/ITReqPdfModal";
@@ -32,14 +33,17 @@ const page = async ({ params }: PdfDownloadProps) => {
   const guestObject = {
     username: "Guest Account",
     email: "noreply@hotpoint.co.ke",
+    roles: ["guest"],
   };
 
   return (
     <UserProvider user={guestObject}>
       <DashboardWrapper>
-        <Suspense fallback={<ITReqPdfSkeleton />}>
-          <ITReqPdfModal pdfData={pdfData} />
-        </Suspense>
+        <RequisitionPagesWrapper>
+          <Suspense fallback={<ITReqPdfSkeleton />}>
+            <ITReqPdfModal pdfData={pdfData} />
+          </Suspense>
+        </RequisitionPagesWrapper>
       </DashboardWrapper>
     </UserProvider>
   );

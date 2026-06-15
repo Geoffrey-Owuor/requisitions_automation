@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { Suspense } from "react";
 import DashboardWrapper from "@/components/Dashboard/DashboardWrapper";
+import RequisitionPagesWrapper from "@/components/Dashboard/RequisitionPagesWrapper";
 import { UserProvider } from "@/context/UserContext";
 import { query } from "@/lib/db";
 import TravelApprovalModal from "@/components/Approvers/TravelApprovers/TravelApprovalModal";
@@ -84,39 +85,42 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
   const contextObject = {
     username: currentApprover,
     email: currentApproverEmail,
+    roles: [stage],
   };
 
   return (
     <UserProvider user={contextObject}>
       <DashboardWrapper>
-        <Suspense fallback={<TravelApprovalSkeleton />}>
-          <TravelApprovalModal
-            uuid={uuid}
-            stage={stage}
-            approverName={currentApprover}
-            approverEmail={currentApproverEmail}
-            employeeName={requestData.employee_name}
-            employeeDepartment={requestData.employee_department}
-            employeeDesignation={requestData.employee_designation}
-            travelDestination={requestData.travel_destination}
-            travelDepartureDate={requestData.travel_departure_date}
-            travelReturnDate={requestData.travel_return_date}
-            travelCategory={requestData.travel_category}
-            travelBusinessJustification={
-              requestData.travel_business_justification
-            }
-            travelMode={requestData.travel_mode}
-            travelTransportCost={requestData.travel_transport_cost}
-            travelOtherCosts={requestData.travel_other_costs}
-            travelPerDiem={requestData.travel_per_diem}
-            travelTotalCost={requestData.travel_total_cost}
-            travelCostCenter={requestData.travel_cost_center}
-            travelWithinBudget={requestData.travel_within_budget}
-            travelApprovalTier={requestData.travel_approval_tier}
-            requestCreatedAt={requestData.request_created_at}
-            engineeringJobs={requestData.engineering_jobs}
-          />
-        </Suspense>
+        <RequisitionPagesWrapper>
+          <Suspense fallback={<TravelApprovalSkeleton />}>
+            <TravelApprovalModal
+              uuid={uuid}
+              stage={stage}
+              approverName={currentApprover}
+              approverEmail={currentApproverEmail}
+              employeeName={requestData.employee_name}
+              employeeDepartment={requestData.employee_department}
+              employeeDesignation={requestData.employee_designation}
+              travelDestination={requestData.travel_destination}
+              travelDepartureDate={requestData.travel_departure_date}
+              travelReturnDate={requestData.travel_return_date}
+              travelCategory={requestData.travel_category}
+              travelBusinessJustification={
+                requestData.travel_business_justification
+              }
+              travelMode={requestData.travel_mode}
+              travelTransportCost={requestData.travel_transport_cost}
+              travelOtherCosts={requestData.travel_other_costs}
+              travelPerDiem={requestData.travel_per_diem}
+              travelTotalCost={requestData.travel_total_cost}
+              travelCostCenter={requestData.travel_cost_center}
+              travelWithinBudget={requestData.travel_within_budget}
+              travelApprovalTier={requestData.travel_approval_tier}
+              requestCreatedAt={requestData.request_created_at}
+              engineeringJobs={requestData.engineering_jobs}
+            />
+          </Suspense>
+        </RequisitionPagesWrapper>
       </DashboardWrapper>
     </UserProvider>
   );

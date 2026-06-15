@@ -1,10 +1,20 @@
 "use server";
 import { query } from "@/lib/db";
 
-export const getTravelRequisitionData = async (email?: string) => {
-  if (!email) return [];
+export interface TravelRequisitionDataProps {
+  dataFlag: "userData" | "hodPending" | "hrPending" | "directorPending";
+  userEmail?: string;
+  hodEmail?: string;
+}
 
-  const fetchQuery = `
+export const getTravelRequisitionData = async ({
+  dataFlag,
+  userEmail,
+  hodEmail,
+}: TravelRequisitionDataProps) => {
+  const baseParams = [];
+
+  let baseQuery = `
     SELECT 
         request_id, request_created_at,
         employee_name, travel_destination, travel_departure_date, 
@@ -13,11 +23,36 @@ export const getTravelRequisitionData = async (email?: string) => {
         travel_cost_center,
         travel_hod_approval_status, travel_hr_approval_status, travel_director_approval_status
         FROM travel_requisitions
-        WHERE submitter_email = $1 ORDER BY request_created_at DESC
     `;
 
+  switch (dataFlag) {
+    case "userData":
+      baseQuery += ` WHERE submitter_email = $${baseParams.length + 1}`;
+      baseParams.push(userEmail);
+      break;
+    case "hodPending":
+      baseQuery += ` WHERE travel_hod_email = $${baseParams.length + 1} AND 
+                     travel_hod_approval_status = $${baseParams.length + 2}`;
+      baseParams.push(hodEmail, "pending");
+      break;
+    case "hrPending":
+      baseQuery += ` WHERE travel_hod_approval_status = $${baseParams.length + 1} AND
+                     travel_hr_approval_status = $${baseParams.length + 2}`;
+      baseParams.push("approved", "pending");
+      break;
+    case "directorPending":
+      baseQuery += ` WHERE travel_hod_approval_status = $${baseParams.length + 1} AND
+                     travel_hr_approval_status = $${baseParams.length + 2} AND
+                     travel_director_approval_status = $${baseParams.length + 3}`;
+      baseParams.push("approved", "approved", "pending");
+      break;
+  }
+
+  // Final base query
+  baseQuery += ` ORDER BY request_created_at DESC`;
+
   try {
-    const result = await query(fetchQuery, [email]);
+    const result = await query(baseQuery, baseParams);
     return result;
   } catch (error) {
     console.error(
