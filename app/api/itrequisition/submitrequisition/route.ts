@@ -90,9 +90,9 @@ export async function POST(request: NextRequest) {
     const insertQuery = `
   INSERT INTO it_requisitions
   (submitter_email, submitter_name, employee_name, employee_department, employee_staff_number,
-   replacement_new, requirements, other_requirements, requisition_date, date_joining, hod_approver_name)
+   replacement_new, requirements, other_requirements, requisition_date, date_joining, hod_approver_name, hod_approver_email)
    VALUES
-   ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+   ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
    RETURNING request_id
   `;
 
@@ -109,6 +109,7 @@ export async function POST(request: NextRequest) {
       requisitionDate,
       dateJoining,
       hodApprover,
+      hodEmail,
     ];
 
     // Run the query

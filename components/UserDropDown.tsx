@@ -3,22 +3,26 @@
 
 import { useState, useRef, useEffect } from "react";
 import { LogOut } from "lucide-react";
+import { useUser } from "@/context/UserContext";
+import { initialsHelper } from "@/public/assets";
+import RolePill from "./RolePill";
 
 type UserDropdownProps = {
-  initials?: string;
-  userName?: string | null;
-  userEmail?: string | null;
-  direction?: "up" | "down";
+  direction: "up" | "down";
 };
 
 export default function UserDropdown({
-  initials,
-  userName,
-  userEmail,
   direction = "down",
 }: UserDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // User details
+  // roles here is an array of unique strings
+  const { username, email, roles } = useUser();
+
+  // Initials
+  const initials = initialsHelper(username);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -43,7 +47,7 @@ export default function UserDropdown({
       {/* ── TRIGGER BUTTON ── */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-slate-800 to-rose-900 text-[11px] font-semibold text-white hover:shadow-sm active:scale-95 md:h-8 md:w-8"
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-slate-50 to-rose-100 text-[11px] font-semibold text-red-950 hover:shadow-sm active:scale-95 md:h-8 md:w-8"
         aria-expanded={isOpen}
       >
         {initials || "NA"}
@@ -55,16 +59,28 @@ export default function UserDropdown({
           className={`absolute ${positionClasses} animate-in fade-in zoom-in-95 w-60 rounded-2xl border border-slate-200/80 bg-white/95 p-2 shadow-[0_16px_40px_rgba(0,0,0,0.08)] backdrop-blur-xl duration-200`}
         >
           {/* User Info Header */}
-          <div className="mb-1 flex flex-col gap-0.5 rounded-xl bg-slate-50/80 px-4 py-3">
-            <span className="truncate text-[14px] font-semibold text-slate-900">
-              {userName || "Unknown User"}
-            </span>
-            <span className="truncate text-[12px] font-medium text-slate-500">
-              {userEmail || "Not logged in"}
-            </span>
-          </div>
 
-          <div className="my-1 h-px w-full bg-slate-100" />
+          <div className="mb-1 flex flex-col gap-0.5 rounded-xl bg-slate-100/60 px-4 py-3">
+            <span className="truncate text-[14px] font-semibold text-slate-900">
+              {username}
+            </span>
+            <span className="truncate border-b border-slate-200 pb-2 text-[12px] font-medium text-slate-500">
+              {email}
+            </span>
+
+            <span className="mt-3 text-xs font-medium text-neutral-700">
+              Active roles:
+            </span>
+
+            {/* TODO: Add this mapping block directly below the email span */}
+            {roles && roles.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {roles.map((role) => (
+                  <RolePill key={role} role={role} />
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* CHANGE: Execute the logout endpoint directly via window navigation */}
           <button

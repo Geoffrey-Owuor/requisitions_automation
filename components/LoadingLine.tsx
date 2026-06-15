@@ -54,7 +54,7 @@ const LoadingLine = () => {
   return (
     <div className="fixed top-0 left-0 z-100 h-0.75 w-full bg-transparent">
       <div
-        className="h-full bg-linear-to-r from-rose-600 via-rose-700 to-rose-800 transition-all duration-300 ease-out"
+        className="h-full bg-linear-to-r from-rose-500 via-rose-600 to-rose-700 transition-all duration-300 ease-out"
         style={{ width: `${progress}%` }}
       />
     </div>

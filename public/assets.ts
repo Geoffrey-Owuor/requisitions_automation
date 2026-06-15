@@ -1,12 +1,14 @@
 import hotpoint_logo from "./hotpoint_icon.png";
 import form_image from "./form_image.png";
 import hotpoint_background from "./hotpoint_logo.png";
+import hotpoint_black_logo from "./hotpoint_black_logo.png";
 import it_form_image from "./it_form_image.png";
 
 export const assets = {
   hotpoint_logo,
   form_image,
   hotpoint_background,
+  hotpoint_black_logo,
   it_form_image,
 };
 
@@ -38,3 +40,43 @@ export const initialsHelper = (userName: string) => {
 
   return initials;
 };
+
+export function getDailyGreeting(date: Date = new Date()): string {
+  const dayOfWeek = date.getDay(); // 0 (Sunday) to 6 (Saturday)
+
+  const greetings: Record<number, string[]> = {
+    0: ["Easy like Sunday morning! ☀️", "Happy Sunday! Time to recharge 🔋"],
+    1: [
+      "May your coffee be strong and your Monday be short! ☕",
+      "Happy Monday! Let's crush this week 🚀",
+    ],
+    2: [
+      "Terrific Tuesday! You're already crushing it 💪",
+      "Happy Tuesday! Keep up the great momentum ✨",
+    ],
+    3: [
+      "Happy Hump Day! We're officially halfway there 🐪",
+      "Wonderful Wednesday! Keep shining 🌟",
+    ],
+    4: [
+      "Thrilling Thursday! The weekend is officially in sight 👀",
+      "Happy Thursday! Let's finish strong 🏁",
+    ],
+    5: [
+      "Fri-nally! Time to wrap up and celebrate 🥳",
+      "TGIF! Have a fantastic Friday 🎉",
+    ],
+    6: [
+      "Super Saturday! Time to relax and unwind 🌴",
+      "Happy Saturday! Enjoy those weekend vibes 🛋️",
+    ],
+  };
+
+  // Get the array of greetings for the current day
+  const dailyGreetings = greetings[dayOfWeek];
+
+  // Pick a random greeting from the available options
+  const randomIndex = Math.floor(Math.random() * dailyGreetings.length);
+
+  return dailyGreetings[randomIndex];
+}

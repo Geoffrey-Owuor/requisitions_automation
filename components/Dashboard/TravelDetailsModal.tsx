@@ -11,27 +11,83 @@ import {
   ArrowUpRight,
   Workflow,
   BriefcaseBusiness,
+  ShieldUser,
 } from "lucide-react";
 import { QueryResultRow } from "pg";
 import StatusFormatter from "./StatusFormatter";
 import { dateFormatter } from "@/public/assets";
 import ClientPortal from "../ClientPortal";
 import Link from "next/link";
+import { useUser } from "@/context/UserContext";
+import { getTravelApproverLink } from "@/serverActions/GetTravelApproverLink";
 import { useLoadingStore } from "@/store/useLoadingStore";
+import { useEffect, useState } from "react";
 
 interface ModalProps {
   data: QueryResultRow | null;
   isOpen: boolean;
+  dataFlag: "userData" | "hodPending" | "hrPending" | "directorPending";
   onClose: () => void;
 }
 
-export const TravelDetailsModal = ({ data, isOpen, onClose }: ModalProps) => {
-  const setLoadingLine = useLoadingStore((state) => state.setLoadingLine);
+export type TravelStageLevels = "hod" | "hr" | "director" | "user";
 
-  const handlePdfLink = () => {
+export const TravelDetailsModal = ({
+  data,
+  isOpen,
+  onClose,
+  dataFlag,
+}: ModalProps) => {
+  const setLoadingLine = useLoadingStore((state) => state.setLoadingLine);
+  const { email } = useUser();
+  const [loading, setLoading] = useState(false);
+  const [link, setLink] = useState("#");
+
+  const handleLinkClick = () => {
     setLoadingLine(true);
     onClose();
   };
+
+  // Get token based on the data flag
+
+  const STAGE_LEVELS: Record<typeof dataFlag, TravelStageLevels> = {
+    hodPending: "hod",
+    hrPending: "hr",
+    directorPending: "director",
+    userData: "user", // We have to make sure this is never used as it it not yet available in our data
+  };
+
+  const stage = STAGE_LEVELS[dataFlag];
+
+  useEffect(() => {
+    const getApprovalLink = async () => {
+      try {
+        if (!data) return; //do not run when data is not available
+        if (
+          stage === "user" ||
+          data[`travel_${stage}_approval_status`] !== "pending"
+        )
+          return; //do not run when we are viewing user data or approver status is not pending
+
+        setLoading(true);
+
+        const uuid = data.request_id;
+        const resolvedLink = await getTravelApproverLink({
+          email,
+          stage,
+          uuid,
+        });
+
+        setLink(resolvedLink);
+      } catch (error) {
+        console.error("Error fetching approver link:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getApprovalLink();
+  }, [data, stage, email]);
 
   if (!isOpen || !data) return null;
 
@@ -46,7 +102,7 @@ export const TravelDetailsModal = ({ data, isOpen, onClose }: ModalProps) => {
           className="relative w-full max-w-2xl rounded-[20px] border border-white/80 bg-white/90 shadow-[0_32px_64px_rgba(160,60,60,0.15)] backdrop-blur-2xl"
         >
           {/* Header */}
-          <div className="flex items-center justify-between overflow-hidden rounded-t-[20px] bg-white px-8 py-4">
+          <div className="flex flex-wrap items-center justify-between gap-2 overflow-hidden rounded-t-[20px] bg-white px-8 py-4">
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-red-400 shadow-sm">
                 <BriefcaseBusiness size={18} />
@@ -62,12 +118,29 @@ export const TravelDetailsModal = ({ data, isOpen, onClose }: ModalProps) => {
               </div>
             </div>
             <div className="flex items-center gap-4">
+              {stage !== "user" &&
+                data[`travel_${stage}_approval_status`] === "pending" && (
+                  <>
+                    {loading ? (
+                      <div className="h-5 w-12 animate-pulse rounded-full bg-gray-300" />
+                    ) : (
+                      <Link
+                        href={link}
+                        onClick={handleLinkClick}
+                        className="flex items-center gap-1 rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white transition-colors duration-200 hover:bg-slate-800"
+                      >
+                        <ShieldUser className="h-3.5 w-3.5" />
+                        Review
+                      </Link>
+                    )}
+                  </>
+                )}
               <Link
                 href={`/travelapproval/${data.request_id}/pdfdownload`}
-                onClick={handlePdfLink}
+                onClick={handleLinkClick}
                 className="flex items-center gap-1 rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white transition-colors duration-200 hover:bg-slate-800"
               >
-                Goto pdf
+                Pdf
                 <ArrowUpRight className="h-3.5 w-3.5" />
               </Link>
               <button
@@ -79,7 +152,7 @@ export const TravelDetailsModal = ({ data, isOpen, onClose }: ModalProps) => {
             </div>
           </div>
 
-          <div className="grid max-h-[80vh] grid-cols-1 gap-4 overflow-y-auto p-6 md:grid-cols-2">
+          <div className="layout-scrollbar grid max-h-[80vh] grid-cols-1 gap-4 p-6 md:grid-cols-2">
             <DetailItem
               icon={UserRound}
               label="Employee"

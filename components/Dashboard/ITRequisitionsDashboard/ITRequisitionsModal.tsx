@@ -9,15 +9,23 @@ import {
   CheckCircle2,
   UserRound,
   ArrowUpRight,
+  ShieldUser,
 } from "lucide-react";
 import StatusFormatter from "../StatusFormatter";
 import { dateFormatter } from "@/public/assets";
 import { useLoadingStore } from "@/store/useLoadingStore";
 import ClientPortal from "@/components/ClientPortal";
+import {
+  getITApproverLink,
+  ITStageLevels,
+} from "@/serverActions/GetITApproverLink";
+import { useUser } from "@/context/UserContext";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
 interface ITRequisitionModalProps {
   isOpen: boolean;
+  dataFlag: "userData" | "hodPending" | "itPending" | "itAll";
   data: QueryResultRow | null;
   onClose: () => void;
 }
@@ -70,7 +78,9 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
       <span className="text-[10px] font-semibold tracking-wider text-gray-400 uppercase">
         {label}
       </span>
-      <span className="text-sm text-[#1e1b1b]">{generateValue(value)}</span>
+      <span className="max-w-50 truncate text-sm text-[#1e1b1b]">
+        {generateValue(value)}
+      </span>
     </div>
   );
 }
@@ -79,10 +89,15 @@ export function ITRequisitionModal({
   isOpen,
   data,
   onClose,
+  dataFlag,
 }: ITRequisitionModalProps) {
   const setLoadingLine = useLoadingStore((state) => state.setLoadingLine);
 
-  const handlePdfLink = () => {
+  const { email } = useUser();
+  const [loading, setLoading] = useState(false);
+  const [link, setLink] = useState("#");
+
+  const handleLinkClick = () => {
     onClose();
     setLoadingLine(true);
   };
@@ -92,6 +107,44 @@ export function ITRequisitionModal({
     if (Array.isArray(val)) return val.join(", ");
     return String(val);
   };
+
+  // Get token based on the data flag
+
+  const STAGE_LEVELS: Record<typeof dataFlag, ITStageLevels> = {
+    hodPending: "hod",
+    itPending: "it",
+    userData: "user", // We have to make sure this is never used as it it not yet available in our data
+    itAll: "it",
+  };
+
+  const stage = STAGE_LEVELS[dataFlag];
+
+  useEffect(() => {
+    const getApprovalLink = async () => {
+      try {
+        if (!data) return; //do not run when data is not available
+        if (stage === "user" || data[`${stage}_approver_status`] !== "pending")
+          return; //do not run when we are viewing user data or approver status is not pending
+
+        setLoading(true);
+
+        const uuid = data.request_id;
+        const resolvedLink = await getITApproverLink({
+          email,
+          stage,
+          uuid,
+        });
+
+        setLink(resolvedLink);
+      } catch (error) {
+        console.error("Error fetching approver link:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getApprovalLink();
+  }, [data, stage, email]);
 
   if (!isOpen || !data) return null;
 
@@ -108,7 +161,7 @@ export function ITRequisitionModal({
           className="relative w-full max-w-2xl rounded-[20px] border border-b border-gray-200 bg-white/90 shadow-[0_32px_64px_rgba(60,100,160,0.15)] backdrop-blur-2xl"
         >
           {/* Header */}
-          <div className="sticky top-0 z-10 flex items-center justify-between rounded-t-[20px] border-b border-neutral-100/50 bg-neutral-50/40 px-6 py-4 backdrop-blur-md">
+          <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-2 rounded-t-[20px] border-b border-neutral-100/50 bg-neutral-50/40 px-6 py-4 backdrop-blur-md">
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-red-400 shadow-sm">
                 <Monitor size={18} />
@@ -125,12 +178,29 @@ export function ITRequisitionModal({
             </div>
 
             <div className="flex items-center gap-4">
+              {stage !== "user" &&
+                data[`${stage}_approver_status`] === "pending" && (
+                  <>
+                    {loading ? (
+                      <div className="h-5 w-12 animate-pulse rounded-full bg-gray-300" />
+                    ) : (
+                      <Link
+                        href={link}
+                        onClick={handleLinkClick}
+                        className="flex items-center gap-1 rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white transition-colors duration-200 hover:bg-slate-800"
+                      >
+                        <ShieldUser className="h-3.5 w-3.5" />
+                        Review
+                      </Link>
+                    )}
+                  </>
+                )}
               <Link
                 href={`/itapproval/${data.request_id}/pdfdownload`}
-                onClick={handlePdfLink}
+                onClick={handleLinkClick}
                 className="flex items-center gap-1 rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white transition-colors duration-200 hover:bg-slate-800"
               >
-                Goto pdf
+                Pdf
                 <ArrowUpRight className="h-3.5 w-3.5" />
               </Link>
               <button
@@ -143,7 +213,7 @@ export function ITRequisitionModal({
           </div>
 
           {/* Body */}
-          <div className="max-h-[80vh] space-y-6 overflow-y-auto px-6 py-6">
+          <div className="layout-scrollbar max-h-[80vh] space-y-6 px-6 py-6">
             {/* — Submitter Info — */}
             <section>
               <SectionHeader icon={UserRound} title="Submitted By" />
