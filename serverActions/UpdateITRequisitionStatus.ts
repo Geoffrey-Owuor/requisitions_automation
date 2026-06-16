@@ -90,13 +90,15 @@ export async function UpdateITRequisitionStatus(
 
     await client.query(baseUpdateQuery, baseParams);
 
+    // THIS IS COMMENTED OUT SINCE TOKEN ROTATION CAUSES INVALID LINK
+    // ISSUES FOR SUBSEQUENT EMAIL APPROVAL NOTIFICATIONS
     // Rotate the approver's uuid
-    await client.query(
-      `UPDATE ${payload.stage}_array 
-      SET ${payload.stage}_uuid = gen_random_uuid()
-      WHERE ${payload.stage}_email = $1`,
-      [payload.approverEmail],
-    );
+    // await client.query(
+    //   `UPDATE ${payload.stage}_array
+    //   SET ${payload.stage}_uuid = gen_random_uuid()
+    //   WHERE ${payload.stage}_email = $1`,
+    //   [payload.approverEmail],
+    // );
 
     await client.query("COMMIT");
 
