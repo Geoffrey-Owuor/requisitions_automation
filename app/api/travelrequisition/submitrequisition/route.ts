@@ -42,11 +42,16 @@ export async function POST(request: NextRequest) {
 
     const isEngineering = department === "Engineering & HVAC";
 
+    // More robust validation logic
+    // Returns true only if the value is genuinely missing (Allowing 0 values)
+    const isEmpty = (val: unknown) =>
+      val === null || val === undefined || val === "";
+
     const missingFields =
       Object.entries(formData).some(([key, value]) => {
         if (key === "engineeringJobs") return false;
 
-        return !value;
+        return isEmpty(value);
       }) ||
       (isEngineering && !engineeringJobs);
 
@@ -205,7 +210,7 @@ export async function POST(request: NextRequest) {
         role: "HOD",
         reviewLink: `?token=${hodUuid}&stage=hod`,
       });
-      // // User Send
+      // User Send
       EmailSender({
         to: email,
         requestId: requestUuid,

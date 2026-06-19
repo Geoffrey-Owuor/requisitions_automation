@@ -120,13 +120,19 @@ export default function TravelRequisitionPage() {
   const isEngineering = formData.department === "Engineering & HVAC";
 
   // More robust validation logic
+  // Returns true only if the value is genuinely missing (Allowing 0 values)
+  const isEmpty = (val: string | number) =>
+    val === null || val === undefined || val === "";
+
   const buttonDisabled =
     Object.entries(formData).some(([key, value]) => {
-      if (key === "engineeringJobs") return false; // Handle this separately below
-      return !value;
+      if (key === "engineeringJobs") return false;
+      return isEmpty(value);
     }) ||
     (isEngineering &&
-      formData.engineeringJobs.some((job) => !job.title || job.amount === 0));
+      formData.engineeringJobs.some(
+        (job) => !job.title || isEmpty(job.amount),
+      ));
 
   // Getting the total cost
   const totalCost =
