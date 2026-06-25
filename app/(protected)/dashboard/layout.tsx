@@ -1,9 +1,9 @@
 // app/(protected)/layout.tsx
 import { getSession } from "@/lib/session"; // Updated import
-import { redirect } from "next/navigation";
 import { UserProvider } from "@/context/UserContext";
 import DashboardWrapper from "@/components/Dashboard/DashboardWrapper";
 import { getUserRoles } from "@/serverActions/GetUserRoles";
+import HardRedirect from "@/components/HardRedirect";
 
 export default async function ProtectedLayout({
   children,
@@ -15,7 +15,7 @@ export default async function ProtectedLayout({
 
   // If no session exists, block access and redirect to the public login page
   if (!session) {
-    redirect("/login");
+    return <HardRedirect url="/api/auth/login" />;
   }
 
   // Get the possible user roles assigned to the user
