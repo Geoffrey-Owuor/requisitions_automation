@@ -1,19 +1,29 @@
-import Link from "next/link";
+"use client";
+
+import { useState } from "react";
 import Brand from "./Brand";
 import { ExternalLink } from "lucide-react";
 
 const Header = () => {
+  const [isLoading, setIsLoading] = useState(false);
   return (
     <header className="sticky top-0 z-50 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         <Brand showText={true} />
         <nav className="flex items-center gap-4">
-          <Link
-            href="/login"
-            className="rounded-full px-4 py-2 text-xs font-medium text-slate-600 transition-colors hover:bg-rose-50 hover:text-rose-600 sm:text-sm"
+          <form
+            action="/api/auth/login"
+            method="GET"
+            onSubmit={() => setIsLoading(true)}
           >
-            Login
-          </Link>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="cursor-pointer rounded-full px-4 py-2 text-xs font-medium text-slate-600 transition-colors hover:bg-rose-50 hover:text-rose-600 sm:text-sm"
+            >
+              Login
+            </button>
+          </form>
           <a
             href="http://192.168.0.27:10556"
             target="_blank"
