@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { ReactNode } from "react";
 import Header from "./Header";
+import QuickSignIn from "./QuickSignIn";
 
 const requisitions = [
   {
@@ -56,6 +57,9 @@ const requisitions = [
 export default function HomePage() {
   return (
     <div className="layout-scrollbar relative flex h-screen flex-col bg-[#fafafa] text-slate-900 selection:bg-rose-100 selection:text-rose-900">
+      {/* Quick Sign In component */}
+      <QuickSignIn />
+
       {/* ── AMBIENT BACKGROUND ── */}
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
         <div className="absolute -top-[10%] -left-[10%] h-[50%] w-[50%] rounded-full bg-rose-100/50 blur-[80px] sm:h-[40%] sm:w-[40%] sm:blur-[120px]" />
