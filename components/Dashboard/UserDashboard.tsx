@@ -9,11 +9,17 @@ import {
   Mail,
   Monitor,
   ShoppingBag,
+  Tags,
 } from "lucide-react";
 import Link from "next/link";
+import { useEffect } from "react";
 import DashboardAlert from "./DashboardAlert";
 
-const quickLinks: { icon: LucideIcon; link: string; title: string }[] = [
+const quickLinks: {
+  icon: LucideIcon;
+  link: string;
+  title: string;
+}[] = [
   {
     icon: Monitor,
     link: "/dashboard/itrequisition",
@@ -29,10 +35,26 @@ const quickLinks: { icon: LucideIcon; link: string; title: string }[] = [
     link: "/dashboard/staffproductpurchase",
     title: "Staff Product Purchase",
   },
+  {
+    icon: Tags,
+    link: "/dashboard/helpdesk",
+    title: "HelpDesk",
+  },
 ];
 
 const UserDashboard = () => {
   const { username, email: userEmail, roles } = useUser();
+
+  // --- CACHE USER FOR QUICK SIGN-IN ---
+  useEffect(() => {
+    if (username && userEmail) {
+      localStorage.setItem(
+        "Requisitions_Automation_lastUser",
+        JSON.stringify({ name: username, email: userEmail }),
+      );
+    }
+  }, [username, userEmail]);
+
   const firstName = username.split(" ")[0];
 
   // Check user active roles
