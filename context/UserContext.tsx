@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect } from "react";
+import { createContext, useContext } from "react";
 import { Roles } from "@/serverActions/GetUserRoles";
 
 interface UserDetails {
@@ -17,16 +17,6 @@ type UserProviderProps = {
 const UserContext = createContext<UserDetails | null>(null);
 
 export const UserProvider = ({ user, children }: UserProviderProps) => {
-  // --- CACHE USER FOR QUICK SIGN-IN ---
-  useEffect(() => {
-    if (user.username && user.email) {
-      localStorage.setItem(
-        "Requisitions_Automation_lastUser",
-        JSON.stringify({ name: user.username, email: user.email }),
-      );
-    }
-  }, [user]);
-
   const value: UserDetails = {
     roles: user.roles,
     username: user.username,
