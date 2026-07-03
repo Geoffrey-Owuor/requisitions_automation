@@ -32,8 +32,9 @@ const page = async () => {
     return <HardRedirect url="/api/auth/login" />;
   }
 
-  // Get the user's email
+  // Get the user's details
   const userEmail = session.email;
+  const userName = session.name;
 
   // 2. Generate the timestamp and signature
   const timestamp = Date.now().toString();
@@ -46,7 +47,7 @@ const page = async () => {
     .digest("hex");
 
   // 3. Construct the secure URL pointing to Nginx port 8443
-  const ssoUrl = `${baseUrl}:8443/api/sso/external?email=${encodeURIComponent(userEmail)}&timestamp=${timestamp}&signature=${signature}`;
+  const ssoUrl = `${baseUrl}:8443/api/sso/external?email=${encodeURIComponent(userEmail)}&name=${encodeURIComponent(userName)}&timestamp=${timestamp}&signature=${signature}`;
 
   return <HelpDeskIframeWrapper ssoUrl={ssoUrl} />;
 };

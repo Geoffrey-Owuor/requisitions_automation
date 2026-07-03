@@ -1,5 +1,5 @@
 "use client";
-import { Loader2, Tags } from "lucide-react";
+import { LaptopMinimalCheck, Loader2 } from "lucide-react";
 import { useState } from "react";
 
 const HelpDeskIframeWrapper = ({ ssoUrl }: { ssoUrl: string }) => {
@@ -10,7 +10,7 @@ const HelpDeskIframeWrapper = ({ ssoUrl }: { ssoUrl: string }) => {
       {isLoading && (
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center">
           {/* Larger Shopping Bag Icon */}
-          <Tags
+          <LaptopMinimalCheck
             className="mb-12 h-22 w-22 text-neutral-800 dark:text-neutral-200"
             strokeWidth={1.5}
           />

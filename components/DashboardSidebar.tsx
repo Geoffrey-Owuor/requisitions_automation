@@ -9,10 +9,10 @@ import {
   ChevronLeft,
   CircleQuestionMark,
   HousePlug,
+  LaptopMinimalCheck,
   LucideIcon,
   Monitor,
   ShoppingBag,
-  Tags,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import ClientPortal from "./ClientPortal";
@@ -51,7 +51,7 @@ const links = [
   {
     href: "/dashboard/helpdesk",
     label: "Desk",
-    Icon: Tags,
+    Icon: LaptopMinimalCheck,
     tooltip: "HelpDesk",
     showTooltip: true,
   },

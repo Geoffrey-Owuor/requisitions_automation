@@ -5,11 +5,11 @@ import TravelRequisitionsTable from "./TravelRequisitionsTable";
 import ITRequisitionsTable from "./ITRequisitionsDashboard/ITRequisitionsTable";
 import {
   BriefcaseBusiness,
+  LaptopMinimalCheck,
   LucideIcon,
   Mail,
   Monitor,
   ShoppingBag,
-  Tags,
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect } from "react";
@@ -36,7 +36,7 @@ const quickLinks: {
     title: "Staff Product Purchase",
   },
   {
-    icon: Tags,
+    icon: LaptopMinimalCheck,
     link: "/dashboard/helpdesk",
     title: "HelpDesk",
   },

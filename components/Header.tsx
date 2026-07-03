@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Brand from "./Brand";
-import { ExternalLink } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 
 const Header = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -32,7 +32,7 @@ const Header = () => {
           >
             <span className="hidden sm:inline">Purchase Portal</span>
             <span className="sm:hidden">Portal</span>
-            <ExternalLink size={14} className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+            <ArrowUpRight size={14} className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
           </a>
         </nav>
       </div>
