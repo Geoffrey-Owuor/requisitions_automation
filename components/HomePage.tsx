@@ -11,11 +11,11 @@ import {
   CheckCircle2,
   CircleGauge,
   ShoppingBag,
-  ExternalLink,
   BookText,
   ShieldAlert,
   Workflow,
   BriefcaseBusiness,
+  CircleArrowOutUpRight,
 } from "lucide-react";
 import { ReactNode } from "react";
 import Header from "./Header";
@@ -257,7 +257,7 @@ function QuickLink({
         </div>
       </div>
       {isExternal ? (
-        <ExternalLink size={14} className="text-slate-300" />
+        <CircleArrowOutUpRight size={14} className="text-slate-300" />
       ) : (
         <ArrowUpRight size={14} className="text-slate-300" />
       )}
