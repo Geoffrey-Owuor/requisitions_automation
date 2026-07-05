@@ -6,7 +6,7 @@ import Link from "next/link";
 const DashboardBrand = ({ showText = false }: { showText?: boolean }) => {
   return (
     <Link href="/" className="flex items-center gap-1.5">
-      <div className="relative h-6 w-6 shrink-0">
+      <div className="relative h-6.5 w-6.5 shrink-0">
         <Image
           src={assets.hotpoint_black_logo}
           alt="IssueDesk Logo"

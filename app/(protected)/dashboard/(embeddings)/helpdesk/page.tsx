@@ -1,13 +1,13 @@
 import { Metadata } from "next";
-import PurchaseIframeWrapper from "@/components/Iframes/PurchaseIframeWrapper";
+import HelpDeskIframeWrapper from "@/components/Iframes/HelpDeskIframeWrapper";
 import crypto from "crypto";
 import HardRedirect from "@/components/HardRedirect";
 import { getSession } from "@/lib/session";
 import { headers } from "next/headers";
 
 export const metadata: Metadata = {
-  title: "Staff Product Purchase",
-  description: "Staff Product Purchase Embedded web app",
+  title: "Hotpoint HelpDesk",
+  description: "Hotpoint internal helpdesk system",
 };
 
 const page = async () => {
@@ -19,7 +19,7 @@ const page = async () => {
   const host =
     headerList.get("x-forwarded-host") ||
     headerList.get("host") ||
-    "127.0.0.1:4000";
+    "127.0.0.1:5005";
 
   // 2. Mathematically construct the exact base URL the user is currently using
   const baseUrl = `${proto}://${host}`;
@@ -32,8 +32,9 @@ const page = async () => {
     return <HardRedirect url="/api/auth/login" />;
   }
 
-  // Get the user's email
+  // Get the user's details
   const userEmail = session.email;
+  const userName = session.name;
 
   // 2. Generate the timestamp and signature
   const timestamp = Date.now().toString();
@@ -45,10 +46,10 @@ const page = async () => {
     .update(dataToSign)
     .digest("hex");
 
-  // 3. Construct the secure URL pointing to Nginx port 4443
-  const ssoUrl = `${baseUrl}:4443/api/external/sso?email=${encodeURIComponent(userEmail)}&timestamp=${timestamp}&signature=${signature}`;
+  // 3. Construct the secure URL pointing to Nginx port 8443
+  const ssoUrl = `${baseUrl}:8443/api/sso/external?email=${encodeURIComponent(userEmail)}&name=${encodeURIComponent(userName)}&timestamp=${timestamp}&signature=${signature}`;
 
-  return <PurchaseIframeWrapper ssoUrl={ssoUrl} />;
+  return <HelpDeskIframeWrapper ssoUrl={ssoUrl} />;
 };
 
 export default page;
