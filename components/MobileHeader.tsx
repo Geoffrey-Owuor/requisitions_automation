@@ -12,16 +12,28 @@ import {
   Monitor,
   Plane,
   CircleQuestionMark,
+  LaptopMinimalCheck,
+  ShoppingBag,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 const links = [
-  { href: "/dashboard", label: "Dashboard", Icon: LayoutDashboard },
+  { href: "/dashboard", label: "Home", Icon: LayoutDashboard },
   { href: "/dashboard/itrequisition", label: "IT Requisition", Icon: Monitor },
   {
     href: "/dashboard/travelrequisition",
     label: "Travel Requisition",
     Icon: Plane,
+  },
+  {
+    href: "/dashboard/staffproductpurchase",
+    label: "Staff Purchase",
+    Icon: ShoppingBag,
+  },
+  {
+    href: "/dashboard/helpdesk",
+    label: "HelpDesk",
+    Icon: LaptopMinimalCheck,
   },
 ];
 
