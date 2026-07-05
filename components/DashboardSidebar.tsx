@@ -38,7 +38,7 @@ const links = [
     href: "/dashboard/travelrequisition",
     label: "Travel",
     Icon: BriefcaseBusiness,
-    tooltip: "Travel requisition",
+    tooltip: "Travel Requisition",
     showTooltip: true,
   },
   {
@@ -63,9 +63,9 @@ const DashboardSidebar = () => {
   const router = useRouter();
 
   return (
-    <aside className="fixed top-1 bottom-1 left-0 z-50 hidden w-20 flex-col items-center py-4 lg:flex">
+    <aside className="fixed top-1 bottom-1 left-0 z-50 hidden w-20 flex-col items-center pt-1 pb-2 lg:flex">
       {/* Brand (Icon Only) */}
-      <div className="mb-3.5">
+      <div className="mb-1.5">
         <DashboardBrand showText={false} />
       </div>
 
