@@ -100,7 +100,7 @@ const DashboardBrand = ({ showText = false }: { showText?: boolean }) => {
 
 const AppMenu = () => {
   return (
-    <div className="absolute top-12 left-0 z-50 max-h-100 w-80 overflow-y-auto rounded-3xl border border-white/10 bg-neutral-950/60 p-4 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.8)] backdrop-blur-2xl">
+    <div className="absolute top-12 left-0 z-50 max-h-100 w-80 overflow-y-auto rounded-3xl bg-black/50 p-4 backdrop-blur-2xl">
       {/* Relative z-10 ensures the grid sits above the blurred background orbs */}
       <div className="relative z-10 grid grid-cols-3 gap-2">
         {launcherApps.map((app) => {
@@ -113,7 +113,7 @@ const AppMenu = () => {
               rel="noopener noreferrer"
               className="group flex flex-col items-center justify-center rounded-2xl p-3 transition-all duration-300 outline-none hover:bg-white/5 focus-visible:ring-2 focus-visible:ring-rose-500/50"
             >
-              <div className="mb-2 rounded-full border border-white/5 bg-neutral-800/40 p-3 text-neutral-400 shadow-inner backdrop-blur-md transition-all duration-300 group-hover:border-rose-500/30 group-hover:bg-linear-to-br group-hover:from-rose-500/20 group-hover:to-red-500/20 group-hover:text-rose-200 group-hover:shadow-[0_0_20px_-5px_rgba(99,102,241,0.4)]">
+              <div className="mb-2 rounded-full bg-neutral-800/40 p-3 text-neutral-400 shadow-inner backdrop-blur-md transition-all duration-300 group-hover:bg-linear-to-br group-hover:from-neutral-900/40 group-hover:to-neutral-950/40 group-hover:text-neutral-200">
                 <Icon className="h-7 w-7" strokeWidth={1.5} />
               </div>
               <span className="text-xs font-medium tracking-wide text-neutral-400 transition-colors duration-300 group-hover:text-neutral-100">
