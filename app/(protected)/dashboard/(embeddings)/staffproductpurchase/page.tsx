@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import PurchaseIframeWrapper from "@/components/Iframes/PurchaseIframeWrapper";
 import crypto from "crypto";
-import { redirect } from "next/navigation";
+import HardRedirect from "@/components/HardRedirect";
 import { getSession } from "@/lib/session";
 import { headers } from "next/headers";
 
@@ -29,7 +29,7 @@ const page = async () => {
 
   // If no session exists, block access and redirect to the public login page
   if (!session) {
-    redirect("/login");
+    return <HardRedirect url="/api/auth/login" />;
   }
 
   // Get the user's email
