@@ -11,7 +11,7 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
       <DashboardSidebar />
       <div
         id="dashboard-wrapper"
-        className="layout-scrollbar fixed top-16 right-0 bottom-0 left-0 rounded-t-2xl bg-white sm:rounded-tr-none lg:top-0 lg:left-20"
+        className="layout-scrollbar fixed top-16 right-0 bottom-0 left-0 rounded-t-3xl bg-white sm:rounded-t-2xl sm:rounded-tr-none lg:top-0 lg:left-20"
       >
         <div className="flex h-full w-full flex-col">{children}</div>
       </div>
