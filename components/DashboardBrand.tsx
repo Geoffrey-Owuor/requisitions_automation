@@ -13,11 +13,15 @@ import {
 } from "lucide-react";
 
 const launcherApps = [
-  { name: "Purchase", icon: ShoppingBag, href: "https://192.168.0.155:4443" },
+  {
+    name: "Purchase",
+    icon: ShoppingBag,
+    href: "https://192.168.0.155:4443/login",
+  },
   {
     name: "Desk",
     icon: LaptopMinimalCheck,
-    href: "https://192.168.0.155:8443",
+    href: "https://192.168.0.155:8443/login",
   },
   { name: "Outlook", icon: Mail, href: "https://outlook.cloud.microsoft" },
   {
@@ -100,8 +104,8 @@ const DashboardBrand = ({ showText = false }: { showText?: boolean }) => {
 
 const AppMenu = () => {
   return (
-    <div className="absolute top-12 left-0 z-50 max-h-100 w-80 overflow-y-auto rounded-3xl bg-black/50 p-4 backdrop-blur-2xl">
-      {/* Relative z-10 ensures the grid sits above the blurred background orbs */}
+    <div className="absolute top-12 left-0 z-50 max-h-100 w-80 overflow-y-auto rounded-3xl border border-gray-100 bg-white p-4 shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
+      {/* Container holding the grid */}
       <div className="relative z-10 grid grid-cols-3 gap-2">
         {launcherApps.map((app) => {
           const Icon = app.icon;
@@ -111,12 +115,15 @@ const AppMenu = () => {
               href={app.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="group flex flex-col items-center justify-center rounded-2xl p-3 transition-all duration-300 outline-none hover:bg-white/5 focus-visible:ring-2 focus-visible:ring-rose-500/50"
+              className="group flex flex-col items-center justify-center rounded-2xl p-3 transition-all duration-300 outline-none hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-red-500/50"
             >
-              <div className="mb-2 rounded-full bg-neutral-800/40 p-3 text-neutral-400 shadow-inner backdrop-blur-md transition-all duration-300 group-hover:bg-linear-to-br group-hover:from-neutral-900/40 group-hover:to-neutral-950/40 group-hover:text-neutral-200">
+              {/* Icon Container with subtle border, shadow, and lift on hover */}
+              <div className="mb-2 flex items-center justify-center rounded-2xl border border-gray-100 bg-white p-3 text-gray-500 shadow-sm transition-all duration-300 group-hover:-translate-y-1 group-hover:border-red-100 group-hover:text-red-600 group-hover:shadow-md">
                 <Icon className="h-7 w-7" strokeWidth={1.5} />
               </div>
-              <span className="text-xs font-medium tracking-wide text-neutral-400 transition-colors duration-300 group-hover:text-neutral-100">
+
+              {/* App Label with enhanced contrast on hover */}
+              <span className="text-xs font-medium tracking-wide text-gray-500 transition-colors duration-300 group-hover:text-gray-900">
                 {app.name}
               </span>
             </a>
