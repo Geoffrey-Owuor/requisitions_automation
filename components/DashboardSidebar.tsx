@@ -63,7 +63,7 @@ const DashboardSidebar = () => {
   const router = useRouter();
 
   return (
-    <aside className="fixed top-1 bottom-1 left-0 z-50 hidden w-20 flex-col items-center pt-1 pb-2 lg:flex">
+    <aside className="fixed top-1 bottom-1 left-0 z-50 hidden w-20 flex-col items-center pt-0 pb-2 lg:flex">
       {/* Brand (Icon Only) */}
       <div className="mb-1.5">
         <DashboardBrand showText={false} />
