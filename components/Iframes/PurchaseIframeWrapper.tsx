@@ -1,6 +1,8 @@
 "use client";
-import { Loader2, ShoppingBag } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useState } from "react";
+import { assets } from "@/public/assets";
+import Image from "next/image";
 
 const PurchaseIframeWrapper = ({ ssoUrl }: { ssoUrl: string }) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -9,13 +11,15 @@ const PurchaseIframeWrapper = ({ ssoUrl }: { ssoUrl: string }) => {
       {/* - LOADER OVERLAY - */}
       {isLoading && (
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center">
-          {/* Larger Shopping Bag Icon */}
-          <ShoppingBag
-            className="mb-12 h-22 w-22 text-gray-800 dark:text-gray-200"
-            strokeWidth={1.5}
+          {/* Hotpoint logo image */}
+          <Image
+            src={assets.hotpoint_logo}
+            alt="Hotpoint logo"
+            className="h-35 w-35"
+            preload
           />
           {/* Smaller Spinning Loader */}
-          <Loader2 className="h-8 w-8 animate-spin text-gray-500 dark:text-gray-400" />
+          <Loader2 className="mt-12 h-12 w-12 animate-spin text-gray-500 dark:text-gray-400" />
 
           {/* Footer at the bottom of the loader wrapper */}
           <div className="absolute right-0 bottom-6 left-0 px-4 text-center">
