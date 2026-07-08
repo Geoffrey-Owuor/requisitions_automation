@@ -72,7 +72,7 @@ const RequisitionPdfModal = ({ pdfData }: { pdfData: TravelPdfValues }) => {
   );
 
   return (
-    <div className="relative py-4 font-sans">
+    <div className="relative p-4 font-sans">
       <div className="relative z-10 mx-auto max-w-3xl">
         {/* Toolbar — hidden in print */}
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-gray-100 bg-white/70 px-6 py-4 shadow-[0_8px_16px_rgba(160,60,60,0.06)] backdrop-blur-xl">

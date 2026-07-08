@@ -189,7 +189,7 @@ const ITApprovalModal = ({ data }: { data: ITRequisitionData }) => {
   };
 
   return (
-    <div className="relative py-4">
+    <div className="relative p-4">
       {(approving || declining) && <SubmittingOverlay />}
 
       {step === 2 && (
