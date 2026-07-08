@@ -181,7 +181,7 @@ export default function ITRequisitionPage() {
   };
 
   return (
-    <div className="relative py-4">
+    <div className="relative p-4">
       {submitting && <SubmittingOverlay />}
 
       {step === 3 && <AlertModal alertInfo={alertInfo} setStep={setStep} />}
