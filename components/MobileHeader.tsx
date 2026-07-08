@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import Link from "next/link";
 import DashboardBrand from "./DashboardBrand";
 import Brand from "./Brand";
@@ -8,23 +8,19 @@ import UserDropdown from "./UserDropDown";
 import {
   Menu,
   X,
-  LayoutDashboard,
   Monitor,
-  Plane,
   CircleQuestionMark,
   LaptopMinimalCheck,
   ShoppingBag,
+  HousePlug,
+  Briefcase,
 } from "lucide-react";
+import ModalWrapper from "./Modules/ModalWrapper";
+import ITRequisitionPage from "./ITRequisition/ITRequisitionPage";
+import TravelRequisitionPage from "./TravelRequisitionPage";
 import { usePathname } from "next/navigation";
 
 const links = [
-  { href: "/dashboard", label: "Home", Icon: LayoutDashboard },
-  { href: "/dashboard/itrequisition", label: "IT Requisition", Icon: Monitor },
-  {
-    href: "/dashboard/travelrequisition",
-    label: "Travel Requisition",
-    Icon: Plane,
-  },
   {
     href: "/dashboard/staffproductpurchase",
     label: "Staff Purchase",
@@ -41,8 +37,37 @@ const MobileHeader = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
 
+  const isHomeActive = pathname === "/dashboard";
+
+  const [showITRequisition, setShowITRequisition] = useState(false);
+  const [showTravelRequisition, setShowTravelRequisition] = useState(false);
+
+  const handleButtonClick = (
+    setAction: Dispatch<SetStateAction<boolean>>,
+    value: boolean,
+  ) => {
+    setAction(value);
+
+    setSidebarOpen(false);
+  };
   return (
     <>
+      {/* IT Modal */}
+      <ModalWrapper
+        isOpen={showITRequisition}
+        onClose={() => setShowITRequisition(false)}
+      >
+        <ITRequisitionPage />
+      </ModalWrapper>
+
+      {/* Travel Modal */}
+      <ModalWrapper
+        isOpen={showTravelRequisition}
+        onClose={() => setShowTravelRequisition(false)}
+      >
+        <TravelRequisitionPage />
+      </ModalWrapper>
+
       {/* Overlay & Sliding Mobile Sidebar */}
       <div
         className={`fixed inset-0 z-70 ${
@@ -74,6 +99,49 @@ const MobileHeader = () => {
           </div>
 
           <nav className="flex flex-col gap-1 overflow-y-auto p-4">
+            {/* Home Link */}
+            <Link
+              href="/dashboard"
+              onClick={() => setSidebarOpen(false)}
+              className={`group flex items-center gap-3 rounded-xl px-4 py-3 text-[14px] font-semibold transition-all ${
+                isHomeActive
+                  ? "bg-red-950 text-white shadow-md"
+                  : "text-slate-600 hover:bg-red-50 hover:text-red-950"
+              }`}
+            >
+              <HousePlug
+                size={18}
+                className={`transition-colors ${
+                  isHomeActive
+                    ? "text-white"
+                    : "text-slate-500 group-hover:text-red-950"
+                }`}
+              />
+              Home
+            </Link>
+
+            {/* IT Requisition */}
+            <button
+              onClick={() => handleButtonClick(setShowITRequisition, true)}
+              className="group flex items-center gap-3 rounded-xl px-4 py-3 text-[14px] font-semibold text-slate-600 transition-all hover:bg-red-50 hover:text-red-950"
+            >
+              <Monitor
+                size={18}
+                className="text-slate-500 transition-colors group-hover:text-red-950"
+              />
+              IT Requisition
+            </button>
+            {/* Travel Requisition */}
+            <button
+              onClick={() => handleButtonClick(setShowTravelRequisition, true)}
+              className="group flex items-center gap-3 rounded-xl px-4 py-3 text-[14px] font-semibold text-slate-600 transition-all hover:bg-red-50 hover:text-red-950"
+            >
+              <Briefcase
+                size={18}
+                className="text-slate-500 transition-colors group-hover:text-red-950"
+              />
+              Travel Requisition
+            </button>
             {links.map(({ href, label, Icon }) => {
               const isActive = pathname === href;
               return (

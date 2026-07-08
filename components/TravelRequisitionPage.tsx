@@ -257,7 +257,7 @@ export default function TravelRequisitionPage() {
           approvalTier={generatedAprovalTier}
           onBack={() => {
             setStep(1);
-            const dashboardDiv = document.getElementById("dashboard-wrapper");
+            const dashboardDiv = document.getElementById("modal-wrapper");
             dashboardDiv?.scrollTo({ top: 0, behavior: "instant" });
           }}
           onSubmit={handleSubmit}
@@ -395,8 +395,7 @@ export default function TravelRequisitionPage() {
               onSubmit={(e) => {
                 e.preventDefault();
                 setStep(2);
-                const dashboardDiv =
-                  document.getElementById("dashboard-wrapper");
+                const dashboardDiv = document.getElementById("modal-wrapper");
                 dashboardDiv?.scrollTo({ top: 0, behavior: "instant" });
               }}
             >
