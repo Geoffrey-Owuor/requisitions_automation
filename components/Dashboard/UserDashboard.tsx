@@ -3,43 +3,9 @@
 import { useUser } from "@/context/UserContext";
 import TravelRequisitionsTable from "./TravelRequisitionsTable";
 import ITRequisitionsTable from "./ITRequisitionsDashboard/ITRequisitionsTable";
-import {
-  BriefcaseBusiness,
-  LaptopMinimalCheck,
-  LucideIcon,
-  Monitor,
-  ShoppingBag,
-} from "lucide-react";
-import Link from "next/link";
+
 import { useEffect } from "react";
 import DashboardAlert from "./DashboardAlert";
-
-const quickLinks: {
-  icon: LucideIcon;
-  link: string;
-  title: string;
-}[] = [
-  {
-    icon: Monitor,
-    link: "/dashboard/itrequisition",
-    title: "IT Requisition",
-  },
-  {
-    icon: BriefcaseBusiness,
-    link: "/dashboard/travelrequisition",
-    title: "Travel Requisition",
-  },
-  {
-    icon: ShoppingBag,
-    link: "/dashboard/staffproductpurchase",
-    title: "Staff Product Purchase",
-  },
-  {
-    icon: LaptopMinimalCheck,
-    link: "/dashboard/helpdesk",
-    title: "HelpDesk",
-  },
-];
 
 const UserDashboard = () => {
   const { username, email: userEmail, roles } = useUser();
@@ -77,21 +43,6 @@ const UserDashboard = () => {
           <h1 className="text-sm font-semibold tracking-[-0.5px] text-[#1e1b1b]">
             {firstName}, look who showed up 👀
           </h1>
-        </div>
-
-        {/* Quick Dashboard Links */}
-
-        <div className="inline-flex items-center gap-2">
-          {quickLinks.map(({ icon: Icon, link, title }, index) => (
-            <Link
-              key={index}
-              href={link}
-              title={title}
-              className="rounded-full p-2 hover:bg-rose-50 hover:text-rose-800"
-            >
-              <Icon className="h-4 w-4" />
-            </Link>
-          ))}
         </div>
       </div>
 
