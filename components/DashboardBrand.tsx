@@ -80,7 +80,7 @@ const DashboardBrand = ({ showText = false }: { showText?: boolean }) => {
             loading="eager"
             className="object-contain invert"
             fill // Added fill to fit safely inside the absolute container
-            priority
+            preload
           />
         )}
       </div>
