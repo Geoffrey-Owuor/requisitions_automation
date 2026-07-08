@@ -273,7 +273,7 @@ export default function TravelRequisitionPage() {
               src={assets.form_image}
               sizes="100vh"
               className="rounded-xl object-contain object-center" // or "object-cover" depending on your needs
-              priority // Use this if the image is above the fold
+              priority
               alt="Form Image"
             />
           </div>
