@@ -6,7 +6,6 @@ import {
   MapPin,
   Shield,
   Monitor,
-  ArrowRight,
   ArrowUpRight,
   CheckCircle2,
   CircleGauge,
@@ -27,7 +26,6 @@ const requisitions = [
     label: "Travel Requisition",
     description:
       "Site visits, local flights, road travel, and international travel with automated multi-tier approvals.",
-    href: "/dashboard/travelrequisition",
     icon: <BriefcaseBusiness size={22} className="h-5 w-5 sm:h-6 sm:w-6" />,
     accent: "from-rose-500 to-rose-600",
     shadow: "shadow-rose-200",
@@ -44,7 +42,6 @@ const requisitions = [
     label: "IT Requisition",
     description:
       "Request laptops, peripherals, and software. Routed to HOD then fulfilled by IT Team.",
-    href: "/dashboard/itrequisition",
     icon: <Monitor size={22} className="h-5 w-5 sm:h-6 sm:w-6" />,
     accent: "from-slate-800 to-slate-900",
     shadow: "shadow-slate-200",
@@ -197,13 +194,6 @@ export default function HomePage() {
                     </div>
                   )}
                 </div>
-
-                <Link
-                  href={req.href}
-                  className={`flex w-full items-center justify-center gap-2 rounded-2xl bg-linear-to-r ${req.accent} py-3 text-sm font-semibold text-white transition-transform group-hover:scale-[1.01] active:scale-[0.98] sm:py-4`}
-                >
-                  Create New Request <ArrowRight size={16} />
-                </Link>
               </div>
             ))}
           </div>
