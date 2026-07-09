@@ -104,7 +104,7 @@ const DashboardBrand = ({ showText = false }: { showText?: boolean }) => {
 
 const AppMenu = () => {
   return (
-    <div className="absolute top-12 left-0 z-50 max-h-100 w-80 overflow-y-auto rounded-3xl border border-gray-100 bg-white p-4 shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
+    <div className="absolute top-12 left-0 z-50 max-h-100 w-80 overflow-y-auto rounded-3xl border border-gray-200 bg-white p-4 shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
       {/* Container holding the grid */}
       <div className="relative z-10 grid grid-cols-3 gap-2">
         {launcherApps.map((app) => {

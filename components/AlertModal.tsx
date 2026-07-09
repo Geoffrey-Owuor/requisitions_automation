@@ -1,6 +1,5 @@
 import { CheckCircle2, XCircle } from "lucide-react";
 import { AlertInfo } from "./TravelRequisitionPage";
-import Link from "next/link";
 
 interface AlertModalProps {
   alertInfo: AlertInfo;
@@ -65,11 +64,6 @@ export default function AlertModal({ alertInfo, setStep }: AlertModalProps) {
         >
           {config.buttonLabel}
         </button>
-
-        {/* Dashboard Link */}
-        <Link href="/dashboard" className="text-xs text-[#7c5a5a] underline">
-          Go to dashboard
-        </Link>
       </div>
     </div>
   );
