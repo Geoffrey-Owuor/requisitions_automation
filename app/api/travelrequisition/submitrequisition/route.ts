@@ -230,7 +230,7 @@ export async function POST(request: NextRequest) {
       { status: 200 },
     );
   } catch (error) {
-    console.error("Error while trying to submit the requisition", error);
+    console.error("Error while trying to submit the travel requisition", error);
     return NextResponse.json(
       { message: "An error occurred while trying to submit this requisition" },
       { status: 500 },
