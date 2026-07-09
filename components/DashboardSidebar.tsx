@@ -6,13 +6,16 @@ import DashboardBrand from "./DashboardBrand";
 import UserDropdown from "./UserDropDown";
 import {
   BriefcaseBusiness,
-  ChevronLeft,
+  ChevronDown,
+  ChevronUp,
   CircleQuestionMark,
   HousePlug,
   LaptopMinimalCheck,
+  LockKeyhole,
   LucideIcon,
   Monitor,
   ShoppingBag,
+  Undo2,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import ClientPortal from "./ClientPortal";
@@ -20,6 +23,7 @@ import { useRef, useState } from "react";
 import ITRequisitionPage from "./ITRequisition/ITRequisitionPage";
 import TravelRequisitionPage from "./TravelRequisitionPage";
 import ModalWrapper from "./Modules/ModalWrapper";
+import KeyAccessRequisitionForm from "./Modules/Retail/KeyAccessRequisitionForm";
 
 // Summarized labels for tight vertical sidebar space
 const links = [
@@ -47,6 +51,10 @@ const DashboardSidebar = () => {
   const [showITRequisition, setShowITRequisition] = useState(false);
   const [showTravelRequisition, setShowTravelRequisition] = useState(false);
 
+  // Retail States
+  const [showRetailForms, setShowRetailForms] = useState(false);
+  const [showAccessRequisition, setShowAccessRequisition] = useState(false);
+
   return (
     <>
       {/* IT Modal */}
@@ -65,14 +73,18 @@ const DashboardSidebar = () => {
         <TravelRequisitionPage />
       </ModalWrapper>
 
+      {/* Key Access Requisition Modal */}
+      <ModalWrapper
+        isOpen={showAccessRequisition}
+        onClose={() => setShowAccessRequisition(false)}
+      >
+        <KeyAccessRequisitionForm />
+      </ModalWrapper>
+
       <aside className="fixed top-1 bottom-1 left-0 z-50 hidden w-20 flex-col items-center pt-0 pb-2 lg:flex">
         {/* Brand (Icon Only) */}
-        <div className="mb-1.5">
-          <DashboardBrand showText={false} />
-        </div>
-
-        {/* Vertical Navigation */}
-        <nav className="sidebar-nav mb-2 flex w-full flex-1 flex-col items-center gap-1.5 px-2">
+        <DashboardBrand showText={false} />
+        <div className="mx-auto mt-2 mb-2 w-full px-2">
           {/* Home */}
           <SideBarLink
             key="/dashboard"
@@ -83,7 +95,10 @@ const DashboardSidebar = () => {
             isActive={pathname === "/dashboard"}
             showToolTip={true}
           />
+        </div>
 
+        {/* Vertical Navigation */}
+        <nav className="sidebar-nav mb-2 flex w-full flex-1 flex-col items-center gap-1.5 px-2">
           {/* IT Requisition */}
           <SideBarButton
             label="IT Req"
@@ -116,19 +131,40 @@ const DashboardSidebar = () => {
             );
           })}
 
-          {/* Go back button */}
+          {/* Retail Button */}
           <SideBarButton
-            label="Back"
-            handleClick={() => router.back()}
-            Icon={ChevronLeft}
+            label="Retail"
+            handleClick={() => setShowRetailForms((prev) => !prev)}
+            Icon={showRetailForms ? ChevronUp : ChevronDown}
             showToolTip={true}
-            toolTipMessage="Go Back"
+            toolTipMessage="Retail Forms"
           />
+
+          {/* Access key button */}
+          {showRetailForms && (
+            <>
+              <SideBarButton
+                label="Access"
+                handleClick={() => setShowAccessRequisition(true)}
+                Icon={LockKeyhole}
+                showToolTip={true}
+                toolTipMessage="Access/Key Issuance"
+              />
+            </>
+          )}
         </nav>
 
         {/* User Dropdown at the Bottom */}
-        <div className="mt-auto">
-          <div className="flex flex-col items-center justify-center gap-4">
+        <div className="mt-auto w-full px-2">
+          <div className="flex w-full flex-col items-center justify-center gap-4">
+            {/* Go back button */}
+            <SideBarButton
+              label="Back"
+              handleClick={() => router.back()}
+              Icon={Undo2}
+              showToolTip={true}
+              toolTipMessage="Go Back"
+            />
             <a
               href="/guidelines"
               target="_blank"
