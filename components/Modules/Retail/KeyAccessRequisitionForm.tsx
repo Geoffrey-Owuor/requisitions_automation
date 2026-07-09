@@ -22,7 +22,7 @@ import KeyConfirmationModal from "./KeyConfirmationModal";
 
 // ---- Types ----
 export interface KeyAccessFormData {
-  staffName: string;
+  employeeName: string;
   staffNumber: string;
   department: string;
   hodApprover: string;
@@ -32,7 +32,7 @@ export interface KeyAccessFormData {
 }
 
 const InitialFormState: KeyAccessFormData = {
-  staffName: "",
+  employeeName: "",
   staffNumber: "",
   department: "",
   hodApprover: "",
@@ -84,7 +84,7 @@ export default function KeyAccessRequisitionForm() {
 
   // Required fields for button disable check
   const requiredFields: (keyof KeyAccessFormData)[] = [
-    "staffName",
+    "employeeName",
     "staffNumber",
     "department",
     "hodApprover",
@@ -217,10 +217,10 @@ export default function KeyAccessRequisitionForm() {
                 </h2>
                 <div className="grid grid-cols-2 gap-5 max-sm:grid-cols-1">
                   <FormInput
-                    label="Staff Name"
+                    label="Employee Name"
                     placeholder="Full Name"
-                    value={formData.staffName}
-                    onChange={(v) => updateField("staffName", v)}
+                    value={formData.employeeName}
+                    onChange={(v) => updateField("employeeName", v)}
                   />
                   <FormInput
                     label="Staff Number"
