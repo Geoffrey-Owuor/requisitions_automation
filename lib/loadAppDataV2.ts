@@ -117,3 +117,19 @@ export const loadITArray = async (): Promise<ApproversObject[] | []> => {
     return [];
   }
 };
+
+// Load the security array
+export const loadSecurityArray = async (): Promise<ApproversObject[] | []> => {
+  try {
+    const result = await query<ApproversObject>(`
+      SELECT security_uuid AS uuid,
+      security_name AS name,
+      security_email AS email
+      FROM security_array `);
+
+    return result;
+  } catch (error) {
+    console.error("Error while trying to fetch security array data:", error);
+    return [];
+  }
+};

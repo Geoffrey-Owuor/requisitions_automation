@@ -14,11 +14,15 @@ import {
   ShoppingBag,
   HousePlug,
   Briefcase,
+  ChevronUp,
+  ChevronDown,
+  LockKeyhole,
 } from "lucide-react";
 import ModalWrapper from "./Modules/ModalWrapper";
 import ITRequisitionPage from "./ITRequisition/ITRequisitionPage";
 import TravelRequisitionPage from "./TravelRequisitionPage";
 import { usePathname } from "next/navigation";
+import KeyAccessRequisitionForm from "./Modules/Retail/KeyAccessRequisitionForm";
 
 const links = [
   {
@@ -41,6 +45,10 @@ const MobileHeader = () => {
 
   const [showITRequisition, setShowITRequisition] = useState(false);
   const [showTravelRequisition, setShowTravelRequisition] = useState(false);
+
+  // Retail States
+  const [showRetailForms, setShowRetailForms] = useState(false);
+  const [showAccessRequisition, setShowAccessRequisition] = useState(false);
 
   const handleButtonClick = (
     setAction: Dispatch<SetStateAction<boolean>>,
@@ -66,6 +74,14 @@ const MobileHeader = () => {
         onClose={() => setShowTravelRequisition(false)}
       >
         <TravelRequisitionPage />
+      </ModalWrapper>
+
+      {/* Key Access Requisition Modal */}
+      <ModalWrapper
+        isOpen={showAccessRequisition}
+        onClose={() => setShowAccessRequisition(false)}
+      >
+        <KeyAccessRequisitionForm />
       </ModalWrapper>
 
       {/* Overlay & Sliding Mobile Sidebar */}
@@ -167,6 +183,41 @@ const MobileHeader = () => {
                 </Link>
               );
             })}
+
+            {/* Retail Button  */}
+            <button
+              onClick={() => setShowRetailForms((prev) => !prev)}
+              className="group flex items-center gap-3 rounded-xl px-4 py-3 text-[14px] font-semibold text-slate-600 transition-all hover:bg-red-50 hover:text-red-950"
+            >
+              {showRetailForms ? (
+                <ChevronUp
+                  size={18}
+                  className="text-slate-500 transition-colors group-hover:text-red-950"
+                />
+              ) : (
+                <ChevronDown
+                  size={18}
+                  className="text-slate-500 transition-colors group-hover:text-red-950"
+                />
+              )}
+              Retail
+            </button>
+
+            {/* Access Key Button */}
+            {showRetailForms && (
+              <button
+                onClick={() =>
+                  handleButtonClick(setShowAccessRequisition, true)
+                }
+                className="group flex items-center gap-3 rounded-xl px-4 py-3 text-[14px] font-semibold text-slate-600 transition-all hover:bg-red-50 hover:text-red-950"
+              >
+                <LockKeyhole
+                  size={18}
+                  className="text-slate-500 transition-colors group-hover:text-red-950"
+                />
+                Access/ Key Issuance
+              </button>
+            )}
           </nav>
         </aside>
       </div>

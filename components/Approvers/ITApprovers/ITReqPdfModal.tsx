@@ -72,7 +72,7 @@ const ITReqPdfModal = ({ pdfData }: { pdfData: ITPdfValues }) => {
         </div>
 
         {/* HTML Document Preview */}
-        <div className="rounded-3xl border border-white/85 bg-white/65 px-10 py-10 shadow-[0_24px_48px_rgba(160,60,60,0.10)] backdrop-blur-2xl">
+        <div className="rounded-3xl border border-white/85 bg-white/65 px-6 py-8 shadow-[0_24px_48px_rgba(160,60,60,0.10)] backdrop-blur-2xl sm:px-8">
           {/* Header */}
           <div className="mb-8 border-b border-[rgba(240,180,180,0.4)] pb-6">
             <h1 className="text-[26px] font-semibold tracking-[-0.5px] text-[#1e1b1b]">

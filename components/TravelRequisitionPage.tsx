@@ -247,7 +247,7 @@ export default function TravelRequisitionPage() {
   };
 
   return (
-    <div className="relative p-4">
+    <div className="relative p-2">
       {submitting && <SubmittingOverlay />}
       {step === 3 && <AlertModal alertInfo={alertInfo} setStep={setStep} />}
       {step === 2 && (
@@ -268,7 +268,7 @@ export default function TravelRequisitionPage() {
       {step === 1 && (
         <div className="relative z-10 mx-auto max-w-225">
           {/* Form Image */}
-          <div className="mb-4 overflow-hidden rounded-3xl">
+          <div className="mb-4 overflow-hidden rounded-2xl sm:rounded-3xl">
             <Image
               src={assets.form_image}
               sizes="100vh"
@@ -389,7 +389,7 @@ export default function TravelRequisitionPage() {
           </div>
 
           {/* Form Card */}
-          <div className="rounded-3xl border border-white/85 bg-white/65 p-10 shadow-[0_24px_48px_rgba(160,60,60,0.10)] backdrop-blur-2xl">
+          <div className="rounded-3xl border border-white/85 bg-white/65 px-6 py-8 shadow-[0_24px_48px_rgba(160,60,60,0.10)] backdrop-blur-2xl sm:px-8">
             <form
               className="flex flex-col gap-10"
               onSubmit={(e) => {

@@ -104,7 +104,7 @@ const RequisitionPdfModal = ({ pdfData }: { pdfData: TravelPdfValues }) => {
         {/* Document */}
         <div
           id="printable-area"
-          className="rounded-3xl border border-white/85 bg-white/65 px-10 py-10 shadow-[0_24px_48px_rgba(160,60,60,0.10)] backdrop-blur-2xl"
+          className="rounded-3xl border border-white/85 bg-white/65 px-6 py-8 shadow-[0_24px_48px_rgba(160,60,60,0.10)] backdrop-blur-2xl sm:px-8"
         >
           {/* Doc header */}
 
