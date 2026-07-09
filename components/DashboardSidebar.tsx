@@ -265,7 +265,7 @@ const SideBarButton = ({
         onMouseEnter={handleMouseEnter}
         onMouseLeave={() => setIsHovered(false)}
         onClick={handleClick}
-        className="flex w-full flex-col items-center gap-1 rounded-2xl py-2.5 text-[10px] text-white/70 transition-all duration-300 hover:bg-white/10 hover:text-white active:scale-95"
+        className="flex w-full flex-col items-center gap-1 rounded-2xl py-2.5 text-[10px] font-semibold text-white/70 transition-all duration-300 hover:bg-white/10 hover:text-white active:scale-95"
       >
         <Icon className="h-5 w-5" />
         <span>{label}</span>
