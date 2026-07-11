@@ -36,7 +36,7 @@ export function ITRequisitionTemplate({
               </td>
               <td style="text-align: right; vertical-align: middle;">
                 <div style="display: inline-block; background-color: #7f1d1d; border-radius: 12px; padding: 8px 14px;">
-                  <p style="margin: 0; font-size: 11px; font-weight: 700; color: #f2d7d5; letter-spacing: 1px;">IT REQ</p>
+                  <p style="margin: 0; font-size: 11px; font-weight: 700; color: #f2d7d5; letter-spacing: 1px;">IT</p>
                 </div>
               </td>
             </tr>

@@ -1,6 +1,7 @@
 import "server-only";
 import { cookies } from "next/headers";
 import { SignJWT, jwtVerify } from "jose";
+import { cache } from "react";
 
 const SECRET_KEY = new TextEncoder().encode(process.env.SESSION_SECRET);
 const COOKIE_NAME = "requisitions_session";
@@ -46,12 +47,14 @@ export async function createSession(user: SessionPayload) {
 }
 
 // 4. Extract user details from active cookie
-export async function getSession(): Promise<SessionPayload | null> {
+async function requireSession(): Promise<SessionPayload | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get(COOKIE_NAME)?.value;
   if (!token) return null;
   return await decrypt(token);
 }
+
+export const getSession = cache(requireSession);
 
 // 5. Delete cookie on logout
 export async function deleteSession() {
