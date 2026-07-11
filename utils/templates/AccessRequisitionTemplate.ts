@@ -1,23 +1,24 @@
 import { dateFormatter } from "@/public/assets";
-import { ITDataProps, ITMailTemplateValues } from "@/services/ITEmailSender";
-
+import {
+  AccessDataProps,
+  AccessMailTemplateValues,
+} from "@/services/AccessEmailSender";
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
-interface ITRequisitionProps extends Omit<ITDataProps, "to"> {
-  emailData: ITMailTemplateValues;
+interface AccessRequisitionProps extends Omit<AccessDataProps, "to"> {
+  emailData: AccessMailTemplateValues;
 }
 
-export function ITRequisitionTemplate({
+export function AccessRequisitionTemplate({
   requestId,
   message,
   title,
   role,
   emailData,
   reviewLink,
-}: ITRequisitionProps) {
+}: AccessRequisitionProps) {
   const formattedDateSubmitted = dateFormatter(emailData.datesubmitted);
-  const formattedRequisitionDate = dateFormatter(emailData.requisitiondate);
-  const formattedDateJoining = dateFormatter(emailData.datejoining);
+  const formattedIssuanceDate = dateFormatter(emailData.issuancedate);
 
   const buttonStyle =
     role !== "user" ? "display: inline-block;" : "display: none;";
@@ -31,12 +32,12 @@ export function ITRequisitionTemplate({
           <table width="100%">
             <tr>
               <td style="vertical-align: middle;">
-                <p style="margin: 0; font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #f2d7d5; opacity: 0.85;">IT Department</p>
+                <p style="margin: 0; font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #f2d7d5; opacity: 0.85;">Access Requisition</p>
                 <h2 style="margin: 4px 0 0; font-size: 20px; color: #ffffff; font-weight: 600;">${title}</h2>
               </td>
               <td style="text-align: right; vertical-align: middle;">
                 <div style="display: inline-block; background-color: #7f1d1d; border-radius: 12px; padding: 8px 14px;">
-                  <p style="margin: 0; font-size: 11px; font-weight: 700; color: #f2d7d5; letter-spacing: 1px;">IT REQ</p>
+                  <p style="margin: 0; font-size: 11px; font-weight: 700; color: #f2d7d5; letter-spacing: 1px;">ACCESS</p>
                 </div>
               </td>
             </tr>
@@ -68,36 +69,27 @@ export function ITRequisitionTemplate({
           <div style="margin-bottom: 24px;">
             <p style="font-size: 11px; font-weight: 700; color: #a31d1d; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px;">Employee Information</p>
             <table width="100%" style="border-collapse: collapse;">
-              ${itRow("Employee Name", emailData.employeename)}
-              ${itRow("Staff Number", emailData.employeestaffnumber)}
-              ${itRow("Department", emailData.employeedepartment)}
-              ${itRow("Date Joining", formattedDateJoining)}
-              ${itRow("Requisition Date", formattedRequisitionDate)}
+              ${accessRow("Employee Name", emailData.employeename)}
+              ${accessRow("Staff Number", emailData.employeestaffnumber)}
+              ${accessRow("Department", emailData.employeedepartment)}
+              ${accessRow("Issuance Date", formattedIssuanceDate)}
+
             </table>
           </div>
 
           <!-- Equipment Details: dark solid box (same gradient-avoidance fix as Travel) -->
           <div style="background-color: #0f172a; border-radius: 20px; padding: 24px; margin-bottom: 24px; border: 1px solid rgba(30,58,138,0.3);">
-            <p style="margin: 0 0 16px; font-size: 10px; font-weight: 800; color: #f87171; text-transform: uppercase; letter-spacing: 2px;">Equipment Details</p>
+            <p style="margin: 0 0 16px; font-size: 10px; font-weight: 800; color: #f87171; text-transform: uppercase; letter-spacing: 2px;">Requirement Details</p>
             <table width="100%">
               <tr>
-                <td style="padding-bottom: 12px; font-size: 12px; color: #94a3b8;">Request Type</td>
-                <td style="padding-bottom: 12px; font-size: 12px; color: #ffffff; text-align: right; font-weight: 600;">${emailData.replacementnew || "—"}</td>
-              </tr>
-              <tr>
-                <td style="padding-bottom: 12px; font-size: 12px; color: #94a3b8; vertical-align: top;">Requirements</td>
+                <td style="padding-bottom: 12px; font-size: 12px; color: #94a3b8;">Requirements</td>
                 <td style="padding-bottom: 12px; font-size: 12px; color: #ffffff; text-align: right; font-weight: 600;">${emailData.requirements || "—"}</td>
               </tr>
-              ${
-                emailData.otherrequirements
-                  ? `<tr>
-                <td colspan="2" style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 12px;">
-                  <p style="margin: 0 0 4px; font-size: 10px; font-weight: 700; color: #f87171; text-transform: uppercase; letter-spacing: 1px;">Additional Requirements</p>
-                  <p style="margin: 0; font-size: 12px; color: #cbd5e1; line-height: 1.5;">${emailData.otherrequirements}</p>
-                </td>
-              </tr>`
-                  : ""
-              }
+              <tr>
+                <td style="padding-bottom: 12px; font-size: 12px; color: #94a3b8; vertical-align: top;">Locations</td>
+                <td style="padding-bottom: 12px; font-size: 12px; color: #ffffff; text-align: right; font-weight: 600;">${emailData.locations || "—"}</td>
+              </tr>
+              
             </table>
           </div>
 
@@ -108,11 +100,11 @@ export function ITRequisitionTemplate({
           <table width="100%" style="border-collapse: separate; border-spacing: 0 0; margin-bottom: 24px;">
             <tr>
               <td width="49%" style="vertical-align: top; padding-right: 8px;">
-                ${itStatusCard("Head of Department", emailData.hodapprovalstatus, emailData.hodapprover, emailData.hodcomments)}
+                ${accessStatusCard("Head of Department", emailData.hodapprovalstatus, emailData.hodapprover, emailData.hodcomments)}
               </td>
               <td width="2%"></td>
               <td width="49%" style="vertical-align: top;">
-                ${itStatusCard("IT Department", emailData.itapprovalstatus, emailData.itapprover, emailData.itcomments)}
+                ${accessStatusCard("Security Department", emailData.securityapprovalstatus, emailData.securityapprover, emailData.securitycomments)}
               </td>
             </tr>
           </table>
@@ -120,7 +112,7 @@ export function ITRequisitionTemplate({
           <!-- CTA Button -->
           <div style="margin-top: 32px; text-align: center;">
             <div style="${buttonStyle}">
-              <a href="${BASE_URL}/itapproval/${requestId}${reviewLink ?? ""}" style="background-color: #a31d1d; color: #ffffff; padding: 14px 36px; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 13px; display: inline-block;">Review Requisition</a>
+              <a href="${BASE_URL}/accessapproval/${requestId}${reviewLink ?? ""}" style="background-color: #a31d1d; color: #ffffff; padding: 14px 36px; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 13px; display: inline-block;">Review Requisition</a>
             </div>
           </div>
 
@@ -128,7 +120,7 @@ export function ITRequisitionTemplate({
 
         <!-- Footer: explicit white avoids near-white Outlook dark-mode issues -->
         <div style="background-color: #ffffff; padding: 20px; text-align: center; border-top: 1px solid #f2eaea;">
-          <p style="margin: 0; font-size: 10px; color: #64748b; letter-spacing: 1px;">&copy; ${new Date().getFullYear()} Hotpoint Appliances Ltd. | IT Requisition</p>
+          <p style="margin: 0; font-size: 10px; color: #64748b; letter-spacing: 1px;">&copy; ${new Date().getFullYear()} Hotpoint Appliances Ltd. | Access Requisition</p>
         </div>
 
       </div>
@@ -138,12 +130,7 @@ export function ITRequisitionTemplate({
   return emailHtml;
 }
 
-/**
- * HELPER: IT INFO ROW
- * Uses blue-toned label colours instead of the red family used in Travel.
- * Darker label (#334155) ensures contrast on light backgrounds in Outlook dark mode.
- */
-function itRow(label: string, value: string) {
+function accessRow(label: string, value: string) {
   return `
     <tr>
       <td style="padding: 10px 0; font-size: 12px; color: #5a3a3a; width: 40%; border-bottom: 1px solid #f7f0f0;">${label}</td>
@@ -151,12 +138,7 @@ function itRow(label: string, value: string) {
     </tr>`;
 }
 
-/**
- * HELPER: IT STATUS CARD
- * Compact card designed for side-by-side (two-column) layout.
- * Badge borders match text colour for Outlook dark-mode resilience (same fix as Travel).
- */
-function itStatusCard(
+function accessStatusCard(
   title: string,
   status: string,
   name: string,

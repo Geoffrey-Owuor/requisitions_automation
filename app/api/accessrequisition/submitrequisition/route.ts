@@ -1,10 +1,11 @@
 import { NextResponse, NextRequest } from "next/server";
 import { loadSecurityArray } from "@/lib/loadAppDataV2";
+import { AccessEmailSender } from "@/services/AccessEmailSender";
 import { query } from "@/lib/db";
 
 export async function POST(request: NextRequest) {
   // Get security data
-  const SECURITY_ARRAY = loadSecurityArray();
+  const SECURITY_ARRAY = await loadSecurityArray();
 
   try {
     // Getting our payload
@@ -126,6 +127,50 @@ export async function POST(request: NextRequest) {
       ];
 
       await query(updateQuery, updateParams);
+
+      // Send mail to security approvers
+      SECURITY_ARRAY.forEach((securityApprover) => {
+        AccessEmailSender({
+          to: securityApprover.email,
+          requestId: requestId,
+          message:
+            "A new Access Requisition has been submitted and requires your review",
+          title: "Action Required: New Access Requisition",
+          role: "security",
+          reviewLink: `?token=${securityApprover.uuid}&stage=security`,
+        });
+      });
+
+      // Send Email to the HOD approver
+      AccessEmailSender({
+        to: email,
+        requestId: requestId,
+        message:
+          "Your Access requisition has been submitted successfully and forwaded to Security for review",
+        title: "Update: Access Requisition Submitted Successfully",
+        role: "user",
+      });
+    } else {
+      // Follow the normal workflow - send to HOD and User
+      AccessEmailSender({
+        to: hodEmail,
+        requestId: requestId,
+        message:
+          "A new Access Requisition has been submitted and requires your review",
+        title: "Action Required: New Access Requisition",
+        role: "HOD",
+        reviewLink: `?token=${hodUuid}&stage=hod`,
+      });
+
+      // Send Email to the user
+      AccessEmailSender({
+        to: email,
+        requestId: requestId,
+        message:
+          "Your Access requisition has been submitted successfully and forwaded to the HOD for review",
+        title: "Update: Access Requisition Submitted Successfully",
+        role: "user",
+      });
     }
 
     // Return a success response

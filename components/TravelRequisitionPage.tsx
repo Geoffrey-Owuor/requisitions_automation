@@ -27,6 +27,7 @@ import TravelConfirmationModal from "./TravelConfirmationModal";
 import { ApiHandler } from "@/utils/ApiHandler";
 import SubmittingOverlay from "./SubmittingOverlay";
 import AlertModal from "./AlertModal";
+import { useToggleStore } from "@/store/useToggleStore";
 import { EngineeringJobFields, EngineeringJob } from "./EngineeringJobFields";
 
 export interface TravelFormData {
@@ -90,6 +91,9 @@ interface FormSelectProps {
 
 export default function TravelRequisitionPage() {
   const { username, email } = useUser();
+
+  const triggerScroll = useToggleStore((state) => state.triggerScroll);
+  const scrollTrigger = useToggleStore((state) => state.scrollTrigger);
 
   // Load departments
   const { data: DEPARTMENTS = [], isLoading: departmentsLoading } = useQuery({
@@ -257,8 +261,7 @@ export default function TravelRequisitionPage() {
           approvalTier={generatedAprovalTier}
           onBack={() => {
             setStep(1);
-            const dashboardDiv = document.getElementById("modal-wrapper");
-            dashboardDiv?.scrollTo({ top: 0, behavior: "instant" });
+            triggerScroll(!scrollTrigger);
           }}
           onSubmit={handleSubmit}
           submitting={submitting}
@@ -395,8 +398,7 @@ export default function TravelRequisitionPage() {
               onSubmit={(e) => {
                 e.preventDefault();
                 setStep(2);
-                const dashboardDiv = document.getElementById("modal-wrapper");
-                dashboardDiv?.scrollTo({ top: 0, behavior: "instant" });
+                triggerScroll(!scrollTrigger);
               }}
             >
               {/* Section 1: Employee Details */}

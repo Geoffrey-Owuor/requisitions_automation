@@ -24,7 +24,7 @@ export default function KeyConfirmationModal({
   const nameString = userName ? userName : "";
 
   const staffDetails: { label: string; value: string }[] = [
-    { label: "Staff Name", value: formData.staffName },
+    { label: "Staff Name", value: formData.employeeName },
     { label: "Department", value: formData.department },
     { label: "Staff Number", value: formData.staffNumber },
     { label: "HOD Approver", value: formData.hodApprover },

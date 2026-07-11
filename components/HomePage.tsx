@@ -15,6 +15,7 @@ import {
   Workflow,
   BriefcaseBusiness,
   CircleArrowOutUpRight,
+  LockKeyhole,
 } from "lucide-react";
 import { ReactNode } from "react";
 import Header from "./Header";
@@ -29,7 +30,7 @@ const requisitions = [
     icon: <BriefcaseBusiness size={22} className="h-5 w-5 sm:h-6 sm:w-6" />,
     accent: "from-rose-500 to-rose-600",
     shadow: "shadow-rose-200",
-    badge: "3 Approval Tiers",
+    badge: "HR",
     workflow: ["Submit", "HOD", "HR", "Director"],
     tiers: [
       { label: "Local", cost: "< 30K", icon: <MapPin size={12} /> },
@@ -45,8 +46,32 @@ const requisitions = [
     icon: <Monitor size={22} className="h-5 w-5 sm:h-6 sm:w-6" />,
     accent: "from-slate-800 to-slate-900",
     shadow: "shadow-slate-200",
-    badge: "Direct Process",
+    badge: "IT",
     workflow: ["Submit", "HOD", "IT Fulfilment"],
+    tiers: null,
+  },
+  {
+    id: "purchase",
+    label: "Staff Product Purchase",
+    description:
+      "The purchase portal for making purchase requisitions at discounted staff prices. Can be accessed within the requisition hub or through the portal link.",
+    icon: <ShoppingBag size={22} className="h-5 w-5 sm:h-6 sm:w-6" />,
+    accent: "from-red-800 to-red-900",
+    shadow: "shadow-red-200",
+    badge: "HR",
+    workflow: ["Submit", "Payroll", "HR", "Credit Control", "Invoicing"],
+    tiers: null,
+  },
+  {
+    id: "security",
+    label: "Key(s) & Access Code Issuance",
+    description:
+      "Submit a request for Key(s) and Access Code Issuance. Routed to your designated HOD then completed by security.",
+    icon: <LockKeyhole size={22} className="h-5 w-5 sm:h-6 sm:w-6" />,
+    accent: "from-zinc-800 to-zinc-900",
+    shadow: "shadow-zinc-200",
+    badge: "Retail",
+    workflow: ["Submit", "HOD", "Security finalizes"],
     tiers: null,
   },
 ];

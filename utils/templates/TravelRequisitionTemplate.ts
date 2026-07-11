@@ -47,11 +47,10 @@ export function TravelRequisitionTemplate({
 
   // The major template
   const emailHtml = `
-    <div style="background-color: #fcfafb; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-      <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 40px rgba(163,29,29,0.08); border: 1px solid #f2eaea;">
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+      <div style="max-width: 600px; border-radius: 24px; margin: 0 auto; background: transparent; overflow: hidden;">
         
-       
-        <div style="background-color: #a31d1d; padding: 24px 30px; border-bottom: 4px solid #f2d7d5;">
+        <div style="background-color: #a31d1d; padding: 18px 20px; border-bottom: 4px solid #f2d7d5;">
            <table width="100%">
              <tr>
                <td style="vertical-align: middle;">
@@ -62,7 +61,7 @@ export function TravelRequisitionTemplate({
            </table>
         </div>
 
-        <div style="padding: 30px 24px;">
+        <div style = "margin: 24px 0;">
           
           
           <div style="background-color: #ffffff; border-radius: 16px; padding: 18px 20px; margin-bottom: 24px; border: 1px solid #f9e8e8;">

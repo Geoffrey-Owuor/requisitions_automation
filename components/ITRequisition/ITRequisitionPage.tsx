@@ -20,6 +20,7 @@ import { ApiHandler } from "@/utils/ApiHandler";
 import SubmittingOverlay from "../SubmittingOverlay";
 import AlertModal from "../AlertModal";
 import { AlertInfo } from "../TravelRequisitionPage";
+import { useToggleStore } from "@/store/useToggleStore";
 
 // ---- Constants ----
 const REQUEST_TYPES = ["Replacement", "New"];
@@ -86,6 +87,9 @@ interface CheckboxGroupProps {
 // ---- Main Page ----
 export default function ITRequisitionPage() {
   const { username, email } = useUser();
+
+  const triggerScroll = useToggleStore((state) => state.triggerScroll);
+  const scrollTrigger = useToggleStore((state) => state.scrollTrigger);
 
   // Load departments
   const { data: DEPARTMENTS = [], isLoading: departmentsLoading } = useQuery({
@@ -191,8 +195,7 @@ export default function ITRequisitionPage() {
           formData={formData}
           onBack={() => {
             setStep(1);
-            const dashboardDiv = document.getElementById("modal-wrapper");
-            dashboardDiv?.scrollTo({ top: 0, behavior: "instant" });
+            triggerScroll(!scrollTrigger);
           }}
           onSubmit={handleSubmit}
           submitting={submitting}
@@ -248,8 +251,7 @@ export default function ITRequisitionPage() {
               onSubmit={(e) => {
                 e.preventDefault();
                 setStep(2);
-                const dashboardDiv = document.getElementById("modal-wrapper");
-                dashboardDiv?.scrollTo({ top: 0, behavior: "instant" });
+                triggerScroll(!scrollTrigger);
               }}
             >
               {/* Section 1: Employee Details */}

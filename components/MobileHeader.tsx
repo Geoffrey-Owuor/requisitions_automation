@@ -1,6 +1,6 @@
 "use client";
 
-import { Dispatch, SetStateAction, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import DashboardBrand from "./DashboardBrand";
 import Brand from "./Brand";
@@ -22,6 +22,7 @@ import ModalWrapper from "./Modules/ModalWrapper";
 import ITRequisitionPage from "./ITRequisition/ITRequisitionPage";
 import TravelRequisitionPage from "./TravelRequisitionPage";
 import { usePathname } from "next/navigation";
+import { useToggleStore } from "@/store/useToggleStore";
 import KeyAccessRequisitionForm from "./Modules/Retail/KeyAccessRequisitionForm";
 
 const links = [
@@ -43,15 +44,33 @@ const MobileHeader = () => {
 
   const isHomeActive = pathname === "/dashboard";
 
-  const [showITRequisition, setShowITRequisition] = useState(false);
-  const [showTravelRequisition, setShowTravelRequisition] = useState(false);
+  // Zustand stores
+  const showITRequisition = useToggleStore((state) => state.showITRequisition);
+  const setShowITRequisition = useToggleStore(
+    (state) => state.setShowITRequisition,
+  );
 
-  // Retail States
-  const [showRetailForms, setShowRetailForms] = useState(false);
-  const [showAccessRequisition, setShowAccessRequisition] = useState(false);
+  const showTravelRequisition = useToggleStore(
+    (state) => state.showTravelRequisition,
+  );
+  const setShowTravelRequisition = useToggleStore(
+    (state) => state.setShowTravelRequisition,
+  );
+
+  const showRetailForms = useToggleStore((state) => state.showRetailForms);
+  const setShowRetailForms = useToggleStore(
+    (state) => state.setShowRetailForms,
+  );
+
+  const showAccessRequisition = useToggleStore(
+    (state) => state.showAccessRequisition,
+  );
+  const setShowAccessRequisition = useToggleStore(
+    (state) => state.setShowAccessRequisition,
+  );
 
   const handleButtonClick = (
-    setAction: Dispatch<SetStateAction<boolean>>,
+    setAction: (value: boolean) => void,
     value: boolean,
   ) => {
     setAction(value);
@@ -186,7 +205,7 @@ const MobileHeader = () => {
 
             {/* Retail Button  */}
             <button
-              onClick={() => setShowRetailForms((prev) => !prev)}
+              onClick={() => setShowRetailForms(!showRetailForms)}
               className="group flex items-center gap-3 rounded-xl px-4 py-3 text-[14px] font-semibold text-slate-600 transition-all hover:bg-red-50 hover:text-red-950"
             >
               {showRetailForms ? (

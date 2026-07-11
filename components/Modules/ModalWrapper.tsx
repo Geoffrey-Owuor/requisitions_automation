@@ -1,9 +1,10 @@
 "use client";
 
 import { X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import ClientPortal from "../ClientPortal";
 import Brand from "../Brand";
+import { useToggleStore } from "@/store/useToggleStore";
 
 interface ModalWrapperProps {
   onClose: () => void;
@@ -14,6 +15,10 @@ interface ModalWrapperProps {
 const ModalWrapper = ({ isOpen, onClose, children }: ModalWrapperProps) => {
   const [shouldRender, setShouldRender] = useState(isOpen);
   const [animate, setAnimate] = useState(false);
+
+  const scrollTrigger = useToggleStore((state) => state.scrollTrigger);
+
+  const modalWrapperRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -29,6 +34,17 @@ const ModalWrapper = ({ isOpen, onClose, children }: ModalWrapperProps) => {
       return () => clearTimeout(timer);
     }
   }, [isOpen]);
+
+  // Listen for the Zustand trigger change
+  useEffect(() => {
+    const executeScroll = () => {
+      requestAnimationFrame(() => {
+        modalWrapperRef.current?.scrollTo({ top: 0, behavior: "instant" });
+      });
+    };
+
+    executeScroll();
+  }, [scrollTrigger]);
 
   if (!shouldRender) return null;
 
@@ -60,7 +76,7 @@ const ModalWrapper = ({ isOpen, onClose, children }: ModalWrapperProps) => {
           </div>
 
           <div
-            id="modal-wrapper"
+            ref={modalWrapperRef}
             className="normal-scrollbar min-h-0 w-full flex-1 overflow-y-auto p-2"
           >
             {children}

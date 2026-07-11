@@ -14,7 +14,7 @@ export default function TravelRequisitionGuideline() {
     <div className="mx-auto max-w-4xl space-y-10 pb-16">
       <div className="space-y-3">
         <div className="inline-flex items-center gap-2 rounded-full border border-rose-100 bg-rose-50/50 px-3 py-1.5 text-[11px] font-semibold tracking-wide text-rose-600 uppercase">
-          <Plane size={14} /> Travel Requisition Policy
+          <Plane size={14} /> Travel Requisition
         </div>
         <h2 className="text-3xl font-semibold tracking-tight text-slate-900">
           Travel Requisition Guidelines
