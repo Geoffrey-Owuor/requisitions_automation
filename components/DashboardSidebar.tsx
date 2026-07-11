@@ -24,6 +24,7 @@ import ITRequisitionPage from "./ITRequisition/ITRequisitionPage";
 import TravelRequisitionPage from "./TravelRequisitionPage";
 import ModalWrapper from "./Modules/ModalWrapper";
 import KeyAccessRequisitionForm from "./Modules/Retail/KeyAccessRequisitionForm";
+import { useToggleStore } from "@/store/useToggleStore";
 
 // Summarized labels for tight vertical sidebar space
 const links = [
@@ -36,7 +37,7 @@ const links = [
   },
   {
     href: "/dashboard/helpdesk",
-    label: "Desk",
+    label: "Helpdesk",
     Icon: LaptopMinimalCheck,
     tooltip: "HelpDesk",
     showTooltip: true,
@@ -48,12 +49,30 @@ const DashboardSidebar = () => {
 
   const router = useRouter();
 
-  const [showITRequisition, setShowITRequisition] = useState(false);
-  const [showTravelRequisition, setShowTravelRequisition] = useState(false);
+  // Zustand stores
+  const showITRequisition = useToggleStore((state) => state.showITRequisition);
+  const setShowITRequisition = useToggleStore(
+    (state) => state.setShowITRequisition,
+  );
 
-  // Retail States
-  const [showRetailForms, setShowRetailForms] = useState(false);
-  const [showAccessRequisition, setShowAccessRequisition] = useState(false);
+  const showTravelRequisition = useToggleStore(
+    (state) => state.showTravelRequisition,
+  );
+  const setShowTravelRequisition = useToggleStore(
+    (state) => state.setShowTravelRequisition,
+  );
+
+  const showRetailForms = useToggleStore((state) => state.showRetailForms);
+  const setShowRetailForms = useToggleStore(
+    (state) => state.setShowRetailForms,
+  );
+
+  const showAccessRequisition = useToggleStore(
+    (state) => state.showAccessRequisition,
+  );
+  const setShowAccessRequisition = useToggleStore(
+    (state) => state.setShowAccessRequisition,
+  );
 
   return (
     <>
@@ -134,7 +153,7 @@ const DashboardSidebar = () => {
           {/* Retail Button */}
           <SideBarButton
             label="Retail"
-            handleClick={() => setShowRetailForms((prev) => !prev)}
+            handleClick={() => setShowRetailForms(!showRetailForms)}
             Icon={showRetailForms ? ChevronUp : ChevronDown}
             showToolTip={true}
             toolTipMessage="Retail Forms"

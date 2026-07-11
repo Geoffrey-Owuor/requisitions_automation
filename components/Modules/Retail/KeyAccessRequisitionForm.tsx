@@ -19,6 +19,7 @@ import SubmittingOverlay from "@/components/SubmittingOverlay";
 import AlertModal from "@/components/AlertModal";
 import { AlertInfo } from "@/components/TravelRequisitionPage";
 import KeyConfirmationModal from "./KeyConfirmationModal";
+import { useToggleStore } from "@/store/useToggleStore";
 
 // ---- Types ----
 export interface KeyAccessFormData {
@@ -60,6 +61,9 @@ interface FormSelectProps {
 // ---- Main Page ----
 export default function KeyAccessRequisitionForm() {
   const { username, email } = useUser();
+
+  const scrollTrigger = useToggleStore((state) => state.scrollTrigger);
+  const triggerScroll = useToggleStore((state) => state.triggerScroll);
 
   // Load departments
   const { data: DEPARTMENTS = [], isLoading: departmentsLoading } = useQuery({
@@ -166,8 +170,7 @@ export default function KeyAccessRequisitionForm() {
           formData={formData}
           onBack={() => {
             setStep(1);
-            const dashboardDiv = document.getElementById("modal-wrapper");
-            dashboardDiv?.scrollTo({ top: 0, behavior: "instant" });
+            triggerScroll(!scrollTrigger);
           }}
           onSubmit={handleSubmit}
           submitting={submitting}
@@ -206,8 +209,7 @@ export default function KeyAccessRequisitionForm() {
               onSubmit={(e) => {
                 e.preventDefault();
                 setStep(2);
-                const dashboardDiv = document.getElementById("modal-wrapper");
-                dashboardDiv?.scrollTo({ top: 0, behavior: "instant" });
+                triggerScroll(!scrollTrigger);
               }}
             >
               {/* Section 1: Staff Details */}

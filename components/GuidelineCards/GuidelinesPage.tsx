@@ -8,12 +8,14 @@ import {
   AlertCircle,
   ChevronRight,
   BriefcaseBusiness,
+  ShoppingBag,
+  LockKeyhole,
 } from "lucide-react";
 import ITRequisitionGuideline from "./ITRequisitionGuideline";
 import TravelRequisitionGuideline from "./TravelRequisitionGuideline";
 
 // Types
-type TabId = "travel" | "it";
+type TabId = "travel" | "it" | "purchase" | "access";
 
 // Reusable Sub-components
 export const GeneralNote = () => (
@@ -108,6 +110,12 @@ export default function GuidelinesPage() {
       icon: <BriefcaseBusiness size={14} />,
     },
     { id: "it", label: "IT Requisition", icon: <Monitor size={14} /> },
+    {
+      id: "purchase",
+      label: "Staff Purchase",
+      icon: <ShoppingBag size={14} />,
+    },
+    { id: "access", label: "Key(s) & Access", icon: <LockKeyhole size={14} /> },
   ] as const;
 
   return (
