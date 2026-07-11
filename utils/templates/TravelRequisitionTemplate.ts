@@ -54,9 +54,14 @@ export function TravelRequisitionTemplate({
            <table width="100%">
              <tr>
                <td style="vertical-align: middle;">
-                 <p style="margin: 0; font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #f2d7d5; opacity: 0.8;">New Requisition</p>
+                 <p style="margin: 0; font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #f2d7d5; opacity: 0.8;">Travel Requisition</p>
                  <h2 style="margin: 4px 0 0; font-size: 20px; color: #ffffff; font-weight: 600;">${title}</h2>
                </td>
+               <td style="text-align: right; vertical-align: middle;">
+                <div style="display: inline-block; background-color: #7f1d1d; border-radius: 12px; padding: 8px 14px;">
+                  <p style="margin: 0; font-size: 11px; font-weight: 700; color: #f2d7d5; letter-spacing: 1px;">TRAVEL</p>
+                </div>
+              </td>
              </tr>
            </table>
         </div>
@@ -129,7 +134,7 @@ export function TravelRequisitionTemplate({
               <a href="${BASE_URL}/travelapproval/${requestId}${reviewLink}" style="background-color: #a31d1d; color: #ffffff; padding: 14px 36px; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 13px; display: inline-block;">Review Requisition</a>
             </div>
             <div style="${pdfButtonStyle} width: 100%;">
-              <a href="${BASE_URL}/travelapproval/${requestId}/pdfdownload" style="color: #a31d1d; font-size: 12px; font-weight: 600; text-decoration: underline; display: inline-block; margin-top: 12px;">Download PDF Summary</a>
+              <a href="${BASE_URL}/dashboard/travelpdf/${requestId}" style="color: #a31d1d; font-size: 12px; font-weight: 600; text-decoration: underline; display: inline-block; margin-top: 12px;">Download PDF Summary</a>
             </div>
           </div>
 
