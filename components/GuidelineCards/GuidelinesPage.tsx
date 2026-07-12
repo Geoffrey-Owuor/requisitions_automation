@@ -8,14 +8,18 @@ import {
   AlertCircle,
   ChevronRight,
   BriefcaseBusiness,
-  ShoppingBag,
   LockKeyhole,
+  LaptopMinimalCheck,
+  ShoppingBag,
 } from "lucide-react";
 import ITRequisitionGuideline from "./ITRequisitionGuideline";
 import TravelRequisitionGuideline from "./TravelRequisitionGuideline";
+import HelpdeskGuideline from "./HelpDeskGuideline";
+import AccessRequisitionGuideline from "./AccessRequisitionGuideline";
+import StaffPurchaseGuideline from "./StaffPurchaseGuideline";
 
 // Types
-type TabId = "travel" | "it" | "purchase" | "access";
+type TabId = "travel" | "it" | "access" | "desk" | "purchase";
 
 // Reusable Sub-components
 export const GeneralNote = () => (
@@ -110,6 +114,7 @@ export default function GuidelinesPage() {
       icon: <BriefcaseBusiness size={14} />,
     },
     { id: "it", label: "IT Requisition", icon: <Monitor size={14} /> },
+    { id: "desk", label: "HelpDesk", icon: <LaptopMinimalCheck size={14} /> },
     {
       id: "purchase",
       label: "Staff Purchase",
@@ -131,14 +136,14 @@ export default function GuidelinesPage() {
       {/* Main Content Area */}
       <main className="relative z-10 mx-auto mt-4 flex max-w-6xl flex-1 flex-col gap-4 px-4 sm:mt-6 sm:px-6 md:flex-row md:gap-8">
         {/* Sidebar */}
-        <aside className="shrink-0 md:w-56">
+        <aside className="w-[calc(100vw-40px)] md:w-auto">
           {/* Mobile: horizontal pill strip */}
-          <nav className="no-scrollbar flex gap-1 overflow-x-auto pb-1 md:sticky md:top-20 md:flex-col md:gap-1 md:overflow-y-auto md:pb-0">
+          <nav className="scrollbar-hide flex flex-row gap-1 overflow-x-auto py-2 md:sticky md:top-20 md:flex-col md:gap-1 md:overflow-y-auto md:py-0">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`group relative flex shrink-0 cursor-pointer items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium transition-all duration-200 md:w-full md:shrink-0 md:text-sm ${
+                className={`group relative flex shrink-0 cursor-pointer items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-medium transition-all duration-200 md:w-full md:shrink-0 md:text-sm ${
                   activeTab === tab.id
                     ? "bg-rose-100/60 text-slate-900"
                     : "text-slate-600 hover:text-slate-800"
@@ -159,6 +164,9 @@ export default function GuidelinesPage() {
         <div className="min-h-0 flex-1 pb-4">
           {activeTab === "travel" && <TravelRequisitionGuideline />}
           {activeTab === "it" && <ITRequisitionGuideline />}
+          {activeTab === "desk" && <HelpdeskGuideline />}
+          {activeTab === "purchase" && <StaffPurchaseGuideline />}
+          {activeTab === "access" && <AccessRequisitionGuideline />}
         </div>
       </main>
 

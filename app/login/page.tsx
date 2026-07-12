@@ -9,7 +9,7 @@ import Footer from "@/components/Footer";
 import { FileText } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Login | Requisition Hub",
+  title: "Login | Hotpoint Apps Hub",
   description: "Secure corporate portal for Hotpoint Appliances Ltd",
 };
 
