@@ -3,18 +3,18 @@ import { UpdateRequestStatusProps } from "./UpdateTravelStatus";
 import { pool } from "@/lib/db";
 import { PoolClient } from "pg";
 import { AlertInfo } from "@/components/TravelRequisitionPage";
-import { ITEmailSender } from "@/services/ITEmailSender";
-import { itApprovalStage } from "@/utils/ITApprovalStages/itApprovalStage";
-import { hodApprovalStage } from "@/utils/ITApprovalStages/hodApprovalStage";
+import { AccessEmailSender } from "@/services/AccessEmailSender";
+import { securityApprovalStage } from "@/utils/AccessApprovalStages/securityApprovalStage";
+import { hodApprovalStage } from "@/utils/AccessApprovalStages/hodApprovalStage";
 
-export async function UpdateITRequisitionStatus(
+export const UpdateAccessRequisitionStatus = async (
   payload: UpdateRequestStatusProps,
-): Promise<AlertInfo> {
+): Promise<AlertInfo> => {
   let client: PoolClient | undefined;
 
   //  Our base update status query
   const baseUpdateQuery = `
-  UPDATE it_requisitions
+  UPDATE access_requisitions
   SET ${payload.stage}_approval_date = CURRENT_TIMESTAMP,
   ${payload.stage}_approver_status = $1,
   ${payload.stage}_approver_name = $2,
@@ -43,7 +43,7 @@ export async function UpdateITRequisitionStatus(
       SELECT ${payload.stage}_approver_status AS approval_status,
       ${payload.stage}_approver_name AS approver,
       submitter_email, hod_approver_email
-      FROM it_requisitions WHERE request_id = $1 FOR UPDATE
+      FROM access_requisitions WHERE request_id = $1 FOR UPDATE
       `,
 
       [payload.uuid],
@@ -90,16 +90,6 @@ export async function UpdateITRequisitionStatus(
 
     await client.query(baseUpdateQuery, baseParams);
 
-    // THIS IS COMMENTED OUT SINCE TOKEN ROTATION CAUSES INVALID LINK
-    // ISSUES FOR SUBSEQUENT EMAIL APPROVAL NOTIFICATIONS
-    // Rotate the approver's uuid
-    // await client.query(
-    //   `UPDATE ${payload.stage}_array
-    //   SET ${payload.stage}_uuid = gen_random_uuid()
-    //   WHERE ${payload.stage}_email = $1`,
-    //   [payload.approverEmail],
-    // );
-
     await client.query("COMMIT");
 
     // Email sending logic
@@ -113,8 +103,8 @@ export async function UpdateITRequisitionStatus(
           approverName: payload.approverName,
         });
         break;
-      case "it":
-        itApprovalStage({
+      case "security":
+        securityApprovalStage({
           uuid: payload.uuid,
           userEmail,
           hodEmail,
@@ -124,12 +114,12 @@ export async function UpdateITRequisitionStatus(
         });
         break;
       default:
-        ITEmailSender({
+        AccessEmailSender({
           to: "geoffrey@hotpoint.co.ke",
           requestId: payload.uuid,
           message:
-            "A wrong stage was passed in the IT requisition approval workflow for this requistion",
-          title: "Wrong stage passed to IT requisition approval workflow",
+            "A wrong stage was passed in the access requisition approval workflow for this requistion",
+          title: "Wrong stage passed to access requisition approval workflow",
           role: "user",
         });
         break;
@@ -154,4 +144,4 @@ export async function UpdateITRequisitionStatus(
   } finally {
     if (client) client.release();
   }
-}
+};
