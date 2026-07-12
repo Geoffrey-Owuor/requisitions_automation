@@ -6,6 +6,7 @@ import {
   LaptopMinimalCheck,
 } from "lucide-react";
 import { InfoCard } from "./GuidelinesPage";
+import { BASE_URL } from "@/public/assets";
 
 export default function HelpdeskGuideline() {
   return (
@@ -36,7 +37,7 @@ export default function HelpdeskGuideline() {
             <a
               target="_blank"
               rel="noopener noreferrer"
-              href="https://192.168.0.155:8443/manual"
+              href={`${BASE_URL}:8443/manual`}
               className="font-semibold underline underline-offset-2 transition-colors hover:text-blue-600"
             >
               HelpDesk Manual

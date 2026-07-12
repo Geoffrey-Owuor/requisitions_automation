@@ -20,6 +20,7 @@ import {
 import { ReactNode } from "react";
 import Header from "./Header";
 import QuickSignIn from "./QuickSignIn";
+import { BASE_URL } from "@/public/assets";
 
 const requisitions = [
   {
@@ -150,14 +151,14 @@ export default function HomePage() {
                   />
 
                   <QuickLink
-                    href="https://192.168.0.155:4443"
+                    href={`${BASE_URL}:4443/login`}
                     icon={<ShoppingBag size={18} />}
                     label="Staff Product Purchase"
                     sub="Go to External portal"
                     isExternal
                   />
                   <QuickLink
-                    href="https://192.168.0.155:8443"
+                    href={`${BASE_URL}:8443/login`}
                     icon={<LaptopMinimalCheck size={18} />}
                     label="HelpDesk"
                     sub="Go to External portal"

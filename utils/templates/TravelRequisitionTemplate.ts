@@ -1,7 +1,6 @@
 import { EmailDataValues, EmailDataProps } from "@/services/EmailSender";
 import { dateFormatter } from "@/public/assets";
-
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+import { BASE_URL } from "@/public/assets";
 
 interface TravelRequisitionProps extends Omit<EmailDataProps, "to"> {
   emailData: EmailDataValues;

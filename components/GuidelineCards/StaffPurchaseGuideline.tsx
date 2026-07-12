@@ -7,7 +7,8 @@ import {
   ShoppingBag,
 } from "lucide-react";
 import Link from "next/link";
-import { GeneralNote, InfoCard } from "./GuidelinesPage";
+import { InfoCard } from "./GuidelinesPage";
+import { BASE_URL } from "@/public/assets";
 
 export default function StaffPurchaseGuideline() {
   return (
@@ -37,7 +38,7 @@ export default function StaffPurchaseGuideline() {
           <p className="mt-1 text-sm leading-relaxed text-blue-800">
             You can access the portal directly in a separate window.{" "}
             <Link
-              href="https://192.168.0.155:4443"
+              href={`${BASE_URL}:4443`}
               target="_blank"
               rel="noopener noreferrer"
               className="font-semibold underline underline-offset-2 transition-colors hover:text-blue-600"

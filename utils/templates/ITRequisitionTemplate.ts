@@ -1,7 +1,6 @@
 import { dateFormatter } from "@/public/assets";
 import { ITDataProps, ITMailTemplateValues } from "@/services/ITEmailSender";
-
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+import { BASE_URL } from "@/public/assets";
 
 interface ITRequisitionProps extends Omit<ITDataProps, "to"> {
   emailData: ITMailTemplateValues;

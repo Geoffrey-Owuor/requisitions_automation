@@ -3,7 +3,7 @@ import {
   AccessDataProps,
   AccessMailTemplateValues,
 } from "@/services/AccessEmailSender";
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+import { BASE_URL } from "@/public/assets";
 
 interface AccessRequisitionProps extends Omit<AccessDataProps, "to"> {
   emailData: AccessMailTemplateValues;
