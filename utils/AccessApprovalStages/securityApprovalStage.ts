@@ -64,6 +64,7 @@ export async function securityApprovalStage({
       message: "You have approved this access requisition",
       title: "Final Update: Access Requisition Approved",
       role: "user",
+      showPdfDownload: true,
     });
 
     if (hodEmail === userEmail) {
@@ -73,6 +74,7 @@ export async function securityApprovalStage({
         message: `Your access requisition has been approved by ${approverName}`,
         title: "Final Update: Access Requisition Approved",
         role: "user",
+        showPdfDownload: true,
       });
     } else {
       AccessEmailSender({
@@ -81,6 +83,7 @@ export async function securityApprovalStage({
         message: `This access requisition has been approved by ${approverName}`,
         title: "Final Update: Access Requisition Approved",
         role: "user",
+        showPdfDownload: true,
       });
 
       AccessEmailSender({
@@ -89,6 +92,7 @@ export async function securityApprovalStage({
         message: `Your access requisition has been approved by ${approverName}`,
         title: "Final Update: Access Requisition Approved",
         role: "user",
+        showPdfDownload: true,
       });
     }
   }

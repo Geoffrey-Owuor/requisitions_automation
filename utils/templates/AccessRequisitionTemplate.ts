@@ -16,12 +16,17 @@ export function AccessRequisitionTemplate({
   role,
   emailData,
   reviewLink,
+  showPdfDownload,
 }: AccessRequisitionProps) {
   const formattedDateSubmitted = dateFormatter(emailData.datesubmitted);
   const formattedIssuanceDate = dateFormatter(emailData.issuancedate);
 
   const buttonStyle =
     role !== "user" ? "display: inline-block;" : "display: none;";
+
+  const pdfButtonStyle = showPdfDownload
+    ? "display: inline-block; margin-top: 10px;"
+    : "display: none;";
 
   const emailHtml = `
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
@@ -113,6 +118,9 @@ export function AccessRequisitionTemplate({
           <div style="margin-top: 32px; text-align: center;">
             <div style="${buttonStyle}">
               <a href="${BASE_URL}/accessapproval/${requestId}${reviewLink ?? ""}" style="background-color: #a31d1d; color: #ffffff; padding: 14px 36px; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 13px; display: inline-block;">Review Requisition</a>
+            </div>
+            <div style="${pdfButtonStyle} width: 100%;">
+              <a href="${BASE_URL}/dashboard/accesspdf/${requestId}" style="color: #a31d1d; font-size: 12px; font-weight: 600; text-decoration: underline; display: inline-block; margin-top: 12px;">Download PDF Summary</a>
             </div>
           </div>
 
