@@ -32,6 +32,8 @@ export const TRAVEL_CATEGORIES = ["International", "Local"];
 export const TRAVEL_MODES = ["Road", "Air"];
 export const BUDGET_STATUS = ["Yes", "No"];
 
+export const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+
 export const initialsHelper = (userName: string) => {
   const initials = userName
     .split(" ")
