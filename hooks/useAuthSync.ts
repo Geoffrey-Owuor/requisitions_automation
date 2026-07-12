@@ -39,12 +39,12 @@ export function useAuthSync(user: SessionPayload) {
 
       if (action === "LOGOUT") {
         // Another tab logged out, immediately clean up and redirect
-        router.push("/");
+        router.push("/login");
         router.refresh();
       } else if (action === "LOGIN" && email !== localUserEmail) {
         // Another tab logged in as a different user (Imposter caught)
         await fetch("/api/auth/logout", { method: "POST" });
-        router.push("/");
+        router.push("/login");
       }
     };
 
@@ -65,11 +65,11 @@ export function useAuthSync(user: SessionPayload) {
         const data = await response.json();
 
         if (data.loggedIn === false) {
-          router.push("/");
+          router.push("/login");
           router.refresh();
         } else if (data.loggedIn === true && data.email !== localUserEmail) {
           await fetch("/api/auth/logout", { method: "POST" });
-          router.push("/");
+          router.push("/login");
         }
       } catch (error) {
         console.error("Error checking session status:", error);

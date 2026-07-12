@@ -58,12 +58,12 @@ export default async function LoginPage() {
 
             {/* Typography Header Group */}
             <div className="mb-6 text-center">
-              <h1 className="mb-2 text-[20px] leading-tight font-semibold tracking-tight text-slate-900">
-                Sign in to continue
+              <h1 className="mb-2 text-2xl leading-tight font-semibold tracking-tight text-slate-900">
+                Welcome Back
               </h1>
               <p className="px-1 text-[13.5px] leading-relaxed font-normal text-slate-500">
-                Valid work account required. Authenticate using your Microsoft
-                365 account to proceed.
+                Valid work account required. Login using your Microsoft 365
+                account to proceed.
               </p>
             </div>
 

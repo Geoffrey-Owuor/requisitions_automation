@@ -58,7 +58,7 @@ export default function UserDropdown({
       authChannel.postMessage({ action: "LOGOUT" });
       authChannel.close();
 
-      window.location.href = "/";
+      window.location.href = "/login";
     } catch (error) {
       console.error("Error while trying to log out:", error);
       setShowOverlay(false);
