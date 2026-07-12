@@ -24,7 +24,7 @@ export async function hodApprovalStage({
     ITEmailSender({
       to: approverEmail,
       requestId: uuid,
-      message: "You have declined this travel requisition",
+      message: "You have declined this IT requisition",
       title: "Final Update: IT Requisition Declined",
       role: "user",
     });
@@ -33,7 +33,7 @@ export async function hodApprovalStage({
     ITEmailSender({
       to: userEmail,
       requestId: uuid,
-      message: `Your travel requisition has been declined by ${approverName}`,
+      message: `Your IT requisition has been declined by ${approverName}`,
       title: "Final Update: IT Requisition Declined",
       role: "user",
     });
