@@ -53,12 +53,8 @@ const ITReqPdfModal = ({ pdfData }: { pdfData: ITPdfValues }) => {
               fileName={`IT_Requisition_${pdfData.employeename.replace(/\s+/g, "_")}.pdf`}
               className="flex cursor-pointer items-center gap-2 rounded-[14px] border-none bg-slate-900 px-5 py-2.5 text-[13px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)]"
             >
-              {({ loading }) => (
-                <>
-                  <Printer size={14} />
-                  {loading ? "Preparing PDF..." : "Download PDF"}
-                </>
-              )}
+              <Printer size={14} />
+              <span>Download PDF</span>
             </PDFDownloadLink>
           ) : (
             <button

@@ -20,7 +20,7 @@ export interface AccessMailTemplateValues {
   securitycomments: string;
 }
 
-const TravelDataQuery = `
+export const AccessDataQuery = `
    SELECT request_created_at AS datesubmitted,
    submitter_name AS submittername,
    employee_name AS employeename,
@@ -45,10 +45,11 @@ export interface AccessDataProps {
   title: string;
   role: string;
   reviewLink?: string;
+  showPdfDownload?: boolean;
 }
 
 export const getAccessEmailData = cache(async (requestId: string) => {
-  const result = await query<AccessMailTemplateValues>(TravelDataQuery, [
+  const result = await query<AccessMailTemplateValues>(AccessDataQuery, [
     requestId,
   ]);
   return result[0];
@@ -61,6 +62,7 @@ export async function AccessEmailSender({
   title,
   role,
   reviewLink,
+  showPdfDownload = false,
 }: AccessDataProps) {
   const emailData = await getAccessEmailData(requestId);
 
@@ -71,6 +73,7 @@ export async function AccessEmailSender({
     role,
     emailData,
     reviewLink,
+    showPdfDownload,
   });
 
   await sendEmail({
