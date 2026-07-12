@@ -1,4 +1,4 @@
-# Hotpoint Requisition Hub
+# Hotpoint Apps Hub
 
 A comprehensive web application for automating internal requisitions at Hotpoint, built with Next.js. Streamlines the process of submitting and approving IT equipment requests and travel requisitions with multi-tier approval workflows.
 

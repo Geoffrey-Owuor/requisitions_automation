@@ -75,7 +75,7 @@ export default function QuickSignIn() {
           <div className="flex items-center gap-2">
             <MicrosoftIcon />
             <span className="text-sm font-semibold text-neutral-600 dark:text-neutral-400">
-              Sign in to Requisition Hub
+              Sign in to the Apps Hub
             </span>
           </div>
           <button

@@ -20,10 +20,10 @@ const Brand = ({ showText = false }: { showText?: boolean }) => {
       {showText && (
         <div className="flex flex-col gap-px leading-none">
           <span className="text-[14px] font-semibold text-[#1e1b1b]">
-            Requisition Hub
+            Apps Hub
           </span>
           <span className="text-[11px] text-[#a18080]">
-            Hotpoint Appliances Ltd
+            Hotpoint Appliances
           </span>
         </div>
       )}
