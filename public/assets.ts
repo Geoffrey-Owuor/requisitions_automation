@@ -3,8 +3,10 @@ import form_image from "./form_image.png";
 import hotpoint_background from "./hotpoint_logo.png";
 import hotpoint_black_logo from "./hotpoint_black_logo.png";
 import it_form_image from "./it_form_image.png";
+import access_key_image from "./access_key_image.png";
 
 export const assets = {
+  access_key_image,
   hotpoint_logo,
   form_image,
   hotpoint_background,
@@ -29,6 +31,8 @@ export function dateFormatter(dateString: string) {
 export const TRAVEL_CATEGORIES = ["International", "Local"];
 export const TRAVEL_MODES = ["Road", "Air"];
 export const BUDGET_STATUS = ["Yes", "No"];
+
+export const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 export const initialsHelper = (userName: string) => {
   const initials = userName

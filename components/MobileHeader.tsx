@@ -8,20 +8,33 @@ import UserDropdown from "./UserDropDown";
 import {
   Menu,
   X,
-  LayoutDashboard,
   Monitor,
-  Plane,
   CircleQuestionMark,
+  LaptopMinimalCheck,
+  ShoppingBag,
+  HousePlug,
+  Briefcase,
+  ChevronUp,
+  ChevronDown,
+  LockKeyhole,
 } from "lucide-react";
+import ModalWrapper from "./Modules/ModalWrapper";
+import ITRequisitionPage from "./ITRequisition/ITRequisitionPage";
+import TravelRequisitionPage from "./TravelRequisitionPage";
 import { usePathname } from "next/navigation";
+import { useToggleStore } from "@/store/useToggleStore";
+import KeyAccessRequisitionForm from "./Modules/Retail/KeyAccessRequisitionForm";
 
 const links = [
-  { href: "/dashboard", label: "Dashboard", Icon: LayoutDashboard },
-  { href: "/dashboard/itrequisition", label: "IT Requisition", Icon: Monitor },
   {
-    href: "/dashboard/travelrequisition",
-    label: "Travel Requisition",
-    Icon: Plane,
+    href: "/dashboard/staffproductpurchase",
+    label: "Staff Purchase",
+    Icon: ShoppingBag,
+  },
+  {
+    href: "/dashboard/helpdesk",
+    label: "HelpDesk",
+    Icon: LaptopMinimalCheck,
   },
 ];
 
@@ -29,8 +42,67 @@ const MobileHeader = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
 
+  const isHomeActive = pathname === "/dashboard";
+
+  // Zustand stores
+  const showITRequisition = useToggleStore((state) => state.showITRequisition);
+  const setShowITRequisition = useToggleStore(
+    (state) => state.setShowITRequisition,
+  );
+
+  const showTravelRequisition = useToggleStore(
+    (state) => state.showTravelRequisition,
+  );
+  const setShowTravelRequisition = useToggleStore(
+    (state) => state.setShowTravelRequisition,
+  );
+
+  const showRetailForms = useToggleStore((state) => state.showRetailForms);
+  const setShowRetailForms = useToggleStore(
+    (state) => state.setShowRetailForms,
+  );
+
+  const showAccessRequisition = useToggleStore(
+    (state) => state.showAccessRequisition,
+  );
+  const setShowAccessRequisition = useToggleStore(
+    (state) => state.setShowAccessRequisition,
+  );
+
+  const handleButtonClick = (
+    setAction: (value: boolean) => void,
+    value: boolean,
+  ) => {
+    setAction(value);
+
+    setSidebarOpen(false);
+  };
   return (
     <>
+      {/* IT Modal */}
+      <ModalWrapper
+        isOpen={showITRequisition}
+        onClose={() => setShowITRequisition(false)}
+      >
+        <ITRequisitionPage />
+      </ModalWrapper>
+
+      {/* Travel Modal */}
+      <ModalWrapper
+        isOpen={showTravelRequisition}
+        onClose={() => setShowTravelRequisition(false)}
+      >
+        <TravelRequisitionPage />
+      </ModalWrapper>
+
+      {/* Key Access Requisition Modal */}
+      <ModalWrapper
+        isOpen={showAccessRequisition}
+        onClose={() => setShowAccessRequisition(false)}
+      >
+        <KeyAccessRequisitionForm />
+      </ModalWrapper>
+
       {/* Overlay & Sliding Mobile Sidebar */}
       <div
         className={`fixed inset-0 z-70 ${
@@ -62,6 +134,49 @@ const MobileHeader = () => {
           </div>
 
           <nav className="flex flex-col gap-1 overflow-y-auto p-4">
+            {/* Home Link */}
+            <Link
+              href="/dashboard"
+              onClick={() => setSidebarOpen(false)}
+              className={`group flex items-center gap-3 rounded-xl px-4 py-3 text-[14px] font-semibold transition-all ${
+                isHomeActive
+                  ? "bg-red-950 text-white shadow-md"
+                  : "text-slate-600 hover:bg-red-50 hover:text-red-950"
+              }`}
+            >
+              <HousePlug
+                size={18}
+                className={`transition-colors ${
+                  isHomeActive
+                    ? "text-white"
+                    : "text-slate-500 group-hover:text-red-950"
+                }`}
+              />
+              Home
+            </Link>
+
+            {/* IT Requisition */}
+            <button
+              onClick={() => handleButtonClick(setShowITRequisition, true)}
+              className="group flex items-center gap-3 rounded-xl px-4 py-3 text-[14px] font-semibold text-slate-600 transition-all hover:bg-red-50 hover:text-red-950"
+            >
+              <Monitor
+                size={18}
+                className="text-slate-500 transition-colors group-hover:text-red-950"
+              />
+              IT Requisition
+            </button>
+            {/* Travel Requisition */}
+            <button
+              onClick={() => handleButtonClick(setShowTravelRequisition, true)}
+              className="group flex items-center gap-3 rounded-xl px-4 py-3 text-[14px] font-semibold text-slate-600 transition-all hover:bg-red-50 hover:text-red-950"
+            >
+              <Briefcase
+                size={18}
+                className="text-slate-500 transition-colors group-hover:text-red-950"
+              />
+              Travel Requisition
+            </button>
             {links.map(({ href, label, Icon }) => {
               const isActive = pathname === href;
               return (
@@ -87,6 +202,41 @@ const MobileHeader = () => {
                 </Link>
               );
             })}
+
+            {/* Retail Button  */}
+            <button
+              onClick={() => setShowRetailForms(!showRetailForms)}
+              className="group flex items-center gap-3 rounded-xl px-4 py-3 text-[14px] font-semibold text-slate-600 transition-all hover:bg-red-50 hover:text-red-950"
+            >
+              {showRetailForms ? (
+                <ChevronUp
+                  size={18}
+                  className="text-slate-500 transition-colors group-hover:text-red-950"
+                />
+              ) : (
+                <ChevronDown
+                  size={18}
+                  className="text-slate-500 transition-colors group-hover:text-red-950"
+                />
+              )}
+              Retail
+            </button>
+
+            {/* Access Key Button */}
+            {showRetailForms && (
+              <button
+                onClick={() =>
+                  handleButtonClick(setShowAccessRequisition, true)
+                }
+                className="group flex items-center gap-3 rounded-xl px-4 py-3 text-[14px] font-semibold text-slate-600 transition-all hover:bg-red-50 hover:text-red-950"
+              >
+                <LockKeyhole
+                  size={18}
+                  className="text-slate-500 transition-colors group-hover:text-red-950"
+                />
+                Access/ Key Issuance
+              </button>
+            )}
           </nav>
         </aside>
       </div>

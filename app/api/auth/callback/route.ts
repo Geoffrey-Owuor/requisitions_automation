@@ -23,6 +23,10 @@ export async function GET(req: Request) {
   const storedState = cookieStore.get("oauth_state")?.value;
   const storedCodeVerifier = cookieStore.get("oauth_code_verifier")?.value;
 
+  // 1. Get the stored return path
+  const storedReturnTo =
+    cookieStore.get("oauth_return_to")?.value || "/dashboard";
+
   if (
     !code ||
     !state ||
@@ -60,8 +64,15 @@ export async function GET(req: Request) {
     // Cleanup state tracking cookies
     cookieStore.delete("oauth_state");
     cookieStore.delete("oauth_code_verifier");
+    cookieStore.delete("oauth_return_to");
 
-    return Response.redirect(new URL("/dashboard", origin));
+    // 3. Security Check: Ensure it's a local relative path to avoid open redirects
+    const safeReturnTo =
+      storedReturnTo.startsWith("/") && !storedReturnTo.startsWith("//")
+        ? storedReturnTo
+        : "/dashboard";
+
+    return Response.redirect(new URL(safeReturnTo, origin));
   } catch (error) {
     console.error("Authentication handshake error:", error);
     return new Response("Authentication failed", { status: 500 });

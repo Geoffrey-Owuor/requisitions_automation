@@ -28,6 +28,16 @@ html {
   border-radius: 999px;
 }
 
+/* Normal scrollbar */
+.normal-scrollbar {
+  scrollbar-color: #a3a3a3 transparent;
+}
+/* Small scrollbar */
+.small-scrollbar {
+  scrollbar-color: #a3a3a3 transparent;
+  scrollbar-width: thin;
+}
+
 /* Dashboard Alert Styles */
 
 @keyframes slideInTopCenter {
@@ -58,4 +68,9 @@ html {
 
 .animate-slide-out-top {
   animation: slideOutTopCenter 0.4s cubic-bezier(0.7, 0, 0.84, 0) forwards;
+}
+
+/* Hide scrollbar */
+.scrollbar-hide {
+  scrollbar-width: none;
 }

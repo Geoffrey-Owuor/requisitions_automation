@@ -180,7 +180,7 @@ const TravelApprovalModal = ({
   };
 
   return (
-    <div className="relative py-4">
+    <div className="relative p-4">
       {(approving || declining) && <SubmittingOverlay />}
       {step === 2 && (
         <ApprovalAlert
@@ -191,7 +191,7 @@ const TravelApprovalModal = ({
       {step === 1 && (
         <div className="relative z-10 mx-auto max-w-225">
           {/* Banner image */}
-          <div className="mb-4 overflow-hidden rounded-3xl">
+          <div className="mb-4 overflow-hidden rounded-2xl sm:rounded-3xl">
             <Image
               src={assets.form_image}
               sizes="100vh"
@@ -215,7 +215,7 @@ const TravelApprovalModal = ({
           </div>
 
           {/* ── Card ── */}
-          <div className="rounded-3xl border border-gray-100 bg-white/65 p-10 shadow-[0_24px_48px_rgba(160,60,60,0.10)] backdrop-blur-2xl">
+          <div className="rounded-3xl border border-gray-100 bg-white/65 px-6 py-8 shadow-[0_24px_48px_rgba(160,60,60,0.10)] backdrop-blur-2xl sm:px-8">
             {/* Approver identity badge */}
             <div className="mb-7 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white/80 px-4 py-3">
               <div className="flex items-center gap-3">
