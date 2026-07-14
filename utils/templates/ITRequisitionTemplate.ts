@@ -1,7 +1,6 @@
 import { dateFormatter } from "@/public/assets";
 import { ITDataProps, ITMailTemplateValues } from "@/services/ITEmailSender";
-
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+import { BASE_URL } from "@/public/assets";
 
 interface ITRequisitionProps extends Omit<ITDataProps, "to"> {
   emailData: ITMailTemplateValues;
@@ -23,11 +22,11 @@ export function ITRequisitionTemplate({
     role !== "user" ? "display: inline-block;" : "display: none;";
 
   const emailHtml = `
-    <div style="background-color: #fcfafb; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-      <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 40px rgba(163,29,29,0.08); border: 1px solid #f2eaea;">
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+      <div style="max-width: 600px; border-radius: 24px; margin: 0 auto; background: transparent; overflow: hidden;">
 
         <!-- Header: solid background avoids Outlook gradient rendering issues -->
-        <div style="background-color: #a31d1d; padding: 24px 30px; border-bottom: 4px solid #f2d7d5;">
+        <div style="background-color: #a31d1d; padding: 18px 20px; border-bottom: 4px solid #f2d7d5;">
           <table width="100%">
             <tr>
               <td style="vertical-align: middle;">
@@ -36,14 +35,14 @@ export function ITRequisitionTemplate({
               </td>
               <td style="text-align: right; vertical-align: middle;">
                 <div style="display: inline-block; background-color: #7f1d1d; border-radius: 12px; padding: 8px 14px;">
-                  <p style="margin: 0; font-size: 11px; font-weight: 700; color: #f2d7d5; letter-spacing: 1px;">IT REQ</p>
+                  <p style="margin: 0; font-size: 11px; font-weight: 700; color: #f2d7d5; letter-spacing: 1px;">IT</p>
                 </div>
               </td>
             </tr>
           </table>
         </div>
 
-        <div style="padding: 30px 24px;">
+        <div style = "margin: 24px 0;">
 
           <!-- Message box: explicit white avoids Outlook dark-mode unpredictability -->
           <div style="background-color: #ffffff; border-radius: 16px; padding: 18px 20px; margin-bottom: 24px; border: 1px solid #dbeafe;">

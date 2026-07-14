@@ -196,7 +196,7 @@ export function ITRequisitionModal({
                   </>
                 )}
               <Link
-                href={`/itapproval/${data.request_id}/pdfdownload`}
+                href={`/dashboard/itpdf/${data.request_id}`}
                 onClick={handleLinkClick}
                 className="flex items-center gap-1 rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white transition-colors duration-200 hover:bg-slate-800"
               >

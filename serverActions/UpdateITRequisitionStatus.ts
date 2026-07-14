@@ -128,8 +128,8 @@ export async function UpdateITRequisitionStatus(
           to: "geoffrey@hotpoint.co.ke",
           requestId: payload.uuid,
           message:
-            "A wrong stage was passed in the travel requisition approval workflow for this requistion",
-          title: "Wrong stage passed to travel requisition approval workflow",
+            "A wrong stage was passed in the IT requisition approval workflow for this requistion",
+          title: "Wrong stage passed to IT requisition approval workflow",
           role: "user",
         });
         break;

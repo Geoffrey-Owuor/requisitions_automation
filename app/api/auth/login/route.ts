@@ -8,6 +8,10 @@ export async function GET(req: Request) {
   const origin = await getRequestOrigin(req);
   const dynamicRedirectURI = `${origin}/api/auth/callback`;
 
+  // 1. Extract the returnTo path, default to /dashboard if missing
+  const requestUrl = new URL(req.url);
+  const returnTo = requestUrl.searchParams.get("returnTo") || "/dashboard";
+
   // Instantiate Arctic uniquely for the current domain
   const entraId = new MicrosoftEntraId(
     process.env.AUTH_MICROSOFT_ENTRA_ID_TENANT_ID!,
@@ -34,6 +38,14 @@ export async function GET(req: Request) {
     httpOnly: true,
     path: "/",
     maxAge: 60 * 10,
+  });
+
+  // 2. Save the return target in a cookie
+  cookieStore.set("oauth_return_to", returnTo, {
+    secure: isProd,
+    httpOnly: true,
+    path: "/",
+    maxAge: 60 * 10, // 10 minutes is plenty
   });
 
   // FIX: Define the scopes as a flat string array

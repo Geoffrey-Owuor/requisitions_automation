@@ -1,7 +1,6 @@
 import { EmailDataValues, EmailDataProps } from "@/services/EmailSender";
 import { dateFormatter } from "@/public/assets";
-
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+import { BASE_URL } from "@/public/assets";
 
 interface TravelRequisitionProps extends Omit<EmailDataProps, "to"> {
   emailData: EmailDataValues;
@@ -47,22 +46,26 @@ export function TravelRequisitionTemplate({
 
   // The major template
   const emailHtml = `
-    <div style="background-color: #fcfafb; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-      <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 40px rgba(163,29,29,0.08); border: 1px solid #f2eaea;">
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+      <div style="max-width: 600px; border-radius: 24px; margin: 0 auto; background: transparent; overflow: hidden;">
         
-       
-        <div style="background-color: #a31d1d; padding: 24px 30px; border-bottom: 4px solid #f2d7d5;">
+        <div style="background-color: #a31d1d; padding: 18px 20px; border-bottom: 4px solid #f2d7d5;">
            <table width="100%">
              <tr>
                <td style="vertical-align: middle;">
-                 <p style="margin: 0; font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #f2d7d5; opacity: 0.8;">New Requisition</p>
+                 <p style="margin: 0; font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #f2d7d5; opacity: 0.8;">Travel Requisition</p>
                  <h2 style="margin: 4px 0 0; font-size: 20px; color: #ffffff; font-weight: 600;">${title}</h2>
                </td>
+               <td style="text-align: right; vertical-align: middle;">
+                <div style="display: inline-block; background-color: #7f1d1d; border-radius: 12px; padding: 8px 14px;">
+                  <p style="margin: 0; font-size: 11px; font-weight: 700; color: #f2d7d5; letter-spacing: 1px;">TRAVEL</p>
+                </div>
+              </td>
              </tr>
            </table>
         </div>
 
-        <div style="padding: 30px 24px;">
+        <div style = "margin: 24px 0;">
           
           
           <div style="background-color: #ffffff; border-radius: 16px; padding: 18px 20px; margin-bottom: 24px; border: 1px solid #f9e8e8;">
@@ -130,7 +133,7 @@ export function TravelRequisitionTemplate({
               <a href="${BASE_URL}/travelapproval/${requestId}${reviewLink}" style="background-color: #a31d1d; color: #ffffff; padding: 14px 36px; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 13px; display: inline-block;">Review Requisition</a>
             </div>
             <div style="${pdfButtonStyle} width: 100%;">
-              <a href="${BASE_URL}/travelapproval/${requestId}/pdfdownload" style="color: #a31d1d; font-size: 12px; font-weight: 600; text-decoration: underline; display: inline-block; margin-top: 12px;">Download PDF Summary</a>
+              <a href="${BASE_URL}/dashboard/travelpdf/${requestId}" style="color: #a31d1d; font-size: 12px; font-weight: 600; text-decoration: underline; display: inline-block; margin-top: 12px;">Download PDF Summary</a>
             </div>
           </div>
 

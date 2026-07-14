@@ -47,7 +47,7 @@ const page = async () => {
     .digest("hex");
 
   // 3. Construct the secure URL pointing to Nginx port 8443
-  const ssoUrl = `${baseUrl}:8443/api/sso/external?email=${encodeURIComponent(userEmail)}&name=${encodeURIComponent(userName)}&timestamp=${timestamp}&signature=${signature}`;
+  const ssoUrl = `${baseUrl}/helpdesk/api/sso/external?email=${encodeURIComponent(userEmail)}&name=${encodeURIComponent(userName)}&timestamp=${timestamp}&signature=${signature}`;
 
   return <HelpDeskIframeWrapper ssoUrl={ssoUrl} />;
 };

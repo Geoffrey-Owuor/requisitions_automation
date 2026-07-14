@@ -72,7 +72,7 @@ const RequisitionPdfModal = ({ pdfData }: { pdfData: TravelPdfValues }) => {
   );
 
   return (
-    <div className="relative py-4 font-sans">
+    <div className="relative p-4 font-sans">
       <div className="relative z-10 mx-auto max-w-3xl">
         {/* Toolbar — hidden in print */}
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-gray-100 bg-white/70 px-6 py-4 shadow-[0_8px_16px_rgba(160,60,60,0.06)] backdrop-blur-xl">
@@ -104,7 +104,7 @@ const RequisitionPdfModal = ({ pdfData }: { pdfData: TravelPdfValues }) => {
         {/* Document */}
         <div
           id="printable-area"
-          className="rounded-3xl border border-white/85 bg-white/65 px-10 py-10 shadow-[0_24px_48px_rgba(160,60,60,0.10)] backdrop-blur-2xl"
+          className="rounded-3xl border border-white/85 bg-white/65 px-6 py-8 shadow-[0_24px_48px_rgba(160,60,60,0.10)] backdrop-blur-2xl sm:px-8"
         >
           {/* Doc header */}
 

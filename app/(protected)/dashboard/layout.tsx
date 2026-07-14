@@ -4,6 +4,7 @@ import { UserProvider } from "@/context/UserContext";
 import DashboardWrapper from "@/components/Dashboard/DashboardWrapper";
 import { getUserRoles } from "@/serverActions/GetUserRoles";
 import HardRedirect from "@/components/HardRedirect";
+import UserSessionWrapper from "@/components/Dashboard/UserSessionWrapper";
 
 export default async function ProtectedLayout({
   children,
@@ -28,9 +29,17 @@ export default async function ProtectedLayout({
     email: session.email,
   };
 
+  // User object for running auth sync
+  const sessionObject = {
+    name: session.name,
+    email: session.email,
+  };
+
   return (
     <UserProvider user={userObject}>
-      <DashboardWrapper>{children}</DashboardWrapper>
+      <UserSessionWrapper user={sessionObject}>
+        <DashboardWrapper>{children}</DashboardWrapper>
+      </UserSessionWrapper>
     </UserProvider>
   );
 }

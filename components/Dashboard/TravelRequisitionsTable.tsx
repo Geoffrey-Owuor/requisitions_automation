@@ -18,7 +18,7 @@ import { TravelDetailsModal } from "./TravelDetailsModal";
 import StatusFormatter from "./StatusFormatter";
 import { QueryResultRow } from "pg";
 import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
+import { useToggleStore } from "@/store/useToggleStore";
 import { SkeletonTable } from "../Skeletons/SkeletonTable";
 
 export default function TravelRequisitionsTable({
@@ -26,6 +26,11 @@ export default function TravelRequisitionsTable({
   userEmail,
   hodEmail,
 }: TravelRequisitionDataProps) {
+  // Zustand store
+  const setShowTravelRequisition = useToggleStore(
+    (state) => state.setShowTravelRequisition,
+  );
+
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRequest, setSelectedRequest] = useState<QueryResultRow | null>(
@@ -237,13 +242,13 @@ export default function TravelRequisitionsTable({
 
                           {/* New Requisition Link, when returned data is empty */}
                           {!searchTerm && (
-                            <Link
-                              href="/dashboard/travelrequisition"
+                            <button
+                              onClick={() => setShowTravelRequisition(true)}
                               className="my-2 flex items-center gap-2 rounded-xl bg-slate-900 px-3 py-2 text-sm text-white hover:bg-slate-800"
                             >
                               <Plus className="h-4 w-4" />
                               <span>New Requisition</span>
-                            </Link>
+                            </button>
                           )}
 
                           {/* Optional Action Button for Search Fallback */}

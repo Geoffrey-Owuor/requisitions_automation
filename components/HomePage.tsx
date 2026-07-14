@@ -6,16 +6,16 @@ import {
   MapPin,
   Shield,
   Monitor,
-  ArrowRight,
-  ArrowUpRight,
   CheckCircle2,
   CircleGauge,
   ShoppingBag,
-  BookText,
   ShieldAlert,
   Workflow,
   BriefcaseBusiness,
   CircleArrowOutUpRight,
+  LockKeyhole,
+  LaptopMinimalCheck,
+  ArrowRight,
 } from "lucide-react";
 import { ReactNode } from "react";
 import Header from "./Header";
@@ -27,11 +27,10 @@ const requisitions = [
     label: "Travel Requisition",
     description:
       "Site visits, local flights, road travel, and international travel with automated multi-tier approvals.",
-    href: "/dashboard/travelrequisition",
     icon: <BriefcaseBusiness size={22} className="h-5 w-5 sm:h-6 sm:w-6" />,
     accent: "from-rose-500 to-rose-600",
     shadow: "shadow-rose-200",
-    badge: "3 Approval Tiers",
+    badge: "HR",
     workflow: ["Submit", "HOD", "HR", "Director"],
     tiers: [
       { label: "Local", cost: "< 30K", icon: <MapPin size={12} /> },
@@ -44,12 +43,47 @@ const requisitions = [
     label: "IT Requisition",
     description:
       "Request laptops, peripherals, and software. Routed to HOD then fulfilled by IT Team.",
-    href: "/dashboard/itrequisition",
     icon: <Monitor size={22} className="h-5 w-5 sm:h-6 sm:w-6" />,
     accent: "from-slate-800 to-slate-900",
     shadow: "shadow-slate-200",
-    badge: "Direct Process",
+    badge: "IT",
     workflow: ["Submit", "HOD", "IT Fulfilment"],
+    tiers: null,
+  },
+  {
+    id: "desk",
+    label: "HelpDesk",
+    description:
+      "Submit an IT issue/ticket through our internal IT HelpDesk platform.",
+    icon: <LaptopMinimalCheck size={22} className="h-5 w-5 sm:h-6 sm:w-6" />,
+    accent: "from-neutral-800 to-neutral-900",
+    shadow: "shadow-neutral-200",
+    badge: "IT",
+    workflow: ["Submit Issue", "Track issue until it's resolved"],
+    tiers: null,
+  },
+  {
+    id: "purchase",
+    label: "Staff Product Purchase",
+    description:
+      "The purchase portal for making purchase requisitions at discounted staff prices.",
+    icon: <ShoppingBag size={22} className="h-5 w-5 sm:h-6 sm:w-6" />,
+    accent: "from-red-800 to-red-900",
+    shadow: "shadow-red-200",
+    badge: "HR",
+    workflow: ["Submit", "Payroll", "HR", "Credit Control", "Invoicing"],
+    tiers: null,
+  },
+  {
+    id: "security",
+    label: "Key(s) & Access Code Issuance",
+    description:
+      "Submit a request for Key(s) and Access Code Issuance. Routed to your designated HOD then completed by security.",
+    icon: <LockKeyhole size={22} className="h-5 w-5 sm:h-6 sm:w-6" />,
+    accent: "from-zinc-800 to-zinc-900",
+    shadow: "shadow-zinc-200",
+    badge: "Retail",
+    workflow: ["Submit", "HOD", "Security finalizes"],
     tiers: null,
   },
 ];
@@ -72,28 +106,34 @@ export default function HomePage() {
       <main className="relative z-10">
         {/* ── HERO SECTION ── */}
         <section className="mx-auto max-w-6xl px-4 py-12 text-center sm:px-6 sm:py-16 lg:text-left">
-          <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-5 lg:gap-12">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-5 lg:gap-12">
             <div className="lg:col-span-3">
-              <div className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-rose-100 bg-rose-50/50 px-3 py-1 text-[9px] font-bold tracking-wide text-rose-600 uppercase sm:mb-6 sm:gap-2 sm:px-4 sm:py-1.5 sm:text-[10px]">
+              <div className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-rose-100 bg-rose-50/50 px-3 py-1 text-[9px] font-bold tracking-wide text-rose-600 uppercase sm:gap-2 sm:px-4 sm:py-1.5 sm:text-[10px]">
                 <Workflow size={14} className="h-3 w-3 sm:h-3.5 sm:w-3.5" />{" "}
-                Internal Requisitions
+                Internal Applications
               </div>
               <h1 className="mb-2 text-3xl font-semibold tracking-tight text-slate-900 sm:mb-6 sm:text-[42px]">
                 Hotpoint{" "}
                 <span className="bg-linear-to-r from-rose-500 to-rose-700 bg-clip-text text-transparent">
-                  Requisition
+                  Apps
                 </span>{" "}
                 Hub
               </h1>
-              <ul className="mx-auto max-w-xl list-none space-y-2 px-4 text-sm leading-relaxed text-slate-500 sm:px-0 sm:text-base lg:mx-0">
-                <li>Submit and track internal requisitions.</li>
+              <ul className="mx-auto max-w-xl list-none space-y-1 px-4 text-sm leading-relaxed text-slate-500 sm:px-0 sm:text-base lg:mx-0">
                 <li>
-                  Some forms may require you to be signed into your company
-                  account.
+                  Central hub for accessing internal apps and online forms. Some
+                  forms may require you to be signed into your work account.
                 </li>
                 <li className="font-semibold">
-                  See the requisition guidelines page if you need clarification
-                  on a certain requisition.
+                  See the{" "}
+                  <Link
+                    href="/guidelines"
+                    className="text-blue-500 hover:underline"
+                  >
+                    guidelines
+                  </Link>{" "}
+                  page if you need clarification on a certain app or online
+                  form.
                 </li>
               </ul>
             </div>
@@ -110,17 +150,18 @@ export default function HomePage() {
                   />
 
                   <QuickLink
-                    href="http://192.168.0.27:10556"
+                    href="/dashboard/staffproductpurchase"
                     icon={<ShoppingBag size={18} />}
                     label="Staff Product Purchase"
-                    sub="Go to External portal"
+                    sub="Make a purchase request"
                     isExternal
                   />
                   <QuickLink
-                    href="/guidelines"
-                    icon={<BookText size={18} />}
-                    label="Requisition Guidelines"
-                    sub="Read Requisition Guidelines"
+                    href="/dashboard/helpdesk"
+                    icon={<LaptopMinimalCheck size={18} />}
+                    label="HelpDesk"
+                    sub="Submit an IT ticket"
+                    isExternal
                   />
                 </div>
               </div>
@@ -132,7 +173,7 @@ export default function HomePage() {
         <section className="mx-auto max-w-6xl px-4 pb-20 sm:px-6 sm:pb-32">
           <div className="mb-8 flex items-center gap-4 sm:mb-10">
             <h2 className="text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase sm:text-sm">
-              Available Requisitions
+              Available apps and forms
             </h2>
             <div className="h-px flex-1 bg-slate-200" />
           </div>
@@ -197,13 +238,6 @@ export default function HomePage() {
                     </div>
                   )}
                 </div>
-
-                <Link
-                  href={req.href}
-                  className={`flex w-full items-center justify-center gap-2 rounded-2xl bg-linear-to-r ${req.accent} py-3 text-sm font-semibold text-white transition-transform group-hover:scale-[1.01] active:scale-[0.98] sm:py-4`}
-                >
-                  Create New Request <ArrowRight size={16} />
-                </Link>
               </div>
             ))}
           </div>
@@ -212,7 +246,8 @@ export default function HomePage() {
           <div className="mt-8 flex items-center justify-center gap-2 text-slate-500 sm:mt-12 sm:gap-3">
             <ShieldAlert size={16} className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
             <p className="text-xs italic sm:text-sm">
-              Standard compliance and procedures apply to all requisitions.
+              Standard compliance and procedures for online form requisitions
+              must be adhered to.
             </p>
           </div>
         </section>
@@ -238,18 +273,16 @@ function QuickLink({
   sub,
   isExternal = false,
 }: QuickLinkProps) {
-  const Tag = isExternal ? "a" : Link;
   return (
-    <Tag
+    <Link
       href={href}
-      target={isExternal ? "_blank" : undefined}
       className="group flex items-center justify-between rounded-xl p-3 transition-colors hover:bg-slate-50 sm:rounded-2xl sm:p-4"
     >
       <div className="flex items-center gap-3 sm:gap-4">
         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-rose-50 text-rose-600 transition-colors group-hover:bg-rose-600 group-hover:text-white sm:h-10 sm:w-10 sm:rounded-xl">
           {icon}
         </div>
-        <div>
+        <div className="text-left">
           <p className="text-sm font-semibold text-slate-900">{label}</p>
           <p className="text-left text-[10px] text-slate-500 sm:text-xs">
             {sub}
@@ -259,8 +292,8 @@ function QuickLink({
       {isExternal ? (
         <CircleArrowOutUpRight size={14} className="text-slate-300" />
       ) : (
-        <ArrowUpRight size={14} className="text-slate-300" />
+        <ArrowRight size={14} className="text-slate-300" />
       )}
-    </Tag>
+    </Link>
   );
 }

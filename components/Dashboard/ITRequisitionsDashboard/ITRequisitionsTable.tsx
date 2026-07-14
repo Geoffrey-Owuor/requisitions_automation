@@ -12,13 +12,17 @@ import StatusFormatter from "../StatusFormatter";
 import { useQuery } from "@tanstack/react-query";
 import { QueryResultRow } from "pg";
 import ITDataExport from "./ITDataExport";
-import Link from "next/link";
+import { useToggleStore } from "@/store/useToggleStore";
 
 export default function ITRequisitionsTable({
   userEmail,
   dataFlag,
   hodEmail,
 }: ITRequisitionDataProps) {
+  // Zustand store
+  const setShowITRequisition = useToggleStore(
+    (state) => state.setShowITRequisition,
+  );
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRequest, setSelectedRequest] = useState<QueryResultRow | null>(
@@ -232,13 +236,13 @@ export default function ITRequisitionsTable({
 
                           {/* Only show new requisition link when email prop is available and no search term */}
                           {!searchTerm && userEmail && (
-                            <Link
-                              href="/dashboard/itrequisition"
+                            <button
+                              onClick={() => setShowITRequisition(true)}
                               className="my-2 flex items-center gap-2 rounded-xl bg-slate-900 px-3 py-2 text-sm text-white hover:bg-slate-800"
                             >
                               <Plus className="h-4 w-4" />
                               <span>New Requisition</span>
-                            </Link>
+                            </button>
                           )}
 
                           {searchTerm && (

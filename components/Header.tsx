@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Brand from "./Brand";
-import { ArrowUpRight } from "lucide-react";
+import { BookText } from "lucide-react";
+import Link from "next/link";
 
 const Header = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -24,16 +25,13 @@ const Header = () => {
               Login
             </button>
           </form>
-          <a
-            href="http://192.168.0.27:10556"
-            target="_blank"
-            rel="noopener"
+          <Link
+            href="/guidelines"
             className="flex items-center gap-1.5 rounded-full bg-slate-900 px-3 py-1.5 text-xs font-medium text-white transition-transform hover:scale-[1.02] active:scale-95 sm:gap-2 sm:px-5 sm:py-2 sm:text-sm"
           >
-            <span className="hidden sm:inline">Purchase Portal</span>
-            <span className="sm:hidden">Portal</span>
-            <ArrowUpRight size={14} className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-          </a>
+            <BookText size={14} className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+            <span>Guidelines</span>
+          </Link>
         </nav>
       </div>
     </header>
