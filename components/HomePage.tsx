@@ -20,7 +20,6 @@ import {
 import { ReactNode } from "react";
 import Header from "./Header";
 import QuickSignIn from "./QuickSignIn";
-import { BASE_URL } from "@/public/assets";
 
 const requisitions = [
   {
@@ -55,7 +54,7 @@ const requisitions = [
     id: "desk",
     label: "HelpDesk",
     description:
-      "Submit an IT issue/ticket through our internal IT HelpDesk platform. Can be accessed within the hub or through the portal external link.",
+      "Submit an IT issue/ticket through our internal IT HelpDesk platform.",
     icon: <LaptopMinimalCheck size={22} className="h-5 w-5 sm:h-6 sm:w-6" />,
     accent: "from-neutral-800 to-neutral-900",
     shadow: "shadow-neutral-200",
@@ -67,7 +66,7 @@ const requisitions = [
     id: "purchase",
     label: "Staff Product Purchase",
     description:
-      "The purchase portal for making purchase requisitions at discounted staff prices. Can be accessed within the hub or through the portal external link.",
+      "The purchase portal for making purchase requisitions at discounted staff prices.",
     icon: <ShoppingBag size={22} className="h-5 w-5 sm:h-6 sm:w-6" />,
     accent: "from-red-800 to-red-900",
     shadow: "shadow-red-200",
@@ -151,17 +150,17 @@ export default function HomePage() {
                   />
 
                   <QuickLink
-                    href={`${BASE_URL}:4443/login`}
+                    href="/dashboard/staffproductpurchase"
                     icon={<ShoppingBag size={18} />}
                     label="Staff Product Purchase"
-                    sub="Go to External portal"
+                    sub="Make a purchase request"
                     isExternal
                   />
                   <QuickLink
-                    href={`${BASE_URL}:8443/login`}
+                    href="/dashboard/helpdesk"
                     icon={<LaptopMinimalCheck size={18} />}
                     label="HelpDesk"
-                    sub="Go to External portal"
+                    sub="Submit an IT ticket"
                     isExternal
                   />
                 </div>
@@ -274,11 +273,9 @@ function QuickLink({
   sub,
   isExternal = false,
 }: QuickLinkProps) {
-  const Tag = isExternal ? "a" : Link;
   return (
-    <Tag
+    <Link
       href={href}
-      target={isExternal ? "_blank" : undefined}
       className="group flex items-center justify-between rounded-xl p-3 transition-colors hover:bg-slate-50 sm:rounded-2xl sm:p-4"
     >
       <div className="flex items-center gap-3 sm:gap-4">
@@ -297,6 +294,6 @@ function QuickLink({
       ) : (
         <ArrowRight size={14} className="text-slate-300" />
       )}
-    </Tag>
+    </Link>
   );
 }
