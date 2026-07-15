@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
 import { SessionPayload } from "@/lib/session";
 
 // Type definition for the BroadcastChannel message payload
@@ -11,8 +10,6 @@ interface AuthChannelMessage {
 }
 
 export function useAuthSync(user: SessionPayload) {
-  const router = useRouter();
-
   // FIX 1: Initialize with null to avoid calling Date.now() during render
   const lastCheckedRef = useRef<number | null>(null);
 
@@ -35,13 +32,11 @@ export function useAuthSync(user: SessionPayload) {
       const { action, email } = event.data;
 
       if (action === "LOGOUT") {
-        // Another tab logged out, immediately clean up and redirect
-        router.push("/login");
-        router.refresh();
+        // Another tab logged out, immediately redirect
+        window.location.href = "/login";
       } else if (action === "LOGIN" && email !== localUserEmail) {
-        // Another tab logged in as a different user (Imposter caught)
-        await fetch("/api/auth/logout", { method: "POST" });
-        router.push("/login");
+        // Another tab logged in as a different user - reload window
+        window.location.reload();
       }
     };
 
@@ -52,5 +47,5 @@ export function useAuthSync(user: SessionPayload) {
       authChannel.removeEventListener("message", handleCrossTabMessage);
       authChannel.close();
     };
-  }, [user, router]);
+  }, [user]);
 }
