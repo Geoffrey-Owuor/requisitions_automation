@@ -46,7 +46,7 @@ const page = async () => {
     .digest("hex");
 
   // 3. Construct the secure URL pointing to Nginx port 4443
-  const ssoUrl = `${baseUrl}:4443/api/external/sso?email=${encodeURIComponent(userEmail)}&timestamp=${timestamp}&signature=${signature}`;
+  const ssoUrl = `${baseUrl}/staffproductpurchase/api/external/sso?email=${encodeURIComponent(userEmail)}&timestamp=${timestamp}&signature=${signature}`;
 
   return <PurchaseIframeWrapper ssoUrl={ssoUrl} />;
 };
