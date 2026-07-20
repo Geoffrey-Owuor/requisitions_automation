@@ -2,8 +2,18 @@ import { NextResponse, NextRequest } from "next/server";
 import { loadSecurityArray } from "@/lib/loadAppDataV2";
 import { AccessEmailSender } from "@/services/AccessEmailSender";
 import { query } from "@/lib/db";
+import { getSession } from "@/lib/session";
 
 export async function POST(request: NextRequest) {
+  // Check if we have a valid session
+  const user = await getSession();
+
+  if (!user) {
+    return NextResponse.json(
+      { message: "Invalid or no user found" },
+      { status: 401 },
+    );
+  }
   // Get security data
   const SECURITY_ARRAY = await loadSecurityArray();
 
@@ -14,11 +24,11 @@ export async function POST(request: NextRequest) {
     // Destructure submitted area to get a valid email and name
     const { name, email } = submittedBy;
 
-    // Unauthorized user
+    // Bad request
     if (!name || !email) {
       return NextResponse.json(
         { message: "Cannot verify the user trying to make this requisition" },
-        { status: 401 },
+        { status: 400 },
       );
     }
 
