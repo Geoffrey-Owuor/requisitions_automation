@@ -269,7 +269,7 @@ export default function HomePage() {
                 {req.link && (
                   <Link
                     href={req.link}
-                    className="inline-flex w-full items-center justify-center gap-4 rounded-xl bg-mist-800 px-4 py-3 font-medium text-white hover:bg-mist-700"
+                    className="inline-flex w-full items-center justify-center gap-4 rounded-xl bg-mist-900 px-4 py-3 font-medium text-white hover:bg-mist-800"
                   >
                     Submit a Request
                     <ArrowRight className="h-5 w-5" />

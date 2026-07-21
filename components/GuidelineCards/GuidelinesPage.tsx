@@ -11,15 +11,17 @@ import {
   LockKeyhole,
   LaptopMinimalCheck,
   ShoppingBag,
+  CircleDollarSign,
 } from "lucide-react";
 import ITRequisitionGuideline from "./ITRequisitionGuideline";
 import TravelRequisitionGuideline from "./TravelRequisitionGuideline";
 import HelpdeskGuideline from "./HelpDeskGuideline";
 import AccessRequisitionGuideline from "./AccessRequisitionGuideline";
 import StaffPurchaseGuideline from "./StaffPurchaseGuideline";
+import SalaryAdvanceGuideline from "./SalaryAdvanceGuideline";
 
 // Types
-type TabId = "travel" | "it" | "access" | "desk" | "purchase";
+type TabId = "travel" | "it" | "access" | "desk" | "purchase" | "advance";
 
 // Reusable Sub-components
 export const GeneralNote = () => (
@@ -121,6 +123,11 @@ export default function GuidelinesPage() {
       icon: <ShoppingBag size={14} />,
     },
     { id: "access", label: "Key(s) & Access", icon: <LockKeyhole size={14} /> },
+    {
+      id: "advance",
+      label: "Salary Advance",
+      icon: <CircleDollarSign size={14} />,
+    },
   ] as const;
 
   return (
@@ -167,6 +174,7 @@ export default function GuidelinesPage() {
           {activeTab === "desk" && <HelpdeskGuideline />}
           {activeTab === "purchase" && <StaffPurchaseGuideline />}
           {activeTab === "access" && <AccessRequisitionGuideline />}
+          {activeTab === "advance" && <SalaryAdvanceGuideline />}
         </div>
       </main>
 
