@@ -32,15 +32,15 @@ export default function CustomDropdown({
 
   return (
     <div className="relative flex flex-col gap-2">
-      <label className="text-[13px] font-medium text-slate-700">
+      <label className="text-[13px] font-medium text-[#7c5a5a]">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       <button
         type="button"
-        className="flex h-10 cursor-pointer items-center justify-between rounded-xl border border-slate-300 bg-white/60 px-3.5 text-[14px] transition-all duration-200 outline-none focus:border-rose-500 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
+        className="flex h-10 cursor-pointer items-center justify-between rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none"
         onClick={() => setIsOpen(!isOpen)}
       >
-        <span className={selectedLabel ? "text-slate-900" : "text-slate-400"}>
+        <span className={selectedLabel ? "text-[#1e1b1b]" : "text-[#a18080]"}>
           {selectedLabel || "Select option..."}
         </span>
         <ChevronDown

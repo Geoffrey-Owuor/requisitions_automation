@@ -1,8 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DatePicker } from "../DatePicker";
-import { ArrowRight, FileText, Check } from "lucide-react";
+import {
+  ArrowRight,
+  FileText,
+  Check,
+  UserRound,
+  CircleDollarSign,
+} from "lucide-react";
 import { AlertInfo } from "../TravelRequisitionPage";
 import { ApiHandler } from "@/utils/ApiHandler";
 import SubmittingOverlay from "../SubmittingOverlay";
@@ -73,6 +79,24 @@ export default function SalaryAdvanceClient() {
   // OTP Error
   const [otpError, setOtpError] = useState("");
 
+  // Listen for the Zustand trigger change
+  useEffect(() => {
+    const executeScroll = () => {
+      requestAnimationFrame(() => {
+        // Find all elements with the specific class
+        const scrollableElements =
+          document.querySelectorAll(".layout-scrollbar");
+
+        // Scroll each one to the top
+        scrollableElements.forEach((element) => {
+          element.scrollTo({ top: 0, behavior: "instant" });
+        });
+      });
+    };
+
+    executeScroll();
+  }, [scrollTrigger]);
+
   const requiredFields: (keyof SalaryAdvanceFormData)[] = [
     "staffNumber",
     "staffName",
@@ -97,6 +121,16 @@ export default function SalaryAdvanceClient() {
   // Staff autofill logic
   const handleStaffNumberBlur = async () => {
     if (!formData.staffNumber) return;
+
+    // Do not search if informatio is already filled
+    const isFetched =
+      !!formData.staffName &&
+      !!formData.staffEmail &&
+      !!formData.location &&
+      !!formData.department;
+
+    if (isFetched) return;
+
     setStaffSearchStatus("loading");
 
     try {
@@ -108,12 +142,16 @@ export default function SalaryAdvanceClient() {
         const staffData = await res.json();
         updateField("staffName", staffData.staff_name);
         updateField("staffEmail", staffData.staff_email);
+        updateField("department", staffData.staff_department);
+        updateField("location", staffData.staff_location);
         setStaffSearchStatus("found");
       } else {
         setStaffSearchStatus("not_found");
         // Clear them out so user can fill manually
         updateField("staffName", "");
         updateField("staffEmail", "");
+        updateField("department", "");
+        updateField("location", "");
       }
     } catch {
       setStaffSearchStatus("not_found");
@@ -177,12 +215,17 @@ export default function SalaryAdvanceClient() {
   return (
     <div className="relative flex-1 px-2 py-4">
       {submitting && <SubmittingOverlay />}
-      {step === 4 && <AlertModal alertInfo={alertInfo} setStep={setStep} />}
+      {step === 4 && (
+        <AlertModal alertInfo={alertInfo} onBack={() => setStep(2)} />
+      )}
 
       {step === 3 && (
         <SalaryAdvanceConfirmationModal
           formData={formData}
-          onBack={() => setStep(2)}
+          onBack={() => {
+            setStep(2);
+            triggerScroll(!scrollTrigger);
+          }}
           onSubmit={handleSubmit}
           submitting={submitting}
         />
@@ -238,11 +281,11 @@ export default function SalaryAdvanceClient() {
 
       {/* STEP 2: Main Form */}
       {step === 2 && (
-        <div className="relative z-10 mx-auto max-w-3xl">
+        <div className="relative z-10 mx-auto max-w-225">
           {/* Form Image */}
           <div className="mb-4 overflow-hidden rounded-2xl sm:rounded-3xl">
             <Image
-              src={assets.it_form_image}
+              src={assets.advance_form_image}
               sizes="100vh"
               className="rounded-xl object-contain object-center"
               priority
@@ -250,15 +293,15 @@ export default function SalaryAdvanceClient() {
             />
           </div>
           <header className="mb-8">
-            <h1 className="text-2xl font-semibold text-slate-900">
+            <h1 className="m-0 text-2xl font-semibold tracking-[-0.5px] text-[#1e1b1b]">
               Salary Advance Request
             </h1>
-            <p className="mt-1 text-sm text-slate-600">
+            <p className="mt-1 text-[14px] text-[#7c5a5a]">
               Submit your salary advance details below.
             </p>
           </header>
 
-          <div className="rounded-3xl border border-white/85 bg-white/65 px-6 py-8 shadow-xl backdrop-blur-2xl sm:px-8">
+          <div className="rounded-3xl border border-white/85 bg-white/65 px-6 py-8 shadow-[0_24px_48px_rgba(160,60,60,0.10)] backdrop-blur-2xl sm:px-8">
             <form
               className="flex flex-col gap-8"
               onSubmit={(e) => {
@@ -268,127 +311,215 @@ export default function SalaryAdvanceClient() {
               }}
             >
               {/* Employee Information */}
-              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                <div className="flex flex-col gap-2">
-                  <label className="text-[13px] font-medium text-slate-700">
-                    Staff Number <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    className="h-10 rounded-xl border border-slate-300 px-3.5 outline-none focus:border-rose-500"
-                    value={formData.staffNumber}
-                    onChange={(e) => updateField("staffNumber", e.target.value)}
-                    onBlur={handleStaffNumberBlur}
-                  />
-                  {staffSearchStatus === "not_found" && (
-                    <span className="text-xs text-amber-600">
-                      Staff info not found. Please enter manually.
-                    </span>
-                  )}
-                </div>
+              <div>
+                <h2 className="mb-5 flex items-center gap-2 text-[13px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
+                  <UserRound size={16} /> Staff Information
+                </h2>
+                <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                  <div className="flex flex-col gap-2">
+                    <label className="text-[13px] font-medium text-[#7c5a5a]">
+                      Staff Number <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      className="h-10 w-full rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
+                      value={formData.staffNumber}
+                      onChange={(e) =>
+                        updateField("staffNumber", e.target.value)
+                      }
+                      onBlur={handleStaffNumberBlur}
+                    />
+                    {staffSearchStatus === "not_found" && (
+                      <span className="text-xs text-amber-700">
+                        Staff info not found. Please enter manually.
+                      </span>
+                    )}
 
-                <div className="flex flex-col gap-2">
-                  <label className="text-[13px] font-medium text-slate-700">
-                    Staff Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    className="h-10 rounded-xl border border-slate-300 px-3.5 outline-none focus:border-rose-500"
-                    value={formData.staffName}
-                    onChange={(e) => updateField("staffName", e.target.value)}
-                  />
-                </div>
+                    {staffSearchStatus === "loading" && (
+                      <span className="text-xs text-neutral-700">
+                        Fetching staff info...
+                      </span>
+                    )}
+                  </div>
 
-                <div className="flex flex-col gap-2">
-                  <label className="text-[13px] font-medium text-slate-700">
-                    Staff Email <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    className="h-10 rounded-xl border border-slate-300 px-3.5 outline-none focus:border-rose-500"
-                    value={formData.staffEmail}
-                    onChange={(e) => updateField("staffEmail", e.target.value)}
-                  />
-                </div>
+                  <div className="flex flex-col gap-2">
+                    <label className="text-[13px] font-medium text-[#7c5a5a]">
+                      Staff Name <span className="text-red-500">*</span>
+                    </label>
 
-                <div className="flex flex-col gap-2">
-                  <label className="text-[13px] font-medium text-slate-700">
-                    Department <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    className="h-10 rounded-xl border border-slate-300 px-3.5 outline-none focus:border-rose-500"
-                    value={formData.department}
-                    onChange={(e) => updateField("department", e.target.value)}
-                  />
-                </div>
+                    {/* Wrapper for the input and tooltip */}
+                    <div className="group relative w-full">
+                      {/* Conditional Tooltip */}
+                      {!formData.staffNumber && (
+                        <div className="absolute bottom-full left-1/2 z-10 mb-2 hidden -translate-x-1/2 rounded-md bg-slate-800 px-3 py-1.5 text-xs whitespace-nowrap text-white opacity-0 transition-opacity group-hover:block group-hover:opacity-100">
+                          Fill in staff number first
+                          <div className="absolute -bottom-1 left-17 h-2.5 w-2.5 rotate-45 rounded-sm bg-slate-800" />
+                        </div>
+                      )}
 
-                <div className="flex flex-col gap-2">
-                  <label className="text-[13px] font-medium text-slate-700">
-                    Location <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    className="h-10 rounded-xl border border-slate-300 px-3.5 outline-none focus:border-rose-500"
-                    value={formData.location}
-                    onChange={(e) => updateField("location", e.target.value)}
-                  />
+                      <input
+                        type="text"
+                        required
+                        disabled={
+                          staffSearchStatus === "loading" ||
+                          !formData.staffNumber
+                        }
+                        className="h-10 w-full rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)] disabled:cursor-not-allowed"
+                        value={formData.staffName}
+                        onChange={(e) =>
+                          updateField("staffName", e.target.value)
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <label className="text-[13px] font-medium text-[#7c5a5a]">
+                      Staff Email <span className="text-red-500">*</span>
+                    </label>
+
+                    {/* Wrapper for the input and tooltip */}
+                    <div className="group relative w-full">
+                      {/* Conditional Tooltip */}
+                      {!formData.staffNumber && (
+                        <div className="absolute bottom-full left-1/2 z-10 mb-2 hidden -translate-x-1/2 rounded-md bg-slate-800 px-3 py-1.5 text-xs whitespace-nowrap text-white opacity-0 transition-opacity group-hover:block group-hover:opacity-100">
+                          Fill in staff number first
+                          <div className="absolute -bottom-1 left-17 h-2.5 w-2.5 rotate-45 rounded-sm bg-slate-800" />
+                        </div>
+                      )}
+                      <input
+                        type="email"
+                        required
+                        disabled={
+                          staffSearchStatus === "loading" ||
+                          !formData.staffNumber
+                        }
+                        className="h-10 w-full rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)] disabled:cursor-not-allowed"
+                        value={formData.staffEmail}
+                        onChange={(e) =>
+                          updateField("staffEmail", e.target.value)
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <label className="text-[13px] font-medium text-[#7c5a5a]">
+                      Department <span className="text-red-500">*</span>
+                    </label>
+
+                    {/* Wrapper for the input and tooltip */}
+                    <div className="group relative w-full">
+                      {/* Conditional Tooltip */}
+                      {!formData.staffNumber && (
+                        <div className="absolute bottom-full left-1/2 z-10 mb-2 hidden -translate-x-1/2 rounded-md bg-slate-800 px-3 py-1.5 text-xs whitespace-nowrap text-white opacity-0 transition-opacity group-hover:block group-hover:opacity-100">
+                          Fill in staff number first
+                          <div className="absolute -bottom-1 left-17 h-2.5 w-2.5 rotate-45 rounded-sm bg-slate-800" />
+                        </div>
+                      )}
+                      <input
+                        type="text"
+                        required
+                        disabled={
+                          staffSearchStatus === "loading" ||
+                          !formData.staffNumber
+                        }
+                        className="h-10 w-full rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)] disabled:cursor-not-allowed"
+                        value={formData.department}
+                        onChange={(e) =>
+                          updateField("department", e.target.value)
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <label className="text-[13px] font-medium text-[#7c5a5a]">
+                      Location <span className="text-red-500">*</span>
+                    </label>
+
+                    {/* Wrapper for the input and tooltip */}
+                    <div className="group relative w-full">
+                      {/* Conditional Tooltip */}
+                      {!formData.staffNumber && (
+                        <div className="absolute bottom-full left-1/2 z-10 mb-2 hidden -translate-x-1/2 rounded-md bg-slate-800 px-3 py-1.5 text-xs whitespace-nowrap text-white opacity-0 transition-opacity group-hover:block group-hover:opacity-100">
+                          Fill in staff number first
+                          <div className="absolute -bottom-1 left-17 h-2.5 w-2.5 rotate-45 rounded-sm bg-slate-800" />
+                        </div>
+                      )}
+                      <input
+                        type="text"
+                        required
+                        disabled={
+                          staffSearchStatus === "loading" ||
+                          !formData.staffNumber
+                        }
+                        className="h-10 w-full rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)] disabled:cursor-not-allowed"
+                        value={formData.location}
+                        onChange={(e) =>
+                          updateField("location", e.target.value)
+                        }
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <hr className="border-slate-200" />
+              <hr className="border-[rgba(240,180,180,0.6)]" />
 
               {/* Advance Details */}
-              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                <div className="flex flex-col gap-2">
-                  <label className="text-[13px] font-medium text-slate-700">
-                    Request Amount <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    className="h-10 rounded-xl border border-slate-300 px-3.5 outline-none focus:border-rose-500"
-                    value={formData.requestAmount}
-                    onChange={(e) =>
-                      updateField("requestAmount", e.target.value)
-                    }
+              <div>
+                <h2 className="mb-5 flex items-center gap-2 text-[13px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
+                  <CircleDollarSign size={16} /> Advance Details
+                </h2>
+                <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                  <div className="flex flex-col gap-2">
+                    <label className="text-[13px] font-medium text-[#7c5a5a]">
+                      Request Amount <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      className="h-10 rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
+                      value={formData.requestAmount}
+                      onChange={(e) =>
+                        updateField("requestAmount", e.target.value)
+                      }
+                    />
+                  </div>
+
+                  {/* Installments DropDown */}
+                  <CustomDropdown
+                    label="No. of Installments"
+                    options={INSTALLMENT_OPTIONS}
+                    value={formData.installments}
+                    onChange={(val) => updateField("installments", val)}
+                  />
+
+                  <div className="flex flex-col gap-2">
+                    <label className="text-[13px] font-medium text-[#7c5a5a]">
+                      Repayment Start Date{" "}
+                      <span className="text-red-500">*</span>
+                    </label>
+                    <DatePicker
+                      value={formData.repaymentStartDate}
+                      onChange={(v) => updateField("repaymentStartDate", v)}
+                    />
+                  </div>
+
+                  {/* Request Type Dropdown */}
+                  <CustomDropdown
+                    label="Request Type"
+                    options={REQUEST_TYPE_OPTIONS}
+                    value={formData.requestType}
+                    onChange={(val) => updateField("requestType", val)}
                   />
                 </div>
-
-                {/* Installments DropDown */}
-                <CustomDropdown
-                  label="No. of Installments"
-                  options={INSTALLMENT_OPTIONS}
-                  value={formData.installments}
-                  onChange={(val) => updateField("installments", val)}
-                />
-
-                <div className="flex flex-col gap-2">
-                  <label className="text-[13px] font-medium text-slate-700">
-                    Repayment Start Date <span className="text-red-500">*</span>
-                  </label>
-                  <DatePicker
-                    value={formData.repaymentStartDate}
-                    onChange={(v) => updateField("repaymentStartDate", v)}
-                  />
-                </div>
-
-                {/* Request Type Dropdown */}
-                <CustomDropdown
-                  label="Request Type"
-                  options={REQUEST_TYPE_OPTIONS}
-                  value={formData.requestType}
-                  onChange={(val) => updateField("requestType", val)}
-                />
               </div>
 
               {/* Policy & Disclaimer */}
-              <div className="mt-4 rounded-2xl bg-slate-50 p-6 text-sm text-slate-700 shadow-inner">
+              <div className="mt-4 rounded-2xl bg-red-50/30 p-6 text-sm text-slate-700 shadow-inner">
                 <h4 className="mb-3 flex items-center gap-2 font-semibold text-slate-900">
                   <FileText size={18} /> Salary Advance Policy Guidelines
                 </h4>
@@ -430,7 +561,7 @@ export default function SalaryAdvanceClient() {
                   </li>
                 </ul>
 
-                <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 transition-all hover:bg-slate-50">
+                <label className="flex cursor-pointer items-start gap-3 rounded-xl p-4 transition-all hover:bg-red-50">
                   <span
                     className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-all ${policyAccepted ? "border-rose-500 bg-rose-500 text-white" : "border-slate-300 bg-white"}`}
                   >

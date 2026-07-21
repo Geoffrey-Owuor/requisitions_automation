@@ -33,7 +33,7 @@ export default async function SalaryAdvancePage() {
         <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-rose-100 text-rose-600">
           <Lock size={32} />
         </div>
-        <h1 className="mb-2 text-2xl font-bold text-slate-800">
+        <h1 className="mb-2 text-2xl font-semibold text-slate-800">
           Requests Closed
         </h1>
         <p className="max-w-md text-slate-600">
