@@ -16,12 +16,12 @@ const launcherApps = [
   {
     name: "Purchase",
     icon: ShoppingBag,
-    href: `${BASE_URL}:4443/login`,
+    href: `${BASE_URL}/staffproductpurchase/login`,
   },
   {
     name: "Desk",
     icon: LaptopMinimalCheck,
-    href: `${BASE_URL}:8443/login`,
+    href: `${BASE_URL}/helpdesk/login`,
   },
   { name: "Outlook", icon: Mail, href: "https://outlook.cloud.microsoft" },
   {
