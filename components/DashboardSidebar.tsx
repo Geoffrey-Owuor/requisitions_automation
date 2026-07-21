@@ -8,6 +8,7 @@ import {
   BriefcaseBusiness,
   ChevronDown,
   ChevronUp,
+  CircleDollarSign,
   CircleQuestionMark,
   HousePlug,
   LaptopMinimalCheck,
@@ -73,6 +74,10 @@ const DashboardSidebar = () => {
   const setShowAccessRequisition = useToggleStore(
     (state) => state.setShowAccessRequisition,
   );
+
+  // Hr Zustand states
+  const showHrForms = useToggleStore((state) => state.showHrForms);
+  const setShowHrForms = useToggleStore((state) => state.setShowHrForms);
 
   return (
     <>
@@ -149,6 +154,30 @@ const DashboardSidebar = () => {
               />
             );
           })}
+
+          {/* Hr Button */}
+          <SideBarButton
+            label="HR"
+            handleClick={() => setShowHrForms(!showHrForms)}
+            Icon={showHrForms ? ChevronUp : ChevronDown}
+            showToolTip={true}
+            toolTipMessage="HR Forms"
+          />
+
+          {/* HR forms - Salary Advance Link, Casual Requisition(Later) */}
+          {showHrForms && (
+            <>
+              <SideBarLink
+                href="/dashboard/advance"
+                key="/dashboard/advance"
+                label="Advance"
+                Icon={CircleDollarSign}
+                tooltip="Salary Advance"
+                isActive={pathname === "/dashboard/advance"}
+                showToolTip={true}
+              />
+            </>
+          )}
 
           {/* Retail Button */}
           <SideBarButton

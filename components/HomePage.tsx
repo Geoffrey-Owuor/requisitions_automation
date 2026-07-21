@@ -16,12 +16,39 @@ import {
   LockKeyhole,
   LaptopMinimalCheck,
   ArrowRight,
+  CircleDollarSign,
 } from "lucide-react";
-import { ReactNode } from "react";
+import { JSX, ReactNode } from "react";
 import Header from "./Header";
 import QuickSignIn from "./QuickSignIn";
 
-const requisitions = [
+interface Requisitions {
+  id: string;
+  label: string;
+  description: string;
+  icon: JSX.Element;
+  accent: string;
+  shadow: string;
+  badge: string;
+  workflow: string[];
+  tiers?: { label: string; cost: string; icon: JSX.Element }[] | null;
+  link?: string;
+}
+
+const requisitions: Requisitions[] = [
+  {
+    id: "advance",
+    label: "Salary Advance",
+    description:
+      "Apply for a salary advance, requests should be submitted before the 14th of every month",
+    icon: <CircleDollarSign size={22} className="h-5 w-5 sm:w-6" />,
+    accent: "from-mist-500 to-mist-600",
+    shadow: "shadow-mist-200",
+    badge: "HR",
+    workflow: ["Submit", "Wait for HR & Finance to review and approve"],
+    tiers: null,
+    link: "/advance",
+  },
   {
     id: "travel",
     label: "Travel Requisition",
@@ -238,6 +265,16 @@ export default function HomePage() {
                     </div>
                   )}
                 </div>
+                {/* Link if available */}
+                {req.link && (
+                  <Link
+                    href={req.link}
+                    className="inline-flex w-full items-center justify-center gap-4 rounded-xl bg-mist-800 px-4 py-3 text-white hover:bg-mist-700"
+                  >
+                    Submit a Request
+                    <ArrowRight className="h-5 w-5" />
+                  </Link>
+                )}
               </div>
             ))}
           </div>

@@ -14,9 +14,9 @@ import {
   ShoppingBag,
   HousePlug,
   Briefcase,
-  ChevronUp,
   ChevronDown,
   LockKeyhole,
+  CircleDollarSign,
 } from "lucide-react";
 import ModalWrapper from "./Modules/ModalWrapper";
 import ITRequisitionPage from "./ITRequisition/ITRequisitionPage";
@@ -43,6 +43,7 @@ const MobileHeader = () => {
   const pathname = usePathname();
 
   const isHomeActive = pathname === "/dashboard";
+  const isAdvanceActive = pathname === "/dashboard/advance";
 
   // Zustand stores
   const showITRequisition = useToggleStore((state) => state.showITRequisition);
@@ -68,6 +69,10 @@ const MobileHeader = () => {
   const setShowAccessRequisition = useToggleStore(
     (state) => state.setShowAccessRequisition,
   );
+
+  // Hr Zustand states
+  const showHrForms = useToggleStore((state) => state.showHrForms);
+  const setShowHrForms = useToggleStore((state) => state.setShowHrForms);
 
   const handleButtonClick = (
     setAction: (value: boolean) => void,
@@ -203,22 +208,50 @@ const MobileHeader = () => {
               );
             })}
 
+            {/* Hr Button  */}
+            <button
+              onClick={() => setShowHrForms(!showHrForms)}
+              className="group flex items-center gap-3 rounded-xl px-4 py-3 text-[14px] font-semibold text-slate-600 transition-all hover:bg-red-50 hover:text-red-950"
+            >
+              <ChevronDown
+                size={18}
+                className={`text-slate-500 transition-colors ${showHrForms ? "rotate-180" : ""} group-hover:text-red-950`}
+              />
+              HR
+            </button>
+
+            {/* Salary advance button */}
+            {showHrForms && (
+              <Link
+                href="/dashboard/advance"
+                onClick={() => setSidebarOpen(false)}
+                className={`group flex items-center gap-3 rounded-xl px-4 py-3 text-[14px] font-semibold transition-all ${
+                  isAdvanceActive
+                    ? "bg-red-950 text-white shadow-md"
+                    : "text-slate-600 hover:bg-red-50 hover:text-red-950"
+                }`}
+              >
+                <CircleDollarSign
+                  size={18}
+                  className={`transition-colors ${
+                    isAdvanceActive
+                      ? "text-white"
+                      : "text-slate-500 group-hover:text-red-950"
+                  }`}
+                />
+                Salary Advance
+              </Link>
+            )}
+
             {/* Retail Button  */}
             <button
               onClick={() => setShowRetailForms(!showRetailForms)}
               className="group flex items-center gap-3 rounded-xl px-4 py-3 text-[14px] font-semibold text-slate-600 transition-all hover:bg-red-50 hover:text-red-950"
             >
-              {showRetailForms ? (
-                <ChevronUp
-                  size={18}
-                  className="text-slate-500 transition-colors group-hover:text-red-950"
-                />
-              ) : (
-                <ChevronDown
-                  size={18}
-                  className="text-slate-500 transition-colors group-hover:text-red-950"
-                />
-              )}
+              <ChevronDown
+                size={18}
+                className={`text-slate-500 transition-colors ${showRetailForms ? "rotate-180" : ""} group-hover:text-red-950`}
+              />
               Retail
             </button>
 
