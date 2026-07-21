@@ -1,0 +1,469 @@
+"use client";
+
+import { useState } from "react";
+import { DatePicker } from "../DatePicker";
+import { ArrowRight, FileText, Check } from "lucide-react";
+import { AlertInfo } from "../TravelRequisitionPage";
+import { ApiHandler } from "@/utils/ApiHandler";
+import SubmittingOverlay from "../SubmittingOverlay";
+import AlertModal from "../AlertModal";
+import { usePathname } from "next/navigation";
+import { useToggleStore } from "@/store/useToggleStore";
+import SalaryAdvanceConfirmationModal from "./SalaryAdvanceConfirmationModal";
+import Image from "next/image";
+import { assets } from "@/public/assets";
+import { DropdownOption } from "./CustomDropDown";
+import CustomDropdown from "./CustomDropDown";
+
+export interface SalaryAdvanceFormData {
+  staffNumber: string;
+  staffName: string;
+  staffEmail: string;
+  department: string;
+  location: string;
+  requestAmount: string;
+  installments: string;
+  repaymentStartDate: string;
+  requestType: string;
+}
+
+const InitialFormState: SalaryAdvanceFormData = {
+  staffNumber: "",
+  staffName: "",
+  staffEmail: "",
+  department: "",
+  location: "",
+  requestAmount: "",
+  installments: "",
+  repaymentStartDate: "",
+  requestType: "oneoff",
+};
+
+// Define these arrays
+const INSTALLMENT_OPTIONS: DropdownOption[] = [
+  { label: "One", value: "1" },
+  { label: "Two", value: "2" },
+  { label: "Three", value: "3" },
+];
+
+const REQUEST_TYPE_OPTIONS: DropdownOption[] = [
+  { label: "One-off", value: "oneoff" },
+  { label: "Continuous", value: "continuous" },
+];
+
+export default function SalaryAdvanceClient() {
+  const pathname = usePathname();
+  const triggerScroll = useToggleStore((state) => state.triggerScroll);
+  const scrollTrigger = useToggleStore((state) => state.scrollTrigger);
+
+  const [step, setStep] = useState(pathname === "/advance" ? 1 : 2);
+  const [otp, setOtp] = useState("");
+  const [formData, setFormData] =
+    useState<SalaryAdvanceFormData>(InitialFormState);
+  const [submitting, setSubmitting] = useState(false);
+  const [policyAccepted, setPolicyAccepted] = useState(false);
+  const [staffSearchStatus, setStaffSearchStatus] = useState<
+    "idle" | "loading" | "found" | "not_found"
+  >("idle");
+  const [alertInfo, setAlertInfo] = useState<AlertInfo>({
+    alertType: "",
+    alertMessage: "",
+  });
+
+  // OTP Error
+  const [otpError, setOtpError] = useState("");
+
+  const requiredFields: (keyof SalaryAdvanceFormData)[] = [
+    "staffNumber",
+    "staffName",
+    "staffEmail",
+    "department",
+    "location",
+    "requestAmount",
+    "installments",
+    "repaymentStartDate",
+    "requestType",
+  ];
+  const isFormValid =
+    requiredFields.every((field) => formData[field]) && policyAccepted;
+
+  const updateField = <K extends keyof SalaryAdvanceFormData>(
+    field: K,
+    value: SalaryAdvanceFormData[K],
+  ) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  // Staff autofill logic
+  const handleStaffNumberBlur = async () => {
+    if (!formData.staffNumber) return;
+    setStaffSearchStatus("loading");
+
+    try {
+      // TODO: Ensure you have a GET endpoint configured to query company_staff_data
+      const res = await fetch(
+        `/api/salaryadvance/fetch-staff?staff_number=${formData.staffNumber}`,
+      );
+      if (res.ok) {
+        const staffData = await res.json();
+        updateField("staffName", staffData.staff_name);
+        updateField("staffEmail", staffData.staff_email);
+        setStaffSearchStatus("found");
+      } else {
+        setStaffSearchStatus("not_found");
+        // Clear them out so user can fill manually
+        updateField("staffName", "");
+        updateField("staffEmail", "");
+      }
+    } catch {
+      setStaffSearchStatus("not_found");
+    }
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+
+    try {
+      const response = await ApiHandler(
+        "/api/salaryadvance/verify-otp",
+        "POST",
+        { otp },
+      );
+      const data = await response.json();
+
+      if (!response.ok) throw new Error(data.message || "Invalid OTP");
+
+      setOtpError("");
+      setStep(2);
+    } catch (error) {
+      if (error instanceof Error) {
+        setOtpError(error.toString());
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleSubmit = async () => {
+    setSubmitting(true);
+    try {
+      const response = await ApiHandler(
+        "/api/salaryadvance/submit-form",
+        "POST",
+        formData,
+      );
+      const data = await response.json();
+
+      if (!response.ok) {
+        setAlertInfo({ alertType: "error", alertMessage: data.message });
+        setStep(4);
+      } else {
+        setAlertInfo({ alertType: "success", alertMessage: data.message });
+        setFormData(InitialFormState);
+        setStep(4);
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error("Error while trying to submit a salary advance:", error);
+        setAlertInfo({ alertType: "error", alertMessage: error.toString() });
+        setStep(4);
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="relative flex-1 px-2 py-4">
+      {submitting && <SubmittingOverlay />}
+      {step === 4 && <AlertModal alertInfo={alertInfo} setStep={setStep} />}
+
+      {step === 3 && (
+        <SalaryAdvanceConfirmationModal
+          formData={formData}
+          onBack={() => setStep(2)}
+          onSubmit={handleSubmit}
+          submitting={submitting}
+        />
+      )}
+
+      {/* STEP 1: OTP Entry */}
+      {step === 1 && (
+        <div className="flex h-full flex-col items-center justify-center">
+          {/* Main Centered Content */}
+          <div className="flex flex-1 items-center justify-center p-4">
+            <div className="w-full max-w-md rounded-3xl border border-white/85 bg-white/65 p-8 shadow-xl backdrop-blur-2xl">
+              <h2 className="mb-4 text-xl font-semibold">
+                Security Verification
+              </h2>
+              <p className="mb-6 text-sm text-slate-600">
+                Please enter the Salary Advance OTP to access the request form.
+              </p>
+
+              {/* OTP Error */}
+              {otpError && (
+                <p className="mb-6 text-sm text-red-600">{otpError}</p>
+              )}
+
+              <form onSubmit={handleVerifyOtp} className="flex flex-col gap-4">
+                <input
+                  type="text"
+                  required
+                  className="h-12 rounded-xl border border-slate-300 px-4 text-center tracking-widest outline-none focus:border-rose-500"
+                  placeholder="Enter OTP"
+                  value={otp}
+                  maxLength={10}
+                  onChange={(e) => setOtp(e.target.value)}
+                />
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="mt-2 rounded-xl bg-slate-900 py-3 font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg disabled:opacity-50"
+                >
+                  {submitting ? "Verifying..." : "Verify & Proceed"}
+                </button>
+              </form>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <footer className="mt-auto py-6 text-center text-sm font-medium text-slate-500">
+            <p>
+              For assistance with the OTP, please contact the HR Department.
+            </p>
+          </footer>
+        </div>
+      )}
+
+      {/* STEP 2: Main Form */}
+      {step === 2 && (
+        <div className="relative z-10 mx-auto max-w-3xl">
+          {/* Form Image */}
+          <div className="mb-4 overflow-hidden rounded-2xl sm:rounded-3xl">
+            <Image
+              src={assets.it_form_image}
+              sizes="100vh"
+              className="rounded-xl object-contain object-center"
+              priority
+              alt="Form Image"
+            />
+          </div>
+          <header className="mb-8">
+            <h1 className="text-2xl font-semibold text-slate-900">
+              Salary Advance Request
+            </h1>
+            <p className="mt-1 text-sm text-slate-600">
+              Submit your salary advance details below.
+            </p>
+          </header>
+
+          <div className="rounded-3xl border border-white/85 bg-white/65 px-6 py-8 shadow-xl backdrop-blur-2xl sm:px-8">
+            <form
+              className="flex flex-col gap-8"
+              onSubmit={(e) => {
+                e.preventDefault();
+                setStep(3);
+                triggerScroll(!scrollTrigger);
+              }}
+            >
+              {/* Employee Information */}
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                <div className="flex flex-col gap-2">
+                  <label className="text-[13px] font-medium text-slate-700">
+                    Staff Number <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    className="h-10 rounded-xl border border-slate-300 px-3.5 outline-none focus:border-rose-500"
+                    value={formData.staffNumber}
+                    onChange={(e) => updateField("staffNumber", e.target.value)}
+                    onBlur={handleStaffNumberBlur}
+                  />
+                  {staffSearchStatus === "not_found" && (
+                    <span className="text-xs text-amber-600">
+                      Staff info not found. Please enter manually.
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label className="text-[13px] font-medium text-slate-700">
+                    Staff Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    className="h-10 rounded-xl border border-slate-300 px-3.5 outline-none focus:border-rose-500"
+                    value={formData.staffName}
+                    onChange={(e) => updateField("staffName", e.target.value)}
+                  />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label className="text-[13px] font-medium text-slate-700">
+                    Staff Email <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    className="h-10 rounded-xl border border-slate-300 px-3.5 outline-none focus:border-rose-500"
+                    value={formData.staffEmail}
+                    onChange={(e) => updateField("staffEmail", e.target.value)}
+                  />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label className="text-[13px] font-medium text-slate-700">
+                    Department <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    className="h-10 rounded-xl border border-slate-300 px-3.5 outline-none focus:border-rose-500"
+                    value={formData.department}
+                    onChange={(e) => updateField("department", e.target.value)}
+                  />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label className="text-[13px] font-medium text-slate-700">
+                    Location <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    className="h-10 rounded-xl border border-slate-300 px-3.5 outline-none focus:border-rose-500"
+                    value={formData.location}
+                    onChange={(e) => updateField("location", e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <hr className="border-slate-200" />
+
+              {/* Advance Details */}
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                <div className="flex flex-col gap-2">
+                  <label className="text-[13px] font-medium text-slate-700">
+                    Request Amount <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    className="h-10 rounded-xl border border-slate-300 px-3.5 outline-none focus:border-rose-500"
+                    value={formData.requestAmount}
+                    onChange={(e) =>
+                      updateField("requestAmount", e.target.value)
+                    }
+                  />
+                </div>
+
+                {/* Installments DropDown */}
+                <CustomDropdown
+                  label="No. of Installments"
+                  options={INSTALLMENT_OPTIONS}
+                  value={formData.installments}
+                  onChange={(val) => updateField("installments", val)}
+                />
+
+                <div className="flex flex-col gap-2">
+                  <label className="text-[13px] font-medium text-slate-700">
+                    Repayment Start Date <span className="text-red-500">*</span>
+                  </label>
+                  <DatePicker
+                    value={formData.repaymentStartDate}
+                    onChange={(v) => updateField("repaymentStartDate", v)}
+                  />
+                </div>
+
+                {/* Request Type Dropdown */}
+                <CustomDropdown
+                  label="Request Type"
+                  options={REQUEST_TYPE_OPTIONS}
+                  value={formData.requestType}
+                  onChange={(val) => updateField("requestType", val)}
+                />
+              </div>
+
+              {/* Policy & Disclaimer */}
+              <div className="mt-4 rounded-2xl bg-slate-50 p-6 text-sm text-slate-700 shadow-inner">
+                <h4 className="mb-3 flex items-center gap-2 font-semibold text-slate-900">
+                  <FileText size={18} /> Salary Advance Policy Guidelines
+                </h4>
+                <p className="mb-3">
+                  To ensure efficient financial management and compliance, all
+                  requests for salary advances will be required to adhere to the
+                  following guidelines:
+                </p>
+                <ul className="mb-5 list-inside list-disc space-y-1.5 pl-2 text-[13px]">
+                  <li>
+                    <strong>Processing Schedule:</strong> Salary advance
+                    requests will be processed once per month, specifically by
+                    the 15th of each month.
+                  </li>
+                  <li>
+                    <strong>Submission Deadline:</strong> All requests must be
+                    submitted in writing to the HR Department no later than the
+                    10th of every month.
+                  </li>
+                  <li>
+                    <strong>Legal Compliance:</strong> All salary advances must
+                    be processed in strict alignment with the one-third (1/3)
+                    rule.
+                  </li>
+                  <li>
+                    <strong>Exception:</strong> Any salary advance requests
+                    received outside of the stipulated submission deadlines will
+                    not be processed, except in the case of a documented,
+                    verified emergency.
+                  </li>
+                  <li>
+                    <strong>Repayment Terms:</strong> The maximum repayment
+                    period for any salary advance is three(3) months, also
+                    subject to the strict adherence of the one-third (1/3) rule.
+                  </li>
+                  <li>
+                    <strong>Limitation:</strong> Multiple salary advances are
+                    strictly not allowed.
+                  </li>
+                </ul>
+
+                <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 transition-all hover:bg-slate-50">
+                  <span
+                    className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-all ${policyAccepted ? "border-rose-500 bg-rose-500 text-white" : "border-slate-300 bg-white"}`}
+                  >
+                    {policyAccepted && (
+                      <Check className="h-3.5 w-3.5" strokeWidth={3} />
+                    )}
+                  </span>
+                  <input
+                    type="checkbox"
+                    className="sr-only"
+                    checked={policyAccepted}
+                    onChange={(e) => setPolicyAccepted(e.target.checked)}
+                  />
+                  <span className="text-[13px] leading-tight font-medium">
+                    I hereby acknowledge that I have read and fully understood
+                    the Salary Advance Policy and agree to comply with all
+                    provisions contained therein.
+                  </span>
+                </label>
+              </div>
+
+              <button
+                type="submit"
+                disabled={!isFormValid}
+                className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-slate-900 py-4 font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Proceed to Confirmation
+                <ArrowRight className="h-4 w-4" />
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
