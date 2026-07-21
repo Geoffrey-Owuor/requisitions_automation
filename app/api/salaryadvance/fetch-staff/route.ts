@@ -13,7 +13,8 @@ export async function GET(request: NextRequest) {
 
   try {
     const result = await query(
-      `SELECT staff_name, staff_email 
+      `SELECT staff_name, staff_email, 
+       staff_department, staff_location
        FROM company_staff_data 
        WHERE staff_number = $1 
        LIMIT 1`,
