@@ -38,7 +38,7 @@ export default function StaffPurchaseGuideline() {
           <p className="mt-1 text-sm leading-relaxed text-blue-800">
             You can access the portal directly in a separate window.{" "}
             <Link
-              href={`${BASE_URL}:4443`}
+              href={`${BASE_URL}/staffproductpurchase`}
               target="_blank"
               rel="noopener noreferrer"
               className="font-semibold underline underline-offset-2 transition-colors hover:text-blue-600"
