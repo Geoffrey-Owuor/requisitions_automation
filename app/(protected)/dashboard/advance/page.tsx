@@ -1,5 +1,4 @@
 const page = () => {
-  return <div>Salary Advance page</div>;
+  return <></>;
 };
-
 export default page;
