@@ -1,5 +1,6 @@
 import { query } from "@/lib/db";
 import { NextResponse, NextRequest } from "next/server";
+import { AdvanceEmailSender } from "@/services/AdvanceEmailSender";
 
 export async function POST(request: NextRequest) {
   try {
@@ -55,7 +56,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Insert new request if all checks pass
-    await query(
+    const result = await query(
       `INSERT INTO salary_advances (
         staff_number, staff_name, staff_email, staff_department, staff_location, 
         request_amount, no_of_installments, repayment_start_date, request_type
@@ -72,6 +73,18 @@ export async function POST(request: NextRequest) {
         requestType,
       ],
     );
+
+    // Get the request id
+    const requestId = result[0].request_id;
+
+    // Send a notification email to the staff
+    AdvanceEmailSender({
+      to: staffEmail,
+      requestId: requestId,
+      message:
+        "Your salary advance requisition has been submitted successfully, you will be notified by HR once it has been approved and processed. If you did not request this, kindly contact HR for inquiry",
+      title: "Salary Advance Request Submitted Successfully",
+    });
 
     return NextResponse.json(
       {
