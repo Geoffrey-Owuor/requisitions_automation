@@ -78,11 +78,11 @@ export function SalaryAdvanceModal({
 
     if (result.success) {
       setComments(""); // reset
-      triggerAlert("success", "Status updated successfully");
+      triggerAlert("success", result.message);
       onSuccess(); // refetch table data
       onClose(); // close modal
     } else {
-      triggerAlert("error", "Something went wrong while updating the request.");
+      triggerAlert("error", result.message);
     }
   };
 
