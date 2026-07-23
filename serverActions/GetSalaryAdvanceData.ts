@@ -26,7 +26,7 @@ export async function GetSalaryAdvanceData(): Promise<
     staff_location, request_amount, no_of_installments, repayment_start_date, 
     request_type, approval_status, approver_comments
     FROM salary_advances
-    ORDER BY request_created_at DESC
+    ORDER BY request_created_at DESC LIMIT 500
     `;
 
   try {

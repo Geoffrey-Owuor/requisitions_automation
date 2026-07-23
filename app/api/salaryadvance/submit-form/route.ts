@@ -78,13 +78,13 @@ export async function POST(request: NextRequest) {
     const requestId = result[0].request_id;
 
     // Send a notification email to the staff
-    // AdvanceEmailSender({
-    //   to: staffEmail,
-    //   requestId: requestId,
-    //   message:
-    //     "Your salary advance requisition has been submitted successfully, you will be notified by HR once it has been approved and processed. If you did not request this, kindly contact HR for inquiry",
-    //   title: "Salary Advance Request Submitted Successfully",
-    // });
+    AdvanceEmailSender({
+      to: staffEmail,
+      requestId: requestId,
+      message:
+        "Your salary advance requisition has been submitted successfully, you will be notified by HR once it has been approved and processed. If you did not request this, kindly contact HR for inquiry",
+      title: "Salary Advance Request Submitted Successfully",
+    });
 
     return NextResponse.json(
       {

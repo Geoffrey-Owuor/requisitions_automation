@@ -14,7 +14,7 @@ const DashboardAdvanceWrapper = () => {
     <div className="mx-auto h-full w-full">
       {/* Toggle Container - Visible only on the hr side */}
       {roles.includes("hr") && (
-        <div className="flex justify-center p-4">
+        <div className="flex justify-end p-4">
           <div className="flex w-full gap-1 rounded-2xl bg-gray-100 p-1 shadow-inner sm:w-auto">
             <button
               onClick={() => setActiveView("page")}
