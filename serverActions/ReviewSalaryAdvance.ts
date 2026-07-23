@@ -62,7 +62,7 @@ export async function ReviewSalaryAdvance(
     AdvanceEmailSender({
       to: staffEmail,
       requestId: request_id,
-      message: `Your salary advance request has been ${status} by HR. For more inquiry - contact HR`,
+      message: `Your salary advance request has been ${status} by HR. For more inquiry, contact HR`,
       title: `Salary Advance ${status} by HR`,
     });
 

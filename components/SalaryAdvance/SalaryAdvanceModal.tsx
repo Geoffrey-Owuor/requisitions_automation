@@ -5,7 +5,6 @@ import {
   UserRound,
   CheckCircle2,
   Check,
-  Ban,
   Banknote,
   CircleDollarSign,
 } from "lucide-react";
@@ -15,6 +14,7 @@ import { dateFormatter } from "@/public/assets";
 import ClientPortal from "@/components/ClientPortal";
 import { SalaryAdvanceData } from "@/serverActions/GetSalaryAdvanceData";
 import { ReviewSalaryAdvance } from "@/serverActions/ReviewSalaryAdvance";
+import SubmittingOverlay from "../SubmittingOverlay";
 
 interface SalaryAdvanceModalProps {
   isOpen: boolean;
@@ -90,6 +90,7 @@ export function SalaryAdvanceModal({
 
   return (
     <ClientPortal>
+      {loadingAction !== null && <SubmittingOverlay />}
       <div
         onClick={onClose}
         className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
@@ -193,7 +194,7 @@ export function SalaryAdvanceModal({
                         {loadingAction === "declined" ? (
                           <span className="h-4 w-4 animate-spin rounded-full border-2 border-red-600 border-t-transparent" />
                         ) : (
-                          <Ban size={16} />
+                          <X size={16} />
                         )}
                         Decline
                       </button>

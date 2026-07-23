@@ -19,7 +19,7 @@ const launcherApps = [
     href: `${BASE_URL}/staffproductpurchase/login`,
   },
   {
-    name: "Desk",
+    name: "HelpDesk",
     icon: LaptopMinimalCheck,
     href: `${BASE_URL}/helpdesk/login`,
   },
