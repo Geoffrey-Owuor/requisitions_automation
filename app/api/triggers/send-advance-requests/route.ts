@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
     staff_number, staff_name, staff_email, staff_department, 
     staff_location, request_amount, no_of_installments,
     TO_CHAR(repayment_start_date, 'YYYY-MM-DD HH24:MI:SS') AS repayment_start_date, 
-    request_type
+    request_type, approval_status, approver_comments
     FROM salary_advances
     WHERE DATE_TRUNC('month', request_created_at) = DATE_TRUNC('month', CURRENT_DATE)
     OR request_type = 'continuous'

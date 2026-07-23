@@ -213,7 +213,7 @@ export default function SalaryAdvanceClient() {
   };
 
   return (
-    <div className="relative flex-1 px-2 py-4">
+    <div className="relative flex-1 p-4">
       {submitting && <SubmittingOverlay />}
       {step === 4 && (
         <AlertModal alertInfo={alertInfo} onBack={() => setStep(2)} />

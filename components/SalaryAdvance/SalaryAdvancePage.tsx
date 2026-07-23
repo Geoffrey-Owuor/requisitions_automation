@@ -1,30 +1,43 @@
-import { query } from "@/lib/db";
-import SalaryAdvanceClient from "./SalaryAdvanceClient";
-import { Lock } from "lucide-react";
+"use client";
 
-export default async function SalaryAdvancePage() {
+import { useQuery } from "@tanstack/react-query";
+import { GetSalaryAdvanceLock } from "@/serverActions/GetSalaryAdvanceLock";
+import SalaryAdvanceClient from "./SalaryAdvanceClient";
+import { Loader2, Lock } from "lucide-react";
+
+export default function SalaryAdvancePage() {
   let isLocked = false;
 
-  try {
-    const result = await query(
-      "SELECT lock_advance_form FROM salary_advance_metadata ORDER BY id LIMIT 1",
+  const { data: lockAdvanceForm = false, isPending: loading } = useQuery({
+    queryKey: ["LockAdvanceBoolean"],
+    queryFn: GetSalaryAdvanceLock,
+    staleTime: 0,
+    gcTime: 0,
+  });
+
+  // Time check logic (EAT timezone assumed based on your server config, but Date() uses system local time)
+  const now = new Date();
+  const currentDay = now.getDate();
+  const currentHour = now.getHours();
+
+  // Beyond 5.00pm (17:00) on the 10th of the month
+  const isPastDeadline =
+    currentDay > 10 || (currentDay === 10 && currentHour >= 17);
+
+  if (isPastDeadline && lockAdvanceForm) {
+    isLocked = true;
+  }
+
+  if (loading) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center p-6 text-center text-neutral-800">
+        <Loader2 size={32} className="animate-spin" />
+
+        <h1 className="mb-2 text-xl font-semibold text-slate-800">
+          Loading...
+        </h1>
+      </div>
     );
-    const lockAdvanceForm = result[0]?.lock_advance_form || false;
-
-    // Time check logic (EAT timezone assumed based on your server config, but Date() uses system local time)
-    const now = new Date();
-    const currentDay = now.getDate();
-    const currentHour = now.getHours();
-
-    // Beyond 5.00pm (17:00) on the 10th of the month
-    const isPastDeadline =
-      currentDay > 10 || (currentDay === 10 && currentHour >= 17);
-
-    if (isPastDeadline && lockAdvanceForm) {
-      isLocked = true;
-    }
-  } catch (error) {
-    console.error("Failed to check salary advance lock status", error);
   }
 
   if (isLocked) {
