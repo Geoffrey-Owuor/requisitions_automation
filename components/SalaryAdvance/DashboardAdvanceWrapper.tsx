@@ -3,41 +3,52 @@ import { useState } from "react";
 import SalaryAdvancePage from "./SalaryAdvancePage";
 import SalaryAdvanceDashboard from "./SalaryAdvanceDashboard";
 import { useUser } from "@/context/UserContext";
+import { LayoutDashboard, Plus } from "lucide-react";
 
 type ViewState = "dashboard" | "page";
 
 const DashboardAdvanceWrapper = () => {
   const { roles } = useUser();
-  const [activeView, setActiveView] = useState<ViewState>("page");
+  const [activeView, setActiveView] = useState<ViewState>(
+    roles.includes("hr") ? "dashboard" : "page",
+  );
 
   return (
-    <div className="mx-auto h-full w-full">
-      {/* Toggle Container - Visible only on the hr side */}
+    <div className="relative h-full w-full">
+      {/* HR Action toggle button */}
       {roles.includes("hr") && (
-        <div className="flex justify-end p-4">
-          <div className="flex w-full gap-1 rounded-2xl bg-gray-100 p-1 shadow-inner sm:w-auto">
-            <button
-              onClick={() => setActiveView("page")}
-              className={`flex-1 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200 sm:flex-none ${
-                activeView === "page"
-                  ? "bg-white text-gray-900 shadow-sm"
-                  : "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
-              }`}
-            >
+        <div className="fixed right-6 bottom-4 z-50 flex flex-col items-end">
+          {/* Make a Request Button */}
+          <button
+            onClick={() => setActiveView("page")}
+            title="Make a Request"
+            className="group flex h-10 cursor-pointer items-center justify-end overflow-hidden rounded-t-2xl bg-slate-800 px-0.5 text-neutral-100 transition-all duration-300 ease-out"
+          >
+            {/* Label: Slides out to the left on hover */}
+            <span className="max-w-0 text-xs font-semibold tracking-wide whitespace-nowrap opacity-0 transition-all duration-300 group-hover:max-w-xs group-hover:pl-4 group-hover:opacity-100">
               Make a Request
-            </button>
+            </span>
+            {/* Icon Container */}
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center">
+              <Plus className="h-5 w-5" />
+            </div>
+          </button>
 
-            <button
-              onClick={() => setActiveView("dashboard")}
-              className={`flex-1 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200 sm:flex-none ${
-                activeView === "dashboard"
-                  ? "bg-white text-gray-900 shadow-sm"
-                  : "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
-              }`}
-            >
+          {/* Dashboard Button */}
+          <button
+            onClick={() => setActiveView("dashboard")}
+            title="Dashboard"
+            className="group flex h-10 cursor-pointer items-center justify-end overflow-hidden rounded-b-2xl bg-slate-900 px-0.5 text-neutral-100 transition-all duration-300 ease-out"
+          >
+            {/* Label: Slides out to the left on hover */}
+            <span className="max-w-0 text-xs font-semibold tracking-wide whitespace-nowrap opacity-0 transition-all duration-300 group-hover:max-w-xs group-hover:pl-4 group-hover:opacity-100">
               Dashboard
-            </button>
-          </div>
+            </span>
+            {/* Icon Container */}
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center">
+              <LayoutDashboard className="h-4 w-4" />
+            </div>
+          </button>
         </div>
       )}
 

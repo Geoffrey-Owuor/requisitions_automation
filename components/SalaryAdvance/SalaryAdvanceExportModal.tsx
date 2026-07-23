@@ -74,7 +74,7 @@ export function SalaryAdvanceExportModal({
                 <h2 className="text-base font-semibold text-gray-900">
                   Export Data
                 </h2>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-600">
                   Download salary advances as Excel
                 </p>
               </div>
