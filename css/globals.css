@@ -74,3 +74,34 @@ html {
 .scrollbar-hide {
   scrollbar-width: none;
 }
+
+/* Alert styles */
+@keyframes slideDown {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slideDown {
+  animation: slideDown 0.2s ease-out forwards;
+}
+
+.animate-slideUp {
+  animation: slideUp 0.2s ease-out forwards;
+}

@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "../css/globals.css";
 import QueryProvider from "@/components/QueryProvider";
 import LoadingLine from "@/components/LoadingLine";
+import Alert from "@/components/Modules/Alert";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,6 +40,7 @@ export default function RootLayout({
       </head>
       <body className="flex min-h-screen flex-col bg-[#fafafa]">
         <LoadingLine />
+        <Alert />
         {/* Page Content */}
         <QueryProvider>{children}</QueryProvider>
       </body>
