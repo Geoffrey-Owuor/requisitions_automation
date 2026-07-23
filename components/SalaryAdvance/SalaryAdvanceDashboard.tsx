@@ -7,6 +7,7 @@ import {
   RotateCcw,
   X,
   Info,
+  FileText,
   CircleDollarSign,
 } from "lucide-react";
 import { TablePagination } from "../Dashboard/TablePagination";
@@ -17,12 +18,14 @@ import {
   GetSalaryAdvanceData,
   SalaryAdvanceData,
 } from "@/serverActions/GetSalaryAdvanceData";
+import { SalaryAdvanceExportModal } from "./SalaryAdvanceExportModal";
 
 export default function SalaryAdvanceDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRequest, setSelectedRequest] =
     useState<SalaryAdvanceData | null>(null);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const itemsPerPage = 6;
 
   const {
@@ -90,10 +93,17 @@ export default function SalaryAdvanceDashboard() {
             </div>
             <button
               onClick={() => refetch()}
-              className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-3 py-2.5 text-sm text-white hover:bg-slate-800"
+              className="mr-2 inline-flex items-center gap-2 rounded-xl bg-slate-900 px-3 py-2.5 text-sm text-white hover:bg-slate-800"
             >
               <RotateCcw className="h-4 w-4" />
               Refresh
+            </button>
+
+            <button
+              onClick={() => setIsExportModalOpen(true)}
+              className="rounded-xl bg-neutral-200 p-2.5 text-sm font-medium text-gray-800 transition-colors hover:bg-neutral-300 hover:text-gray-900"
+            >
+              <FileText className="h-4.5 w-4.5" />
             </button>
           </div>
 
@@ -228,6 +238,13 @@ export default function SalaryAdvanceDashboard() {
               </tbody>
             </table>
           </div>
+
+          {/* Export Modal */}
+          {/* ADD THE EXPORT MODAL HERE */}
+          <SalaryAdvanceExportModal
+            isOpen={isExportModalOpen}
+            onClose={() => setIsExportModalOpen(false)}
+          />
 
           {/* Pagination */}
           <TablePagination
