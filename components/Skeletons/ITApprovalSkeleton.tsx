@@ -1,6 +1,6 @@
 const ITApprovalSkeleton = () => {
   return (
-    <div className="relative min-h-screen overflow-x-hidden p-5">
+    <div className="relative min-h-screen overflow-x-hidden p-4">
       <div className="relative z-10 mx-auto max-w-225 animate-pulse">
         {/* Banner image placeholder */}
         <div className="mb-4 h-30 rounded-xl bg-gray-200" />

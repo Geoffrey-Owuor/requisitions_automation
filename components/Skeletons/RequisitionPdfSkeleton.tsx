@@ -1,7 +1,7 @@
 const RequisitionPdfSkeleton = () => {
   return (
-    <div className="relative min-h-screen overflow-x-hidden p-5">
-      <div className="relative z-10 mx-auto max-w-180 animate-pulse">
+    <div className="relative min-h-screen overflow-x-hidden p-4">
+      <div className="relative z-10 mx-auto max-w-3xl animate-pulse">
         {/* Header bar */}
         <div className="mb-6 flex items-center justify-between rounded-2xl bg-white/60 px-8 py-5">
           <div className="h-8 w-36 rounded-lg bg-gray-200" />

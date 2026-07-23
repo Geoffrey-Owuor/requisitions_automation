@@ -7,8 +7,8 @@ import {
   RotateCcw,
   X,
   Info,
-  FileText,
   CircleDollarSign,
+  FileSpreadsheet,
 } from "lucide-react";
 import { TablePagination } from "../Dashboard/TablePagination";
 import { SalaryAdvanceModal } from "./SalaryAdvanceModal";
@@ -55,7 +55,7 @@ export default function SalaryAdvanceTable() {
 
   return (
     <div>
-      <span className="mb-4 flex items-center gap-2 font-medium text-neutral-600">
+      <span className="mb-4 flex items-center gap-2 font-medium text-neutral-700">
         <CircleDollarSign className="h-5 w-5" />
         Salary Advances Data
       </span>
@@ -102,7 +102,7 @@ export default function SalaryAdvanceTable() {
             onClick={() => setIsExportModalOpen(true)}
             className="rounded-xl bg-neutral-200 p-2.5 text-sm font-medium text-gray-800 transition-colors hover:bg-neutral-300 hover:text-gray-900"
           >
-            <FileText className="h-4.5 w-4.5" />
+            <FileSpreadsheet className="h-4.5 w-4.5" />
           </button>
         </div>
 

@@ -201,7 +201,7 @@ export function SalaryAdvanceModal({
                       <button
                         onClick={() => handleReview("approved")}
                         disabled={loadingAction !== null}
-                        className="flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-700 disabled:opacity-50"
+                        className="flex items-center gap-2 rounded-xl bg-slate-800 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-slate-900 disabled:opacity-50"
                       >
                         {loadingAction === "approved" ? (
                           <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
