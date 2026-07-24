@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { assets, BASE_URL } from "@/public/assets";
+import { assets } from "@/public/assets";
 import { useState, useEffect, useRef } from "react";
 import {
   Cloud,
@@ -16,12 +16,12 @@ const launcherApps = [
   {
     name: "Purchase",
     icon: ShoppingBag,
-    href: `${BASE_URL}/staffproductpurchase/login`,
+    href: "/staffproductpurchase/login",
   },
   {
     name: "HelpDesk",
     icon: LaptopMinimalCheck,
-    href: `${BASE_URL}/helpdesk/login`,
+    href: "/helpdesk/login",
   },
   { name: "Outlook", icon: Mail, href: "https://outlook.cloud.microsoft" },
   {
