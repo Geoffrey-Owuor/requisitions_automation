@@ -1,5 +1,6 @@
 "use server";
 import { query } from "@/lib/db";
+import { getSession } from "@/lib/session";
 
 export interface ITRequisitionDataProps {
   dataFlag: "userData" | "hodPending" | "itPending" | "itAll";
@@ -13,6 +14,9 @@ export const getITRequisitionData = async ({
   hodEmail,
 }: ITRequisitionDataProps) => {
   const baseParams = [];
+
+  const user = await getSession();
+  if (!user) return [];
 
   let baseQuery = `
     SELECT request_id, request_created_at, submitter_email, submitter_name,

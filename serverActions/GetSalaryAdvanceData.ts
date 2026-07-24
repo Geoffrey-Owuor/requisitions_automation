@@ -1,5 +1,6 @@
 "use server";
 import { query } from "@/lib/db";
+import { getSession } from "@/lib/session";
 
 export interface SalaryAdvanceData {
   request_id: string;
@@ -20,6 +21,9 @@ export interface SalaryAdvanceData {
 export async function GetSalaryAdvanceData(): Promise<
   SalaryAdvanceData[] | []
 > {
+  const user = await getSession();
+  if (!user) return [];
+
   const baseQuery = `
     SELECT
     request_id, request_created_at, staff_number, staff_name, staff_email, staff_department, 

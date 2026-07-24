@@ -1,5 +1,6 @@
 "use server";
 import { query } from "@/lib/db";
+import { getSession } from "@/lib/session";
 
 export interface SalaryAdvanceCounts {
   total: number;
@@ -11,6 +12,16 @@ export interface SalaryAdvanceCounts {
 }
 
 export async function GetSalaryAdvanceCounts(): Promise<SalaryAdvanceCounts> {
+  const user = await getSession();
+  if (!user)
+    return {
+      total: 0,
+      pending: 0,
+      approved: 0,
+      declined: 0,
+      oneoff: 0,
+      continuous: 0,
+    };
   // Use conditional aggregation to get all counts in a single efficient query
   const sqlQuery = `
    SELECT 
