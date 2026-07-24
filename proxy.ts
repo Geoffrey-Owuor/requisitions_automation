@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "./lib/session";
 
 // A simple proxy to redirect from designated pages when a valid cookie session is found
-const redirectPaths = ["/", "/login"];
+const redirectPaths = ["/", "/login", "/advance"];
 
 export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
@@ -37,5 +37,5 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   // Combined matcher to watch both auth flows and the main dashboard
-  matcher: ["/", "/login", "/dashboard/:path*"],
+  matcher: ["/", "/login", "/advance", "/dashboard/:path*"],
 };
