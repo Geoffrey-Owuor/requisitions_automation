@@ -2,12 +2,17 @@
 import { pool } from "@/lib/db";
 import { PoolClient } from "pg";
 import { AdvanceEmailSender } from "@/services/AdvanceEmailSender";
+import { getSession } from "@/lib/session";
 
 export async function ReviewSalaryAdvance(
   request_id: string,
   status: "approved" | "declined",
   comments: string,
 ) {
+  const user = await getSession();
+  if (!user)
+    return { success: false, message: "Failed to authenticate the user" };
+
   let client: PoolClient | undefined;
 
   try {

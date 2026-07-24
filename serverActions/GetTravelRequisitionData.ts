@@ -1,5 +1,6 @@
 "use server";
 import { query } from "@/lib/db";
+import { getSession } from "@/lib/session";
 
 export interface TravelRequisitionDataProps {
   dataFlag: "userData" | "hodPending" | "hrPending" | "directorPending";
@@ -12,6 +13,9 @@ export const getTravelRequisitionData = async ({
   userEmail,
   hodEmail,
 }: TravelRequisitionDataProps) => {
+  const user = await getSession();
+  if (!user) return [];
+
   const baseParams = [];
 
   let baseQuery = `

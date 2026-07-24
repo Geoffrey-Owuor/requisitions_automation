@@ -10,7 +10,6 @@ import {
   CircleDollarSign,
 } from "lucide-react";
 import { AlertInfo } from "../TravelRequisitionPage";
-import { ApiHandler } from "@/utils/ApiHandler";
 import SubmittingOverlay from "../SubmittingOverlay";
 import AlertModal from "../AlertModal";
 import { usePathname } from "next/navigation";
@@ -20,6 +19,9 @@ import Image from "next/image";
 import { assets } from "@/public/assets";
 import { DropdownOption } from "./CustomDropDown";
 import CustomDropdown from "./CustomDropDown";
+import { GetOtp } from "@/serverActions/PublicServerActions/GetOtp";
+import { FetchStaffDetails } from "@/serverActions/PublicServerActions/FetchStaffDetails";
+import { SubmitAdvanceForm } from "@/serverActions/PublicServerActions/SubmitAdvanceForm";
 
 export interface SalaryAdvanceFormData {
   staffNumber: string;
@@ -135,11 +137,8 @@ export default function SalaryAdvanceClient() {
 
     try {
       // TODO: Ensure you have a GET endpoint configured to query company_staff_data
-      const res = await fetch(
-        `/api/salaryadvance/fetch-staff?staff_number=${formData.staffNumber}`,
-      );
-      if (res.ok) {
-        const staffData = await res.json();
+      const staffData = await FetchStaffDetails(formData.staffNumber);
+      if (staffData) {
         updateField("staffName", staffData.staff_name);
         updateField("staffEmail", staffData.staff_email);
         updateField("department", staffData.staff_department);
@@ -163,14 +162,9 @@ export default function SalaryAdvanceClient() {
     setSubmitting(true);
 
     try {
-      const response = await ApiHandler(
-        "/api/salaryadvance/verify-otp",
-        "POST",
-        { otp },
-      );
-      const data = await response.json();
+      const response = await GetOtp(otp);
 
-      if (!response.ok) throw new Error(data.message || "Invalid OTP");
+      if (response.type === "error") throw new Error(response.message);
 
       setOtpError("");
       setStep(2);
@@ -186,21 +180,18 @@ export default function SalaryAdvanceClient() {
   const handleSubmit = async () => {
     setSubmitting(true);
     try {
-      const response = await ApiHandler(
-        "/api/salaryadvance/submit-form",
-        "POST",
-        formData,
-      );
-      const data = await response.json();
+      const response = await SubmitAdvanceForm(formData);
 
-      if (!response.ok) {
-        setAlertInfo({ alertType: "error", alertMessage: data.message });
-        setStep(4);
-      } else {
-        setAlertInfo({ alertType: "success", alertMessage: data.message });
+      setAlertInfo({
+        alertType: response.type,
+        alertMessage: response.message,
+      });
+
+      if (response.type === "success") {
         setFormData(InitialFormState);
-        setStep(4);
       }
+
+      setStep(4);
     } catch (error) {
       if (error instanceof Error) {
         console.error("Error while trying to submit a salary advance:", error);

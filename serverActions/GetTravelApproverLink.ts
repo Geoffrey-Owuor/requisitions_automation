@@ -1,6 +1,7 @@
 "use server";
 import { query } from "@/lib/db";
 import { TravelStageLevels } from "@/components/Dashboard/TravelDetailsModal";
+import { getSession } from "@/lib/session";
 
 interface TravelApproverLinkProps {
   email: string;
@@ -13,6 +14,9 @@ export async function getTravelApproverLink({
   uuid,
   stage,
 }: TravelApproverLinkProps): Promise<string> {
+  const user = await getSession();
+  if (!user) return "#";
+
   const baseQuery = `SELECT ${stage}_uuid AS token 
                      FROM ${stage}_array WHERE ${stage}_email = $1 LIMIT 1`;
 
