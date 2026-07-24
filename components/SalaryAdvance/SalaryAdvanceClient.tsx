@@ -120,42 +120,42 @@ export default function SalaryAdvanceClient() {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  // Staff autofill logic
-  const handleStaffNumberBlur = async () => {
-    if (!formData.staffNumber) return;
-
-    // Do not search if informatio is already filled
-    const isFetched =
-      !!formData.staffName &&
-      !!formData.staffEmail &&
-      !!formData.location &&
-      !!formData.department;
-
-    if (isFetched) return;
-
-    setStaffSearchStatus("loading");
-
-    try {
-      // TODO: Ensure you have a GET endpoint configured to query company_staff_data
-      const staffData = await FetchStaffDetails(formData.staffNumber);
-      if (staffData) {
-        updateField("staffName", staffData.staff_name);
-        updateField("staffEmail", staffData.staff_email);
-        updateField("department", staffData.staff_department);
-        updateField("location", staffData.staff_location);
-        setStaffSearchStatus("found");
-      } else {
-        setStaffSearchStatus("not_found");
-        // Clear them out so user can fill manually
-        updateField("staffName", "");
-        updateField("staffEmail", "");
-        updateField("department", "");
-        updateField("location", "");
-      }
-    } catch {
-      setStaffSearchStatus("not_found");
+  // Replace handleStaffNumberBlur with this useEffect
+  useEffect(() => {
+    // 1. Don't fetch if empty
+    if (!formData.staffNumber?.trim()) {
+      return;
     }
-  };
+
+    // 2. Set up the debounce timer (e.g., 500ms delay)
+    const timer = setTimeout(async () => {
+      setStaffSearchStatus("loading");
+
+      try {
+        const staffData = await FetchStaffDetails(formData.staffNumber);
+
+        if (staffData) {
+          updateField("staffName", staffData.staff_name);
+          updateField("staffEmail", staffData.staff_email);
+          updateField("department", staffData.staff_department);
+          updateField("location", staffData.staff_location);
+          setStaffSearchStatus("found");
+        } else {
+          setStaffSearchStatus("not_found");
+          // Clear fields for manual entry
+          updateField("staffName", "");
+          updateField("staffEmail", "");
+          updateField("department", "");
+          updateField("location", "");
+        }
+      } catch {
+        setStaffSearchStatus("not_found");
+      }
+    }, 500); // 500ms after user stops typing
+
+    // 3. Cleanup: cancel the timer if the user types again before 500ms
+    return () => clearTimeout(timer);
+  }, [formData.staffNumber]); // Re-run effect whenever staffNumber changes
 
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -232,7 +232,8 @@ export default function SalaryAdvanceClient() {
                 Security Verification
               </h2>
               <p className="mb-6 text-sm text-slate-600">
-                Please enter the Salary Advance OTP to access the request form.
+                Please enter the Salary Advance password to access the request
+                form.
               </p>
 
               {/* OTP Error */}
@@ -245,7 +246,7 @@ export default function SalaryAdvanceClient() {
                   type="text"
                   required
                   className="h-12 rounded-xl border border-slate-300 px-4 text-center tracking-widest outline-none focus:border-rose-500"
-                  placeholder="Enter OTP"
+                  placeholder="Enter Password"
                   value={otp}
                   maxLength={10}
                   onChange={(e) => setOtp(e.target.value)}
@@ -264,7 +265,8 @@ export default function SalaryAdvanceClient() {
           {/* Footer */}
           <footer className="mt-auto py-6 text-center text-sm font-medium text-slate-500">
             <p>
-              For assistance with the OTP, please contact the HR Department.
+              For assistance with the password, please contact the HR
+              Department.
             </p>
           </footer>
         </div>
@@ -309,7 +311,17 @@ export default function SalaryAdvanceClient() {
                 <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                   <div className="flex flex-col gap-2">
                     <label className="text-[13px] font-medium text-[#7c5a5a]">
-                      Staff Number <span className="text-red-500">*</span>
+                      Staff Number <span className="mr-3 text-red-500">*</span>
+                      {staffSearchStatus === "not_found" && (
+                        <span className="text-xs text-amber-700">
+                          Staff info not found. Contact hr for inquiry.
+                        </span>
+                      )}
+                      {staffSearchStatus === "loading" && (
+                        <span className="animate-pulse text-xs text-neutral-700">
+                          Fetching staff info...
+                        </span>
+                      )}
                     </label>
                     <input
                       type="text"
@@ -319,19 +331,7 @@ export default function SalaryAdvanceClient() {
                       onChange={(e) =>
                         updateField("staffNumber", e.target.value)
                       }
-                      onBlur={handleStaffNumberBlur}
                     />
-                    {staffSearchStatus === "not_found" && (
-                      <span className="text-xs text-amber-700">
-                        Staff info not found. Please enter manually.
-                      </span>
-                    )}
-
-                    {staffSearchStatus === "loading" && (
-                      <span className="text-xs text-neutral-700">
-                        Fetching staff info...
-                      </span>
-                    )}
                   </div>
 
                   <div className="flex flex-col gap-2">
@@ -352,11 +352,8 @@ export default function SalaryAdvanceClient() {
                       <input
                         type="text"
                         required
-                        disabled={
-                          staffSearchStatus === "loading" ||
-                          !formData.staffNumber
-                        }
-                        className="h-10 w-full rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)] disabled:cursor-not-allowed"
+                        disabled
+                        className="h-10 w-full rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)] disabled:cursor-not-allowed disabled:bg-gray-100"
                         value={formData.staffName}
                         onChange={(e) =>
                           updateField("staffName", e.target.value)
@@ -382,11 +379,8 @@ export default function SalaryAdvanceClient() {
                       <input
                         type="email"
                         required
-                        disabled={
-                          staffSearchStatus === "loading" ||
-                          !formData.staffNumber
-                        }
-                        className="h-10 w-full rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)] disabled:cursor-not-allowed"
+                        disabled
+                        className="h-10 w-full rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)] disabled:cursor-not-allowed disabled:bg-gray-100"
                         value={formData.staffEmail}
                         onChange={(e) =>
                           updateField("staffEmail", e.target.value)
@@ -412,11 +406,8 @@ export default function SalaryAdvanceClient() {
                       <input
                         type="text"
                         required
-                        disabled={
-                          staffSearchStatus === "loading" ||
-                          !formData.staffNumber
-                        }
-                        className="h-10 w-full rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)] disabled:cursor-not-allowed"
+                        disabled
+                        className="h-10 w-full rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)] disabled:cursor-not-allowed disabled:bg-gray-100"
                         value={formData.department}
                         onChange={(e) =>
                           updateField("department", e.target.value)
@@ -442,11 +433,8 @@ export default function SalaryAdvanceClient() {
                       <input
                         type="text"
                         required
-                        disabled={
-                          staffSearchStatus === "loading" ||
-                          !formData.staffNumber
-                        }
-                        className="h-10 w-full rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)] disabled:cursor-not-allowed"
+                        disabled
+                        className="h-10 w-full rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)] disabled:cursor-not-allowed disabled:bg-gray-100"
                         value={formData.location}
                         onChange={(e) =>
                           updateField("location", e.target.value)
