@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { GetSalaryAdvanceLock } from "@/serverActions/GetSalaryAdvanceLock";
 import SalaryAdvanceClient from "./SalaryAdvanceClient";
-import { Loader2, Lock } from "lucide-react";
+import { Loader, Lock } from "lucide-react";
 
 export default function SalaryAdvancePage() {
   let isLocked = false;
@@ -31,7 +31,7 @@ export default function SalaryAdvancePage() {
   if (loading) {
     return (
       <div className="flex h-full flex-col items-center justify-center p-6 text-center text-neutral-800">
-        <Loader2 size={32} className="animate-spin" />
+        <Loader size={32} className="animate-spin" />
 
         <h1 className="mb-2 text-xl font-semibold text-slate-800">
           Loading...

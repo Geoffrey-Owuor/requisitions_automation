@@ -23,17 +23,25 @@ const CustomLoader = () => (
     </g>
   </svg>
 );
-export default function HardRedirect({ url }: { url: string }) {
+export default function HardRedirect({
+  url,
+  returnTo,
+}: {
+  url: string;
+  returnTo?: string;
+}) {
   useEffect(() => {
     // .replace() is better than .href here because it doesn't leave
     // a broken "redirect loop" entry in the user's browser back history
     // Capture the path and any search params (e.g., /dashboard/somepage?id=123)
-    const currentPath = window.location.pathname + window.location.search;
+    const currentPath = returnTo
+      ? returnTo
+      : window.location.pathname + window.location.search;
 
     // Safely encode it to pass as a query parameter
     const targetUrl = `${url}?returnTo=${encodeURIComponent(currentPath)}`;
     window.location.replace(targetUrl);
-  }, [url]);
+  }, [url, returnTo]);
 
   // Render a seamless loading state while the browser executes the redirect
   return (
