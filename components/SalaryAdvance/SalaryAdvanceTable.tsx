@@ -3,7 +3,6 @@ import { useState, useMemo } from "react";
 import { SkeletonTable } from "@/components/Skeletons/SkeletonTable";
 import {
   Search,
-  Banknote,
   RotateCcw,
   X,
   Info,
@@ -100,7 +99,7 @@ export default function SalaryAdvanceTable() {
 
           <button
             onClick={() => setIsExportModalOpen(true)}
-            className="rounded-xl bg-neutral-200 p-2.5 text-sm font-medium text-gray-800 transition-colors hover:bg-neutral-300 hover:text-gray-900"
+            className="rounded-xl border border-neutral-300 bg-neutral-200/50 p-2.5 text-sm font-medium text-gray-800 transition-colors hover:bg-neutral-200/80 hover:text-gray-900"
           >
             <FileSpreadsheet className="h-4.5 w-4.5" />
           </button>
@@ -172,7 +171,9 @@ export default function SalaryAdvanceTable() {
 
                     {/* Type */}
                     <td className="px-6 py-5">
-                      <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-semibold text-slate-700 capitalize">
+                      <span
+                        className={`inline-flex items-center rounded-full ${req.request_type === "oneoff" ? "bg-slate-100 text-slate-700" : "bg-cyan-100 text-cyan-700"} px-2.5 py-0.5 text-[11px] font-semibold capitalize`}
+                      >
                         {req.request_type}
                       </span>
                     </td>
@@ -208,7 +209,7 @@ export default function SalaryAdvanceTable() {
                   <td colSpan={7} className="px-6 py-20">
                     <div className="flex flex-col items-center justify-center text-center">
                       <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/80 bg-white/40 text-red-300 shadow-[0_8px_16px_rgba(60,100,160,0.05)] backdrop-blur-md">
-                        <Banknote size={32} strokeWidth={1.5} />
+                        <CircleDollarSign size={32} strokeWidth={1.5} />
                       </div>
                       <h3 className="text-base font-semibold text-[#1e1b1b]">
                         {searchTerm

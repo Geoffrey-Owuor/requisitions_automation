@@ -3,6 +3,7 @@
 import { useUser } from "@/context/UserContext";
 import TravelRequisitionsTable from "./TravelRequisitionsTable";
 import ITRequisitionsTable from "./ITRequisitionsDashboard/ITRequisitionsTable";
+import DashboardWatermark from "../Modules/DashboardWaterMark";
 
 import { useEffect } from "react";
 import DashboardAlert from "./DashboardAlert";
@@ -27,43 +28,52 @@ const UserDashboard = () => {
   const isDirector = roles.includes("director");
 
   return (
-    <div className="p-4">
-      {/* The dashboard alert */}
-      <DashboardAlert />
+    <div className="relative h-full p-4">
+      <div className="pointer-events-none fixed inset-0 z-0 flex items-center justify-center overflow-hidden">
+        {/* ---------- WATERMARK LAYER ---------- */}
+        <DashboardWatermark />
+      </div>
 
-      {/* ----------DATA TABLES------------ */}
+      {/* 3. THE CONTENT LAYER */}
 
-      {/* TRAVEL REQUISITIONS */}
+      <div className="relative z-10 space-y-4">
+        {/* The dashboard alert */}
+        <DashboardAlert />
 
-      {/* User Travel Requisitions */}
-      <TravelRequisitionsTable dataFlag="userData" userEmail={userEmail} />
+        {/* ----------DATA TABLES------------ */}
 
-      {/* Travel Requisitions Pending HOD Approval */}
-      {isHod && (
-        <TravelRequisitionsTable dataFlag="hodPending" hodEmail={userEmail} />
-      )}
+        {/* TRAVEL REQUISITIONS */}
 
-      {/* Travel Requisitions Pending HR Approval */}
-      {isHr && <TravelRequisitionsTable dataFlag="hrPending" />}
+        {/* User Travel Requisitions */}
+        <TravelRequisitionsTable dataFlag="userData" userEmail={userEmail} />
 
-      {/* Travel Requisitions Pending Director Approval */}
-      {isDirector && <TravelRequisitionsTable dataFlag="directorPending" />}
+        {/* Travel Requisitions Pending HOD Approval */}
+        {isHod && (
+          <TravelRequisitionsTable dataFlag="hodPending" hodEmail={userEmail} />
+        )}
 
-      {/* IT REQUISITIONS */}
+        {/* Travel Requisitions Pending HR Approval */}
+        {isHr && <TravelRequisitionsTable dataFlag="hrPending" />}
 
-      {/* User IT Requisitions */}
-      <ITRequisitionsTable dataFlag="userData" userEmail={userEmail} />
+        {/* Travel Requisitions Pending Director Approval */}
+        {isDirector && <TravelRequisitionsTable dataFlag="directorPending" />}
 
-      {/* IT Requisitions Pending HOD Approval */}
-      {isHod && (
-        <ITRequisitionsTable dataFlag="hodPending" hodEmail={userEmail} />
-      )}
+        {/* IT REQUISITIONS */}
 
-      {/* IT Requisitions Pending IT Approval */}
-      {isITAdmin && <ITRequisitionsTable dataFlag="itPending" />}
+        {/* User IT Requisitions */}
+        <ITRequisitionsTable dataFlag="userData" userEmail={userEmail} />
 
-      {/* All IT Requisitions */}
-      {isITAdmin && <ITRequisitionsTable dataFlag="itAll" />}
+        {/* IT Requisitions Pending HOD Approval */}
+        {isHod && (
+          <ITRequisitionsTable dataFlag="hodPending" hodEmail={userEmail} />
+        )}
+
+        {/* IT Requisitions Pending IT Approval */}
+        {isITAdmin && <ITRequisitionsTable dataFlag="itPending" />}
+
+        {/* All IT Requisitions */}
+        {isITAdmin && <ITRequisitionsTable dataFlag="itAll" />}
+      </div>
     </div>
   );
 };
