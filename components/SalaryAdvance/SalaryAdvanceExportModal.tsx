@@ -1,7 +1,9 @@
 "use client";
+
 import { useState } from "react";
 import { X, Download, FileSpreadsheet } from "lucide-react";
 import ClientPortal from "@/components/ClientPortal";
+import { DatePicker } from "@/components/DatePicker";
 
 interface SalaryAdvanceExportModalProps {
   isOpen: boolean;
@@ -58,11 +60,11 @@ export function SalaryAdvanceExportModal({
     <ClientPortal>
       <div
         onClick={onClose}
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+        className="client-scrollbar fixed inset-0 z-50 flex items-start justify-center bg-black/50 px-4 py-6"
       >
         <div
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-md rounded-3xl border border-gray-200 bg-white shadow-2xl"
+          className="relative w-full max-w-3xl rounded-3xl border border-gray-200 bg-white shadow-2xl"
         >
           {/* Header */}
           <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
@@ -88,42 +90,28 @@ export function SalaryAdvanceExportModal({
           </div>
 
           {/* Body */}
-          <div className="space-y-5 p-6">
-            <div className="space-y-4">
-              <div className="flex flex-col gap-1.5">
-                <label
-                  htmlFor="fromDate"
-                  className="text-[11px] font-bold tracking-widest text-gray-400 uppercase"
-                >
-                  From Date
-                </label>
-                <input
-                  id="fromDate"
-                  type="date"
-                  value={fromDate}
-                  onClick={(e) => e.currentTarget.showPicker?.()}
-                  onChange={(e) => setFromDate(e.target.value)}
-                  className="h-10 w-full cursor-pointer rounded-xl border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-600 transition-all outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
-                />
-              </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label
-                  htmlFor="toDate"
-                  className="text-[11px] font-bold tracking-widest text-gray-400 uppercase"
-                >
-                  To Date
-                </label>
-                <input
-                  id="toDate"
-                  type="date"
-                  value={toDate}
-                  min={fromDate}
-                  onClick={(e) => e.currentTarget.showPicker?.()}
-                  onChange={(e) => setToDate(e.target.value)}
-                  className="h-10 w-full cursor-pointer rounded-xl border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-600 transition-all outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
-                />
-              </div>
+          <div className="flex w-full items-center gap-2 p-6">
+            <div className="flex w-full flex-col gap-1.5">
+              <label className="text-[11px] font-bold tracking-widest text-gray-400 uppercase">
+                From Date
+              </label>
+              <DatePicker
+                value={fromDate}
+                onChange={setFromDate}
+                placeholder="Select start date"
+              />
+            </div>
+
+            <div className="flex w-full flex-col gap-1.5">
+              <label className="text-[11px] font-bold tracking-widest text-gray-400 uppercase">
+                To Date
+              </label>
+              <DatePicker
+                value={toDate}
+                onChange={setToDate}
+                placeholder="Select end date"
+              />
             </div>
           </div>
 

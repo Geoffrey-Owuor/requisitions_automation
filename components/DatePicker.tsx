@@ -1,5 +1,6 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+
+import { useState, useRef, useEffect, useCallback } from "react";
 import {
   CalendarDays,
   ChevronLeft,
@@ -117,12 +118,35 @@ export function DatePicker({
   placeholder = "Pick a date",
 }: DatePickerProps) {
   const [open, setOpen] = useState(false);
+  const [placement, setPlacement] = useState<"top" | "bottom">("bottom");
   const [viewDate, setViewDate] = useState(() => {
     return value ? new Date(value + "T00:00:00") : new Date();
   });
 
   const ref = useRef<HTMLDivElement>(null);
   const today = new Date();
+
+  // Calculate position (Top vs Bottom) based on remaining screen height
+  const updatePlacement = useCallback(() => {
+    if (!ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+    const estimatedPickerHeight = 350; // Approx height of the calendar popover
+
+    if (spaceBelow < estimatedPickerHeight && spaceAbove > spaceBelow) {
+      setPlacement("top");
+    } else {
+      setPlacement("bottom");
+    }
+  }, []);
+
+  const toggleOpen = () => {
+    if (!open) {
+      updatePlacement();
+    }
+    setOpen((prev) => !prev);
+  };
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -192,7 +216,7 @@ export function DatePicker({
           readOnly
           value={displayValue}
           placeholder={placeholder}
-          onClick={() => setOpen((o) => !o)}
+          onClick={toggleOpen}
           className="h-10 w-full cursor-pointer rounded-xl border border-neutral-300 bg-white py-2 pr-10 pl-3 text-sm text-neutral-600 transition-all outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
         />
 
@@ -207,7 +231,7 @@ export function DatePicker({
         )}
         <button
           type="button"
-          onClick={() => setOpen((o) => !o)}
+          onClick={toggleOpen}
           className="absolute right-4 text-neutral-400 hover:text-neutral-600"
           tabIndex={-1}
         >
@@ -216,7 +240,11 @@ export function DatePicker({
       </div>
 
       {open && (
-        <div className="absolute top-full left-0 z-50 mt-2 w-full rounded-2xl border border-neutral-200 bg-white p-4 shadow-lg">
+        <div
+          className={`absolute left-0 z-50 w-full rounded-2xl border border-neutral-200 bg-white p-4 shadow-xl ${
+            placement === "top" ? "bottom-full mb-2" : "top-full mt-2"
+          }`}
+        >
           <div className="mb-3 flex items-center justify-between">
             <button
               type="button"

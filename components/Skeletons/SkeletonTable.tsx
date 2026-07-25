@@ -1,11 +1,12 @@
 export const SkeletonTable = () => {
   return (
-    <div className="my-4 w-full animate-pulse space-y-4">
+    <div className="w-full animate-pulse space-y-4">
       {/* Table Title Placeholder */}
-      <div className="mb-6 h-10 w-64 rounded-xl bg-neutral-200/60" />
+      <div className="mb-4 h-6 w-64 rounded-xl bg-neutral-200/60" />
+      <div className="mb-6 h-10 w-100 rounded-xl bg-neutral-200/60" />
 
       {/* Table Container */}
-      <div className="h-96 w-full rounded-2xl border border-white/80 bg-white/40 backdrop-blur-md">
+      <div className="h-96 w-full rounded-2xl border border-gray-200 bg-white/50 px-4 py-2 backdrop-blur-2xl">
         {/* Table Header Row */}
         <div className="flex space-x-4 border-b border-neutral-200/50 py-4">
           {[...Array(5)].map((_, i) => (
