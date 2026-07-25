@@ -9,6 +9,7 @@ import TravelApprovalSkeleton from "@/components/Skeletons/TravelApprovalSkeleto
 import AlreadyProcessed from "@/components/Approvers/TravelApprovers/AlreadyProcessed";
 import InvalidToken from "@/components/Approvers/TravelApprovers/InvalidToken";
 import NotFoundRequest from "@/components/Approvers/TravelApprovers/NotFoundRequest";
+import { isValidTravelStage } from "@/public/assets";
 
 type ApprovalPageProps = {
   params: Promise<{ uuid: string }>;
@@ -20,7 +21,16 @@ export const generateMetadata = async ({
   searchParams,
 }: ApprovalPageProps): Promise<Metadata> => {
   const { stage } = await searchParams;
-  const upperCase = stage.toUpperCase();
+
+  // Validate stage early
+  if (!isValidTravelStage(stage)) {
+    return {
+      title: "Review | Invalid Request",
+      description: "Invalid or missing approval stage.",
+    };
+  }
+
+  const upperCase = stage.toUpperCase(); // Safe to call: stage is typed as Stage here
   return {
     title: `Review | ${upperCase || "NO"} Stage`,
     description: `Review | ${upperCase || "NO"} Approval Stage`,
@@ -32,7 +42,7 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
   const { token, stage } = await searchParams;
 
   // First fallback - one of our props is missing/falsy
-  if (!uuid || !token || !stage) return <NotFoundRequest />;
+  if (!uuid || !token || !isValidTravelStage(stage)) return <NotFoundRequest />;
 
   const validApprover = await query(
     `SELECT ${stage}_email AS email, 
