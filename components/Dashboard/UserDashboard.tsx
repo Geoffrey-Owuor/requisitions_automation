@@ -20,8 +20,6 @@ const UserDashboard = () => {
     }
   }, [username, userEmail]);
 
-  const firstName = username.split(" ")[0];
-
   // Check user active roles
   const isITAdmin = roles.includes("it");
   const isHod = roles.includes("hod");
@@ -32,19 +30,6 @@ const UserDashboard = () => {
     <div className="p-4">
       {/* The dashboard alert */}
       <DashboardAlert />
-
-      {/* WELCOME AREA */}
-      <div className="flex flex-wrap items-center justify-between gap-6 max-sm:flex-col max-sm:items-start">
-        {/* Welcome Text */}
-        <div>
-          <p className="mb-1 font-mono text-[14px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
-            Howdy!
-          </p>
-          <h1 className="text-sm font-semibold tracking-[-0.5px] text-[#1e1b1b]">
-            {firstName}, look who showed up 👀
-          </h1>
-        </div>
-      </div>
 
       {/* ----------DATA TABLES------------ */}
 

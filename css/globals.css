@@ -10,6 +10,11 @@ html {
   overflow-y: auto;
 }
 
+.client-scrollbar {
+  scrollbar-color: #ffffff transparent;
+  overflow-y: auto;
+}
+
 /* Sidebar scrollbar navigation styles */
 .sidebar-nav {
   overflow-y: auto;

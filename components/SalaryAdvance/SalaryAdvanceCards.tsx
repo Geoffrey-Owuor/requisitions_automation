@@ -38,13 +38,16 @@ export default function SalaryAdvanceCards() {
 
   if (isPending) {
     return (
-      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {[1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className="h-45 animate-pulse rounded-2xl bg-neutral-100 shadow-[0_8px_16px_rgba(60,100,160,0.02)]"
-          />
-        ))}
+      <div className="mb-6">
+        <div className="mb-4 h-6 w-64 animate-pulse rounded-2xl bg-neutral-100" />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="h-42 animate-pulse rounded-2xl bg-neutral-100 shadow-[0_8px_16px_rgba(60,100,160,0.02)]"
+            />
+          ))}
+        </div>
       </div>
     );
   }
