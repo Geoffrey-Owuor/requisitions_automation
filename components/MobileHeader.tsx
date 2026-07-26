@@ -289,14 +289,14 @@ const MobileHeader = () => {
 
         {/* Right Side: User Dropdown and Guidelines Link */}
         <div className="flex items-center gap-4">
-          <a
+          <Link
             href="/guidelines"
             target="_blank"
             rel="noopener noreferrer"
             className="rounded-full p-1.5 text-white/80 transition-all hover:bg-white/10 hover:text-white"
           >
             <CircleQuestionMark className="h-5 w-5" />
-          </a>
+          </Link>
           <UserDropdown direction="down" />
         </div>
       </header>

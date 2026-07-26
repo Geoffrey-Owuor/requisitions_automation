@@ -134,8 +134,8 @@ export default function GuidelinesPage() {
     <div className="layout-scrollbar flex h-screen flex-col bg-[#fafafa] text-slate-900 selection:bg-rose-100 selection:text-rose-900">
       {/* Ambient Background */}
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
-        <div className="absolute -top-[10%] -left-[10%] h-[50%] w-[50%] rounded-full bg-rose-100/40 blur-[80px] sm:h-[40%] sm:w-[40%] sm:blur-[120px]" />
-        <div className="absolute top-[20%] -right-[10%] h-[40%] w-[40%] rounded-full bg-blue-50/40 blur-[80px] sm:h-[30%] sm:w-[30%] sm:blur-[100px]" />
+        <div className="absolute top-[-10%] left-[-10%] h-[50%] w-[50%] rounded-full bg-rose-100/40 blur-[80px] sm:h-[40%] sm:w-[40%] sm:blur-[120px]" />
+        <div className="absolute top-[20%] right-[-10%] h-[40%] w-[40%] rounded-full bg-blue-50/40 blur-[80px] sm:h-[30%] sm:w-[30%] sm:blur-[100px]" />
       </div>
 
       <Header />

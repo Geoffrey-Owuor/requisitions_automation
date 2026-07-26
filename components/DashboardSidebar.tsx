@@ -150,7 +150,7 @@ const DashboardSidebar = () => {
         </div>
 
         {/* Vertical Navigation */}
-        <nav className="mb-2 flex w-full flex-1 scrollbar-none flex-col items-center gap-1.5 overflow-y-auto mask-[linear-gradient(to_bottom,transparent_0%,black_30px,black_calc(100%-30px),transparent_100%)] px-2">
+        <nav className="mb-2 flex w-full flex-1 scrollbar-none flex-col items-center gap-1.5 overflow-y-auto mask-[linear-gradient(to_bottom,transparent_0%,black_24px,black_calc(100%-24px),transparent_100%)] px-2">
           {/* IT Requisition */}
           <SideBarButton
             label="IT Req"
@@ -245,14 +245,14 @@ const DashboardSidebar = () => {
               showToolTip={true}
               toolTipMessage="Go Back"
             />
-            <a
+            <Link
               href="/guidelines"
               target="_blank"
               rel="noopener noreferrer"
               className="rounded-full p-2 text-white/70 transition-colors hover:bg-white/10 hover:text-white"
             >
               <CircleQuestionMark className="h-5 w-5" />
-            </a>
+            </Link>
             <UserDropdown direction="up" />
           </div>
         </div>
