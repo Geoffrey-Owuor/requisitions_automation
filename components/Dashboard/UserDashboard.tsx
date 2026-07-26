@@ -4,7 +4,6 @@ import { useUser } from "@/context/UserContext";
 import TravelRequisitionsTable from "./TravelRequisitionsTable";
 import ITRequisitionsTable from "./ITRequisitionsDashboard/ITRequisitionsTable";
 import DashboardWatermark from "../Modules/DashboardWaterMark";
-
 import { useEffect } from "react";
 import DashboardAlert from "./DashboardAlert";
 
@@ -29,6 +28,8 @@ const UserDashboard = () => {
 
   return (
     <div className="relative h-full p-4">
+      {/* The dashboard alert */}
+      <DashboardAlert />
       <div className="pointer-events-none fixed inset-0 z-0 flex items-center justify-center overflow-hidden">
         {/* ---------- WATERMARK LAYER ---------- */}
         <DashboardWatermark />
@@ -37,9 +38,6 @@ const UserDashboard = () => {
       {/* 3. THE CONTENT LAYER */}
 
       <div className="relative z-10 space-y-4">
-        {/* The dashboard alert */}
-        <DashboardAlert />
-
         {/* ----------DATA TABLES------------ */}
 
         {/* TRAVEL REQUISITIONS */}
