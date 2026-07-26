@@ -30,7 +30,7 @@ const UserDashboard = () => {
     <div className="relative h-full p-4">
       {/* The dashboard alert */}
       <DashboardAlert />
-      <div className="pointer-events-none fixed inset-0 z-0 flex items-center justify-center overflow-hidden">
+      <div className="pointer-events-none fixed inset-y-0 left-1/2 z-0 flex -translate-x-1/2 items-center justify-center overflow-hidden lg:left-[calc(80px+(100vw-80px)/2)]">
         {/* ---------- WATERMARK LAYER ---------- */}
         <DashboardWatermark />
       </div>

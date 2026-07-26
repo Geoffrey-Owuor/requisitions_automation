@@ -6,6 +6,7 @@ import {
   LaptopMinimalCheck,
 } from "lucide-react";
 import { InfoCard } from "./GuidelinesPage";
+import Link from "next/link";
 
 export default function HelpdeskGuideline() {
   return (
@@ -33,14 +34,14 @@ export default function HelpdeskGuideline() {
           <p className="mt-1 text-sm leading-relaxed text-blue-800">
             For comprehensive information on issue types, priority levels, and
             more - please review the{" "}
-            <a
+            <Link
               target="_blank"
               rel="noopener noreferrer"
               href="/helpdesk/manual"
               className="font-semibold underline underline-offset-2 transition-colors hover:text-blue-600"
             >
               HelpDesk Manual
-            </a>
+            </Link>
             .
           </p>
         </div>
