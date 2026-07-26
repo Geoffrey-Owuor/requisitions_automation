@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import ClientPortal from "./ClientPortal";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import ITRequisitionPage from "./ITRequisition/ITRequisitionPage";
 import TravelRequisitionPage from "./TravelRequisitionPage";
 import ModalWrapper from "./Modules/ModalWrapper";
@@ -79,6 +79,34 @@ const DashboardSidebar = () => {
   const showHrForms = useToggleStore((state) => state.showHrForms);
   const setShowHrForms = useToggleStore((state) => state.setShowHrForms);
 
+  // Refs for scroll targets
+  const hrEndRef = useRef<HTMLDivElement>(null);
+  const retailEndRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to HR bottom when opened
+  useEffect(() => {
+    if (showHrForms) {
+      setTimeout(() => {
+        hrEndRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+        });
+      }, 50);
+    }
+  }, [showHrForms]);
+
+  // Scroll to Retail bottom when opened
+  useEffect(() => {
+    if (showRetailForms) {
+      setTimeout(() => {
+        retailEndRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+        });
+      }, 50);
+    }
+  }, [showRetailForms]);
+
   return (
     <>
       {/* IT Modal */}
@@ -122,7 +150,7 @@ const DashboardSidebar = () => {
         </div>
 
         {/* Vertical Navigation */}
-        <nav className="sidebar-nav mb-2 flex w-full flex-1 flex-col items-center gap-1.5 px-2">
+        <nav className="mb-2 flex w-full flex-1 scrollbar-none flex-col items-center gap-1.5 overflow-y-auto mask-[linear-gradient(to_bottom,transparent_0%,black_30px,black_calc(100%-30px),transparent_100%)] px-2">
           {/* IT Requisition */}
           <SideBarButton
             label="IT Req"
@@ -166,7 +194,7 @@ const DashboardSidebar = () => {
 
           {/* HR forms - Salary Advance Link, Casual Requisition(Later) */}
           {showHrForms && (
-            <>
+            <div className="flex w-full flex-col gap-1.5">
               <SideBarLink
                 href="/dashboard/advance"
                 key="/dashboard/advance"
@@ -176,7 +204,9 @@ const DashboardSidebar = () => {
                 isActive={pathname === "/dashboard/advance"}
                 showToolTip={true}
               />
-            </>
+              {/* Invisible scroll target element */}
+              <div ref={hrEndRef} />
+            </div>
           )}
 
           {/* Retail Button */}
@@ -190,7 +220,7 @@ const DashboardSidebar = () => {
 
           {/* Access key button */}
           {showRetailForms && (
-            <>
+            <div className="flex w-full flex-col gap-1.5">
               <SideBarButton
                 label="Access"
                 handleClick={() => setShowAccessRequisition(true)}
@@ -198,7 +228,9 @@ const DashboardSidebar = () => {
                 showToolTip={true}
                 toolTipMessage="Access/Key Issuance"
               />
-            </>
+              {/* Invisible scroll target element */}
+              <div ref={retailEndRef} />
+            </div>
           )}
         </nav>
 
