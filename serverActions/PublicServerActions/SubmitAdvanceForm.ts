@@ -46,7 +46,23 @@ export async function SubmitAdvanceForm(
       requestType,
     } = formData;
 
-    // RULE 1: Check if the staff has already selected "continuous" in any previous request
+    // RULE 1: Check if we have the staff info, if not - stop the submission
+    const isExistingStaff = await query(
+      `
+      SELECT id FROM company_staff_data WHERE staff_number = $1
+      `,
+      [staffNumber],
+    );
+
+    if (isExistingStaff.length === 0) {
+      return {
+        type: "error",
+        message:
+          "Selected staff info could not be found, please contact your admin",
+      };
+    }
+
+    // RULE 2: Check if the staff has already selected "continuous" in any previous request
     const continuousCheckRes = await query(
       `SELECT request_id FROM salary_advances 
            WHERE staff_number = $1 AND request_type = 'continuous' 
@@ -62,7 +78,7 @@ export async function SubmitAdvanceForm(
       };
     }
 
-    // RULE 2: Check if staff has already submitted a request THIS month
+    // RULE 3: Check if staff has already submitted a request THIS month
     const thisMonthCheckRes = await query(
       `SELECT request_id FROM salary_advances 
        WHERE staff_number = $1 
