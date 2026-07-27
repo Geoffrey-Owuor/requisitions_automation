@@ -67,7 +67,7 @@ export default function QuickSignIn() {
   return (
     <ClientPortal>
       <div
-        className={`fixed top-2 right-2 left-auto z-9999 hidden w-full max-w-80 transition-all duration-300 md:block ${
+        className={`fixed top-2 right-4 left-auto z-9999 hidden w-full max-w-80 transition-all duration-300 md:block ${
           isDismissing ? "animate-slide-out-top" : "animate-slide-in-top"
         }`}
       >
