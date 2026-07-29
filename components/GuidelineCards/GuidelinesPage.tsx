@@ -11,15 +11,17 @@ import {
   LockKeyhole,
   LaptopMinimalCheck,
   ShoppingBag,
+  CircleDollarSign,
 } from "lucide-react";
 import ITRequisitionGuideline from "./ITRequisitionGuideline";
 import TravelRequisitionGuideline from "./TravelRequisitionGuideline";
 import HelpdeskGuideline from "./HelpDeskGuideline";
 import AccessRequisitionGuideline from "./AccessRequisitionGuideline";
 import StaffPurchaseGuideline from "./StaffPurchaseGuideline";
+import SalaryAdvanceGuideline from "./SalaryAdvanceGuideline";
 
 // Types
-type TabId = "travel" | "it" | "access" | "desk" | "purchase";
+type TabId = "travel" | "it" | "access" | "desk" | "purchase" | "advance";
 
 // Reusable Sub-components
 export const GeneralNote = () => (
@@ -121,14 +123,19 @@ export default function GuidelinesPage() {
       icon: <ShoppingBag size={14} />,
     },
     { id: "access", label: "Key(s) & Access", icon: <LockKeyhole size={14} /> },
+    {
+      id: "advance",
+      label: "Salary Advance",
+      icon: <CircleDollarSign size={14} />,
+    },
   ] as const;
 
   return (
     <div className="layout-scrollbar flex h-screen flex-col bg-[#fafafa] text-slate-900 selection:bg-rose-100 selection:text-rose-900">
       {/* Ambient Background */}
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
-        <div className="absolute -top-[10%] -left-[10%] h-[50%] w-[50%] rounded-full bg-rose-100/40 blur-[80px] sm:h-[40%] sm:w-[40%] sm:blur-[120px]" />
-        <div className="absolute top-[20%] -right-[10%] h-[40%] w-[40%] rounded-full bg-blue-50/40 blur-[80px] sm:h-[30%] sm:w-[30%] sm:blur-[100px]" />
+        <div className="absolute top-[-10%] left-[-10%] h-[50%] w-[50%] rounded-full bg-rose-100/40 blur-[80px] sm:h-[40%] sm:w-[40%] sm:blur-[120px]" />
+        <div className="absolute top-[20%] right-[-10%] h-[40%] w-[40%] rounded-full bg-blue-50/40 blur-[80px] sm:h-[30%] sm:w-[30%] sm:blur-[100px]" />
       </div>
 
       <Header />
@@ -167,6 +174,7 @@ export default function GuidelinesPage() {
           {activeTab === "desk" && <HelpdeskGuideline />}
           {activeTab === "purchase" && <StaffPurchaseGuideline />}
           {activeTab === "access" && <AccessRequisitionGuideline />}
+          {activeTab === "advance" && <SalaryAdvanceGuideline />}
         </div>
       </main>
 

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { assets, BASE_URL } from "@/public/assets";
+import { assets } from "@/public/assets";
 import { useState, useEffect, useRef } from "react";
 import {
   Cloud,
@@ -16,12 +16,12 @@ const launcherApps = [
   {
     name: "Purchase",
     icon: ShoppingBag,
-    href: `${BASE_URL}:4443/login`,
+    href: "/staffproductpurchase/login",
   },
   {
-    name: "Desk",
+    name: "HelpDesk",
     icon: LaptopMinimalCheck,
-    href: `${BASE_URL}:8443/login`,
+    href: "/helpdesk/login",
   },
   { name: "Outlook", icon: Mail, href: "https://outlook.cloud.microsoft" },
   {
@@ -104,31 +104,36 @@ const DashboardBrand = ({ showText = false }: { showText?: boolean }) => {
 
 const AppMenu = () => {
   return (
-    <div className="absolute top-12 left-0 z-50 max-h-100 w-80 overflow-y-auto rounded-3xl border border-gray-200 bg-white p-4 shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
-      {/* Container holding the grid */}
-      <div className="relative z-10 grid grid-cols-3 gap-2">
-        {launcherApps.map((app) => {
-          const Icon = app.icon;
-          return (
-            <a
-              key={app.name}
-              href={app.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group flex flex-col items-center justify-center rounded-2xl p-3 transition-all duration-300 outline-none hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-red-500/50"
-            >
-              {/* Icon Container with subtle border, shadow, and lift on hover */}
-              <div className="mb-2 flex items-center justify-center rounded-2xl border border-gray-100 bg-white p-3 text-gray-500 shadow-sm transition-all duration-300 group-hover:-translate-y-1 group-hover:border-red-100 group-hover:text-red-600 group-hover:shadow-md">
-                <Icon className="h-7 w-7" strokeWidth={1.5} />
-              </div>
+    <div className="absolute top-12 left-0 z-50 w-88 overflow-hidden rounded-[28px] border border-gray-100/80 bg-white/95 p-4 shadow-[0_20px_50px_rgba(0,0,0,0.12)] backdrop-blur-xl transition-all">
+      {/* Grid Container */}
+      <div className="scrollbar-thin scrollbar-thumb-gray-200 max-h-80 overflow-y-auto pr-1">
+        <div className="grid grid-cols-3 gap-2">
+          {launcherApps.map((app) => {
+            const Icon = app.icon;
+            return (
+              <a
+                key={app.name}
+                href={app.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex flex-col items-center justify-center rounded-2xl p-2.5 transition-all duration-200 hover:bg-red-50/60 focus-visible:ring-2 focus-visible:ring-red-500/40 focus-visible:outline-none active:scale-95"
+              >
+                {/* Icon Tile */}
+                <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-50/80 text-gray-600 shadow-sm ring-1 ring-black/5 transition-all duration-200 group-hover:bg-white group-hover:text-red-600 group-hover:shadow-md group-hover:ring-red-100">
+                  <Icon
+                    className="h-6 w-6 transition-transform duration-200 group-hover:scale-105"
+                    strokeWidth={1.75}
+                  />
+                </div>
 
-              {/* App Label with enhanced contrast on hover */}
-              <span className="text-xs font-medium tracking-wide text-gray-500 transition-colors duration-300 group-hover:text-gray-900">
-                {app.name}
-              </span>
-            </a>
-          );
-        })}
+                {/* App Label */}
+                <span className="max-w-full truncate text-[11px] font-semibold text-gray-600 transition-colors duration-200 group-hover:text-gray-900">
+                  {app.name}
+                </span>
+              </a>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

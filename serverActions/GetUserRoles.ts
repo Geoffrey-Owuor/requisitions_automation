@@ -1,4 +1,5 @@
 import { query } from "@/lib/db";
+import { getSession } from "@/lib/session";
 
 export type Roles = string[];
 
@@ -7,6 +8,8 @@ interface QueryRoles {
 }
 
 export async function getUserRoles(email: string): Promise<Roles> {
+  const user = await getSession();
+  if (!user) return ["user"];
   try {
     const baseQuery = `
     SELECT r.role_name

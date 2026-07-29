@@ -188,7 +188,9 @@ export default function ITRequisitionPage() {
     <div className="relative p-2">
       {submitting && <SubmittingOverlay />}
 
-      {step === 3 && <AlertModal alertInfo={alertInfo} setStep={setStep} />}
+      {step === 3 && (
+        <AlertModal alertInfo={alertInfo} onBack={() => setStep(1)} />
+      )}
 
       {step === 2 && (
         <ITConfirmationModal

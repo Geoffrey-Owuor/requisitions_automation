@@ -2,8 +2,19 @@ import { NextResponse, NextRequest } from "next/server";
 import { loadHrArray } from "@/lib/loadAppDataV2";
 import { query } from "@/lib/db";
 import { EmailSender } from "@/services/EmailSender";
+import { getSession } from "@/lib/session";
 
 export async function POST(request: NextRequest) {
+  // Check if we have a valid session
+  const user = await getSession();
+
+  if (!user) {
+    return NextResponse.json(
+      { message: "Invalid or no user found" },
+      { status: 401 },
+    );
+  }
+
   const HR_ARRAY = await loadHrArray();
   try {
     const { formData, totalCost, approvalTier, submittedBy } =
@@ -16,7 +27,7 @@ export async function POST(request: NextRequest) {
     if (!name || !email) {
       return NextResponse.json(
         { message: "Cannot verify the user trying to make this requisition" },
-        { status: 401 },
+        { status: 400 },
       );
     }
 

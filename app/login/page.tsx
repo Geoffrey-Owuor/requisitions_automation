@@ -7,17 +7,28 @@ import LoginWrapper from "@/components/LoginWrapper";
 import Brand from "@/components/Brand";
 import Footer from "@/components/Footer";
 import { FileText } from "lucide-react";
+import HardRedirect from "@/components/HardRedirect";
 
 export const metadata: Metadata = {
   title: "Login | Hotpoint Apps Hub",
   description: "Secure corporate portal for Hotpoint Appliances Ltd",
 };
 
-export default async function LoginPage() {
+type Props = {
+  searchParams: Promise<{ returnTo?: string }>;
+};
+
+export default async function LoginPage({ searchParams }: Props) {
   const session = await getSession();
 
   if (session) {
     redirect("/dashboard");
+  }
+
+  // Handle auto-redirect if requested by middleware
+  const { returnTo } = await searchParams;
+  if (returnTo) {
+    return <HardRedirect url="/api/auth/login" returnTo={returnTo} />;
   }
 
   return (

@@ -5,10 +5,10 @@ import { useToggleStore } from "@/store/useToggleStore";
 
 interface AlertModalProps {
   alertInfo: AlertInfo;
-  setStep: (step: number) => void;
+  onBack: () => void;
 }
 
-export default function AlertModal({ alertInfo, setStep }: AlertModalProps) {
+export default function AlertModal({ alertInfo, onBack }: AlertModalProps) {
   const triggerScroll = useToggleStore((state) => state.triggerScroll);
   const scrollTrigger = useToggleStore((state) => state.scrollTrigger);
 
@@ -61,7 +61,7 @@ export default function AlertModal({ alertInfo, setStep }: AlertModalProps) {
         {/* Button */}
         <button
           onClick={() => {
-            setStep(1);
+            onBack();
             triggerScroll(!scrollTrigger);
           }}
           className={`mt-8 mb-3 flex w-full cursor-pointer items-center justify-center gap-2 rounded-[14px] border-none py-4 text-[14px] font-semibold transition-all duration-200 hover:-translate-y-0.5 ${config.buttonStyle}`}

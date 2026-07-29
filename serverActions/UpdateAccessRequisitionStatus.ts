@@ -6,10 +6,18 @@ import { AlertInfo } from "@/components/TravelRequisitionPage";
 import { AccessEmailSender } from "@/services/AccessEmailSender";
 import { securityApprovalStage } from "@/utils/AccessApprovalStages/securityApprovalStage";
 import { hodApprovalStage } from "@/utils/AccessApprovalStages/hodApprovalStage";
+import { isValidAccessStage } from "@/public/assets";
 
 export const UpdateAccessRequisitionStatus = async (
   payload: UpdateRequestStatusProps,
 ): Promise<AlertInfo> => {
+  if (!isValidAccessStage(payload.stage)) {
+    return {
+      alertType: "error",
+      alertMessage: "Invalid approval stage provided",
+    };
+  }
+
   let client: PoolClient | undefined;
 
   //  Our base update status query
@@ -60,7 +68,7 @@ export const UpdateAccessRequisitionStatus = async (
 
     // Check if the approver exists in our table array data set
     const { rows: approverResult } = await client.query(
-      `SELECT id FROM ${payload.stage}_array WHERE ${payload.stage}_email = $1 FOR UPDATE`,
+      `SELECT id FROM ${payload.stage}_array WHERE ${payload.stage}_email = $1`,
       [payload.approverEmail],
     );
 

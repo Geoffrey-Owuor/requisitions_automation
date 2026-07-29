@@ -1,8 +1,19 @@
 import { NextResponse } from "next/server";
 import { query } from "@/lib/db";
 import { Workbook } from "exceljs";
+import { getSession } from "@/lib/session";
 
 export async function GET() {
+  // Check if we have a valid session
+  const user = await getSession();
+
+  if (!user) {
+    return NextResponse.json(
+      { message: "Invalid or no user found" },
+      { status: 401 },
+    );
+  }
+
   // Our base query
   const baseQuery = `
   SELECT
