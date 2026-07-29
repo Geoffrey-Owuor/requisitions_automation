@@ -9,6 +9,7 @@ import {
   ArrowRight,
   ShieldAlert,
   MapPin,
+  Check,
 } from "lucide-react";
 import Image from "next/image";
 import { assets } from "@/public/assets";
@@ -163,7 +164,9 @@ export default function KeyAccessRequisitionForm() {
     <div className="relative p-2">
       {submitting && <SubmittingOverlay />}
 
-      {step === 3 && <AlertModal alertInfo={alertInfo} setStep={setStep} />}
+      {step === 3 && (
+        <AlertModal alertInfo={alertInfo} onBack={() => setStep(1)} />
+      )}
 
       {step === 2 && (
         <KeyConfirmationModal
@@ -370,26 +373,27 @@ export default function KeyAccessRequisitionForm() {
                 </div>
 
                 <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-transparent p-2 transition-all hover:bg-rose-50/50">
-                  <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center">
-                    <input
-                      type="checkbox"
-                      className="h-4 w-4 cursor-pointer rounded border-[rgba(240,180,180,0.8)] text-rose-600 focus:ring-rose-600"
-                      checked={agreedToTerms}
-                      onChange={(e) => setAgreedToTerms(e.target.checked)}
-                    />
-                  </div>
-                  <div className="text-[13px] leading-snug text-[#4a3a3a]">
-                    <span className="font-semibold text-[#1e1b1b]">
-                      I confirm that I have been taken through and fully
-                      understand the above responsibilities and requirements.
-                    </span>{" "}
+                  <span
+                    className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-all ${agreedToTerms ? "border-rose-500 bg-rose-500 text-white" : "border-slate-300 bg-white"}`}
+                  >
+                    {agreedToTerms && (
+                      <Check className="h-3.5 w-3.5" strokeWidth={3} />
+                    )}
+                  </span>
+                  <input
+                    type="checkbox"
+                    className="sr-only"
+                    checked={agreedToTerms}
+                    onChange={(e) => setAgreedToTerms(e.target.checked)}
+                  />
+                  <span className="text-[13px] leading-tight font-medium text-slate-700">
                     I agree to comply with all HAL policies and procedures
                     relating to the custody and use of facility/store key(s) and
                     access codes. I further acknowledge that if the key(s) are
                     lost, stolen, damaged, or not surrendered upon request, I
                     may be surcharged for costs incurred, including replacement
                     of locks and related security measures.
-                  </div>
+                  </span>{" "}
                 </label>
               </div>
 

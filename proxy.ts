@@ -2,27 +2,28 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "./lib/session";
 
 // A simple proxy to redirect from designated pages when a valid cookie session is found
-const redirectPaths = ["/", "/login", "/guidelines"];
+const redirectPaths = ["/", "/login", "/advance"];
 
 export async function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const { pathname, search } = request.nextUrl;
 
   // Fetch session status once per request
   const session = await getSession();
 
-  // 1. HANDLE PROTECTED ROUTE (/dashboard)
-  //   Dashboard gracefully handles its own redirect to entra id login
-  //   if (pathname.startsWith("/dashboard")) {
-  //     if (!session) {
-  //       // Cookie is missing or expired -> Force redirect to login
-  //       const response = NextResponse.redirect(new URL("/login", request.url));
+  // 1. HANDLE PROTECTED ROUTES (/dashboard)
+  if (pathname.startsWith("/dashboard")) {
+    if (!session) {
+      const loginUrl = new URL("/login", request.url);
+      // Capture full route (path + query params)
+      const returnTo = `${pathname}${search}`;
+      loginUrl.searchParams.set("returnTo", returnTo);
 
-  //       // Optional: Explicitly wipe the dead cookie if getSession doesn't
-  //       response.cookies.delete("requisitions_session");
+      const response = NextResponse.redirect(loginUrl);
+      response.cookies.delete("requisitions_session");
 
-  //       return response;
-  //     }
-  //   }
+      return response;
+    }
+  }
 
   // 2. HANDLE REDIRECT PAGES (Redirect logged-in users away)
   if (redirectPaths.includes(pathname)) {
@@ -36,5 +37,5 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   // Combined matcher to watch both auth flows and the main dashboard
-  matcher: ["/", "/guidelines", "/login"],
+  matcher: ["/", "/login", "/advance", "/dashboard/:path*"],
 };

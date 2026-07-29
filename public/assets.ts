@@ -4,9 +4,11 @@ import hotpoint_background from "./hotpoint_logo.png";
 import hotpoint_black_logo from "./hotpoint_black_logo.png";
 import it_form_image from "./it_form_image.png";
 import access_key_image from "./access_key_image.png";
+import advance_form_image from "./advance_form_image.png";
 
 export const assets = {
   access_key_image,
+  advance_form_image,
   hotpoint_logo,
   form_image,
   hotpoint_background,
@@ -44,6 +46,36 @@ export const initialsHelper = (userName: string) => {
 
   return initials;
 };
+
+export const ALLOWED_TRAVEL_STAGES = ["hod", "hr", "director"] as const;
+export const ALLOWED_ACCESS_STAGES = ["hod", "security"] as const;
+export const ALLOWED_IT_STAGES = ["hod", "it"] as const;
+
+// Create a TypeScript union type: "manager" | "director" | "hr" | "finance"
+export type TravelStage = (typeof ALLOWED_TRAVEL_STAGES)[number];
+export type AccessStage = (typeof ALLOWED_ACCESS_STAGES)[number];
+export type itStage = (typeof ALLOWED_IT_STAGES)[number];
+
+/**
+ * Type guard to check if an untrusted string is a valid Stage
+ */
+export function isValidTravelStage(stage: unknown): stage is TravelStage {
+  return (
+    typeof stage === "string" &&
+    ALLOWED_TRAVEL_STAGES.includes(stage as TravelStage)
+  );
+}
+export function isValidAccessStage(stage: unknown): stage is AccessStage {
+  return (
+    typeof stage === "string" &&
+    ALLOWED_ACCESS_STAGES.includes(stage as AccessStage)
+  );
+}
+export function isValidItStage(stage: unknown): stage is itStage {
+  return (
+    typeof stage === "string" && ALLOWED_IT_STAGES.includes(stage as itStage)
+  );
+}
 
 export function getDailyGreeting(date: Date = new Date()): string {
   const dayOfWeek = date.getDay(); // 0 (Sunday) to 6 (Saturday)

@@ -122,7 +122,7 @@ export const TravelDetailsModal = ({
                 data[`travel_${stage}_approval_status`] === "pending" && (
                   <>
                     {loading ? (
-                      <div className="h-5 w-12 animate-pulse rounded-full bg-gray-300" />
+                      <div className="h-5 w-20 animate-pulse rounded-full bg-gray-300" />
                     ) : (
                       <Link
                         href={link}

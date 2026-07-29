@@ -1,5 +1,6 @@
 "use server";
 import { query } from "@/lib/db";
+import { getSession } from "@/lib/session";
 
 export type ITStageLevels = "hod" | "it" | "user";
 
@@ -14,6 +15,8 @@ export async function getITApproverLink({
   uuid,
   stage,
 }: ITApproverLinkProps): Promise<string> {
+  const user = await getSession();
+  if (!user) return "#";
   const baseQuery = `SELECT ${stage}_uuid AS token 
                      FROM ${stage}_array WHERE ${stage}_email = $1 LIMIT 1`;
 

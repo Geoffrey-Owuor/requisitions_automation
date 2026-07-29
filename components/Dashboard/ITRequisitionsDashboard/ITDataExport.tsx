@@ -54,7 +54,7 @@ const ITDataExport = () => {
         title="Export data"
         onClick={handleExport}
         disabled={isExporting}
-        className="relative z-10 rounded-xl bg-neutral-200/50 p-2.5 transition-colors duration-200 hover:bg-neutral-200/80"
+        className="relative z-10 rounded-xl border border-neutral-300 bg-neutral-200/50 p-2.5 transition-colors duration-200 hover:bg-neutral-200/80"
       >
         <FileSpreadsheet className="h-4.5 w-4.5" />
       </button>

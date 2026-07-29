@@ -2,8 +2,19 @@ import { NextResponse, NextRequest } from "next/server";
 import { loadITArray } from "@/lib/loadAppDataV2";
 import { ITEmailSender } from "@/services/ITEmailSender";
 import { query } from "@/lib/db";
+import { getSession } from "@/lib/session";
 
 export async function POST(request: NextRequest) {
+  // Check if we have a valid session
+  const user = await getSession();
+
+  if (!user) {
+    return NextResponse.json(
+      { message: "Invalid or no user found" },
+      { status: 401 },
+    );
+  }
+
   // Get the data
   const IT_ARRAY = await loadITArray();
 
@@ -18,7 +29,7 @@ export async function POST(request: NextRequest) {
     if (!name || !email) {
       return NextResponse.json(
         { message: "Cannot verify the user trying to make this requisition" },
-        { status: 401 },
+        { status: 400 },
       );
     }
 

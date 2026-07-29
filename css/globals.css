@@ -10,6 +10,11 @@ html {
   overflow-y: auto;
 }
 
+.client-scrollbar {
+  scrollbar-color: #ffffff transparent;
+  overflow-y: auto;
+}
+
 /* Sidebar scrollbar navigation styles */
 .sidebar-nav {
   overflow-y: auto;
@@ -27,7 +32,6 @@ html {
   background-color: #fca5a5; /* red */
   border-radius: 999px;
 }
-
 /* Normal scrollbar */
 .normal-scrollbar {
   scrollbar-color: #a3a3a3 transparent;
@@ -42,35 +46,66 @@ html {
 
 @keyframes slideInTopCenter {
   0% {
-    transform: translate(-50%, -150%);
+    transform: translateY(-100%);
     opacity: 0;
   }
   100% {
-    transform: translate(-50%, 0);
+    transform: translateY(0);
     opacity: 1;
   }
 }
 
 @keyframes slideOutTopCenter {
   0% {
-    transform: translate(-50%, 0);
+    transform: translateY(0);
     opacity: 1;
   }
   100% {
-    transform: translate(-50%, -150%);
+    transform: translateY(-100%);
     opacity: 0;
   }
 }
 
 .animate-slide-in-top {
-  animation: slideInTopCenter 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: slideInTopCenter 0.3s ease-out forwards;
 }
 
 .animate-slide-out-top {
-  animation: slideOutTopCenter 0.4s cubic-bezier(0.7, 0, 0.84, 0) forwards;
+  animation: slideOutTopCenter 0.3s ease-out forwards;
 }
 
 /* Hide scrollbar */
 .scrollbar-hide {
   scrollbar-width: none;
+}
+
+/* Alert styles */
+@keyframes slideDown {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slideDown {
+  animation: slideDown 0.2s ease-out forwards;
+}
+
+.animate-slideUp {
+  animation: slideUp 0.2s ease-out forwards;
 }

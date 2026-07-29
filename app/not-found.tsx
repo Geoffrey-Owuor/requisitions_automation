@@ -6,7 +6,7 @@ import { Home, Search, ArrowLeft } from "lucide-react";
 export default function NotFound() {
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-neutral-50 px-4">
-      <div className="mx-auto max-w-md rounded-3xl border border-gray-100 bg-white/65 p-10 text-center shadow-[0_24px_48px_rgba(160,60,60,0.10)] backdrop-blur-2xl">
+      <div className="mx-auto max-w-md rounded-4xl border border-gray-100 bg-white/65 p-10 text-center shadow-[0_24px_48px_rgba(160,60,60,0.10)] backdrop-blur-2xl">
         {/* Icon with a subtle "searching" animation pulse */}
         <div className="relative mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-neutral-100">
           <Search className="h-8 w-8 text-neutral-400" />
@@ -31,7 +31,7 @@ export default function NotFound() {
         <div className="flex flex-col gap-3">
           <Link
             href="/"
-            className="flex w-full items-center justify-center gap-2 rounded-[14px] bg-slate-900 py-4 text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(30,27,27,0.3)]"
+            className="flex w-full items-center justify-center gap-2 rounded-full bg-slate-900 py-4 text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5"
           >
             <Home size={18} />
             Return to Homepage
@@ -39,7 +39,7 @@ export default function NotFound() {
 
           <button
             onClick={() => window.history.back()}
-            className="flex w-full items-center justify-center gap-2 rounded-[14px] border border-neutral-200 bg-transparent py-4 text-[14px] font-semibold text-neutral-700 transition-all duration-200 hover:bg-neutral-50"
+            className="flex w-full items-center justify-center gap-2 rounded-full border border-neutral-200 bg-transparent py-4 text-[14px] font-semibold text-neutral-700 transition-all duration-200 hover:bg-neutral-50"
           >
             <ArrowLeft size={18} />
             Go back

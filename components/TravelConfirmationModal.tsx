@@ -60,7 +60,7 @@ export default function TravelConfirmationModal({
       </div>
 
       {/* User account card */}
-      <div className="mb-6 flex items-center gap-3 rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white/80 px-4 py-3">
+      <div className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white/80 px-4 py-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-rose-100 text-[13px] font-semibold text-rose-700">
           {initialsHelper(nameString)}
         </div>

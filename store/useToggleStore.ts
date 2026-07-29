@@ -6,6 +6,7 @@ interface ToggleButtonState {
   showRetailForms: boolean;
   showAccessRequisition: boolean;
   scrollTrigger: boolean;
+  showHrForms: boolean;
 }
 
 interface ToggleButtonActions {
@@ -15,6 +16,7 @@ interface ToggleButtonActions {
   setShowAccessRequisition: (value: boolean) => void;
   triggerScroll: (value: boolean) => void;
   reset: () => void; //The reset function
+  setShowHrForms: (value: boolean) => void;
 }
 // Create a new type that excludes 'scrollTrigger'
 type ReducedToggleButtonState = Omit<ToggleButtonState, "scrollTrigger">;
@@ -24,6 +26,7 @@ const initialValues: ReducedToggleButtonState = {
   showTravelRequisition: false,
   showRetailForms: false,
   showAccessRequisition: false,
+  showHrForms: false,
 };
 
 // Creating the store
@@ -35,6 +38,7 @@ export const useToggleStore = create<ToggleButtonState & ToggleButtonActions>()(
     showRetailForms: false,
     showAccessRequisition: false,
     scrollTrigger: false,
+    showHrForms: false,
 
     // Actions
     setShowITRequisition: (value) => set({ showITRequisition: value }),
@@ -43,5 +47,6 @@ export const useToggleStore = create<ToggleButtonState & ToggleButtonActions>()(
     setShowAccessRequisition: (value) => set({ showAccessRequisition: value }),
     triggerScroll: (value) => set({ scrollTrigger: value }),
     reset: () => set(initialValues),
+    setShowHrForms: (value) => set({ showHrForms: value }),
   }),
 );

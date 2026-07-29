@@ -67,9 +67,9 @@ export default function ITRequisitionsTable({
 
   return (
     <>
-      {(userEmail || initialData.length > 0) && (
+      {initialData.length > 0 && (
         <div>
-          <span className="my-4 flex items-center gap-2 font-medium text-neutral-600">
+          <span className="mb-4 flex items-center gap-2 font-medium text-neutral-600">
             <Monitor className="h-5 w-5" />
             {dynamicTitles[dataFlag]}
           </span>

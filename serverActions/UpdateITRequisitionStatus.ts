@@ -6,10 +6,18 @@ import { AlertInfo } from "@/components/TravelRequisitionPage";
 import { ITEmailSender } from "@/services/ITEmailSender";
 import { itApprovalStage } from "@/utils/ITApprovalStages/itApprovalStage";
 import { hodApprovalStage } from "@/utils/ITApprovalStages/hodApprovalStage";
+import { isValidItStage } from "@/public/assets";
 
 export async function UpdateITRequisitionStatus(
   payload: UpdateRequestStatusProps,
 ): Promise<AlertInfo> {
+  if (!isValidItStage(payload.stage)) {
+    return {
+      alertType: "error",
+      alertMessage: "Invalid approval stage provided",
+    };
+  }
+
   let client: PoolClient | undefined;
 
   //  Our base update status query
@@ -60,7 +68,7 @@ export async function UpdateITRequisitionStatus(
 
     // Check if the approver exists in our table array data set
     const { rows: approverResult } = await client.query(
-      `SELECT id FROM ${payload.stage}_array WHERE ${payload.stage}_email = $1 FOR UPDATE`,
+      `SELECT id FROM ${payload.stage}_array WHERE ${payload.stage}_email = $1`,
       [payload.approverEmail],
     );
 
@@ -89,16 +97,6 @@ export async function UpdateITRequisitionStatus(
     }
 
     await client.query(baseUpdateQuery, baseParams);
-
-    // THIS IS COMMENTED OUT SINCE TOKEN ROTATION CAUSES INVALID LINK
-    // ISSUES FOR SUBSEQUENT EMAIL APPROVAL NOTIFICATIONS
-    // Rotate the approver's uuid
-    // await client.query(
-    //   `UPDATE ${payload.stage}_array
-    //   SET ${payload.stage}_uuid = gen_random_uuid()
-    //   WHERE ${payload.stage}_email = $1`,
-    //   [payload.approverEmail],
-    // );
 
     await client.query("COMMIT");
 
