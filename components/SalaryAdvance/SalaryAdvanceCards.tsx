@@ -44,7 +44,7 @@ export default function SalaryAdvanceCards() {
   if (isPending) {
     return (
       <div className="mb-6">
-        <div className="mb-4 h-6 w-64 animate-pulse rounded-2xl bg-neutral-100" />
+        <div className="mb-5.5 h-6 w-64 animate-pulse rounded-2xl bg-neutral-100" />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3].map((i) => (
             <div

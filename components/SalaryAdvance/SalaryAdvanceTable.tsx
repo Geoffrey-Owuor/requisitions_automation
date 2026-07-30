@@ -32,7 +32,7 @@ export default function SalaryAdvanceTable() {
   const [batchStatus, setBatchStatus] = useState<
     "approved" | "declined" | null
   >(null);
-  const itemsPerPage = 6;
+  const [itemsPerPage, setItemsPerPage] = useState(6);
 
   const {
     data: initialData = [],
@@ -55,7 +55,7 @@ export default function SalaryAdvanceTable() {
   const paginatedData = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
     return filteredData.slice(start, start + itemsPerPage);
-  }, [filteredData, currentPage]);
+  }, [filteredData, currentPage, itemsPerPage]);
 
   // Only pending requests are eligible for batch review
   const selectablePageIds = useMemo(
@@ -152,14 +152,14 @@ export default function SalaryAdvanceTable() {
               </span>
               <button
                 onClick={() => setBatchStatus("declined")}
-                className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-sm font-semibold text-red-600 transition-colors hover:bg-red-100"
+                className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-600 transition-colors hover:bg-red-100"
               >
                 <X className="h-4 w-4" />
                 Batch Decline
               </button>
               <button
                 onClick={() => setBatchStatus("approved")}
-                className="inline-flex items-center gap-2 rounded-xl bg-slate-800 px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-900"
+                className="inline-flex items-center gap-2 rounded-xl bg-slate-800 px-3 py-2.5 text-sm text-white transition-colors hover:bg-slate-900"
               >
                 <Check className="h-4 w-4" />
                 Batch Approve
@@ -183,10 +183,10 @@ export default function SalaryAdvanceTable() {
                 {[
                   "Employee",
                   "Department",
-                  "Amount (KES)",
+                  "Amount",
                   "Installments",
                   "Type",
-                  "Requisition Date",
+                  "Date Submitted",
                   "Status",
                 ].map((col) => (
                   <th
@@ -339,6 +339,10 @@ export default function SalaryAdvanceTable() {
           itemsPerPage={itemsPerPage}
           currentPage={currentPage}
           onPageChange={setCurrentPage}
+          onItemsPerPageChange={(n) => {
+            setItemsPerPage(n);
+            setCurrentPage(1);
+          }}
         />
 
         {/* Details & Review Modal */}
