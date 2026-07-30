@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { DatePicker } from "../DatePicker";
 import {
   ArrowRight,
@@ -63,6 +63,10 @@ const REQUEST_TYPE_OPTIONS: DropdownOption[] = [
 
 const RESEND_COOLDOWN_SECONDS = 60;
 
+function toISODate(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
 function applyStaffSession(
   staff: {
     staffNumber: string;
@@ -115,6 +119,19 @@ export default function SalaryAdvanceClient() {
     alertType: "",
     alertMessage: "",
   });
+
+  // Repayment must start on the 15th of the submission month (processing
+  // date), up to the 1st of the month following the one the form is
+  // submitted in.
+  const { repaymentMinDate, repaymentMaxDate } = useMemo(() => {
+    const now = new Date();
+    const min = new Date(now.getFullYear(), now.getMonth(), 15);
+    const max = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    return {
+      repaymentMinDate: toISODate(min),
+      repaymentMaxDate: toISODate(max),
+    };
+  }, []);
 
   const updateField = <K extends keyof SalaryAdvanceFormData>(
     field: K,
@@ -509,6 +526,8 @@ export default function SalaryAdvanceClient() {
                     <DatePicker
                       value={formData.repaymentStartDate}
                       onChange={(v) => updateField("repaymentStartDate", v)}
+                      minDate={repaymentMinDate}
+                      maxDate={repaymentMaxDate}
                     />
                   </div>
 
