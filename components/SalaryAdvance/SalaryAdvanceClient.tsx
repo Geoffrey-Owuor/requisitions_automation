@@ -289,28 +289,27 @@ export default function SalaryAdvanceClient() {
       {step === 1 && !checkingSession && (
         <div className="flex h-full flex-col items-center justify-center">
           <div className="flex flex-1 items-center justify-center p-4">
-            <div className="w-full max-w-115 rounded-3xl p-8">
+            <div className="w-full max-w-115 rounded-3xl border border-slate-200 p-8 shadow-inner">
               {verifyStage === "email" ? (
                 <>
                   <h2 className="mb-4 text-center text-2xl font-semibold">
                     Verify Your Identity
                   </h2>
                   <p className="mb-4 text-sm text-slate-600">
-                    Enter the email address your staff details were
-                    registered/onboarded with (The personal email you used).
-                    We&apos;ll send a verification code to confirm it&apos;s
-                    you.
+                    Enter the email address registered by HR during your
+                    onboarding. We&apos;ll send a verification code to confirm
+                    it&apos;s you
                   </p>
-                  <span className="mb-4 inline-flex items-center gap-2 rounded-full bg-slate-200 px-4 py-2 text-xs">
+                  <span className="mb-4 inline-flex items-center gap-2 rounded-full bg-blue-50 px-4 py-2 text-xs text-blue-900">
                     <Lightbulb className="h-4 w-4 shrink-0" />
                     This is likely the email address where you receive your
                     payslips
                   </span>
-                  <p className="mb-6 rounded-xl bg-amber-50 p-3 text-xs text-amber-800">
-                    If this isn&apos;t the email currently on file for you,
-                    verification will fail. If you no longer have access to that
-                    email, contact HR to update your records before proceeding
-                    with your salary advance request.
+                  <p className="mb-6 rounded-xl bg-neutral-200/50 p-3 text-xs text-neutral-800">
+                    Verification requires access to the email address you
+                    provided. If you no longer have access to it, contact HR to
+                    update your records before proceeding with your salary
+                    advance request.
                   </p>
 
                   {verifyError && (
@@ -324,7 +323,7 @@ export default function SalaryAdvanceClient() {
                     <input
                       type="email"
                       required
-                      className="h-12 rounded-full border border-slate-300 px-4 text-center outline-none focus:border-rose-500"
+                      className="h-12 rounded-full border border-slate-300 px-4 text-center outline-none focus:border-slate-500"
                       placeholder="you@example.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
@@ -340,11 +339,11 @@ export default function SalaryAdvanceClient() {
                 </>
               ) : (
                 <>
-                  <h2 className="mb-4 text-2xl font-semibold">
+                  <h2 className="mb-4 text-center text-2xl font-semibold">
                     Enter Verification Code
                   </h2>
                   <p className="mb-6 text-sm text-slate-600">
-                    If <strong>{email}</strong> is on our records, a 6-digit
+                    If <strong>{email}</strong> is in our records, a 6-digit
                     code has been sent to it. The code expires in 10 minutes.
                   </p>
 
@@ -359,7 +358,7 @@ export default function SalaryAdvanceClient() {
                     <input
                       type="text"
                       required
-                      className="h-12 rounded-full border border-slate-300 px-4 text-center tracking-widest outline-none focus:border-rose-500"
+                      className="h-12 rounded-full border border-slate-300 px-4 text-center tracking-widest outline-none focus:border-slate-500"
                       placeholder="Enter Code"
                       value={code}
                       maxLength={6}
@@ -403,8 +402,8 @@ export default function SalaryAdvanceClient() {
           </div>
 
           {/* Footer */}
-          <footer className="mt-auto py-6 text-center text-sm font-medium text-slate-500">
-            <p>For assistance, please contact the HR Department.</p>
+          <footer className="mt-auto py-6 text-center font-semibold text-slate-600">
+            <p>For assistance, you contact the HR Department.</p>
           </footer>
         </div>
       )}

@@ -28,7 +28,7 @@ export default function ITRequisitionsTable({
   const [selectedRequest, setSelectedRequest] = useState<QueryResultRow | null>(
     null,
   );
-  const itemsPerPage = 6;
+  const [itemsPerPage, setItemsPerPage] = useState(6);
 
   const {
     data: initialData = [],
@@ -51,7 +51,7 @@ export default function ITRequisitionsTable({
   const paginatedData = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
     return filteredData.slice(start, start + itemsPerPage);
-  }, [filteredData, currentPage]);
+  }, [filteredData, currentPage, itemsPerPage]);
 
   // Render different titles based on the data flag
   const baseTitle = "IT Requisitions";
@@ -267,6 +267,10 @@ export default function ITRequisitionsTable({
               itemsPerPage={itemsPerPage}
               currentPage={currentPage}
               onPageChange={setCurrentPage}
+              onItemsPerPageChange={(n) => {
+                setItemsPerPage(n);
+                setCurrentPage(1);
+              }}
             />
 
             {/* Details Modal */}
