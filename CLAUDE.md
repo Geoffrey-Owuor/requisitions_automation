@@ -47,7 +47,7 @@ Status transitions live in `serverActions/Update{IT,Travel,AccessRequisitionStat
 
 ### Email
 
-`services/EmailService.ts` / `services/EmailSender.ts` are the shared send path; `AccessEmailSender`, `AdvanceEmailSender`, `ITEmailSender` are per-flow wrappers. Sends go through Nodemailer and/or Microsoft Graph `Mail.Send`, with sender addresses set per flow via `EMAIL_SENDER`, `IT_EMAIL_SENDER`, `ACCESS_EMAIL_SENDER`.
+`services/EmailService.ts` / `services/EmailSender.ts` are the shared send path; `AccessEmailSender`, `AdvanceEmailSender`, `ITEmailSender` are per-flow wrappers. Sends go through Nodemailer and/or Microsoft Graph `Mail.Send`, with sender addresses set per flow via `EMAIL_SENDER`, `IT_EMAIL_SENDER`, `ACCESS_EMAIL_SENDER`, `ADVANCE_EMAIL_SENDER`.
 
 ### State management split
 
