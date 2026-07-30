@@ -2,6 +2,10 @@
 import { SalaryAdvanceFormData } from "@/components/SalaryAdvance/SalaryAdvanceClient";
 import { query } from "@/lib/db";
 import { AdvanceEmailSender } from "@/services/AdvanceEmailSender";
+import {
+  getAdvanceFormSession,
+  deleteAdvanceFormSession,
+} from "@/lib/advanceVerificationSession";
 
 export interface MessageResponse {
   type: "error" | "success";
@@ -34,33 +38,21 @@ export async function SubmitAdvanceForm(
       };
     }
 
-    const {
-      staffNumber,
-      staffName,
-      staffEmail,
-      department,
-      location,
-      requestAmount,
-      installments,
-      repaymentStartDate,
-      requestType,
-    } = formData;
+    // Staff identity must come from a verified email+code session, never from client-submitted fields.
+    const verifiedStaff = await getAdvanceFormSession();
 
-    // RULE 1: Check if we have the staff info, if not - stop the submission
-    const isExistingStaff = await query(
-      `
-      SELECT id FROM company_staff_data WHERE staff_number = $1
-      `,
-      [staffNumber],
-    );
-
-    if (isExistingStaff.length === 0) {
+    if (!verifiedStaff) {
       return {
         type: "error",
         message:
-          "Selected staff info could not be found, please contact your admin",
+          "Your verification session has expired. Please verify your email again.",
       };
     }
+
+    const { staffNumber, staffName, staffEmail, department, location } =
+      verifiedStaff;
+    const { requestAmount, installments, repaymentStartDate, requestType } =
+      formData;
 
     // RULE 2: Check if the staff has already selected "continuous" in any previous request
     const continuousCheckRes = await query(
@@ -126,6 +118,14 @@ export async function SubmitAdvanceForm(
         "Your salary advance requisition has been submitted successfully, you will be notified by HR once it has been approved and processed. If you did not request this, kindly contact HR for inquiry",
       title: "Salary Advance Request Submitted Successfully",
     });
+
+    // Delete any verification codes tied to this user - no longer needed
+    await query(`DELETE FROM verification_codes WHERE staff_email = $1`, [
+      staffEmail,
+    ]);
+
+    // Verified session is single-use: force re-verification for any further requests.
+    await deleteAdvanceFormSession();
 
     return {
       type: "success",
