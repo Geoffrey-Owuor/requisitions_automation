@@ -207,7 +207,11 @@ export default function SalaryAdvanceClient() {
     <div className="relative flex-1 p-4">
       {submitting && <SubmittingOverlay />}
       {step === 4 && (
-        <AlertModal alertInfo={alertInfo} onBack={() => setStep(2)} />
+        <AlertModal
+          alertInfo={alertInfo}
+          onBack={() => setStep(2)}
+          hideButton={true}
+        />
       )}
 
       {step === 3 && (
@@ -515,8 +519,8 @@ export default function SalaryAdvanceClient() {
                   </li>
                   <li>
                     <strong>Submission Deadline:</strong> All requests must be
-                    submitted in writing to the HR Department no later than the
-                    10th of every month.
+                    submitted through the system no later than the 10th of every
+                    month - latest by 5.00pm
                   </li>
                   <li>
                     <strong>Legal Compliance:</strong> All salary advances must
