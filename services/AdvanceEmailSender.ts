@@ -64,7 +64,7 @@ export async function AdvanceEmailSender({
   });
 
   await sendEmail({
-    from: process.env.ACCESS_EMAIL_SENDER!,
+    from: process.env.ADVANCE_EMAIL_SENDER!,
     to,
     subject: title,
     html: emailHtml,
