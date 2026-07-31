@@ -14,7 +14,6 @@ import {
   ShoppingBag,
   HousePlug,
   Briefcase,
-  ChevronDown,
   LockKeyhole,
   CircleDollarSign,
 } from "lucide-react";
@@ -58,21 +57,12 @@ const MobileHeader = () => {
     (state) => state.setShowTravelRequisition,
   );
 
-  const showRetailForms = useToggleStore((state) => state.showRetailForms);
-  const setShowRetailForms = useToggleStore(
-    (state) => state.setShowRetailForms,
-  );
-
   const showAccessRequisition = useToggleStore(
     (state) => state.showAccessRequisition,
   );
   const setShowAccessRequisition = useToggleStore(
     (state) => state.setShowAccessRequisition,
   );
-
-  // Hr Zustand states
-  const showHrForms = useToggleStore((state) => state.showHrForms);
-  const setShowHrForms = useToggleStore((state) => state.setShowHrForms);
 
   const handleButtonClick = (
     setAction: (value: boolean) => void,
@@ -208,68 +198,38 @@ const MobileHeader = () => {
               );
             })}
 
-            {/* Hr Button  */}
-            <button
-              onClick={() => setShowHrForms(!showHrForms)}
-              className="group flex items-center gap-3 rounded-xl px-4 py-3 text-[14px] font-semibold text-slate-600 transition-all hover:bg-red-50 hover:text-red-950"
-            >
-              <ChevronDown
-                size={18}
-                className={`text-slate-500 transition-colors ${showHrForms ? "rotate-180" : ""} group-hover:text-red-950`}
-              />
-              HR
-            </button>
-
             {/* Salary advance button */}
-            {showHrForms && (
-              <Link
-                href="/dashboard/advance"
-                onClick={() => setSidebarOpen(false)}
-                className={`group flex items-center gap-3 rounded-xl px-4 py-3 text-[14px] font-semibold transition-all ${
+            <Link
+              href="/dashboard/advance"
+              onClick={() => setSidebarOpen(false)}
+              className={`group flex items-center gap-3 rounded-xl px-4 py-3 text-[14px] font-semibold transition-all ${
+                isAdvanceActive
+                  ? "bg-red-950 text-white shadow-md"
+                  : "text-slate-600 hover:bg-red-50 hover:text-red-950"
+              }`}
+            >
+              <CircleDollarSign
+                size={18}
+                className={`transition-colors ${
                   isAdvanceActive
-                    ? "bg-red-950 text-white shadow-md"
-                    : "text-slate-600 hover:bg-red-50 hover:text-red-950"
+                    ? "text-white"
+                    : "text-slate-500 group-hover:text-red-950"
                 }`}
-              >
-                <CircleDollarSign
-                  size={18}
-                  className={`transition-colors ${
-                    isAdvanceActive
-                      ? "text-white"
-                      : "text-slate-500 group-hover:text-red-950"
-                  }`}
-                />
-                Salary Advance
-              </Link>
-            )}
+              />
+              Salary Advance
+            </Link>
 
-            {/* Retail Button  */}
+            {/* Access Requisition button */}
             <button
-              onClick={() => setShowRetailForms(!showRetailForms)}
+              onClick={() => handleButtonClick(setShowAccessRequisition, true)}
               className="group flex items-center gap-3 rounded-xl px-4 py-3 text-[14px] font-semibold text-slate-600 transition-all hover:bg-red-50 hover:text-red-950"
             >
-              <ChevronDown
+              <LockKeyhole
                 size={18}
-                className={`text-slate-500 transition-colors ${showRetailForms ? "rotate-180" : ""} group-hover:text-red-950`}
+                className="text-slate-500 transition-colors group-hover:text-red-950"
               />
-              Retail
+              Access/ Key Issuance
             </button>
-
-            {/* Access Key Button */}
-            {showRetailForms && (
-              <button
-                onClick={() =>
-                  handleButtonClick(setShowAccessRequisition, true)
-                }
-                className="group flex items-center gap-3 rounded-xl px-4 py-3 text-[14px] font-semibold text-slate-600 transition-all hover:bg-red-50 hover:text-red-950"
-              >
-                <LockKeyhole
-                  size={18}
-                  className="text-slate-500 transition-colors group-hover:text-red-950"
-                />
-                Access/ Key Issuance
-              </button>
-            )}
           </nav>
         </aside>
       </div>

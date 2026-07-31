@@ -1,47 +1,64 @@
 # Hotpoint Apps Hub
 
-A comprehensive web application for automating internal requisitions at Hotpoint, built with Next.js. Streamlines the process of submitting and approving IT equipment requests and travel requisitions with multi-tier approval workflows.
+An internal web application for Hotpoint Appliances Ltd that automates requisitions and hosts a set of embedded internal portals behind a single sign-on. Streamlines submitting and approving IT equipment requests, travel requisitions, salary advances, and physical access/key requests with multi-tier approval workflows.
 
 ## Features
 
 ### IT Requisitions
 
 - Request laptops, peripherals, software, and other IT equipment
-- Simple approval workflow: Submit → HOD Approval → IT Fulfillment
+- Approval workflow: Submit → HOD Approval → IT Fulfillment
 - Track completion status and fulfillment details
-- Automated email notifications
+- Automated email notifications with PDF requisition summaries
 
 ### Travel Requisitions
 
 - Submit requests for site visits, local flights, road travel, and international travel
-- Multi-tier approval system based on travel cost:
+- Multi-tier approval based on travel cost:
   - **Local Travel** (< 30K): HOD Approval
-  - **Air Travel** (30K-100K): HOD → HR Approval
+  - **Air Travel** (30K–100K): HOD → HR Approval
   - **Global Travel** (> 100K): HOD → HR → Director Approval
-- Detailed cost breakdown including transport, accommodation, per diem, and other expenses
-- Budget validation and cost center tracking
+- Detailed cost breakdown (transport, accommodation, per diem, other expenses)
+- Engineering job summary fields for HVAC/engineering site visits
+
+### Access / Key Requisitions
+
+- Request physical access or key issuance for retail/other sites
+- Approval workflow: HOD Approval → Security Approval
+
+### Salary Advance
+
+- Staff salary advance requests with a monthly submission window
+- Requests automatically lock after the 10th of the month at 17:00 (also gated by an admin-controlled DB flag)
+
+### Embedded Internal Portals (SSO)
+
+- IT HelpDesk and Staff Product Purchase systems are embedded as SSO'd iframes inside the dashboard, reusing the same session so users don't re-authenticate
 
 ### Dashboard & Management
 
 - User dashboard for submitting and tracking requisitions
-- Approver dashboards for reviewing and approving requests
-- Real-time status updates and approval workflows
-- Export requisitions data to Excel
-- Comprehensive search and filtering
+- Approver dashboards/links (emailed, token-based) for reviewing and approving requests without needing to log in
+- PDF generation for requisitions (`@react-pdf/renderer`)
+- Export requisitions and salary advance data to Excel (`exceljs`)
+- Search, filtering, and pagination on requisition tables
 
 ### Security & Authentication
 
-- Microsoft Entra ID (Azure AD) authentication
-- Role-based access control
-- Secure API endpoints with proper validation
+- Sign-in via Microsoft Entra ID (Azure AD) using an authorization-code + PKCE flow (`arctic`)
+- App-issued session: a signed JWT (`jose`) in an httpOnly cookie, independent of the Entra ID token
+- Route protection via a `proxy.ts` request proxy (Next.js 16's replacement for `middleware.ts`)
+- Role-based access control backed by Postgres (`users` → `user_roles` → `roles`)
+- Token-gated public approval links for approvers who aren't logged-in staff
 
 ## Tech Stack
 
-- **Frontend**: Next.js 16, React 19, TypeScript
-- **Styling**: Tailwind CSS
-- **State Management**: TanStack React Query
-- **Authentication**: NextAuth.js with Microsoft Entra ID
-- **Database**: PostgreSQL
-- **Email**: Nodemailer, Microsoft Graph Mail.Send API
-- **File Export**: ExcelJS
+- **Framework**: Next.js 16 (App Router), React 19, TypeScript
+- **Styling**: Tailwind CSS 4
+- **Server state**: TanStack React Query
+- **Client UI state**: Zustand
+- **Auth**: `arctic` (Microsoft Entra ID OAuth/PKCE) + `jose` (signed JWT session cookie)
+- **Database**: PostgreSQL (`pg`)
+- **Email**: Nodemailer and Microsoft Graph `Mail.Send`
+- **PDF/Export**: `@react-pdf/renderer`, `react-pdf-tailwind`, `exceljs`
 - **Icons**: Lucide React

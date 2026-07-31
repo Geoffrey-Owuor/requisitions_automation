@@ -14,6 +14,7 @@ import { dateFormatter } from "@/public/assets";
 import ClientPortal from "@/components/ClientPortal";
 import { SalaryAdvanceData } from "@/serverActions/GetSalaryAdvanceData";
 import { ReviewSalaryAdvance } from "@/serverActions/ReviewSalaryAdvance";
+import { useQueryClient } from "@tanstack/react-query";
 import SubmittingOverlay from "../SubmittingOverlay";
 
 interface SalaryAdvanceModalProps {
@@ -61,6 +62,8 @@ export function SalaryAdvanceModal({
   onClose,
   onSuccess,
 }: SalaryAdvanceModalProps) {
+  const queryClient = useQueryClient();
+
   const [comments, setComments] = useState("");
   const [loadingAction, setLoadingAction] = useState<
     "approved" | "declined" | null
@@ -79,6 +82,9 @@ export function SalaryAdvanceModal({
     if (result.success) {
       setComments(""); // reset
       triggerAlert("success", result.message);
+
+      // Invalidate card data
+      queryClient.invalidateQueries({ queryKey: ["SalaryAdvancesCounts"] });
       onSuccess(); // refetch table data
       onClose(); // close modal
     } else {

@@ -3,7 +3,6 @@
 import { ArrowLeft, Send } from "lucide-react";
 import { dateFormatter } from "@/public/assets";
 import { initialsHelper } from "@/public/assets";
-import { usePathname } from "next/navigation";
 import { SalaryAdvanceFormData } from "./SalaryAdvanceClient"; // Adjust import path as needed
 
 interface SalaryAdvanceConfirmationModalProps {
@@ -19,7 +18,6 @@ export default function SalaryAdvanceConfirmationModal({
   onSubmit,
   submitting,
 }: SalaryAdvanceConfirmationModalProps) {
-  const pathname = usePathname();
   const employeeDetails: { label: string; value: string }[] = [
     { label: "Staff Name", value: formData.staffName },
     { label: "Staff Number", value: formData.staffNumber },
@@ -43,7 +41,7 @@ export default function SalaryAdvanceConfirmationModal({
       {/* Header */}
       <div className="mb-6">
         <p className="text-[11px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
-          Step {pathname === "/advance" ? "3" : "2"} of 3
+          Step 3 of 3
         </p>
         <h2 className="mt-1 text-[22px] font-semibold tracking-[-0.3px] text-[#1e1b1b]">
           Review & Confirm

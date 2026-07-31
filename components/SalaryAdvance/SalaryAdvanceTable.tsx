@@ -8,9 +8,11 @@ import {
   Info,
   CircleDollarSign,
   FileSpreadsheet,
+  Check,
 } from "lucide-react";
 import { TablePagination } from "../Dashboard/TablePagination";
 import { SalaryAdvanceModal } from "./SalaryAdvanceModal";
+import { SalaryAdvanceBatchModal } from "./SalaryAdvanceBatchModal";
 import StatusFormatter from "../Dashboard/StatusFormatter";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -18,6 +20,7 @@ import {
   SalaryAdvanceData,
 } from "@/serverActions/GetSalaryAdvanceData";
 import { SalaryAdvanceExportModal } from "./SalaryAdvanceExportModal";
+import { Checkbox } from "./Checkbox";
 
 export default function SalaryAdvanceTable() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -25,7 +28,11 @@ export default function SalaryAdvanceTable() {
   const [selectedRequest, setSelectedRequest] =
     useState<SalaryAdvanceData | null>(null);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
-  const itemsPerPage = 6;
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [batchStatus, setBatchStatus] = useState<
+    "approved" | "declined" | null
+  >(null);
+  const [itemsPerPage, setItemsPerPage] = useState(6);
 
   const {
     data: initialData = [],
@@ -48,7 +55,41 @@ export default function SalaryAdvanceTable() {
   const paginatedData = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
     return filteredData.slice(start, start + itemsPerPage);
-  }, [filteredData, currentPage]);
+  }, [filteredData, currentPage, itemsPerPage]);
+
+  // Only pending requests are eligible for batch review
+  const selectablePageIds = useMemo(
+    () =>
+      paginatedData
+        .filter((req) => req.approval_status?.toLowerCase() === "pending")
+        .map((req) => req.request_id),
+    [paginatedData],
+  );
+
+  const isPageFullySelected =
+    selectablePageIds.length > 0 &&
+    selectablePageIds.every((id) => selectedIds.has(id));
+
+  const toggleRowSelection = (requestId: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(requestId)) next.delete(requestId);
+      else next.add(requestId);
+      return next;
+    });
+  };
+
+  const togglePageSelection = () => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (isPageFullySelected) {
+        selectablePageIds.forEach((id) => next.delete(id));
+      } else {
+        selectablePageIds.forEach((id) => next.add(id));
+      }
+      return next;
+    });
+  };
 
   if (loading) return <SkeletonTable />;
 
@@ -103,6 +144,28 @@ export default function SalaryAdvanceTable() {
           >
             <FileSpreadsheet className="h-4.5 w-4.5" />
           </button>
+
+          {selectedIds.size > 0 && (
+            <div className="ml-4 flex flex-wrap items-center gap-4">
+              <span className="text-xs font-medium text-gray-500">
+                {selectedIds.size} selected
+              </span>
+              <button
+                onClick={() => setBatchStatus("declined")}
+                className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-600 transition-colors hover:bg-red-100"
+              >
+                <X className="h-4 w-4" />
+                Batch Decline
+              </button>
+              <button
+                onClick={() => setBatchStatus("approved")}
+                className="inline-flex items-center gap-2 rounded-xl bg-slate-800 px-3 py-2.5 text-sm text-white transition-colors hover:bg-slate-900"
+              >
+                <Check className="h-4 w-4" />
+                Batch Approve
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Table Container */}
@@ -110,13 +173,20 @@ export default function SalaryAdvanceTable() {
           <table className="w-full border-collapse text-left">
             <thead>
               <tr className="border-b border-neutral-200/50 bg-neutral-100/30">
+                <th className="w-10 px-6 py-4">
+                  <Checkbox
+                    checked={isPageFullySelected}
+                    disabled={selectablePageIds.length === 0}
+                    onChange={togglePageSelection}
+                  />
+                </th>
                 {[
                   "Employee",
                   "Department",
-                  "Amount (KES)",
+                  "Amount",
                   "Installments",
                   "Type",
-                  "Requisition Date",
+                  "Date Submitted",
                   "Status",
                 ].map((col) => (
                   <th
@@ -130,83 +200,102 @@ export default function SalaryAdvanceTable() {
             </thead>
             <tbody className="divide-y divide-red-50">
               {filteredData.length > 0 ? (
-                paginatedData.map((req, idx) => (
-                  <tr
-                    key={`${req.staff_number}-${idx}`} // Assuming combo key if no ID
-                    onClick={() => setSelectedRequest(req)}
-                    className="group cursor-pointer transition-colors hover:bg-gray-200/30"
-                  >
-                    {/* Employee */}
-                    <td className="px-6 py-5">
-                      <div className="flex flex-col">
-                        <span className="text-sm font-medium text-[#1e1b1b]">
-                          {req.staff_name}
-                        </span>
-                        <span className="text-[11px] text-gray-400">
-                          #{req.staff_number}
-                        </span>
-                      </div>
-                    </td>
-
-                    {/* Department */}
-                    <td className="px-6 py-5">
-                      <span className="text-sm text-[#1e1b1b]">
-                        {req.staff_department}
-                      </span>
-                    </td>
-
-                    {/* Amount */}
-                    <td className="px-6 py-5">
-                      <span className="text-sm font-semibold text-[#1e1b1b]">
-                        {Number(req.request_amount).toLocaleString()}
-                      </span>
-                    </td>
-
-                    {/* Installments */}
-                    <td className="px-6 py-5">
-                      <span className="text-sm text-[#1e1b1b]">
-                        {req.no_of_installments}
-                      </span>
-                    </td>
-
-                    {/* Type */}
-                    <td className="px-6 py-5">
-                      <span
-                        className={`inline-flex items-center rounded-full ${req.request_type === "oneoff" ? "bg-slate-100 text-slate-700" : "bg-cyan-100 text-cyan-700"} px-2.5 py-0.5 text-[11px] font-semibold capitalize`}
+                paginatedData.map((req, idx) => {
+                  const isPending =
+                    req.approval_status?.toLowerCase() === "pending";
+                  return (
+                    <tr
+                      key={`${req.staff_number}-${idx}`} // Assuming combo key if no ID
+                      onClick={() => setSelectedRequest(req)}
+                      className="group cursor-pointer transition-colors hover:bg-gray-200/30"
+                    >
+                      {/* Select */}
+                      <td
+                        className="px-6 py-5"
+                        onClick={(e) => e.stopPropagation()}
                       >
-                        {req.request_type}
-                      </span>
-                    </td>
+                        {isPending && (
+                          <Checkbox
+                            checked={selectedIds.has(req.request_id)}
+                            onChange={() => toggleRowSelection(req.request_id)}
+                          />
+                        )}
+                      </td>
 
-                    {/* Requisition Date */}
-                    <td className="px-6 py-5">
-                      <span className="text-sm text-[#a18080]">
-                        {new Date(req.request_created_at).toLocaleDateString()}
-                      </span>
-                    </td>
+                      {/* Employee */}
+                      <td className="px-6 py-5">
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium text-[#1e1b1b]">
+                            {req.staff_name}
+                          </span>
+                          <span className="text-[11px] text-gray-400">
+                            #{req.staff_number}
+                          </span>
+                        </div>
+                      </td>
 
-                    {/* Status */}
-                    <td className="px-6 py-5">
-                      <div className="flex items-center justify-between gap-4">
-                        <StatusFormatter status={req.approval_status} />
-                        <Info
-                          size={14}
-                          className={`${
-                            req.approval_status === "approved"
-                              ? "text-emerald-200 group-hover:text-emerald-400"
-                              : req.approval_status === "declined"
-                                ? "text-red-200 group-hover:text-red-400"
-                                : "text-amber-200 group-hover:text-amber-400"
-                          } transition-colors`}
-                        />
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                      {/* Department */}
+                      <td className="px-6 py-5">
+                        <span className="text-sm text-[#1e1b1b]">
+                          {req.staff_department}
+                        </span>
+                      </td>
+
+                      {/* Amount */}
+                      <td className="px-6 py-5">
+                        <span className="text-sm font-semibold text-[#1e1b1b]">
+                          {Number(req.request_amount).toLocaleString()}
+                        </span>
+                      </td>
+
+                      {/* Installments */}
+                      <td className="px-6 py-5">
+                        <span className="text-sm text-[#1e1b1b]">
+                          {req.no_of_installments}
+                        </span>
+                      </td>
+
+                      {/* Type */}
+                      <td className="px-6 py-5">
+                        <span
+                          className={`inline-flex items-center rounded-full ${req.request_type === "oneoff" ? "bg-slate-100 text-slate-700" : "bg-cyan-100 text-cyan-700"} px-2.5 py-0.5 text-[11px] font-semibold capitalize`}
+                        >
+                          {req.request_type}
+                        </span>
+                      </td>
+
+                      {/* Requisition Date */}
+                      <td className="px-6 py-5">
+                        <span className="text-sm text-[#a18080]">
+                          {new Date(
+                            req.request_created_at,
+                          ).toLocaleDateString()}
+                        </span>
+                      </td>
+
+                      {/* Status */}
+                      <td className="px-6 py-5">
+                        <div className="flex items-center justify-between gap-4">
+                          <StatusFormatter status={req.approval_status} />
+                          <Info
+                            size={14}
+                            className={`${
+                              req.approval_status === "approved"
+                                ? "text-emerald-200 group-hover:text-emerald-400"
+                                : req.approval_status === "declined"
+                                  ? "text-red-200 group-hover:text-red-400"
+                                  : "text-amber-200 group-hover:text-amber-400"
+                            } transition-colors`}
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               ) : (
                 /* Fallback UI */
                 <tr>
-                  <td colSpan={7} className="px-6 py-20">
+                  <td colSpan={8} className="px-6 py-20">
                     <div className="flex flex-col items-center justify-center text-center">
                       <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/80 bg-white/40 text-red-300 shadow-[0_8px_16px_rgba(60,100,160,0.05)] backdrop-blur-md">
                         <CircleDollarSign size={32} strokeWidth={1.5} />
@@ -250,6 +339,10 @@ export default function SalaryAdvanceTable() {
           itemsPerPage={itemsPerPage}
           currentPage={currentPage}
           onPageChange={setCurrentPage}
+          onItemsPerPageChange={(n) => {
+            setItemsPerPage(n);
+            setCurrentPage(1);
+          }}
         />
 
         {/* Details & Review Modal */}
@@ -258,6 +351,18 @@ export default function SalaryAdvanceTable() {
           data={selectedRequest}
           onClose={() => setSelectedRequest(null)}
           onSuccess={() => refetch()}
+        />
+
+        {/* Batch Approve/Decline Modal */}
+        <SalaryAdvanceBatchModal
+          isOpen={batchStatus !== null}
+          status={batchStatus}
+          requestIds={Array.from(selectedIds)}
+          onClose={() => setBatchStatus(null)}
+          onSuccess={() => {
+            setSelectedIds(new Set());
+            refetch();
+          }}
         />
       </div>
     </div>
