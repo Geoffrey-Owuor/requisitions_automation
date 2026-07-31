@@ -6,9 +6,14 @@ import { useToggleStore } from "@/store/useToggleStore";
 interface AlertModalProps {
   alertInfo: AlertInfo;
   onBack: () => void;
+  hideButton?: boolean;
 }
 
-export default function AlertModal({ alertInfo, onBack }: AlertModalProps) {
+export default function AlertModal({
+  alertInfo,
+  onBack,
+  hideButton = false,
+}: AlertModalProps) {
   const triggerScroll = useToggleStore((state) => state.triggerScroll);
   const scrollTrigger = useToggleStore((state) => state.scrollTrigger);
 
@@ -59,15 +64,17 @@ export default function AlertModal({ alertInfo, onBack }: AlertModalProps) {
         </p>
 
         {/* Button */}
-        <button
-          onClick={() => {
-            onBack();
-            triggerScroll(!scrollTrigger);
-          }}
-          className={`mt-8 mb-3 flex w-full cursor-pointer items-center justify-center gap-2 rounded-[14px] border-none py-4 text-[14px] font-semibold transition-all duration-200 hover:-translate-y-0.5 ${config.buttonStyle}`}
-        >
-          {config.buttonLabel}
-        </button>
+        {!hideButton && (
+          <button
+            onClick={() => {
+              onBack();
+              triggerScroll(!scrollTrigger);
+            }}
+            className={`mt-8 mb-3 flex w-full cursor-pointer items-center justify-center gap-2 rounded-[14px] border-none py-4 text-[14px] font-semibold transition-all duration-200 hover:-translate-y-0.5 ${config.buttonStyle}`}
+          >
+            {config.buttonLabel}
+          </button>
+        )}
       </div>
     </div>
   );

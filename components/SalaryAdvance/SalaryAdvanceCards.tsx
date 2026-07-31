@@ -11,6 +11,7 @@ import {
   Activity,
   Layers,
   BadgeCent,
+  RotateCcw,
 } from "lucide-react";
 import {
   GetSalaryAdvanceCounts,
@@ -31,7 +32,11 @@ const maxCount = (count: number) => {
 };
 
 export default function SalaryAdvanceCards() {
-  const { data: counts = DefaultCardCounts, isPending } = useQuery({
+  const {
+    data: counts = DefaultCardCounts,
+    isPending,
+    refetch,
+  } = useQuery({
     queryKey: ["SalaryAdvancesCounts"],
     queryFn: () => GetSalaryAdvanceCounts(),
   });
@@ -39,7 +44,7 @@ export default function SalaryAdvanceCards() {
   if (isPending) {
     return (
       <div className="mb-6">
-        <div className="mb-4 h-6 w-64 animate-pulse rounded-2xl bg-neutral-100" />
+        <div className="mb-5.5 h-6 w-64 animate-pulse rounded-2xl bg-neutral-100" />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3].map((i) => (
             <div
@@ -54,15 +59,26 @@ export default function SalaryAdvanceCards() {
 
   return (
     <div className="mb-6">
-      <span className="mb-4 flex items-center gap-2 font-medium text-neutral-700">
-        <BadgeCent className="h-5 w-5" />
-        Salary Advances Overview
-      </span>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
+        <span className="flex items-center gap-2 font-medium text-neutral-700">
+          <BadgeCent className="h-5 w-5" />
+          Salary Advances Overview
+        </span>
+
+        {/* Refetch button */}
+        <button
+          onClick={() => refetch()}
+          title="refetch card counts"
+          className="rounded-full bg-neutral-200/70 p-2 hover:bg-neutral-200"
+        >
+          <RotateCcw className="h-4 w-4" />
+        </button>
+      </div>
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {/* 1. Total Overview Card */}
         <div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-5 shadow-[0_8px_16px_rgba(60,100,160,0.04)]">
           <div className="mb-4 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100 text-neutral-600">
               <BarChart3 size={20} strokeWidth={2} />
             </div>
             <div>
@@ -80,7 +96,7 @@ export default function SalaryAdvanceCards() {
             </span>
             <span className="mb-1 text-sm text-gray-500">Submissions</span>
           </div>
-          <Banknote className="absolute -right-4 -bottom-4 h-24 w-24 text-slate-200 opacity-50" />
+          <Banknote className="absolute -right-4 -bottom-4 h-24 w-24 text-neutral-200 opacity-50" />
         </div>
 
         {/* 2. Status Breakdown Card */}

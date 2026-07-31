@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { DatePicker } from "../DatePicker";
 import {
   ArrowRight,
@@ -8,20 +8,22 @@ import {
   Check,
   UserRound,
   CircleDollarSign,
+  Lightbulb,
 } from "lucide-react";
 import { AlertInfo } from "../TravelRequisitionPage";
 import SubmittingOverlay from "../SubmittingOverlay";
 import AlertModal from "../AlertModal";
-import { usePathname } from "next/navigation";
 import { useToggleStore } from "@/store/useToggleStore";
 import SalaryAdvanceConfirmationModal from "./SalaryAdvanceConfirmationModal";
 import Image from "next/image";
 import { assets } from "@/public/assets";
 import { DropdownOption } from "./CustomDropDown";
 import CustomDropdown from "./CustomDropDown";
-import { GetOtp } from "@/serverActions/PublicServerActions/GetOtp";
-import { FetchStaffDetails } from "@/serverActions/PublicServerActions/FetchStaffDetails";
+import { RequestVerificationCode } from "@/serverActions/PublicServerActions/RequestVerificationCode";
+import { VerifyAdvanceCode } from "@/serverActions/PublicServerActions/VerifyAdvanceCode";
+import { GetAdvanceFormSession } from "@/serverActions/GetAdvanceFormSession";
 import { SubmitAdvanceForm } from "@/serverActions/PublicServerActions/SubmitAdvanceForm";
+import SalaryAdvanceFormSkeleton from "../Skeletons/SalaryAdvanceFormSkeleton";
 
 export interface SalaryAdvanceFormData {
   staffNumber: string;
@@ -59,27 +61,106 @@ const REQUEST_TYPE_OPTIONS: DropdownOption[] = [
   { label: "Continuous", value: "continuous" },
 ];
 
+const RESEND_COOLDOWN_SECONDS = 60;
+
+function toISODate(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function applyStaffSession(
+  staff: {
+    staffNumber: string;
+    staffName: string;
+    staffEmail: string;
+    department: string;
+    location: string;
+  },
+  updateField: <K extends keyof SalaryAdvanceFormData>(
+    field: K,
+    value: SalaryAdvanceFormData[K],
+  ) => void,
+) {
+  updateField("staffNumber", staff.staffNumber);
+  updateField("staffName", staff.staffName);
+  updateField("staffEmail", staff.staffEmail);
+  updateField("department", staff.department);
+  updateField("location", staff.location);
+}
+
+function StaffInfoField({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex flex-col gap-2">
+      <label className="text-[13px] font-medium text-[#7c5a5a]">
+        {label} <span className="text-red-500">*</span>
+      </label>
+      <div className="flex h-10 w-full items-center rounded-xl border border-[rgba(240,180,180,0.6)] bg-gray-100 px-3.5 text-sm text-slate-700 select-none">
+        {value}
+      </div>
+    </div>
+  );
+}
+
 export default function SalaryAdvanceClient() {
-  const pathname = usePathname();
   const triggerScroll = useToggleStore((state) => state.triggerScroll);
   const scrollTrigger = useToggleStore((state) => state.scrollTrigger);
 
-  const [step, setStep] = useState(pathname === "/advance" ? 1 : 2);
-  const [otp, setOtp] = useState("");
+  const [step, setStep] = useState(1);
+  const [checkingSession, setCheckingSession] = useState(true);
+  const [verifyStage, setVerifyStage] = useState<"email" | "code">("email");
+  const [email, setEmail] = useState("");
+  const [code, setCode] = useState("");
+  const [verifyError, setVerifyError] = useState("");
+  const [resendSecondsLeft, setResendSecondsLeft] = useState(0);
   const [formData, setFormData] =
     useState<SalaryAdvanceFormData>(InitialFormState);
   const [submitting, setSubmitting] = useState(false);
   const [policyAccepted, setPolicyAccepted] = useState(false);
-  const [staffSearchStatus, setStaffSearchStatus] = useState<
-    "idle" | "loading" | "found" | "not_found"
-  >("idle");
   const [alertInfo, setAlertInfo] = useState<AlertInfo>({
     alertType: "",
     alertMessage: "",
   });
 
-  // OTP Error
-  const [otpError, setOtpError] = useState("");
+  // Repayment must start on the 15th of the submission month (processing
+  // date), up to the 1st of the month following the one the form is
+  // submitted in.
+  const { repaymentMinDate, repaymentMaxDate } = useMemo(() => {
+    const now = new Date();
+    const min = new Date(now.getFullYear(), now.getMonth(), 15);
+    const max = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    return {
+      repaymentMinDate: toISODate(min),
+      repaymentMaxDate: toISODate(max),
+    };
+  }, []);
+
+  const updateField = <K extends keyof SalaryAdvanceFormData>(
+    field: K,
+    value: SalaryAdvanceFormData[K],
+  ) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  // On mount, check whether the user already has a valid verified form session,
+  // so they don't have to re-verify their email if they refresh mid-form.
+  useEffect(() => {
+    (async () => {
+      const session = await GetAdvanceFormSession();
+      if (session) {
+        applyStaffSession(session, updateField);
+        setStep(2);
+      }
+      setCheckingSession(false);
+    })();
+  }, []);
+
+  // Resend cooldown countdown
+  useEffect(() => {
+    if (resendSecondsLeft <= 0) return;
+    const timer = setInterval(() => {
+      setResendSecondsLeft((prev) => Math.max(prev - 1, 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [resendSecondsLeft]);
 
   // Listen for the Zustand trigger change
   useEffect(() => {
@@ -113,65 +194,58 @@ export default function SalaryAdvanceClient() {
   const isFormValid =
     requiredFields.every((field) => formData[field]) && policyAccepted;
 
-  const updateField = <K extends keyof SalaryAdvanceFormData>(
-    field: K,
-    value: SalaryAdvanceFormData[K],
-  ) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
-
-  // Replace handleStaffNumberBlur with this useEffect
-  useEffect(() => {
-    // 1. Don't fetch if empty
-    if (!formData.staffNumber?.trim()) {
-      return;
-    }
-
-    // 2. Set up the debounce timer (e.g., 500ms delay)
-    const timer = setTimeout(async () => {
-      setStaffSearchStatus("loading");
-
-      try {
-        const staffData = await FetchStaffDetails(formData.staffNumber);
-
-        if (staffData) {
-          updateField("staffName", staffData.staff_name);
-          updateField("staffEmail", staffData.staff_email);
-          updateField("department", staffData.staff_department);
-          updateField("location", staffData.staff_location);
-          setStaffSearchStatus("found");
-        } else {
-          setStaffSearchStatus("not_found");
-          // Clear fields for manual entry
-          updateField("staffName", "");
-          updateField("staffEmail", "");
-          updateField("department", "");
-          updateField("location", "");
-        }
-      } catch {
-        setStaffSearchStatus("not_found");
-      }
-    }, 500); // 500ms after user stops typing
-
-    // 3. Cleanup: cancel the timer if the user types again before 500ms
-    return () => clearTimeout(timer);
-  }, [formData.staffNumber]); // Re-run effect whenever staffNumber changes
-
-  const handleVerifyOtp = async (e: React.FormEvent) => {
+  const handleRequestCode = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
+    setVerifyError("");
 
     try {
-      const response = await GetOtp(otp);
+      const response = await RequestVerificationCode(email);
 
       if (response.type === "error") throw new Error(response.message);
 
-      setOtpError("");
+      setVerifyStage("code");
+      setResendSecondsLeft(RESEND_COOLDOWN_SECONDS);
+    } catch (error) {
+      if (error instanceof Error) setVerifyError(error.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleResendCode = async () => {
+    if (resendSecondsLeft > 0 || submitting) return;
+    setSubmitting(true);
+    setVerifyError("");
+
+    try {
+      const response = await RequestVerificationCode(email);
+      if (response.type === "error") throw new Error(response.message);
+      setResendSecondsLeft(RESEND_COOLDOWN_SECONDS);
+    } catch (error) {
+      if (error instanceof Error) setVerifyError(error.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleVerifyCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setVerifyError("");
+
+    try {
+      const response = await VerifyAdvanceCode(email, code);
+
+      if (response.type === "error") throw new Error(response.message);
+
+      if (response.staff) {
+        applyStaffSession(response.staff, updateField);
+      }
+
       setStep(2);
     } catch (error) {
-      if (error instanceof Error) {
-        setOtpError(error.toString());
-      }
+      if (error instanceof Error) setVerifyError(error.message);
     } finally {
       setSubmitting(false);
     }
@@ -207,7 +281,11 @@ export default function SalaryAdvanceClient() {
     <div className="relative flex-1 p-4">
       {submitting && <SubmittingOverlay />}
       {step === 4 && (
-        <AlertModal alertInfo={alertInfo} onBack={() => setStep(2)} />
+        <AlertModal
+          alertInfo={alertInfo}
+          onBack={() => setStep(2)}
+          hideButton={true}
+        />
       )}
 
       {step === 3 && (
@@ -222,52 +300,127 @@ export default function SalaryAdvanceClient() {
         />
       )}
 
-      {/* STEP 1: OTP Entry */}
-      {step === 1 && (
+      {/* STEP 1: Email + Code Verification */}
+      {step === 1 && checkingSession && <SalaryAdvanceFormSkeleton />}
+
+      {step === 1 && !checkingSession && (
         <div className="flex h-full flex-col items-center justify-center">
-          {/* Main Centered Content */}
           <div className="flex flex-1 items-center justify-center p-4">
-            <div className="w-full max-w-md rounded-3xl border border-white/85 bg-white/65 p-8 shadow-xl backdrop-blur-2xl">
-              <h2 className="mb-4 text-xl font-semibold">
-                Security Verification
-              </h2>
-              <p className="mb-6 text-sm text-slate-600">
-                Please enter the Salary Advance password to access the request
-                form.
-              </p>
+            <div className="w-full max-w-115 rounded-3xl border border-slate-200 p-8 shadow-inner">
+              {verifyStage === "email" ? (
+                <>
+                  <h2 className="mb-4 text-center text-2xl font-semibold">
+                    Verify Your Identity
+                  </h2>
+                  <p className="mb-4 text-sm text-slate-600">
+                    Enter the email address registered by HR during your
+                    onboarding. We&apos;ll send a verification code to confirm
+                    it&apos;s you
+                  </p>
+                  <span className="mb-4 inline-flex items-center gap-2 rounded-full bg-blue-50 px-4 py-2 text-xs text-blue-900">
+                    <Lightbulb className="h-4 w-4 shrink-0" />
+                    This is likely the email address where you receive your
+                    payslips
+                  </span>
+                  <p className="mb-6 rounded-xl bg-neutral-200/50 p-3 text-xs text-neutral-800">
+                    Verification requires access to the email address you
+                    provided. If you no longer have access to it, contact HR to
+                    update your records before proceeding with your salary
+                    advance request.
+                  </p>
 
-              {/* OTP Error */}
-              {otpError && (
-                <p className="mb-6 text-sm text-red-600">{otpError}</p>
+                  {verifyError && (
+                    <p className="mb-6 text-sm text-red-600">{verifyError}</p>
+                  )}
+
+                  <form
+                    onSubmit={handleRequestCode}
+                    className="flex flex-col gap-4"
+                  >
+                    <input
+                      type="email"
+                      required
+                      className="h-12 rounded-full border border-slate-300 px-4 text-center outline-none focus:border-slate-500"
+                      placeholder="you@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className="mt-2 rounded-full bg-slate-900 py-3 font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg disabled:opacity-50"
+                    >
+                      {submitting ? "Sending..." : "Send Verification Code"}
+                    </button>
+                  </form>
+                </>
+              ) : (
+                <>
+                  <h2 className="mb-4 text-center text-2xl font-semibold">
+                    Enter Verification Code
+                  </h2>
+                  <p className="mb-6 text-sm text-slate-600">
+                    If <strong>{email}</strong> is in our records, a 6-digit
+                    code has been sent to it. The code expires in 10 minutes.
+                  </p>
+
+                  {verifyError && (
+                    <p className="mb-6 text-sm text-red-600">{verifyError}</p>
+                  )}
+
+                  <form
+                    onSubmit={handleVerifyCode}
+                    className="flex flex-col gap-4"
+                  >
+                    <input
+                      type="text"
+                      required
+                      className="h-12 rounded-full border border-slate-300 px-4 text-center tracking-widest outline-none focus:border-slate-500"
+                      placeholder="Enter Code"
+                      value={code}
+                      maxLength={6}
+                      onChange={(e) => setCode(e.target.value)}
+                    />
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className="mt-2 rounded-full bg-slate-900 py-3 font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg disabled:opacity-50"
+                    >
+                      {submitting ? "Verifying..." : "Verify & Proceed"}
+                    </button>
+                  </form>
+
+                  <div className="mt-4 flex items-center justify-between text-xs text-slate-500">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setVerifyStage("email");
+                        setCode("");
+                        setVerifyError("");
+                      }}
+                      className="cursor-pointer underline"
+                    >
+                      Change email
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleResendCode}
+                      disabled={resendSecondsLeft > 0 || submitting}
+                      className="cursor-pointer underline disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {resendSecondsLeft > 0
+                        ? `Resend code (${resendSecondsLeft}s)`
+                        : "Resend code"}
+                    </button>
+                  </div>
+                </>
               )}
-
-              <form onSubmit={handleVerifyOtp} className="flex flex-col gap-4">
-                <input
-                  type="text"
-                  required
-                  className="h-12 rounded-xl border border-slate-300 px-4 text-center tracking-widest outline-none focus:border-rose-500"
-                  placeholder="Enter Password"
-                  value={otp}
-                  maxLength={10}
-                  onChange={(e) => setOtp(e.target.value)}
-                />
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="mt-2 rounded-xl bg-slate-900 py-3 font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg disabled:opacity-50"
-                >
-                  {submitting ? "Verifying..." : "Verify & Proceed"}
-                </button>
-              </form>
             </div>
           </div>
 
           {/* Footer */}
-          <footer className="mt-auto py-6 text-center text-sm font-medium text-slate-500">
-            <p>
-              For assistance with the password, please contact the HR
-              Department.
-            </p>
+          <footer className="mt-auto py-6 text-center font-semibold text-slate-600">
+            <p>For assistance, you contact the HR Department.</p>
           </footer>
         </div>
       )}
@@ -308,140 +461,29 @@ export default function SalaryAdvanceClient() {
                 <h2 className="mb-5 flex items-center gap-2 text-[13px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
                   <UserRound size={16} /> Staff Information
                 </h2>
+                <p className="mb-4 text-xs text-slate-500">
+                  These details were verified against your staff record and
+                  can&apos;t be edited here. Contact HR if anything is
+                  incorrect.
+                </p>
                 <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                  <div className="flex flex-col gap-2">
-                    <label className="text-[13px] font-medium text-[#7c5a5a]">
-                      Staff Number <span className="mr-3 text-red-500">*</span>
-                      {staffSearchStatus === "not_found" && (
-                        <span className="text-xs text-amber-700">
-                          Staff info not found. Contact hr for inquiry.
-                        </span>
-                      )}
-                      {staffSearchStatus === "loading" && (
-                        <span className="animate-pulse text-xs text-neutral-700">
-                          Fetching staff info...
-                        </span>
-                      )}
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      className="h-10 w-full rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
-                      value={formData.staffNumber}
-                      onChange={(e) =>
-                        updateField("staffNumber", e.target.value)
-                      }
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-2">
-                    <label className="text-[13px] font-medium text-[#7c5a5a]">
-                      Staff Name <span className="text-red-500">*</span>
-                    </label>
-
-                    {/* Wrapper for the input and tooltip */}
-                    <div className="group relative w-full">
-                      {/* Conditional Tooltip */}
-                      {!formData.staffNumber && (
-                        <div className="absolute bottom-full left-1/2 z-10 mb-2 hidden -translate-x-1/2 rounded-md bg-slate-800 px-3 py-1.5 text-xs whitespace-nowrap text-white opacity-0 transition-opacity group-hover:block group-hover:opacity-100">
-                          Fill in staff number first
-                          <div className="absolute -bottom-1 left-17 h-2.5 w-2.5 rotate-45 rounded-sm bg-slate-800" />
-                        </div>
-                      )}
-
-                      <input
-                        type="text"
-                        required
-                        disabled
-                        className="h-10 w-full rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)] disabled:cursor-not-allowed disabled:bg-gray-100"
-                        value={formData.staffName}
-                        onChange={(e) =>
-                          updateField("staffName", e.target.value)
-                        }
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-2">
-                    <label className="text-[13px] font-medium text-[#7c5a5a]">
-                      Staff Email <span className="text-red-500">*</span>
-                    </label>
-
-                    {/* Wrapper for the input and tooltip */}
-                    <div className="group relative w-full">
-                      {/* Conditional Tooltip */}
-                      {!formData.staffNumber && (
-                        <div className="absolute bottom-full left-1/2 z-10 mb-2 hidden -translate-x-1/2 rounded-md bg-slate-800 px-3 py-1.5 text-xs whitespace-nowrap text-white opacity-0 transition-opacity group-hover:block group-hover:opacity-100">
-                          Fill in staff number first
-                          <div className="absolute -bottom-1 left-17 h-2.5 w-2.5 rotate-45 rounded-sm bg-slate-800" />
-                        </div>
-                      )}
-                      <input
-                        type="email"
-                        required
-                        disabled
-                        className="h-10 w-full rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)] disabled:cursor-not-allowed disabled:bg-gray-100"
-                        value={formData.staffEmail}
-                        onChange={(e) =>
-                          updateField("staffEmail", e.target.value)
-                        }
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-2">
-                    <label className="text-[13px] font-medium text-[#7c5a5a]">
-                      Department <span className="text-red-500">*</span>
-                    </label>
-
-                    {/* Wrapper for the input and tooltip */}
-                    <div className="group relative w-full">
-                      {/* Conditional Tooltip */}
-                      {!formData.staffNumber && (
-                        <div className="absolute bottom-full left-1/2 z-10 mb-2 hidden -translate-x-1/2 rounded-md bg-slate-800 px-3 py-1.5 text-xs whitespace-nowrap text-white opacity-0 transition-opacity group-hover:block group-hover:opacity-100">
-                          Fill in staff number first
-                          <div className="absolute -bottom-1 left-17 h-2.5 w-2.5 rotate-45 rounded-sm bg-slate-800" />
-                        </div>
-                      )}
-                      <input
-                        type="text"
-                        required
-                        disabled
-                        className="h-10 w-full rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)] disabled:cursor-not-allowed disabled:bg-gray-100"
-                        value={formData.department}
-                        onChange={(e) =>
-                          updateField("department", e.target.value)
-                        }
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-2">
-                    <label className="text-[13px] font-medium text-[#7c5a5a]">
-                      Location <span className="text-red-500">*</span>
-                    </label>
-
-                    {/* Wrapper for the input and tooltip */}
-                    <div className="group relative w-full">
-                      {/* Conditional Tooltip */}
-                      {!formData.staffNumber && (
-                        <div className="absolute bottom-full left-1/2 z-10 mb-2 hidden -translate-x-1/2 rounded-md bg-slate-800 px-3 py-1.5 text-xs whitespace-nowrap text-white opacity-0 transition-opacity group-hover:block group-hover:opacity-100">
-                          Fill in staff number first
-                          <div className="absolute -bottom-1 left-17 h-2.5 w-2.5 rotate-45 rounded-sm bg-slate-800" />
-                        </div>
-                      )}
-                      <input
-                        type="text"
-                        required
-                        disabled
-                        className="h-10 w-full rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)] disabled:cursor-not-allowed disabled:bg-gray-100"
-                        value={formData.location}
-                        onChange={(e) =>
-                          updateField("location", e.target.value)
-                        }
-                      />
-                    </div>
-                  </div>
+                  <StaffInfoField
+                    label="Staff Number"
+                    value={formData.staffNumber}
+                  />
+                  <StaffInfoField
+                    label="Staff Name"
+                    value={formData.staffName}
+                  />
+                  <StaffInfoField
+                    label="Staff Email"
+                    value={formData.staffEmail}
+                  />
+                  <StaffInfoField
+                    label="Department"
+                    value={formData.department}
+                  />
+                  <StaffInfoField label="Location" value={formData.location} />
                 </div>
               </div>
 
@@ -484,6 +526,8 @@ export default function SalaryAdvanceClient() {
                     <DatePicker
                       value={formData.repaymentStartDate}
                       onChange={(v) => updateField("repaymentStartDate", v)}
+                      minDate={repaymentMinDate}
+                      maxDate={repaymentMaxDate}
                     />
                   </div>
 
@@ -515,8 +559,8 @@ export default function SalaryAdvanceClient() {
                   </li>
                   <li>
                     <strong>Submission Deadline:</strong> All requests must be
-                    submitted in writing to the HR Department no later than the
-                    10th of every month.
+                    submitted through the system no later than the 10th of every
+                    month - latest by 5.00pm
                   </li>
                   <li>
                     <strong>Legal Compliance:</strong> All salary advances must

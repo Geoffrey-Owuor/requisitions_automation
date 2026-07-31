@@ -29,6 +29,8 @@ interface DatePickerProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  minDate?: string;
+  maxDate?: string;
 }
 
 interface CustomDropdownProps {
@@ -116,6 +118,8 @@ export function DatePicker({
   value,
   onChange,
   placeholder = "Pick a date",
+  minDate,
+  maxDate,
 }: DatePickerProps) {
   const [open, setOpen] = useState(false);
   const [placement, setPlacement] = useState<"top" | "bottom">("bottom");
@@ -164,6 +168,8 @@ export function DatePicker({
   }, [value]);
 
   const selected = value ? new Date(value + "T00:00:00") : null;
+  const minD = minDate ? new Date(minDate + "T00:00:00") : null;
+  const maxD = maxDate ? new Date(maxDate + "T00:00:00") : null;
   const year = viewDate.getFullYear();
   const month = viewDate.getMonth();
 
@@ -184,7 +190,19 @@ export function DatePicker({
     return { label: String(y), value: y };
   });
 
+  const isDisabled = (day: number) => {
+    const d = new Date(year, month, day);
+    if (minD && d < minD) return true;
+    if (maxD && d > maxD) return true;
+    return false;
+  };
+
+  const isTodayDisabled = Boolean(
+    (minD && today < minD) || (maxD && today > maxD),
+  );
+
   const selectDay = (day: number) => {
+    if (isDisabled(day)) return;
     const iso = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
     onChange(iso);
     setOpen(false);
@@ -294,17 +312,21 @@ export function DatePicker({
                 if (!day) return <div key={i} />;
                 const sel = isSelected(day);
                 const tod = isToday(day);
+                const disabled = isDisabled(day);
                 return (
                   <button
                     key={i}
                     type="button"
+                    disabled={disabled}
                     onClick={() => selectDay(day)}
                     className={`flex h-8 w-8 items-center justify-center rounded-lg text-sm transition ${
-                      sel
-                        ? "bg-red-500 font-medium text-white"
-                        : tod
-                          ? "font-medium text-red-500 hover:bg-red-50"
-                          : "text-neutral-700 hover:bg-neutral-100"
+                      disabled
+                        ? "cursor-not-allowed text-neutral-300"
+                        : sel
+                          ? "bg-red-500 font-medium text-white"
+                          : tod
+                            ? "font-medium text-red-500 hover:bg-red-50"
+                            : "text-neutral-700 hover:bg-neutral-100"
                     }`}
                   >
                     {day}
@@ -317,12 +339,13 @@ export function DatePicker({
           <div className="mt-2">
             <button
               type="button"
+              disabled={isTodayDisabled}
               onClick={() => {
                 const iso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
                 onChange(iso);
                 setOpen(false);
               }}
-              className="w-full rounded-lg py-2.5 text-sm text-red-500 transition hover:bg-red-50"
+              className="w-full rounded-lg py-2.5 text-sm text-red-500 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:text-neutral-300 disabled:hover:bg-transparent"
             >
               Today
             </button>
