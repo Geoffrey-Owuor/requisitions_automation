@@ -6,33 +6,33 @@ import {
   FileText,
   CircleDollarSign,
 } from "lucide-react";
-import { GeneralNote, InfoCard } from "./GuidelinesPage";
+import {
+  GeneralNote,
+  GuidelineHeading,
+  InfoCard,
+  SectionTitle,
+} from "./GuidelinesPage";
 
 export default function SalaryAdvanceGuideline() {
   return (
     <div className="mx-auto max-w-4xl space-y-10 pb-16">
-      <div className="space-y-3">
-        <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-100/80 px-3 py-1.5 text-[11px] font-semibold tracking-wide text-slate-700 uppercase">
-          <CircleDollarSign size={14} /> Salary Advance
-        </div>
-        <h2 className="text-3xl font-semibold tracking-tight text-slate-900">
-          Salary Advance Guidelines
-        </h2>
-        <p className="text-slate-500">
-          Policies and procedures governing the request, processing, and
-          repayment of employee salary advances to ensure compliance and
-          efficient financial management.
-        </p>
-      </div>
+      <GuidelineHeading
+        icon={<CircleDollarSign size={13} />}
+        eyebrow="Salary Advance"
+        title="Salary Advance Guidelines"
+      >
+        Policies and procedures governing the request, processing, and repayment
+        of employee salary advances to ensure compliance and efficient financial
+        management.
+      </GuidelineHeading>
 
       <GeneralNote />
 
       {/* Policy Provisions Section */}
-      <section className="space-y-6">
-        <h3 className="flex items-center gap-2 text-lg font-semibold text-slate-800">
-          <Scale size={20} className="text-slate-600" />
+      <section className="space-y-5">
+        <SectionTitle icon={<Scale size={17} />}>
           Policy Provisions
-        </h3>
+        </SectionTitle>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <InfoCard
             icon={<CalendarClock size={18} />}
@@ -56,11 +56,10 @@ export default function SalaryAdvanceGuideline() {
       </section>
 
       {/* Required Fields Section */}
-      <section className="space-y-6">
-        <h3 className="flex items-center gap-2 text-lg font-semibold text-slate-800">
-          <CheckCircle2 size={20} className="text-slate-600" />
+      <section className="space-y-5">
+        <SectionTitle icon={<CheckCircle2 size={17} />}>
           Required Submission Fields
-        </h3>
+        </SectionTitle>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <InfoCard
             icon={<UserCircle size={18} />}

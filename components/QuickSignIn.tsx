@@ -67,52 +67,62 @@ export default function QuickSignIn() {
   return (
     <ClientPortal>
       <div
-        className={`fixed top-2 right-4 left-auto z-9999 hidden w-full max-w-80 transition-all duration-300 md:block ${
+        className={`fixed top-3 right-4 left-auto z-9999 hidden w-full max-w-80 transition-all duration-300 md:block ${
           isDismissing ? "animate-slide-out-top" : "animate-slide-in-top"
         }`}
       >
-        <div className="overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-2xl dark:border-neutral-800 dark:bg-neutral-950">
-          {/* Header */}
-          <div className="flex items-center justify-between border-b border-neutral-100 px-4 py-3 dark:border-neutral-800">
-            <div className="flex items-center gap-2">
-              <MicrosoftIcon />
-              <span className="text-sm font-semibold text-neutral-600 dark:text-neutral-400">
-                Sign in to the Apps Hub
-              </span>
-            </div>
-            <button
-              onClick={handleDismiss}
-              className="rounded-full p-1 text-neutral-400 transition-colors hover:bg-neutral-200 hover:text-neutral-700 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
-              aria-label="Dismiss"
-            >
-              <X size={16} strokeWidth={2.5} />
-            </button>
-          </div>
+        <div className="relative">
+          {/* Ambient glow */}
+          <div className="absolute -inset-2 rounded-[2.25rem] bg-linear-to-br from-rose-300/40 to-blue-100/30 blur-xl" />
 
-          {/* User Profile Area */}
-          <div className="p-5 text-center">
-            <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-linear-to-br from-blue-600 to-indigo-700 text-lg font-bold text-white shadow-sm ring-4 ring-blue-50 dark:ring-neutral-800">
-              {initials}
-            </div>
-            <h3 className="truncate text-base font-semibold text-neutral-900 dark:text-white">
-              {savedUser?.name}
-            </h3>
-            <p className="truncate text-sm text-neutral-500 dark:text-neutral-400">
-              {savedUser?.email}
-            </p>
-          </div>
+          <div className="relative overflow-hidden rounded-[1.75rem] border border-white/80 bg-white/90 shadow-[0_2px_4px_rgba(140,40,60,0.03),0_24px_48px_-20px_rgba(140,40,60,0.4)] backdrop-blur-xl">
+            {/* Top gradient hairline */}
+            <div className="absolute inset-x-8 top-0 h-px bg-linear-to-r from-transparent via-rose-400/60 to-transparent" />
 
-          {/* Action Button */}
-          <div className="px-5 pt-2 pb-5">
-            <button
-              onClick={handleContinue}
-              className="w-full cursor-pointer rounded-full bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-blue-700 active:scale-[0.98]"
-            >
-              Continue as {savedUser?.name.split(" ")[0]}
-            </button>
-            <p className="mt-3 text-center text-[11px] text-neutral-400 dark:text-neutral-500">
-              To use a different account, close this window.
-            </p>
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+              <div className="flex items-center gap-2">
+                <span className="flex items-center justify-center rounded-full bg-white p-1 ring-1 ring-slate-100">
+                  <MicrosoftIcon />
+                </span>
+                <span className="text-[13px] font-semibold text-slate-600">
+                  Sign in to the Apps Hub
+                </span>
+              </div>
+              <button
+                onClick={handleDismiss}
+                className="cursor-pointer rounded-full p-1.5 text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-600"
+                aria-label="Dismiss"
+              >
+                <X size={15} strokeWidth={2.5} />
+              </button>
+            </div>
+
+            {/* User Profile Area */}
+            <div className="p-5 text-center">
+              <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-linear-to-br from-rose-500 to-rose-700 text-lg font-bold text-white shadow-lg shadow-rose-500/25 ring-4 ring-rose-50">
+                {initials}
+              </div>
+              <h3 className="truncate text-base font-semibold text-slate-900">
+                {savedUser?.name}
+              </h3>
+              <p className="truncate text-sm text-slate-500">
+                {savedUser?.email}
+              </p>
+            </div>
+
+            {/* Action Button */}
+            <div className="px-5 pt-2 pb-5">
+              <button
+                onClick={handleContinue}
+                className="w-full cursor-pointer rounded-full bg-linear-to-br from-rose-500 to-rose-700 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-rose-500/25 transition-all hover:shadow-xl hover:shadow-rose-500/35 active:scale-[0.98]"
+              >
+                Continue as {savedUser?.name.split(" ")[0]}
+              </button>
+              <p className="mt-3 text-center text-[11px] text-slate-400">
+                To use a different account, close this window.
+              </p>
+            </div>
           </div>
         </div>
       </div>
