@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { SkeletonTable } from "@/components/Skeletons/SkeletonTable";
 import {
   getITRequisitionData,
@@ -18,7 +18,10 @@ export default function ITRequisitionsTable({
   userEmail,
   dataFlag,
   hodEmail,
-}: ITRequisitionDataProps) {
+  onStatusChange,
+}: ITRequisitionDataProps & {
+  onStatusChange?: (hasData: boolean) => void;
+}) {
   // Zustand store
   const setShowITRequisition = useToggleStore(
     (state) => state.setShowITRequisition,
@@ -52,6 +55,11 @@ export default function ITRequisitionsTable({
     const start = (currentPage - 1) * itemsPerPage;
     return filteredData.slice(start, start + itemsPerPage);
   }, [filteredData, currentPage, itemsPerPage]);
+
+  // Report whether this table ended up with any data, once loaded
+  useEffect(() => {
+    if (!loading) onStatusChange?.(initialData.length > 0);
+  }, [loading, initialData.length, onStatusChange]);
 
   // Render different titles based on the data flag
   const baseTitle = "IT Requisitions";
