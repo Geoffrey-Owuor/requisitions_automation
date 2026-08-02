@@ -449,17 +449,14 @@ export default function SalaryAdvanceClient() {
               {/* ── Context panel ── */}
               <div className="order-2 lg:order-1">
                 <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-rose-200/70 bg-white/70 py-1.5 pr-4 pl-1.5 text-[10px] font-bold tracking-wide text-rose-700 uppercase shadow-sm backdrop-blur-sm sm:text-[11px]">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-linear-to-br from-rose-500 to-rose-700 text-white">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-rose-600 text-white">
                     <ShieldCheck size={11} />
                   </span>
                   Secure verification
                 </div>
 
                 <h1 className="mb-3 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl sm:leading-[1.1]">
-                  Salary Advance{" "}
-                  <span className="bg-linear-to-br from-rose-500 via-rose-600 to-red-800 bg-clip-text text-transparent">
-                    Request
-                  </span>
+                  Salary Advance <span className="text-rose-700">Request</span>
                 </h1>
 
                 <p className="mb-7 max-w-md text-[15px] leading-relaxed text-slate-500">
@@ -474,7 +471,7 @@ export default function SalaryAdvanceClient() {
                       <span
                         className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ring-1 ${
                           index === 0
-                            ? "bg-linear-to-br from-rose-500 to-rose-700 text-white ring-rose-300"
+                            ? "bg-rose-600 text-white ring-rose-300"
                             : "bg-white/80 text-slate-400 ring-slate-200"
                         }`}
                       >
@@ -504,17 +501,17 @@ export default function SalaryAdvanceClient() {
 
               {/* ── Verification card ── */}
               <div className="relative order-1 lg:order-2">
-                <div className="pointer-events-none absolute -inset-2 rounded-[2.5rem] bg-linear-to-br from-rose-200/50 via-transparent to-blue-100/40 blur-xl" />
+                <div className="pointer-events-none absolute -inset-2 rounded-[2.5rem] bg-rose-100/40 blur-xl" />
 
                 <div className="relative rounded-4xl border border-white/80 bg-white/85 p-6 shadow-[0_2px_4px_rgba(140,40,60,0.03),0_24px_48px_-20px_rgba(140,40,60,0.28)] backdrop-blur-xl sm:p-8">
                   {/* Stage progress */}
                   <div className="mb-6 flex items-center gap-3">
                     <div className="flex flex-1 gap-1.5">
-                      <span className="h-1 flex-1 rounded-full bg-linear-to-r from-rose-400 to-rose-600" />
+                      <span className="h-1 flex-1 rounded-full bg-rose-600" />
                       <span
                         className={`h-1 flex-1 rounded-full transition-colors duration-300 ${
                           verifyStage === "code"
-                            ? "bg-linear-to-r from-rose-400 to-rose-600"
+                            ? "bg-rose-600"
                             : "bg-slate-200"
                         }`}
                       />
@@ -524,7 +521,7 @@ export default function SalaryAdvanceClient() {
                     </span>
                   </div>
 
-                  <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-linear-to-br from-rose-500 to-rose-700 text-white shadow-lg shadow-rose-300/60">
+                  <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-600 text-white shadow-lg shadow-rose-300/60">
                     {verifyStage === "code" ? (
                       <ShieldCheck size={22} />
                     ) : (
@@ -568,7 +565,7 @@ export default function SalaryAdvanceClient() {
                           </label>
                           <div className="relative">
                             <Mail
-                              size={16}
+                              size={18}
                               className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-slate-400"
                             />
                             <input
@@ -593,7 +590,7 @@ export default function SalaryAdvanceClient() {
                         <button
                           type="submit"
                           disabled={submitting}
-                          className="group flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-linear-to-br from-rose-500 to-rose-700 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-rose-500/25 transition-all duration-200 hover:shadow-xl hover:shadow-rose-500/35 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none"
+                          className="group flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-rose-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-rose-500/25 transition-all duration-200 hover:bg-rose-700 hover:shadow-xl hover:shadow-rose-500/35 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none"
                         >
                           {submitting ? "Sending code..." : "Send my code"}
                           <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
@@ -663,7 +660,7 @@ export default function SalaryAdvanceClient() {
                         <button
                           type="submit"
                           disabled={submitting || code.length < CODE_LENGTH}
-                          className="group flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-linear-to-br from-rose-500 to-rose-700 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-rose-500/25 transition-all duration-200 hover:shadow-xl hover:shadow-rose-500/35 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none"
+                          className="group flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-rose-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-rose-500/25 transition-all duration-200 hover:bg-rose-700 hover:shadow-xl hover:shadow-rose-500/35 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none"
                         >
                           {submitting ? "Verifying..." : "Verify & proceed"}
                           <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />

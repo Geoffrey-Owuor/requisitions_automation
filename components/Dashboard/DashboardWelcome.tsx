@@ -9,8 +9,8 @@ import {
   LaptopMinimalCheck,
   CircleDollarSign,
   ArrowRight,
-  Sparkles,
   LucideIcon,
+  HousePlug,
 } from "lucide-react";
 import { useToggleStore } from "@/store/useToggleStore";
 import { useUser } from "@/context/UserContext";
@@ -78,7 +78,7 @@ const DashboardWelcome = () => {
   return (
     <div className="flex flex-col items-center justify-center px-4 py-16 text-center">
       <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/80 bg-white/40 text-red-400 shadow-[0_8px_16px_rgba(160,60,60,0.08)] backdrop-blur-md">
-        <Sparkles size={32} strokeWidth={1.5} />
+        <HousePlug size={32} strokeWidth={1.5} />
       </div>
 
       <h2 className="text-xl font-semibold text-[#1e1b1b]">

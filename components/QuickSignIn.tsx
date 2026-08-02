@@ -72,13 +72,7 @@ export default function QuickSignIn() {
         }`}
       >
         <div className="relative">
-          {/* Ambient glow */}
-          <div className="absolute -inset-2 rounded-[2.25rem] bg-linear-to-br from-rose-300/40 to-blue-100/30 blur-xl" />
-
-          <div className="relative overflow-hidden rounded-[1.75rem] border border-white/80 bg-white/90 shadow-[0_2px_4px_rgba(140,40,60,0.03),0_24px_48px_-20px_rgba(140,40,60,0.4)] backdrop-blur-xl">
-            {/* Top gradient hairline */}
-            <div className="absolute inset-x-8 top-0 h-px bg-linear-to-r from-transparent via-rose-400/60 to-transparent" />
-
+          <div className="relative overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-[0_2px_4px_rgba(140,40,60,0.03),0_24px_48px_-20px_rgba(140,40,60,0.4)]">
             {/* Header */}
             <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
               <div className="flex items-center gap-2">
@@ -100,7 +94,7 @@ export default function QuickSignIn() {
 
             {/* User Profile Area */}
             <div className="p-5 text-center">
-              <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-linear-to-br from-rose-500 to-rose-700 text-lg font-bold text-white shadow-lg shadow-rose-500/25 ring-4 ring-rose-50">
+              <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-rose-600 text-lg font-bold text-white shadow-sm ring-4 ring-rose-50">
                 {initials}
               </div>
               <h3 className="truncate text-base font-semibold text-slate-900">
@@ -115,7 +109,7 @@ export default function QuickSignIn() {
             <div className="px-5 pt-2 pb-5">
               <button
                 onClick={handleContinue}
-                className="w-full cursor-pointer rounded-full bg-linear-to-br from-rose-500 to-rose-700 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-rose-500/25 transition-all hover:shadow-xl hover:shadow-rose-500/35 active:scale-[0.98]"
+                className="w-full cursor-pointer rounded-full bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-rose-700 active:scale-[0.98]"
               >
                 Continue as {savedUser?.name.split(" ")[0]}
               </button>

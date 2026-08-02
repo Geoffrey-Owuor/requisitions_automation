@@ -33,9 +33,8 @@ const Header = () => {
               </form>
               <Link
                 href="/guidelines"
-                className="group relative flex items-center gap-1.5 overflow-hidden rounded-full bg-linear-to-br from-rose-500 to-rose-700 px-3.5 py-2 text-xs font-semibold text-white shadow-md shadow-rose-500/25 transition-all duration-200 hover:shadow-lg hover:shadow-rose-500/35 active:scale-95 sm:gap-2 sm:px-5 sm:text-sm"
+                className="flex items-center gap-1.5 rounded-full bg-rose-600 px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition-colors duration-200 hover:bg-rose-700 active:scale-95 sm:gap-2 sm:px-5 sm:text-sm"
               >
-                <span className="animate-shine pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 bg-white/25 blur-[6px]" />
                 <BookText size={14} className="h-3.5 w-3.5" />
                 <span>Guidelines</span>
               </Link>
@@ -43,9 +42,8 @@ const Header = () => {
           ) : (
             <Link
               href="/dashboard"
-              className="group relative flex items-center gap-1.5 overflow-hidden rounded-full bg-linear-to-br from-rose-500 to-rose-700 px-3.5 py-2 text-xs font-semibold text-white shadow-md shadow-rose-500/25 transition-all duration-200 hover:shadow-lg hover:shadow-rose-500/35 active:scale-95 sm:gap-2 sm:px-5 sm:text-sm"
+              className="flex items-center gap-1.5 rounded-full bg-rose-600 px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition-colors duration-200 hover:bg-rose-700 active:scale-95 sm:gap-2 sm:px-5 sm:text-sm"
             >
-              <span className="animate-shine pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 bg-white/25 blur-[6px]" />
               <CircleGauge size={14} className="h-3.5 w-3.5" />
               <span>Dashboard</span>
             </Link>
