@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   getTravelRequisitionData,
   TravelRequisitionDataProps,
@@ -25,7 +25,10 @@ export default function TravelRequisitionsTable({
   dataFlag,
   userEmail,
   hodEmail,
-}: TravelRequisitionDataProps) {
+  onStatusChange,
+}: TravelRequisitionDataProps & {
+  onStatusChange?: (hasData: boolean) => void;
+}) {
   // Zustand store
   const setShowTravelRequisition = useToggleStore(
     (state) => state.setShowTravelRequisition,
@@ -63,6 +66,11 @@ export default function TravelRequisitionsTable({
     const start = (currentPage - 1) * itemsPerPage;
     return filteredData.slice(start, start + itemsPerPage);
   }, [filteredData, currentPage, itemsPerPage]);
+
+  // Report whether this table ended up with any data, once loaded
+  useEffect(() => {
+    if (!loading) onStatusChange?.(initialData.length > 0);
+  }, [loading, initialData.length, onStatusChange]);
 
   // Render different titles based on the data flag
   const baseTitle = "Travel Requisitions";
