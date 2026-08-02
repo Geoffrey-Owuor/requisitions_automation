@@ -162,8 +162,10 @@ export default function HomePage() {
               </h1>
 
               <p className="mx-auto max-w-xl text-[15px] leading-relaxed text-slate-500 sm:text-base lg:mx-0">
-                Central hub for accessing internal apps and online forms. Some
-                forms may require you to be signed into your work account.
+                Access all your internal apps and forms in one place. Depending
+                on the feature, you may be asked to sign in with your work
+                credentials or verify your identity using the personal email
+                address on file from your onboarding.
               </p>
 
               {/* Hero actions */}

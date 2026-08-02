@@ -63,7 +63,7 @@ export default async function LoginPage({ searchParams }: Props) {
         </header>
 
         {/* ── MAIN CONTENT LAYER ── */}
-        <main className="flex flex-1 items-center justify-center py-10">
+        <main className="flex flex-1 items-center justify-center py-6">
           <div className="animate-rise relative w-full max-w-sm">
             {/* Ambient card glow */}
             <div className="absolute -inset-3 rounded-[2.75rem] bg-linear-to-br from-rose-300/35 via-rose-100/20 to-blue-100/30 blur-2xl" />
