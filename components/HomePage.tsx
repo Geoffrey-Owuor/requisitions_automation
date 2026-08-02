@@ -9,14 +9,12 @@ import {
   CircleGauge,
   ShoppingBag,
   ShieldAlert,
-  Workflow,
   BriefcaseBusiness,
   CircleArrowOutUpRight,
   LockKeyhole,
   LaptopMinimalCheck,
   ArrowRight,
   CircleDollarSign,
-  Sparkles,
   BookText,
 } from "lucide-react";
 import { JSX, ReactNode } from "react";
@@ -29,8 +27,6 @@ interface Requisitions {
   description: string;
   icon: JSX.Element;
   accent: string;
-  shadow: string;
-  glow: string;
   badge: string;
   workflow: string[];
   tiers?: { label: string; cost: string; icon: JSX.Element }[] | null;
@@ -44,9 +40,7 @@ const requisitions: Requisitions[] = [
     description:
       "Apply for a salary advance, requests should be submitted before the 14th of every month",
     icon: <CircleDollarSign size={22} className="h-5 w-5 sm:w-6" />,
-    accent: "from-mist-500 to-mist-700",
-    shadow: "shadow-mist-300/60",
-    glow: "group-hover:bg-mist-200/50",
+    accent: "bg-mist-700",
     badge: "HR",
     workflow: ["Submit", "Wait for HR & Finance to review and approve"],
     tiers: null,
@@ -58,9 +52,7 @@ const requisitions: Requisitions[] = [
     description:
       "Site visits, local flights, road travel, and international travel with automated multi-tier approvals.",
     icon: <BriefcaseBusiness size={22} className="h-5 w-5 sm:h-6 sm:w-6" />,
-    accent: "from-rose-500 to-rose-700",
-    shadow: "shadow-rose-300/60",
-    glow: "group-hover:bg-rose-200/60",
+    accent: "bg-rose-700",
     badge: "HR",
     workflow: ["Submit", "HOD", "HR", "Director"],
     tiers: [
@@ -75,9 +67,7 @@ const requisitions: Requisitions[] = [
     description:
       "Request laptops, peripherals, and software. Routed to HOD then fulfilled by IT Team.",
     icon: <Monitor size={22} className="h-5 w-5 sm:h-6 sm:w-6" />,
-    accent: "from-slate-700 to-slate-900",
-    shadow: "shadow-slate-300/60",
-    glow: "group-hover:bg-slate-200/60",
+    accent: "bg-slate-800",
     badge: "IT",
     workflow: ["Submit", "HOD", "IT Fulfilment"],
     tiers: null,
@@ -88,9 +78,7 @@ const requisitions: Requisitions[] = [
     description:
       "Submit an IT issue/ticket through our internal IT HelpDesk platform.",
     icon: <LaptopMinimalCheck size={22} className="h-5 w-5 sm:h-6 sm:w-6" />,
-    accent: "from-neutral-700 to-neutral-900",
-    shadow: "shadow-neutral-300/60",
-    glow: "group-hover:bg-neutral-200/60",
+    accent: "bg-neutral-800",
     badge: "IT",
     workflow: ["Submit Issue", "Track issue until it's resolved"],
     tiers: null,
@@ -101,9 +89,7 @@ const requisitions: Requisitions[] = [
     description:
       "The purchase portal for making purchase requisitions at discounted staff prices.",
     icon: <ShoppingBag size={22} className="h-5 w-5 sm:h-6 sm:w-6" />,
-    accent: "from-red-700 to-red-900",
-    shadow: "shadow-red-300/60",
-    glow: "group-hover:bg-red-200/60",
+    accent: "bg-red-800",
     badge: "HR",
     workflow: ["Submit", "Payroll", "HR", "Credit Control", "Invoicing"],
     tiers: null,
@@ -114,9 +100,7 @@ const requisitions: Requisitions[] = [
     description:
       "Submit a request for Key(s) and Access Code Issuance. Routed to your designated HOD then completed by security.",
     icon: <LockKeyhole size={22} className="h-5 w-5 sm:h-6 sm:w-6" />,
-    accent: "from-zinc-700 to-zinc-900",
-    shadow: "shadow-zinc-300/60",
-    glow: "group-hover:bg-zinc-200/60",
+    accent: "bg-zinc-800",
     badge: "Retail",
     workflow: ["Submit", "HOD", "Security finalizes"],
     tiers: null,
@@ -145,18 +129,10 @@ export default function HomePage() {
         <section className="mx-auto max-w-6xl px-4 pt-8 pb-14 sm:px-6 sm:pt-12 sm:pb-20">
           <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-5 lg:gap-14">
             <div className="animate-rise text-center lg:col-span-3 lg:text-left">
-              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-rose-200/70 bg-white/70 py-1.5 pr-4 pl-1.5 text-[10px] font-bold tracking-wide text-rose-700 uppercase shadow-sm backdrop-blur-sm sm:text-[11px]">
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-linear-to-br from-rose-500 to-rose-700 text-white">
-                  <Workflow size={11} />
-                </span>
-                Internal Applications
-              </div>
-
               <h1 className="mb-4 text-4xl font-semibold tracking-tight text-slate-900 sm:mb-6 sm:text-[52px] sm:leading-[1.05]">
                 Hotpoint{" "}
-                <span className="relative inline-block bg-linear-to-br from-rose-500 via-rose-600 to-red-800 bg-clip-text text-transparent">
+                <span className="relative inline-block text-rose-600">
                   Apps
-                  <span className="absolute -bottom-1 left-0 h-0.75 w-full rounded-full bg-linear-to-r from-rose-400/70 to-transparent" />
                 </span>{" "}
                 Hub
               </h1>
@@ -172,14 +148,14 @@ export default function HomePage() {
               <div className="mt-7 flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-start">
                 <Link
                   href="/dashboard"
-                  className="group flex w-full items-center justify-center gap-2 rounded-full bg-linear-to-br from-rose-500 to-rose-700 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-rose-500/25 transition-all duration-200 hover:shadow-xl hover:shadow-rose-500/35 active:scale-[0.98] sm:w-auto"
+                  className="group flex w-full items-center justify-center gap-2 rounded-full bg-rose-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors duration-200 hover:bg-rose-700 active:scale-[0.98] sm:w-auto"
                 >
                   Go to my dashboard
                   <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
                 </Link>
                 <Link
                   href="/guidelines"
-                  className="flex w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-white/80 px-6 py-3 text-sm font-semibold text-slate-700 shadow-sm backdrop-blur-sm transition-all duration-200 hover:border-rose-200 hover:bg-white hover:text-rose-700 active:scale-[0.98] sm:w-auto"
+                  className="flex w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 shadow-sm transition-colors duration-200 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700 active:scale-[0.98] sm:w-auto"
                 >
                   <BookText className="h-4 w-4" />
                   Read the guidelines
@@ -195,10 +171,8 @@ export default function HomePage() {
             {/* Quick Stats/Links Card */}
             <div className="animate-rise lg:col-span-2">
               <div className="relative">
-                <div className="absolute -inset-2 rounded-[2.5rem] bg-linear-to-br from-rose-200/50 via-transparent to-blue-100/40 blur-xl" />
-                <div className="relative rounded-4xl border border-white/80 bg-white/85 p-2.5 shadow-[0_2px_4px_rgba(140,40,60,0.03),0_24px_48px_-20px_rgba(140,40,60,0.28)] backdrop-blur-xl">
+                <div className="relative rounded-4xl border border-slate-200 bg-white p-2.5 shadow-[0_2px_4px_rgba(140,40,60,0.03),0_24px_48px_-20px_rgba(140,40,60,0.28)]">
                   <div className="flex items-center gap-2 px-3 pt-2 pb-3">
-                    <Sparkles size={13} className="text-rose-500" />
                     <span className="text-[10px] font-bold tracking-[0.15em] text-slate-400 uppercase">
                       Jump straight in
                     </span>
@@ -235,31 +209,26 @@ export default function HomePage() {
         {/* ── REQUISITION GRID ── */}
         <section className="mx-auto max-w-6xl px-4 pb-20 sm:px-6 sm:pb-28">
           <div className="mb-8 flex items-center gap-4 sm:mb-10">
-            <h2 className="shrink-0 rounded-full border border-slate-200/80 bg-white/70 px-4 py-1.5 text-[10px] font-bold tracking-[0.18em] text-slate-500 uppercase backdrop-blur-sm sm:text-[11px]">
+            <h2 className="shrink-0 rounded-full border border-slate-200 bg-white px-4 py-1.5 text-[10px] font-bold tracking-[0.18em] text-slate-500 uppercase sm:text-[11px]">
               Available apps and forms
             </h2>
-            <div className="h-px flex-1 bg-linear-to-r from-rose-200 via-slate-200 to-transparent" />
+            <div className="h-px flex-1 bg-slate-200" />
           </div>
 
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-7">
             {requisitions.map((req) => (
               <div
                 key={req.id}
-                className="group relative flex flex-col justify-between overflow-hidden rounded-4xl border border-slate-200/80 bg-white/85 p-6 shadow-[0_1px_2px_rgba(140,40,60,0.03)] backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-rose-200 hover:shadow-[0_24px_48px_-20px_rgba(140,40,60,0.3)] sm:rounded-[2.25rem] sm:p-8"
+                className="group relative flex flex-col justify-between overflow-hidden rounded-4xl border border-slate-200 bg-white p-6 shadow-[0_1px_2px_rgba(140,40,60,0.03)] transition-all duration-300 hover:-translate-y-1 hover:border-rose-200 hover:shadow-[0_24px_48px_-20px_rgba(140,40,60,0.3)] sm:rounded-[2.25rem] sm:p-8"
               >
-                {/* Hover halo */}
-                <div
-                  className={`pointer-events-none absolute -top-24 -right-16 h-52 w-52 rounded-full bg-transparent blur-3xl transition-colors duration-500 ${req.glow}`}
-                />
-
                 <div className="relative">
                   <div className="mb-6 flex items-start justify-between sm:mb-7">
                     <div
-                      className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-linear-to-br ${req.accent} text-white shadow-lg ${req.shadow} transition-transform duration-300 group-hover:scale-105 sm:h-14 sm:w-14`}
+                      className={`flex h-12 w-12 items-center justify-center rounded-2xl ${req.accent} text-white shadow-sm transition-transform duration-300 group-hover:scale-105 sm:h-14 sm:w-14`}
                     >
                       {req.icon}
                     </div>
-                    <span className="rounded-full border border-slate-200/80 bg-slate-50 px-3 py-1 text-[10px] font-bold tracking-wider text-slate-500 uppercase sm:text-[11px]">
+                    <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[10px] font-bold tracking-wider text-slate-500 uppercase sm:text-[11px]">
                       {req.badge}
                     </span>
                   </div>
@@ -327,7 +296,7 @@ export default function HomePage() {
           </div>
 
           {/* COMPLIANCE FOOTNOTE */}
-          <div className="mx-auto mt-10 flex max-w-2xl items-center justify-center gap-3 rounded-full border border-amber-200/70 bg-amber-50/60 px-5 py-3 text-amber-800 backdrop-blur-sm sm:mt-14">
+          <div className="mx-auto mt-10 flex max-w-2xl items-center justify-center gap-3 rounded-full border border-amber-200 bg-amber-50 px-5 py-3 text-amber-800 sm:mt-14">
             <ShieldAlert size={16} className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
             <p className="text-center text-xs sm:text-[13px]">
               Standard compliance and procedures for online form requisitions
@@ -363,7 +332,7 @@ function QuickLink({
       className="group flex items-center justify-between rounded-full p-2.5 transition-colors hover:bg-rose-50/70 sm:p-3"
     >
       <div className="flex items-center gap-3 sm:gap-4">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-rose-50 text-rose-600 ring-1 ring-rose-100 transition-all duration-200 group-hover:bg-linear-to-br group-hover:from-rose-500 group-hover:to-rose-700 group-hover:text-white group-hover:ring-rose-300 sm:h-10 sm:w-10">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-rose-50 text-rose-600 ring-1 ring-rose-100 transition-colors duration-200 group-hover:bg-rose-600 group-hover:text-white group-hover:ring-rose-300 sm:h-10 sm:w-10">
           {icon}
         </div>
         <div className="text-left">

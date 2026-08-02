@@ -35,10 +35,8 @@ const LoginWrapper = () => {
       >
         {/* Warm wash that sweeps in on hover */}
         <span className="pointer-events-none absolute inset-0 bg-linear-to-r from-rose-50 via-white to-rose-50 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-        {/* Travelling gloss */}
-        <span className="animate-shine pointer-events-none absolute inset-y-0 -left-1/4 w-1/4 bg-linear-to-r from-transparent via-rose-100/70 to-transparent blur-[2px]" />
 
-        <span className="relative flex shrink-0 items-center justify-center rounded-full bg-white p-1 ring-1 ring-slate-100">
+        <span className="relative flex shrink-0 items-center justify-center">
           <MicrosoftIcon />
         </span>
 

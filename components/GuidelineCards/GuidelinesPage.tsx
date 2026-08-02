@@ -33,8 +33,8 @@ export const GuidelineBadge = ({
   icon: ReactNode;
   label: string;
 }) => (
-  <div className="inline-flex items-center gap-2 rounded-full border border-rose-200/70 bg-white/80 py-1.5 pr-4 pl-1.5 text-[11px] font-bold tracking-wide text-rose-700 uppercase shadow-sm backdrop-blur-sm">
-    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-linear-to-br from-rose-500 to-rose-700 text-white">
+  <div className="inline-flex items-center gap-2 rounded-full border border-rose-200 bg-white py-1.5 pr-4 pl-1.5 text-[11px] font-bold tracking-wide text-rose-700 uppercase shadow-sm">
+    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-rose-600 text-white">
       {icon}
     </span>
     {label}
@@ -55,20 +55,20 @@ export const Callout = ({
 }) => {
   const tones = {
     rose: {
-      wrap: "border-rose-100 bg-linear-to-br from-rose-50 to-white",
-      chip: "bg-linear-to-br from-rose-500 to-rose-700 shadow-rose-500/30",
+      wrap: "border-rose-100 bg-rose-50",
+      chip: "bg-rose-600",
       title: "text-rose-900",
       body: "text-rose-800/80",
     },
     blue: {
-      wrap: "border-blue-100 bg-linear-to-br from-blue-50 to-white",
-      chip: "bg-linear-to-br from-blue-500 to-blue-700 shadow-blue-500/30",
+      wrap: "border-blue-100 bg-blue-50",
+      chip: "bg-blue-600",
       title: "text-blue-900",
       body: "text-blue-800/80",
     },
     amber: {
-      wrap: "border-amber-200 bg-linear-to-br from-amber-50 to-white",
-      chip: "bg-linear-to-br from-amber-400 to-amber-600 shadow-amber-500/30",
+      wrap: "border-amber-200 bg-amber-50",
+      chip: "bg-amber-500",
       title: "text-amber-900",
       body: "text-amber-800/80",
     },
@@ -79,7 +79,7 @@ export const Callout = ({
       className={`flex items-start gap-4 rounded-[1.75rem] border p-5 shadow-sm ${tones.wrap}`}
     >
       <div
-        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white shadow-lg ${tones.chip}`}
+        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white shadow-sm ${tones.chip}`}
       >
         {icon}
       </div>
@@ -94,7 +94,7 @@ export const Callout = ({
 };
 
 export const GeneralNote = () => (
-  <div className="flex items-start gap-3.5 rounded-[1.75rem] border border-slate-200/80 bg-white/85 p-5 shadow-sm backdrop-blur-sm">
+  <div className="flex items-start gap-3.5 rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500">
       <AlertCircle size={17} />
     </div>
@@ -116,10 +116,9 @@ export const InfoCard = ({
   title: string;
   items: string[];
 }) => (
-  <div className="group relative overflow-hidden rounded-[1.75rem] border border-slate-200/80 bg-white/85 p-5 shadow-[0_1px_2px_rgba(140,40,60,0.03)] backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-rose-200 hover:shadow-[0_18px_36px_-18px_rgba(140,40,60,0.3)]">
-    <div className="pointer-events-none absolute -top-20 -right-12 h-40 w-40 rounded-full bg-transparent blur-3xl transition-colors duration-500 group-hover:bg-rose-100/60" />
+  <div className="group relative overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-[0_1px_2px_rgba(140,40,60,0.03)] transition-all duration-300 hover:-translate-y-0.5 hover:border-rose-200 hover:shadow-[0_18px_36px_-18px_rgba(140,40,60,0.3)]">
     <div className="relative mb-4 flex items-center gap-3">
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-rose-50 text-rose-600 ring-1 ring-rose-100 transition-all duration-300 group-hover:bg-linear-to-br group-hover:from-rose-500 group-hover:to-rose-700 group-hover:text-white group-hover:ring-rose-300">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-rose-50 text-rose-600 ring-1 ring-rose-100 transition-colors duration-300 group-hover:bg-rose-600 group-hover:text-white group-hover:ring-rose-300">
         {icon}
       </div>
       <h4 className="font-semibold text-slate-900">{title}</h4>
@@ -151,11 +150,9 @@ export const TierCard = ({
   approvers: string[];
   icon: ReactNode;
 }) => (
-  <div className="group relative flex flex-col justify-between gap-4 overflow-hidden rounded-[1.75rem] border border-slate-200/80 bg-white/85 p-5 shadow-[0_1px_2px_rgba(140,40,60,0.03)] backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-rose-200 hover:shadow-[0_18px_36px_-18px_rgba(140,40,60,0.3)] sm:flex-row sm:items-center">
-    <div className="pointer-events-none absolute -top-20 -right-12 h-40 w-40 rounded-full bg-transparent blur-3xl transition-colors duration-500 group-hover:bg-rose-100/60" />
-
+  <div className="group relative flex flex-col justify-between gap-4 overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-[0_1px_2px_rgba(140,40,60,0.03)] transition-all duration-300 hover:-translate-y-0.5 hover:border-rose-200 hover:shadow-[0_18px_36px_-18px_rgba(140,40,60,0.3)] sm:flex-row sm:items-center">
     <div className="relative flex items-center gap-4">
-      <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-full bg-slate-50 text-slate-400 ring-1 ring-slate-100 transition-all duration-300 group-hover:bg-linear-to-br group-hover:from-rose-500 group-hover:to-rose-700 group-hover:text-white group-hover:ring-rose-300">
+      <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-full bg-slate-50 text-slate-400 ring-1 ring-slate-100 transition-colors duration-300 group-hover:bg-rose-600 group-hover:text-white group-hover:ring-rose-300">
         {icon}
       </div>
       <div>
@@ -175,7 +172,10 @@ export const TierCard = ({
             {approver}
           </div>
           {idx < approvers.length - 1 && (
-            <ChevronRight size={12} className="hidden text-slate-300 sm:block" />
+            <ChevronRight
+              size={12}
+              className="hidden text-slate-300 sm:block"
+            />
           )}
         </Fragment>
       ))}
@@ -249,8 +249,8 @@ export default function GuidelinesPage() {
     <div className="layout-scrollbar flex h-screen flex-col bg-[#fdfbfb] text-slate-900 selection:bg-rose-100 selection:text-rose-900">
       {/* Ambient Background */}
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-        <div className="animate-aurora absolute -top-[15%] -left-[10%] h-[55%] w-[55%] rounded-full bg-rose-200/40 blur-[100px] sm:h-[45%] sm:w-[45%] sm:blur-[130px]" />
-        <div className="animate-drift absolute top-[10%] -right-[12%] h-[45%] w-[45%] rounded-full bg-orange-100/45 blur-[100px] sm:h-[35%] sm:w-[35%]" />
+        <div className="animate-aurora absolute top-[-15%] left-[-10%] h-[55%] w-[55%] rounded-full bg-rose-200/40 blur-[100px] sm:h-[45%] sm:w-[45%] sm:blur-[130px]" />
+        <div className="animate-drift absolute top-[10%] right-[-12%] h-[45%] w-[45%] rounded-full bg-orange-100/45 blur-[100px] sm:h-[35%] sm:w-[35%]" />
         <div className="hero-grid absolute inset-x-0 top-0 h-[60vh]" />
       </div>
 
@@ -272,9 +272,9 @@ export default function GuidelinesPage() {
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   aria-current={isActive ? "page" : undefined}
-                  className={`group relative flex shrink-0 cursor-pointer items-center gap-2 rounded-full py-2 pr-4 pl-1.5 text-xs font-semibold transition-all duration-200 md:w-full md:text-[13px] ${
+                  className={`group relative flex shrink-0 cursor-pointer items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold transition-all duration-200 md:w-full md:text-[13px] ${
                     isActive
-                      ? "bg-linear-to-br from-rose-500 to-rose-700 text-white shadow-md shadow-rose-500/25"
+                      ? "bg-rose-700 text-white shadow-md shadow-rose-500/25"
                       : "border border-slate-200/70 bg-white/70 text-slate-600 hover:border-rose-200 hover:bg-rose-50/70 hover:text-rose-700 md:border-transparent md:bg-transparent"
                   }`}
                 >
