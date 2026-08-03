@@ -76,7 +76,7 @@ export default function QuickSignIn() {
             {/* Header */}
             <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
               <div className="flex items-center gap-2">
-                <span className="flex items-center justify-center rounded-full bg-white p-1 ring-1 ring-slate-100">
+                <span className="flex items-center justify-center rounded-full bg-white">
                   <MicrosoftIcon />
                 </span>
                 <span className="text-[13px] font-semibold text-slate-600">
