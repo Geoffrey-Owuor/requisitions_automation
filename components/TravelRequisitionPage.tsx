@@ -144,27 +144,19 @@ export default function TravelRequisitionPage() {
 
   // Generating an approval tier
   const generatedAprovalTier = useMemo(() => {
-    if (!formData.travelCategory || !formData.travelMode || totalCost === 0)
-      return "Tier 1";
+    if (!totalCost || totalCost === 0) return "Tier 1";
 
     let approvalTier;
-    if (
-      formData.travelCategory === "Local" &&
-      formData.travelMode === "Road" &&
-      Number(totalCost) <= 30000
-    ) {
+    if (Number(totalCost) <= 30000) {
       approvalTier = "Tier 1";
-    } else if (
-      formData.travelCategory === "International" ||
-      Number(totalCost) >= 100000
-    ) {
+    } else if (Number(totalCost) >= 100000) {
       approvalTier = "Tier 3";
     } else {
       approvalTier = "Tier 2";
     }
 
     return approvalTier;
-  }, [formData.travelCategory, formData.travelMode, totalCost]);
+  }, [totalCost]);
 
   // Calculate total engineering job costs
   const totalEngineeringCost = useMemo(() => {
@@ -656,7 +648,7 @@ function FormSelect({
             onClick={() => setIsOpen(false)}
           />
           {/* Dropdown */}
-          <div className="absolute top-full right-0 left-0 z-50 mt-1 max-h-60 overflow-y-auto rounded-xl border border-[rgba(240,180,180,0.6)] bg-white p-1 shadow-[0_10px_25px_rgba(160,60,60,0.1)] [scrollbar-width:thin]">
+          <div className="absolute top-full right-0 left-0 z-50 mt-1 max-h-60 scrollbar-thin overflow-y-auto rounded-xl border border-[rgba(240,180,180,0.6)] bg-white p-1 shadow-[0_10px_25px_rgba(160,60,60,0.1)]">
             {options.map((opt) => (
               <div
                 key={opt}
