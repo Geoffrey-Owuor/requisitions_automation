@@ -133,3 +133,20 @@ export const loadSecurityArray = async (): Promise<ApproversObject[] | []> => {
     return [];
   }
 };
+
+// Load the finance array
+export const loadFinanceArray = async (): Promise<ApproversObject[] | []> => {
+  try {
+    const result = await query<ApproversObject>(`
+            SELECT finance_uuid AS uuid,
+            finance_name AS name,
+            finance_email AS email
+            FROM finance_array
+            `);
+
+    return result;
+  } catch (error) {
+    console.error("Error while trying to fetch finance array data:", error);
+    return [];
+  }
+};

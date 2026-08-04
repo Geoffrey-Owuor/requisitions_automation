@@ -5,6 +5,7 @@ import hotpoint_black_logo from "./hotpoint_black_logo.png";
 import it_form_image from "./it_form_image.png";
 import access_key_image from "./access_key_image.png";
 import advance_form_image from "./advance_form_image.png";
+import casual_form_image from "./casual_form_image.png";
 
 export const assets = {
   access_key_image,
@@ -14,6 +15,7 @@ export const assets = {
   hotpoint_background,
   hotpoint_black_logo,
   it_form_image,
+  casual_form_image,
 };
 
 // Date formatter
@@ -50,11 +52,13 @@ export const initialsHelper = (userName: string) => {
 export const ALLOWED_TRAVEL_STAGES = ["hod", "hr", "director"] as const;
 export const ALLOWED_ACCESS_STAGES = ["hod", "security"] as const;
 export const ALLOWED_IT_STAGES = ["hod", "it"] as const;
+export const ALLOWED_CASUAL_STAGES = ["hod", "finance", "hr"] as const;
 
 // Create a TypeScript union type: "manager" | "director" | "hr" | "finance"
 export type TravelStage = (typeof ALLOWED_TRAVEL_STAGES)[number];
 export type AccessStage = (typeof ALLOWED_ACCESS_STAGES)[number];
 export type itStage = (typeof ALLOWED_IT_STAGES)[number];
+export type CasualStage = (typeof ALLOWED_CASUAL_STAGES)[number];
 
 /**
  * Type guard to check if an untrusted string is a valid Stage
@@ -75,6 +79,34 @@ export function isValidItStage(stage: unknown): stage is itStage {
   return (
     typeof stage === "string" && ALLOWED_IT_STAGES.includes(stage as itStage)
   );
+}
+export function isValidCasualStage(stage: unknown): stage is CasualStage {
+  return (
+    typeof stage === "string" &&
+    ALLOWED_CASUAL_STAGES.includes(stage as CasualStage)
+  );
+}
+
+export const CASUAL_LOCATIONS = [
+  "Ruiru",
+  "Imaara",
+  "Galleria",
+  "Garden City",
+  "Village Market",
+  "Karen",
+  "Diani",
+  "Likoni",
+  "Kisumu",
+  "Eldoret",
+  "CBD",
+  "Riara",
+  "Nyali",
+  "Sarit",
+  "Yaya",
+];
+
+export function getCasualRatePerDay(location: string) {
+  return location === "Ruiru" ? 798 : 868;
 }
 
 export function getDailyGreeting(date: Date = new Date()): string {

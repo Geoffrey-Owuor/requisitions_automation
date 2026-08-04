@@ -4,6 +4,7 @@ interface ToggleButtonState {
   showITRequisition: boolean;
   showTravelRequisition: boolean;
   showAccessRequisition: boolean;
+  showCasualRequisition: boolean;
   scrollTrigger: boolean;
 }
 
@@ -11,6 +12,7 @@ interface ToggleButtonActions {
   setShowITRequisition: (value: boolean) => void;
   setShowTravelRequisition: (value: boolean) => void;
   setShowAccessRequisition: (value: boolean) => void;
+  setShowCasualRequisition: (value: boolean) => void;
   triggerScroll: (value: boolean) => void;
   reset: () => void; //The reset function
 }
@@ -21,6 +23,7 @@ const initialValues: ReducedToggleButtonState = {
   showITRequisition: false,
   showTravelRequisition: false,
   showAccessRequisition: false,
+  showCasualRequisition: false,
 };
 
 // Creating the store
@@ -30,12 +33,14 @@ export const useToggleStore = create<ToggleButtonState & ToggleButtonActions>()(
     showITRequisition: false,
     showTravelRequisition: false,
     showAccessRequisition: false,
+    showCasualRequisition: false,
     scrollTrigger: false,
 
     // Actions
     setShowITRequisition: (value) => set({ showITRequisition: value }),
     setShowTravelRequisition: (value) => set({ showTravelRequisition: value }),
     setShowAccessRequisition: (value) => set({ showAccessRequisition: value }),
+    setShowCasualRequisition: (value) => set({ showCasualRequisition: value }),
     triggerScroll: (value) => set({ scrollTrigger: value }),
     reset: () => set(initialValues),
   }),

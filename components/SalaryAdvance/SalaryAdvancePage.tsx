@@ -31,7 +31,7 @@ export default function SalaryAdvancePage() {
 
   if (loading) {
     return (
-      <div className="py-4">
+      <div className="p-4">
         <SalaryAdvanceFormSkeleton />
       </div>
     );
