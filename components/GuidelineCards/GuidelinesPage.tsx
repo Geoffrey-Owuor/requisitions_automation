@@ -12,6 +12,7 @@ import {
   LaptopMinimalCheck,
   ShoppingBag,
   CircleDollarSign,
+  HardHat,
 } from "lucide-react";
 import ITRequisitionGuideline from "./ITRequisitionGuideline";
 import TravelRequisitionGuideline from "./TravelRequisitionGuideline";
@@ -19,9 +20,17 @@ import HelpdeskGuideline from "./HelpDeskGuideline";
 import AccessRequisitionGuideline from "./AccessRequisitionGuideline";
 import StaffPurchaseGuideline from "./StaffPurchaseGuideline";
 import SalaryAdvanceGuideline from "./SalaryAdvanceGuideline";
+import CasualRequisitionGuideline from "./CasualRequisitionGuideline";
 
 // Types
-type TabId = "travel" | "it" | "access" | "desk" | "purchase" | "advance";
+type TabId =
+  | "travel"
+  | "it"
+  | "casual"
+  | "access"
+  | "desk"
+  | "purchase"
+  | "advance";
 
 // Reusable Sub-components
 
@@ -231,6 +240,11 @@ export default function GuidelinesPage() {
       icon: <BriefcaseBusiness size={15} />,
     },
     { id: "it", label: "IT Requisition", icon: <Monitor size={15} /> },
+    {
+      id: "casual",
+      label: "Casual Requisition",
+      icon: <HardHat size={15} />,
+    },
     { id: "desk", label: "HelpDesk", icon: <LaptopMinimalCheck size={15} /> },
     {
       id: "purchase",
@@ -298,6 +312,7 @@ export default function GuidelinesPage() {
         <div className="animate-rise min-h-0 flex-1 pt-2 pb-4" key={activeTab}>
           {activeTab === "travel" && <TravelRequisitionGuideline />}
           {activeTab === "it" && <ITRequisitionGuideline />}
+          {activeTab === "casual" && <CasualRequisitionGuideline />}
           {activeTab === "desk" && <HelpdeskGuideline />}
           {activeTab === "purchase" && <StaffPurchaseGuideline />}
           {activeTab === "access" && <AccessRequisitionGuideline />}
