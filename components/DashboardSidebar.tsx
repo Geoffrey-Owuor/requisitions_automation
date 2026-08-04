@@ -9,6 +9,8 @@ import {
   ChevronLeft,
   CircleDollarSign,
   CircleQuestionMark,
+  Ellipsis,
+  HardHat,
   HousePlug,
   LaptopMinimalCheck,
   LockKeyhole,
@@ -23,6 +25,8 @@ import ITRequisitionPage from "./ITRequisition/ITRequisitionPage";
 import TravelRequisitionPage from "./TravelRequisitionPage";
 import ModalWrapper from "./Modules/ModalWrapper";
 import KeyAccessRequisitionForm from "./Modules/Retail/KeyAccessRequisitionForm";
+import CasualRequisitionForm from "./Modules/Retail/CasualRequisitionForm";
+import MoreMenuModal from "./Modules/MoreMenuModal";
 import { useToggleStore } from "@/store/useToggleStore";
 
 // Summarized labels for tight vertical sidebar space
@@ -68,6 +72,13 @@ const DashboardSidebar = () => {
     (state) => state.setShowAccessRequisition,
   );
 
+  const showCasualRequisition = useToggleStore(
+    (state) => state.showCasualRequisition,
+  );
+  const setShowCasualRequisition = useToggleStore(
+    (state) => state.setShowCasualRequisition,
+  );
+
   return (
     <>
       {/* IT Modal */}
@@ -92,6 +103,14 @@ const DashboardSidebar = () => {
         onClose={() => setShowAccessRequisition(false)}
       >
         <KeyAccessRequisitionForm />
+      </ModalWrapper>
+
+      {/* Casual Requisition Modal */}
+      <ModalWrapper
+        isOpen={showCasualRequisition}
+        onClose={() => setShowCasualRequisition(false)}
+      >
+        <CasualRequisitionForm />
       </ModalWrapper>
 
       <aside className="fixed top-1 bottom-1 left-0 z-50 hidden w-20 flex-col items-center pt-0 pb-2 lg:flex">
@@ -154,15 +173,6 @@ const DashboardSidebar = () => {
             isActive={pathname === "/dashboard/advance"}
             showToolTip={true}
           />
-
-          {/* Access Requisition */}
-          <SideBarButton
-            label="Access"
-            handleClick={() => setShowAccessRequisition(true)}
-            Icon={LockKeyhole}
-            showToolTip={true}
-            toolTipMessage="Access/Key Issuance"
-          />
         </nav>
 
         {/* User Dropdown at the Bottom */}
@@ -176,14 +186,38 @@ const DashboardSidebar = () => {
               showToolTip={true}
               toolTipMessage="Go Back"
             />
-            <Link
-              href="/guidelines"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="rounded-full p-2 text-white/70 transition-colors hover:bg-white/10 hover:text-white"
-            >
-              <CircleQuestionMark className="h-5 w-5" />
-            </Link>
+            {/* More menu - holds secondary links (Guidelines, future additions) */}
+            <MoreMenuModal
+              align="right"
+              triggerClassName="flex w-full flex-col items-center gap-1 rounded-2xl py-2.5 text-[10px] font-semibold text-white/70 transition-all duration-300 hover:bg-white/10 hover:text-white active:scale-95"
+              trigger={
+                <>
+                  <Ellipsis className="h-5 w-5" />
+                  <span>More</span>
+                </>
+              }
+              items={[
+                {
+                  key: "casual",
+                  label: "Casual Requisition",
+                  Icon: HardHat,
+                  onClick: () => setShowCasualRequisition(true),
+                },
+                {
+                  key: "access",
+                  label: "Key & Access",
+                  Icon: LockKeyhole,
+                  onClick: () => setShowAccessRequisition(true),
+                },
+                {
+                  key: "guidelines",
+                  label: "Guidelines",
+                  Icon: CircleQuestionMark,
+                  href: "/guidelines",
+                  external: true,
+                },
+              ]}
+            />
             <UserDropdown direction="up" />
           </div>
         </div>

@@ -1,54 +1,57 @@
 "use client";
 
 import { useUser } from "@/context/UserContext";
-import { useState, ChangeEvent } from "react";
+import { useState, ChangeEvent, useMemo } from "react";
 import { DatePicker } from "@/components/DatePicker";
 import {
   ChevronDown,
   UserRound,
   ArrowRight,
-  ShieldAlert,
-  MapPin,
-  Check,
+  HardHat,
+  Wallet,
+  CalendarRange,
 } from "lucide-react";
-import Image from "next/image";
-import { assets } from "@/public/assets";
 import { useQuery } from "@tanstack/react-query";
 import { loadHodApprovers, loadBaseDepartments } from "@/lib/loadAppDataV2";
+import { assets, CASUAL_LOCATIONS, getCasualRatePerDay } from "@/public/assets";
 import { ApiHandler } from "@/utils/ApiHandler";
 import SubmittingOverlay from "@/components/SubmittingOverlay";
 import AlertModal from "@/components/AlertModal";
 import { AlertInfo } from "@/components/TravelRequisitionPage";
-import KeyConfirmationModal from "./KeyConfirmationModal";
+import CasualConfirmationModal from "./CasualConfirmationModal";
 import { useToggleStore } from "@/store/useToggleStore";
+import Image from "next/image";
 
 // ---- Types ----
-export interface KeyAccessFormData {
-  employeeName: string;
-  staffNumber: string;
+export interface CasualFormData {
   department: string;
   hodApprover: string;
-  issuanceDate: string;
-  requirements: string;
-  locations: string;
+  location: string;
+  justification: string;
+  numberOfCasuals: number;
+  ppesRequired: string;
+  periodFrom: string;
+  periodTo: string;
 }
 
-const InitialFormState: KeyAccessFormData = {
-  employeeName: "",
-  staffNumber: "",
+const InitialFormState: CasualFormData = {
   department: "",
   hodApprover: "",
-  issuanceDate: "",
-  requirements: "",
-  locations: "",
+  location: "",
+  justification: "",
+  numberOfCasuals: 0,
+  ppesRequired: "",
+  periodFrom: "",
+  periodTo: "",
 };
 
 // ---- Sub-component prop types ----
 interface FormInputProps {
   label: string;
+  type?: "text" | "number";
   placeholder?: string;
-  value: string;
-  onChange: (value: string) => void;
+  value: string | number;
+  onChange: (value: string | number) => void;
 }
 
 interface FormSelectProps {
@@ -60,7 +63,7 @@ interface FormSelectProps {
 }
 
 // ---- Main Page ----
-export default function KeyAccessRequisitionForm() {
+export default function CasualRequisitionForm() {
   const { username, email } = useUser();
 
   const scrollTrigger = useToggleStore((state) => state.scrollTrigger);
@@ -78,33 +81,58 @@ export default function KeyAccessRequisitionForm() {
     queryFn: loadHodApprovers,
   });
 
-  const [formData, setFormData] = useState<KeyAccessFormData>(InitialFormState);
+  const [formData, setFormData] = useState<CasualFormData>(InitialFormState);
   const [step, setStep] = useState(1);
-  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [alertInfo, setAlertInfo] = useState<AlertInfo>({
     alertType: "",
     alertMessage: "",
   });
   const [submitting, setSubmitting] = useState(false);
 
-  // Required fields for button disable check
-  const requiredFields: (keyof KeyAccessFormData)[] = [
-    "employeeName",
-    "staffNumber",
+  // Derived rate/day, engagement days (inclusive) and total amount
+  const ratePerDay = formData.location
+    ? getCasualRatePerDay(formData.location)
+    : 0;
+
+  const engagementDays = useMemo(() => {
+    if (!formData.periodFrom || !formData.periodTo) return 0;
+
+    const from = new Date(formData.periodFrom + "T00:00:00");
+    const to = new Date(formData.periodTo + "T00:00:00");
+    const diffDays =
+      Math.round((to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+
+    return diffDays > 0 ? diffDays : 0;
+  }, [formData.periodFrom, formData.periodTo]);
+
+  const totalAmount = formData.numberOfCasuals * ratePerDay * engagementDays;
+
+  const isEmpty = (val: unknown) =>
+    val === null || val === undefined || val === "";
+
+  const requiredStringFields: (keyof CasualFormData)[] = [
     "department",
     "hodApprover",
-    "issuanceDate",
-    "requirements",
-    "locations",
+    "location",
+    "justification",
+    "ppesRequired",
+    "periodFrom",
+    "periodTo",
   ];
 
-  // Button is disabled if any required field is empty OR if terms aren't agreed to
-  const buttonDisabled =
-    requiredFields.some((field) => !formData[field]) || !agreedToTerms;
+  const invalidDateRange =
+    !!formData.periodFrom &&
+    !!formData.periodTo &&
+    formData.periodTo < formData.periodFrom;
 
-  const updateField = <K extends keyof KeyAccessFormData>(
+  const buttonDisabled =
+    requiredStringFields.some((field) => isEmpty(formData[field])) ||
+    formData.numberOfCasuals <= 0 ||
+    invalidDateRange;
+
+  const updateField = <K extends keyof CasualFormData>(
     field: K,
-    value: KeyAccessFormData[K],
+    value: CasualFormData[K],
   ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
@@ -112,6 +140,9 @@ export default function KeyAccessRequisitionForm() {
   const handleSubmit = async () => {
     const payload = {
       formData,
+      engagementDays,
+      ratePerDay,
+      totalAmount,
       submittedBy: {
         name: username,
         email: email,
@@ -121,9 +152,8 @@ export default function KeyAccessRequisitionForm() {
     setSubmitting(true);
 
     try {
-      // TODO: Update the API endpoint to your actual Key Requisition endpoint
       const response = await ApiHandler(
-        "/api/accessrequisition/submitrequisition",
+        "/api/casualrequisition/submitrequisition",
         "POST",
         payload,
       );
@@ -133,25 +163,21 @@ export default function KeyAccessRequisitionForm() {
       if (!response.ok)
         throw new Error(
           data.message ||
-            "An error occurred while trying to submit your Key Access requisition",
+            "An error occurred while trying to submit your Casual requisition",
         );
 
       setAlertInfo({
         alertType: "success",
         alertMessage:
           data.message ||
-          "Your Key Access requisition has been submitted successfully.",
+          "Your Casual requisition has been submitted successfully, you will receive a confirmation email shortly",
       });
 
       setFormData(InitialFormState);
-      setAgreedToTerms(false);
       setStep(3);
     } catch (error) {
       if (error instanceof Error) {
-        console.error(
-          "Error while trying to submit Key Access requisition",
-          error,
-        );
+        console.error("Error while trying to submit Casual requisition", error);
         setAlertInfo({ alertType: "error", alertMessage: error.toString() });
         setStep(3);
       }
@@ -169,8 +195,11 @@ export default function KeyAccessRequisitionForm() {
       )}
 
       {step === 2 && (
-        <KeyConfirmationModal
+        <CasualConfirmationModal
           formData={formData}
+          engagementDays={engagementDays}
+          ratePerDay={ratePerDay}
+          totalAmount={totalAmount}
           onBack={() => {
             setStep(1);
             triggerScroll(!scrollTrigger);
@@ -185,22 +214,21 @@ export default function KeyAccessRequisitionForm() {
           {/* Form Image - TODO: Update src to appropriate asset if needed */}
           <div className="mb-4 overflow-hidden rounded-2xl sm:rounded-3xl">
             <Image
-              src={assets.access_key_image}
+              src={assets.casual_form_image}
               sizes="100vh"
               className="rounded-xl object-contain object-center"
               priority
               alt="Form Image"
             />
           </div>
-
           {/* Header */}
           <header className="mb-8 flex items-end justify-between max-sm:flex-col max-sm:items-start max-sm:gap-5">
             <div>
               <h1 className="m-0 text-2xl font-semibold tracking-[-0.5px] text-[#1e1b1b]">
-                Key & Access Requisition
+                Casual Requisition
               </h1>
               <p className="mt-1 text-[14px] text-[#7c5a5a]">
-                Submit your request for facility keys and access codes.
+                Submit your request for casual staff engagement.
               </p>
             </div>
           </header>
@@ -215,24 +243,12 @@ export default function KeyAccessRequisitionForm() {
                 triggerScroll(!scrollTrigger);
               }}
             >
-              {/* Section 1: Staff Details */}
+              {/* Section 1: Requisition Details */}
               <div>
                 <h2 className="mb-5 flex items-center gap-2 text-[13px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
-                  <UserRound size={16} /> Staff Information
+                  <UserRound size={16} /> Requisition Details
                 </h2>
                 <div className="grid grid-cols-2 gap-5 max-sm:grid-cols-1">
-                  <FormInput
-                    label="Employee Name"
-                    placeholder="Full Name"
-                    value={formData.employeeName}
-                    onChange={(v) => updateField("employeeName", v)}
-                  />
-                  <FormInput
-                    label="Staff Number"
-                    placeholder="Employee staff number"
-                    value={formData.staffNumber}
-                    onChange={(v) => updateField("staffNumber", v)}
-                  />
                   <FormSelect
                     label="Department"
                     options={DEPARTMENTS}
@@ -247,154 +263,116 @@ export default function KeyAccessRequisitionForm() {
                     loading={hodsLoading}
                     onChange={(v) => updateField("hodApprover", v)}
                   />
-
-                  {/* Issuance Date */}
-                  <div className="flex flex-col gap-2">
-                    <label className="text-[13px] font-medium text-[#7c5a5a]">
-                      Issuance Date <span className="text-red-500">*</span>
-                    </label>
-                    <DatePicker
-                      value={formData.issuanceDate}
-                      onChange={(v) => updateField("issuanceDate", v)}
-                    />
-                  </div>
+                  <FormSelect
+                    label="Location"
+                    options={CASUAL_LOCATIONS}
+                    value={formData.location}
+                    onChange={(v) => updateField("location", v)}
+                  />
+                  <FormInput
+                    type="number"
+                    label="Number of Casuals"
+                    value={formData.numberOfCasuals}
+                    onChange={(v) => updateField("numberOfCasuals", Number(v))}
+                  />
                 </div>
               </div>
 
-              {/* Section 2: Access Details */}
+              {/* Section 2: Engagement Period */}
               <div>
                 <h2 className="mb-5 flex items-center gap-2 text-[13px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
-                  <MapPin size={16} /> Access Details
+                  <CalendarRange size={16} /> Engagement Period
+                </h2>
+                <div className="grid grid-cols-2 gap-5 max-sm:grid-cols-1">
+                  <div className="flex flex-col gap-2">
+                    <label className="text-[13px] font-medium text-[#7c5a5a]">
+                      Period From <span className="text-red-500">*</span>
+                    </label>
+                    <DatePicker
+                      value={formData.periodFrom}
+                      onChange={(v) => updateField("periodFrom", v)}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <label className="text-[13px] font-medium text-[#7c5a5a]">
+                      Period To <span className="text-red-500">*</span>
+                    </label>
+                    <DatePicker
+                      value={formData.periodTo}
+                      onChange={(v) => updateField("periodTo", v)}
+                      minDate={formData.periodFrom || undefined}
+                    />
+                  </div>
+                </div>
+                {invalidDateRange && (
+                  <p className="mt-2 text-xs font-medium text-red-500">
+                    Period To cannot be earlier than Period From.
+                  </p>
+                )}
+              </div>
+
+              {/* Section 3: Justification & PPEs */}
+              <div>
+                <h2 className="mb-5 flex items-center gap-2 text-[13px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
+                  <HardHat size={16} /> Justification & PPEs
                 </h2>
 
                 <div className="flex flex-col gap-6">
-                  {/* Locations Textarea */}
                   <div className="flex flex-col gap-2">
                     <label className="text-[13px] font-medium text-[#7c5a5a]">
-                      Locations to be Accessed{" "}
-                      <span className="text-red-500">*</span>
+                      Justification <span className="text-red-500">*</span>
                     </label>
                     <textarea
                       className="h-24 resize-none rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 py-3 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
-                      placeholder="Specify the exact rooms, stores, or facilities you need access to..."
-                      value={formData.locations}
+                      placeholder="State the reason casual staff are required..."
+                      value={formData.justification}
                       required
                       onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
-                        updateField("locations", e.target.value)
+                        updateField("justification", e.target.value)
                       }
                     />
                   </div>
 
-                  {/* Requirements Textarea */}
                   <div className="flex flex-col gap-2">
                     <label className="text-[13px] font-medium text-[#7c5a5a]">
-                      Requirements / Justification{" "}
-                      <span className="text-red-500">*</span>
+                      PPEs Required <span className="text-red-500">*</span>
                     </label>
                     <textarea
                       className="h-24 resize-none rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 py-3 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
-                      placeholder="State the requirements and the reason why access to these locations is required..."
-                      value={formData.requirements}
+                      placeholder="List the personal protective equipment required..."
+                      value={formData.ppesRequired}
                       required
                       onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
-                        updateField("requirements", e.target.value)
+                        updateField("ppesRequired", e.target.value)
                       }
                     />
                   </div>
                 </div>
               </div>
 
-              {/* Section 3: Disclaimers & Acknowledgement */}
-              <div className="mt-2">
-                <h2 className="mb-4 flex items-center gap-2 text-[13px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
-                  <ShieldAlert size={16} /> Key Custody & Access Policy
+              {/* Section 4: Rate Summary */}
+              <div className="col-span-full">
+                <h2 className="mb-5 flex items-center gap-2 text-[13px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
+                  <Wallet size={16} /> Rate Summary
                 </h2>
-
-                <div className="small-scrollbar mb-4 max-h-60 overflow-y-auto rounded-xl border border-[rgba(240,180,180,0.6)] bg-rose-50/30 p-4 text-[13px] leading-relaxed text-[#5c4a4a]">
-                  <p className="mb-3 font-semibold text-[#1e1b1b]">
-                    By receiving these keys/access codes, you are bound by the
-                    following conditions:
-                  </p>
-                  <ol className="ml-4 flex list-decimal flex-col gap-1.5 pb-3">
-                    <li>
-                      Safeguard the store and key(s) securely at all times.
-                    </li>
-                    <li>Use the key(s) strictly for official purposes only.</li>
-                    <li>
-                      Arm and disarm the premises during departure and entry
-                      respectively.
-                    </li>
-                    <li>
-                      Ensure all staff and visitors have exited the premises,
-                      all windows and access points are closed, and lights
-                      switched off before arming the system.
-                    </li>
-                    <li>
-                      Report any lost, damaged, or missing key(s) to HOD & HAL
-                      Security immediately.
-                    </li>
-                    <li>
-                      Do not attempt to copy, alter, duplicate, or reproduce any
-                      HAL facility key(s).
-                    </li>
-                    <li>
-                      Do not share your access code with any colleague,
-                      stranger, or unauthorized person.
-                    </li>
-                    <li>
-                      If unable to secure the premises, report immediately to
-                      the HOD & HAL Security Department.
-                    </li>
-                    <li>
-                      Produce or surrender the key(s) upon official request or
-                      before proceeding on leave.
-                    </li>
-                    <li>
-                      Report any absence or unfamiliar security guard within the
-                      facility before opening the premises.
-                    </li>
-                    <li>
-                      Open & close the premises only in the presence of familiar
-                      contracted security personnel.
-                    </li>
-                    <li>
-                      Report and respond appropriately to any emergencies
-                      brought to your attention.
-                    </li>
-                    <li>
-                      Change your access code whenever deemed necessary based on
-                      your judgment or security concerns.
-                    </li>
-                  </ol>
-                  <p className="mt-2 font-semibold text-rose-700">
-                    Do not hand over the key(s) to strangers or unauthorized
-                    persons under any circumstances.
-                  </p>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                  <div className="flex items-center justify-between rounded-2xl border border-rose-700/30 bg-linear-to-r from-rose-900/80 to-rose-800/80 px-5 py-5 font-semibold text-rose-50">
+                    <span>Rate / Day</span>
+                    <span className="text-xl">
+                      KES {ratePerDay.toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between rounded-2xl border border-rose-700/30 bg-linear-to-r from-rose-900/80 to-rose-800/80 px-5 py-5 font-semibold text-rose-50">
+                    <span>Engagement Days</span>
+                    <span className="text-xl">{engagementDays}</span>
+                  </div>
+                  <div className="flex items-center justify-between rounded-2xl bg-linear-to-r from-slate-800 to-rose-900 px-5 py-5 font-semibold text-white shadow-lg">
+                    <span>Total (KES)</span>
+                    <span className="text-xl">
+                      {totalAmount.toLocaleString()}
+                    </span>
+                  </div>
                 </div>
-
-                <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-transparent p-2 transition-all hover:bg-rose-50/50">
-                  <span
-                    className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-all ${agreedToTerms ? "border-rose-500 bg-rose-500 text-white" : "border-slate-300 bg-white"}`}
-                  >
-                    {agreedToTerms && (
-                      <Check className="h-3.5 w-3.5" strokeWidth={3} />
-                    )}
-                  </span>
-                  <input
-                    type="checkbox"
-                    className="sr-only"
-                    checked={agreedToTerms}
-                    onChange={(e) => setAgreedToTerms(e.target.checked)}
-                  />
-                  <span className="text-[13px] leading-tight font-medium text-slate-700">
-                    I agree to comply with all HAL policies and procedures
-                    relating to the custody and use of facility/store key(s) and
-                    access codes. I further acknowledge that if the key(s) are
-                    lost, stolen, damaged, or not surrendered upon request, I
-                    may be surcharged for costs incurred, including replacement
-                    of locks and related security measures.
-                  </span>{" "}
-                </label>
               </div>
 
               {/* Submit Button */}
@@ -408,7 +386,7 @@ export default function KeyAccessRequisitionForm() {
                   <ArrowRight className="h-4 w-4" />
                 </button>
                 <p className="mt-3 text-center text-xs text-[#7c5a5a]">
-                  All fields and policy agreement are required to proceed.
+                  All fields are required to proceed.
                 </p>
               </div>
             </form>
@@ -421,20 +399,29 @@ export default function KeyAccessRequisitionForm() {
 
 // ---- Helper Components ----
 
-function FormInput({ label, placeholder, value, onChange }: FormInputProps) {
+function FormInput({
+  label,
+  type = "text",
+  placeholder,
+  value,
+  onChange,
+}: FormInputProps) {
   return (
     <div className="flex flex-col gap-2">
       <label className="text-[13px] font-medium text-[#7c5a5a]">
         {label} <span className="text-red-500">*</span>
       </label>
       <input
-        type="text"
+        type={type}
+        min={type === "number" ? 1 : undefined}
         className="h-10 rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
         placeholder={placeholder}
-        value={value}
-        onChange={(e: ChangeEvent<HTMLInputElement>) =>
-          onChange(e.target.value)
-        }
+        value={value || ""}
+        onChange={(e: ChangeEvent<HTMLInputElement>) => {
+          const val =
+            type === "number" ? Number(e.target.value) : e.target.value;
+          onChange(val);
+        }}
         required
       />
     </div>
