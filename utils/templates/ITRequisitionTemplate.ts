@@ -92,7 +92,7 @@ export function ITRequisitionTemplate({
                   ? `<tr>
                 <td colspan="2" style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 12px;">
                   <p style="margin: 0 0 4px; font-size: 10px; font-weight: 700; color: #f87171; text-transform: uppercase; letter-spacing: 1px;">Additional Requirements</p>
-                  <p style="margin: 0; font-size: 12px; color: #cbd5e1; line-height: 1.5;">${emailData.otherrequirements}</p>
+                  <p style="margin: 0; font-size: 12px; color: #cbd5e1; line-height: 1.5; overflow-wrap: break-word; white-space: pre-wrap;">${emailData.otherrequirements}</p>
                 </td>
               </tr>`
                   : ""
