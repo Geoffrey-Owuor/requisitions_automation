@@ -88,11 +88,11 @@ export function AccessRequisitionTemplate({
             <table width="100%">
               <tr>
                 <td style="padding-bottom: 12px; font-size: 12px; color: #94a3b8;">Requirements</td>
-                <td style="padding-bottom: 12px; font-size: 12px; color: #ffffff; text-align: right; font-weight: 600;">${emailData.requirements || "—"}</td>
+                <td style="padding-bottom: 12px; font-size: 12px; color: #ffffff; text-align: right; font-weight: 600; overflow-wrap: break-word; white-space: pre-wrap;">${emailData.requirements || "—"}</td>
               </tr>
               <tr>
                 <td style="padding-bottom: 12px; font-size: 12px; color: #94a3b8; vertical-align: top;">Locations</td>
-                <td style="padding-bottom: 12px; font-size: 12px; color: #ffffff; text-align: right; font-weight: 600;">${emailData.locations || "—"}</td>
+                <td style="padding-bottom: 12px; font-size: 12px; color: #ffffff; text-align: right; font-weight: 600; overflow-wrap: break-word; white-space: pre-wrap;">${emailData.locations || "—"}</td>
               </tr>
               
             </table>

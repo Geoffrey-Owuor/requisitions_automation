@@ -344,7 +344,7 @@ const ITApprovalModal = ({ data }: { data: ITRequisitionData }) => {
             {otherRequirements && (
               <div className="mb-6 border-t border-[rgba(240,180,180,0.4)] pt-6">
                 <SectionLabel>Other Requirements</SectionLabel>
-                <p className="rounded-xl border border-[rgba(240,180,180,0.3)] bg-white/60 px-4 py-3.5 text-[13px] leading-relaxed text-[#1e1b1b]">
+                <p className="rounded-xl border border-[rgba(240,180,180,0.3)] bg-white/60 px-4 py-3.5 text-[13px] leading-relaxed wrap-break-word whitespace-pre-wrap text-[#1e1b1b]">
                   {otherRequirements}
                 </p>
               </div>

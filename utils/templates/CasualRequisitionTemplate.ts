@@ -126,7 +126,7 @@ function modernRow(label: string, value: string) {
   return `
     <tr>
       <td style="padding: 10px 0; font-size: 12px; color: #5a3a3a; width: 35%; border-bottom: 1px solid #f7f0f0;">${label}</td>
-      <td style="padding: 10px 0; font-size: 13px; color: #1a0f0f; font-weight: 500; border-bottom: 1px solid #f7f0f0;">${value || "—"}</td>
+      <td style="padding: 10px 0; font-size: 13px; color: #1a0f0f; font-weight: 500; border-bottom: 1px solid #f7f0f0; overflow-wrap: break-word; white-space: pre-wrap;">${value || "—"}</td>
     </tr>`;
 }
 

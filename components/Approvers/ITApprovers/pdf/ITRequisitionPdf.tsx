@@ -125,7 +125,9 @@ const ITRequisitionPdf = ({ pdfData }: { pdfData: ITPdfValues }) => {
                 Other Requirements / Notes
               </Text>
               <Text
-                style={tw("mt-1 text-[10px] leading-relaxed text-[#1e1b1b]")}
+                style={tw(
+                  "mt-1 text-[10px] leading-relaxed break-words whitespace-pre-wrap text-[#1e1b1b]",
+                )}
               >
                 {pdfData.otherrequirements}
               </Text>

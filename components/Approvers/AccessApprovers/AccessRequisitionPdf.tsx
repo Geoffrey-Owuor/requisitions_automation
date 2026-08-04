@@ -87,7 +87,11 @@ const AccessRequisitionPdf = ({ pdfData }: { pdfData: AccessPdfValues }) => {
             >
               Access Locations
             </Text>
-            <Text style={tw("text-[10px] leading-relaxed text-[#1e1b1b]")}>
+            <Text
+              style={tw(
+                "text-[10px] leading-relaxed break-words whitespace-pre-wrap text-[#1e1b1b]",
+              )}
+            >
               {pdfData.locations || "No locations specified"}
             </Text>
           </View>
@@ -97,7 +101,11 @@ const AccessRequisitionPdf = ({ pdfData }: { pdfData: AccessPdfValues }) => {
             <Text style={tw("text-[8px] font-medium text-[#b0a0a0] uppercase")}>
               Requirements / Justification
             </Text>
-            <Text style={tw("mt-1 text-[10px] leading-relaxed text-[#1e1b1b]")}>
+            <Text
+              style={tw(
+                "mt-1 text-[10px] leading-relaxed break-words whitespace-pre-wrap text-[#1e1b1b]",
+              )}
+            >
               {pdfData.requirements || "No specific requirements/keys provided"}
             </Text>
           </View>
