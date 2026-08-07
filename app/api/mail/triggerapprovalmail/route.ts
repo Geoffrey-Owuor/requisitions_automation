@@ -4,6 +4,7 @@ import { EmailSender } from "@/services/EmailSender";
 import { ITEmailSender } from "@/services/ITEmailSender";
 import { AccessEmailSender } from "@/services/AccessEmailSender";
 import { AdvanceEmailSender } from "@/services/AdvanceEmailSender";
+import { CasualEmailSender } from "@/services/CasualEmailSender";
 
 // An api to re-trigger a notification approval email for travel requisition
 export async function POST(request: NextRequest) {
@@ -45,7 +46,7 @@ export async function POST(request: NextRequest) {
           message,
           title,
           role: role ? role : "user",
-          showPdfDownload: showPdfDownload ? showPdfDownload : undefined,
+          showPdfDownload: !!showPdfDownload,
         });
         break;
       case "it":
@@ -66,7 +67,7 @@ export async function POST(request: NextRequest) {
           message,
           title,
           role: role ? role : "user",
-          showPdfDownload: showPdfDownload ? showPdfDownload : undefined,
+          showPdfDownload: !!showPdfDownload,
         });
         break;
       case "advance":
@@ -77,6 +78,16 @@ export async function POST(request: NextRequest) {
           title,
         });
         break;
+      case "casual":
+        CasualEmailSender({
+          to,
+          requestId,
+          reviewLink: reviewLink ? reviewLink : undefined,
+          message,
+          title,
+          role: role ? role : "user",
+          showPdfDownload: !!showPdfDownload,
+        });
       default:
         return NextResponse.json(
           { message: "Unknown form type passed, try checking the spelling" },
