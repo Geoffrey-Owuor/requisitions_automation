@@ -2,7 +2,10 @@
 
 import { Document, Page, Text, View } from "@react-pdf/renderer";
 import { createTw } from "react-pdf-tailwind";
-import { CasualEmailDataValues as CasualPdfValues } from "@/services/CasualEmailSender";
+import {
+  CasualEmailDataValues as CasualPdfValues,
+  CasualSectionValues,
+} from "@/services/CasualEmailSender";
 import { dateFormatter } from "@/public/assets";
 
 // Initialize Tailwind for React-PDF
@@ -65,6 +68,78 @@ const approvalStages = [
   },
 ] as const;
 
+// SECTION BLOCK
+const PdfSectionBlock = ({ section }: { section: CasualSectionValues }) => {
+  const formatCost = (val: string | number) =>
+    `KES ${Number(val).toLocaleString()}`;
+
+  return (
+    <View
+      style={tw("mb-3 rounded-xl border border-[#f0b4b4] bg-[#fafafa] p-3")}
+    >
+      <Text style={tw("mb-2 text-[10px] font-bold text-[#1e1b1b]")}>
+        {section.sectionname}
+      </Text>
+      <View style={tw("flex flex-row flex-wrap gap-y-2 gap-x-2 mb-2")}>
+        <PdfField
+          label="Period From"
+          value={dateFormatter(section.periodfrom)}
+        />
+        <PdfField label="Period To" value={dateFormatter(section.periodto)} />
+        <PdfField label="Engagement Days" value={section.engagementdays} />
+        <PdfField label="Number of Casuals" value={section.numberofcasuals} />
+        {section.hrapprovedcasuals !== null &&
+          section.hrapprovedcasuals !== undefined && (
+            <PdfField
+              label="HR Approved Casuals"
+              value={section.hrapprovedcasuals}
+            />
+          )}
+        <PdfField label="Rate / Day" value={formatCost(section.rateperday)} />
+      </View>
+
+      <View style={tw("mb-2")}>
+        <Text style={tw("text-[8px] font-medium text-[#b0a0a0] uppercase")}>
+          Justification
+        </Text>
+        <Text
+          style={tw(
+            "mt-0.5 text-[9px] leading-relaxed break-words whitespace-pre-wrap text-[#1e1b1b]",
+          )}
+        >
+          {section.justification}
+        </Text>
+      </View>
+
+      <View style={tw("mb-2")}>
+        <Text style={tw("text-[8px] font-medium text-[#b0a0a0] uppercase")}>
+          PPEs Required
+        </Text>
+        <Text
+          style={tw(
+            "mt-0.5 text-[9px] leading-relaxed break-words whitespace-pre-wrap text-[#1e1b1b]",
+          )}
+        >
+          {section.ppesrequired}
+        </Text>
+      </View>
+
+      <View
+        style={tw(
+          "border-t border-[#f0b4b4] pt-2 flex flex-row justify-between",
+        )}
+      >
+        <Text style={tw("font-semibold text-[9px] text-[#1e1b1b]")}>
+          Section Total
+        </Text>
+        <Text style={tw("text-[10px] font-bold text-[#be123c]")}>
+          {formatCost(section.totalamount)}
+        </Text>
+      </View>
+    </View>
+  );
+};
+
 export const CasualRequisitionPdf = ({
   pdfData,
 }: {
@@ -98,78 +173,27 @@ export const CasualRequisitionPdf = ({
           </View>
         </View>
 
-        {/* Engagement Information */}
+        {/* Sections */}
         <View style={tw("mb-5 border-t border-[#f0b4b4] pt-4")}>
-          <PdfSectionHeading title="Engagement Information" />
-          <View style={tw("flex flex-row flex-wrap gap-y-3 gap-x-2")}>
-            <PdfField
-              label="Period From"
-              value={dateFormatter(pdfData.periodfrom)}
-            />
-            <PdfField
-              label="Period To"
-              value={dateFormatter(pdfData.periodto)}
-            />
-            <PdfField label="Engagement Days" value={pdfData.engagementdays} />
-            <PdfField
-              label="Number of Casuals"
-              value={pdfData.numberofcasuals}
-            />
-            {pdfData.hrapprovedcasuals !== null &&
-              pdfData.hrapprovedcasuals !== undefined && (
-                <PdfField
-                  label="HR Approved Casuals"
-                  value={pdfData.hrapprovedcasuals}
-                />
-              )}
-          </View>
-
-          <View style={tw("mt-4")}>
-            <Text
-              style={tw(
-                "text-[8px] font-medium break-words whitespace-pre-wrap text-[#b0a0a0] uppercase",
-              )}
-            >
-              Justification
-            </Text>
-            <Text
-              style={tw(
-                "mt-1 text-[10px] leading-relaxed break-words whitespace-pre-wrap text-[#1e1b1b]",
-              )}
-            >
-              {pdfData.justification}
-            </Text>
-          </View>
-
-          <View style={tw("mt-4")}>
-            <Text style={tw("text-[8px] font-medium text-[#b0a0a0] uppercase")}>
-              PPEs Required
-            </Text>
-            <Text style={tw("mt-1 text-[10px] leading-relaxed text-[#1e1b1b]")}>
-              {pdfData.ppesrequired}
-            </Text>
-          </View>
+          <PdfSectionHeading title="Sections" />
+          {pdfData.sections.map((section) => (
+            <PdfSectionBlock key={section.sectionname} section={section} />
+          ))}
         </View>
 
-        {/* Rate Summary */}
+        {/* Overall Summary */}
         <View style={tw("mb-5 border-t border-[#f0b4b4] pt-4")}>
-          <PdfSectionHeading title="Rate Summary (KES)" />
+          <PdfSectionHeading title="Overall Summary (KES)" />
 
           <View
             style={tw("rounded-xl border border-[#f0b4b4] bg-[#fafafa] p-4")}
           >
             <View style={tw("flex flex-row justify-between mb-2")}>
-              <Text style={tw("text-[10px] text-[#7c5a5a]")}>Rate / Day</Text>
-              <Text style={tw("text-[10px] font-semibold text-[#1e1b1b]")}>
-                {formatCost(pdfData.rateperday)}
-              </Text>
-            </View>
-            <View style={tw("flex flex-row justify-between mb-2")}>
               <Text style={tw("text-[10px] text-[#7c5a5a]")}>
-                Engagement Days
+                Total Casuals
               </Text>
               <Text style={tw("text-[10px] font-semibold text-[#1e1b1b]")}>
-                {pdfData.engagementdays}
+                {pdfData.totalcasuals}
               </Text>
             </View>
 

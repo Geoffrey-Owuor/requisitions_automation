@@ -1,1 +1,1 @@
-<!-- SKILLS  file for define claude skills -->
+<!-- Skills.md file -->

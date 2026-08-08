@@ -6,11 +6,17 @@ import { dateFormatter } from "@/public/assets";
 import { useUser } from "@/context/UserContext";
 import { initialsHelper } from "@/public/assets";
 
+interface SectionDerived {
+  engagementDays: number;
+  totalAmount: number;
+}
+
 interface CasualConfirmationModalProps {
   formData: CasualFormData;
-  engagementDays: number;
   ratePerDay: number;
-  totalAmount: number;
+  sectionDerived: SectionDerived[];
+  overallTotalAmount: number;
+  overallTotalCasuals: number;
   onBack: () => void;
   onSubmit: () => Promise<void>;
   submitting: boolean;
@@ -18,9 +24,10 @@ interface CasualConfirmationModalProps {
 
 export default function CasualConfirmationModal({
   formData,
-  engagementDays,
   ratePerDay,
-  totalAmount,
+  sectionDerived,
+  overallTotalAmount,
+  overallTotalCasuals,
   onBack,
   onSubmit,
   submitting,
@@ -33,13 +40,6 @@ export default function CasualConfirmationModal({
     { label: "Department", value: formData.department },
     { label: "HOD Approver", value: formData.hodApprover },
     { label: "Location", value: formData.location },
-    { label: "Number of Casuals", value: String(formData.numberOfCasuals) },
-  ];
-
-  const dateDetails: { label: string; value: string }[] = [
-    { label: "Period From", value: formData.periodFrom },
-    { label: "Period To", value: formData.periodTo },
-    { label: "Engagement Days", value: String(engagementDays) },
   ];
 
   return (
@@ -71,78 +71,107 @@ export default function CasualConfirmationModal({
         </span>
       </div>
 
-      {/* Details grid */}
-      <div className="mb-5 grid grid-cols-2 gap-6 max-sm:grid-cols-1">
-        {/* Requisition Details */}
-        <div>
-          <p className="mb-2 text-[11px] font-semibold tracking-[0.4px] text-[#b0a0a0] uppercase">
-            Requisition Details
-          </p>
-          <div className="flex flex-col gap-1.5">
-            {requisitionDetails.map(({ label, value }) => (
-              <div key={label} className="flex justify-between text-[13px]">
-                <span className="text-[#7c5a5a]">{label}</span>
-                <span className="font-medium text-[#1e1b1b]">{value}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Date Details */}
-        <div>
-          <p className="mb-2 text-[11px] font-semibold tracking-[0.4px] text-[#b0a0a0] uppercase">
-            Dates
-          </p>
-          <div className="flex flex-col gap-1.5">
-            {dateDetails.map(({ label, value }) => (
-              <div key={label} className="flex justify-between text-[13px]">
-                <span className="text-[#7c5a5a]">{label}</span>
-                <span className="font-medium text-[#1e1b1b]">
-                  {label === "Engagement Days"
-                    ? value
-                    : value
-                      ? dateFormatter(value)
-                      : "Not Selected"}
-                </span>
-              </div>
-            ))}
-          </div>
+      {/* Requisition Details */}
+      <div className="mb-6">
+        <p className="mb-2 text-[11px] font-semibold tracking-[0.4px] text-[#b0a0a0] uppercase">
+          Requisition Details
+        </p>
+        <div className="grid grid-cols-3 gap-3 max-sm:grid-cols-1">
+          {requisitionDetails.map(({ label, value }) => (
+            <div key={label} className="flex flex-col gap-2 text-[13px]">
+              <span className="text-[#7c5a5a]">{label}</span>
+              <span className="font-medium text-[#1e1b1b]">{value}</span>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Justification */}
-      <div className="mb-5 border-t border-[rgba(240,180,180,0.4)] pt-5">
-        <p className="mb-2 text-[11px] font-semibold tracking-[0.4px] text-[#b0a0a0] uppercase">
-          Justification
+      {/* Sections */}
+      <div className="mb-6 border-t border-[rgba(240,180,180,0.4)] pt-5">
+        <p className="mb-3 text-[11px] font-semibold tracking-[0.4px] text-[#b0a0a0] uppercase">
+          Sections
         </p>
-        <p className="rounded-xl bg-white/60 py-3 text-[13px] leading-relaxed whitespace-pre-wrap text-[#1e1b1b]">
-          {formData.justification || "No justification provided"}
-        </p>
+        <div className="flex flex-col gap-4">
+          {formData.sections.map((section, index) => {
+            const derived = sectionDerived[index];
+            return (
+              <div
+                key={section.sectionName}
+                className="rounded-2xl border border-[rgba(240,180,180,0.4)] bg-white/60 p-5"
+              >
+                <h3 className="mb-3 text-[13px] font-semibold text-[#1e1b1b]">
+                  {section.sectionName}
+                </h3>
+
+                <div className="mb-3 grid grid-cols-2 gap-3 text-[13px] max-sm:grid-cols-1">
+                  <div className="flex flex-col gap-2">
+                    <span className="text-[#7c5a5a]">Number of Casuals</span>
+                    <span className="font-medium text-[#1e1b1b]">
+                      {section.numberOfCasuals}
+                    </span>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <span className="text-[#7c5a5a]">Period</span>
+                    <span className="font-medium text-[#1e1b1b]">
+                      {section.periodFrom
+                        ? dateFormatter(section.periodFrom)
+                        : "—"}{" "}
+                      -{" "}
+                      {section.periodTo ? dateFormatter(section.periodTo) : "—"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mb-3">
+                  <p className="mb-1 text-[11px] font-semibold tracking-[0.4px] text-[#b0a0a0] uppercase">
+                    Justification
+                  </p>
+                  <p className="text-[13px] leading-relaxed whitespace-pre-wrap text-[#1e1b1b]">
+                    {section.justification || "No justification provided"}
+                  </p>
+                </div>
+
+                <div className="mb-4">
+                  <p className="mb-1 text-[11px] font-semibold tracking-[0.4px] text-[#b0a0a0] uppercase">
+                    PPEs Required
+                  </p>
+                  <p className="text-[13px] leading-relaxed whitespace-pre-wrap text-[#1e1b1b]">
+                    {section.ppesRequired || "No PPEs specified"}
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between rounded-xl bg-linear-to-r from-slate-800 to-rose-900 px-4 py-3 text-white">
+                  <span className="text-[12px]">
+                    {section.numberOfCasuals} casual(s) &times; KES{" "}
+                    {ratePerDay.toLocaleString()}/day &times;{" "}
+                    {derived?.engagementDays ?? 0} day(s)
+                  </span>
+                  <span className="text-[15px] font-semibold">
+                    KES {(derived?.totalAmount ?? 0).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
-      {/* PPEs Required */}
-      <div className="mb-5 border-t border-[rgba(240,180,180,0.4)] pt-5">
-        <p className="mb-2 text-[11px] font-semibold tracking-[0.4px] text-[#b0a0a0] uppercase">
-          PPEs Required
-        </p>
-        <p className="rounded-xl bg-white/60 py-3 text-[13px] leading-relaxed whitespace-pre-wrap text-[#1e1b1b]">
-          {formData.ppesRequired || "No PPEs specified"}
-        </p>
-      </div>
-
-      {/* Rate Summary */}
+      {/* Overall Summary */}
       <div className="mb-6 border-t border-[rgba(240,180,180,0.4)] pt-5">
         <p className="mb-2 text-[11px] font-semibold tracking-[0.4px] text-[#b0a0a0] uppercase">
-          Rate Summary
+          Overall Summary
         </p>
-        <div className="flex items-center justify-between rounded-2xl bg-linear-to-r from-slate-800 to-rose-900 px-5 py-5 font-semibold text-white shadow-lg">
-          <span>
-            {formData.numberOfCasuals} casual(s) &times; KES{" "}
-            {ratePerDay.toLocaleString()}/day &times; {engagementDays} day(s)
-          </span>
-          <span className="text-2xl">
-            KES {totalAmount.toLocaleString()}
-          </span>
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+          <div className="flex items-center justify-between rounded-2xl border border-rose-700/30 bg-linear-to-r from-rose-900/80 to-rose-800/80 px-5 py-5 font-semibold text-rose-50">
+            <span>Total Casuals</span>
+            <span className="text-xl">{overallTotalCasuals}</span>
+          </div>
+          <div className="flex items-center justify-between rounded-2xl bg-linear-to-r from-slate-800 to-rose-900 px-5 py-5 font-semibold text-white shadow-lg">
+            <span>Total (KES)</span>
+            <span className="text-xl">
+              KES {overallTotalAmount.toLocaleString()}
+            </span>
+          </div>
         </div>
       </div>
 

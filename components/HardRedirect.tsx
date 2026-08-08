@@ -96,7 +96,7 @@ export default function HardRedirect({
       </div>
 
       <footer className="border-t border-slate-100 py-6">
-        <p className="text-center text-xs tracking-wide text-slate-500">
+        <p className="text-center text-sm text-slate-500">
           © {new Date().getFullYear()} Hotpoint Appliances Ltd · Internal Use
           Only
         </p>

@@ -9,11 +9,17 @@ import {
   ArrowRight,
   HardHat,
   Wallet,
-  CalendarRange,
+  Check,
+  Trash2,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { loadHodApprovers, loadBaseDepartments } from "@/lib/loadAppDataV2";
-import { assets, CASUAL_LOCATIONS, getCasualRatePerDay } from "@/public/assets";
+import {
+  assets,
+  CASUAL_LOCATIONS,
+  getCasualSections,
+  getCasualRatePerDay,
+} from "@/public/assets";
 import { ApiHandler } from "@/utils/ApiHandler";
 import SubmittingOverlay from "@/components/SubmittingOverlay";
 import AlertModal from "@/components/AlertModal";
@@ -23,10 +29,8 @@ import { useToggleStore } from "@/store/useToggleStore";
 import Image from "next/image";
 
 // ---- Types ----
-export interface CasualFormData {
-  department: string;
-  hodApprover: string;
-  location: string;
+export interface CasualSectionFormData {
+  sectionName: string;
   justification: string;
   numberOfCasuals: number;
   ppesRequired: string;
@@ -34,26 +38,42 @@ export interface CasualFormData {
   periodTo: string;
 }
 
+export interface CasualFormData {
+  department: string;
+  hodApprover: string;
+  location: string;
+  sections: CasualSectionFormData[];
+}
+
 const InitialFormState: CasualFormData = {
   department: "",
   hodApprover: "",
   location: "",
+  sections: [],
+};
+
+const EmptySection = (sectionName: string): CasualSectionFormData => ({
+  sectionName,
   justification: "",
   numberOfCasuals: 0,
   ppesRequired: "",
   periodFrom: "",
   periodTo: "",
-};
+});
 
-// ---- Sub-component prop types ----
-interface FormInputProps {
-  label: string;
-  type?: "text" | "number";
-  placeholder?: string;
-  value: string | number;
-  onChange: (value: string | number) => void;
+// ---- Derived helpers ----
+export function computeEngagementDays(periodFrom: string, periodTo: string) {
+  if (!periodFrom || !periodTo) return 0;
+
+  const from = new Date(periodFrom + "T00:00:00");
+  const to = new Date(periodTo + "T00:00:00");
+  const diffDays =
+    Math.round((to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+
+  return diffDays > 0 ? diffDays : 0;
 }
 
+// ---- Sub-component prop types ----
 interface FormSelectProps {
   label: string;
   options: string[];
@@ -89,46 +109,66 @@ export default function CasualRequisitionForm() {
   });
   const [submitting, setSubmitting] = useState(false);
 
-  // Derived rate/day, engagement days (inclusive) and total amount
+  const availableSections = formData.location
+    ? getCasualSections(formData.location)
+    : [];
+  const hasSectionChoice = availableSections.length > 1;
+
   const ratePerDay = formData.location
     ? getCasualRatePerDay(formData.location)
     : 0;
 
-  const engagementDays = useMemo(() => {
-    if (!formData.periodFrom || !formData.periodTo) return 0;
+  // Per-section derived engagement days + total
+  const sectionDerived = useMemo(
+    () =>
+      formData.sections.map((section) => {
+        const engagementDays = computeEngagementDays(
+          section.periodFrom,
+          section.periodTo,
+        );
+        const totalAmount =
+          section.numberOfCasuals * ratePerDay * engagementDays;
+        return { engagementDays, totalAmount };
+      }),
+    [formData.sections, ratePerDay],
+  );
 
-    const from = new Date(formData.periodFrom + "T00:00:00");
-    const to = new Date(formData.periodTo + "T00:00:00");
-    const diffDays =
-      Math.round((to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-
-    return diffDays > 0 ? diffDays : 0;
-  }, [formData.periodFrom, formData.periodTo]);
-
-  const totalAmount = formData.numberOfCasuals * ratePerDay * engagementDays;
+  const overallTotalAmount = sectionDerived.reduce(
+    (sum, s) => sum + s.totalAmount,
+    0,
+  );
+  const overallTotalCasuals = formData.sections.reduce(
+    (sum, s) => sum + s.numberOfCasuals,
+    0,
+  );
 
   const isEmpty = (val: unknown) =>
     val === null || val === undefined || val === "";
 
-  const requiredStringFields: (keyof CasualFormData)[] = [
-    "department",
-    "hodApprover",
-    "location",
-    "justification",
-    "ppesRequired",
-    "periodFrom",
-    "periodTo",
-  ];
+  const sectionsInvalid =
+    formData.sections.length === 0 ||
+    formData.sections.some((section, index) => {
+      const invalidDateRange =
+        !!section.periodFrom &&
+        !!section.periodTo &&
+        section.periodTo < section.periodFrom;
 
-  const invalidDateRange =
-    !!formData.periodFrom &&
-    !!formData.periodTo &&
-    formData.periodTo < formData.periodFrom;
+      return (
+        isEmpty(section.justification) ||
+        isEmpty(section.ppesRequired) ||
+        isEmpty(section.periodFrom) ||
+        isEmpty(section.periodTo) ||
+        section.numberOfCasuals <= 0 ||
+        invalidDateRange ||
+        sectionDerived[index] === undefined
+      );
+    });
 
   const buttonDisabled =
-    requiredStringFields.some((field) => isEmpty(formData[field])) ||
-    formData.numberOfCasuals <= 0 ||
-    invalidDateRange;
+    isEmpty(formData.department) ||
+    isEmpty(formData.hodApprover) ||
+    isEmpty(formData.location) ||
+    sectionsInvalid;
 
   const updateField = <K extends keyof CasualFormData>(
     field: K,
@@ -137,12 +177,46 @@ export default function CasualRequisitionForm() {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handleLocationChange = (location: string) => {
+    const sections = getCasualSections(location);
+
+    setFormData((prev) => ({
+      ...prev,
+      location,
+      // Single-section locations skip the picker and go straight to the fieldset
+      sections: sections.length === 1 ? [EmptySection(sections[0])] : [],
+    }));
+  };
+
+  const toggleSection = (sectionName: string) => {
+    setFormData((prev) => {
+      const exists = prev.sections.some((s) => s.sectionName === sectionName);
+
+      return {
+        ...prev,
+        sections: exists
+          ? prev.sections.filter((s) => s.sectionName !== sectionName)
+          : [...prev.sections, EmptySection(sectionName)],
+      };
+    });
+  };
+
+  const updateSectionField = <K extends keyof CasualSectionFormData>(
+    sectionName: string,
+    field: K,
+    value: CasualSectionFormData[K],
+  ) => {
+    setFormData((prev) => ({
+      ...prev,
+      sections: prev.sections.map((s) =>
+        s.sectionName === sectionName ? { ...s, [field]: value } : s,
+      ),
+    }));
+  };
+
   const handleSubmit = async () => {
     const payload = {
       formData,
-      engagementDays,
-      ratePerDay,
-      totalAmount,
       submittedBy: {
         name: username,
         email: email,
@@ -197,9 +271,10 @@ export default function CasualRequisitionForm() {
       {step === 2 && (
         <CasualConfirmationModal
           formData={formData}
-          engagementDays={engagementDays}
           ratePerDay={ratePerDay}
-          totalAmount={totalAmount}
+          sectionDerived={sectionDerived}
+          overallTotalAmount={overallTotalAmount}
+          overallTotalCasuals={overallTotalCasuals}
           onBack={() => {
             setStep(1);
             triggerScroll(!scrollTrigger);
@@ -267,113 +342,93 @@ export default function CasualRequisitionForm() {
                     label="Location"
                     options={CASUAL_LOCATIONS}
                     value={formData.location}
-                    onChange={(v) => updateField("location", v)}
-                  />
-                  <FormInput
-                    type="number"
-                    label="Number of Casuals"
-                    value={formData.numberOfCasuals}
-                    onChange={(v) => updateField("numberOfCasuals", Number(v))}
+                    onChange={handleLocationChange}
                   />
                 </div>
               </div>
 
-              {/* Section 2: Engagement Period */}
-              <div>
-                <h2 className="mb-5 flex items-center gap-2 text-[13px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
-                  <CalendarRange size={16} /> Engagement Period
-                </h2>
-                <div className="grid grid-cols-2 gap-5 max-sm:grid-cols-1">
-                  <div className="flex flex-col gap-2">
-                    <label className="text-[13px] font-medium text-[#7c5a5a]">
-                      Period From <span className="text-red-500">*</span>
-                    </label>
-                    <DatePicker
-                      value={formData.periodFrom}
-                      onChange={(v) => updateField("periodFrom", v)}
-                    />
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <label className="text-[13px] font-medium text-[#7c5a5a]">
-                      Period To <span className="text-red-500">*</span>
-                    </label>
-                    <DatePicker
-                      value={formData.periodTo}
-                      onChange={(v) => updateField("periodTo", v)}
-                      minDate={formData.periodFrom || undefined}
-                    />
+              {/* Section 2: Sections */}
+              {formData.location && (
+                <div>
+                  <h2 className="mb-2 flex items-center gap-2 text-[13px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
+                    <HardHat size={16} /> Sections
+                  </h2>
+                  <h4 className="mb-4 text-xs text-neutral-600">
+                    Select the sections you&apos;re requesting casuals for
+                  </h4>
+
+                  {hasSectionChoice && (
+                    <div className="mb-6 flex flex-wrap gap-2.5">
+                      {availableSections.map((sectionName) => {
+                        const active = formData.sections.some(
+                          (s) => s.sectionName === sectionName,
+                        );
+                        return (
+                          <button
+                            key={sectionName}
+                            type="button"
+                            onClick={() => toggleSection(sectionName)}
+                            className={`flex cursor-pointer items-center gap-1.5 rounded-full border px-4 py-2 text-[13px] font-medium transition-all duration-200 ${
+                              active
+                                ? "border-rose-600 bg-rose-600 text-white"
+                                : "border-[rgba(240,180,180,0.6)] bg-white/80 text-[#7c5a5a] hover:border-rose-300"
+                            }`}
+                          >
+                            {active && <Check className="h-3.5 w-3.5" />}
+                            {sectionName}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {formData.sections.length === 0 && hasSectionChoice && (
+                    <p className="text-[13px] text-[#a18080]">
+                      Select at least one section above to continue.
+                    </p>
+                  )}
+
+                  <div className="flex flex-col gap-6">
+                    {formData.sections.map((section, index) => (
+                      <SectionFieldset
+                        key={section.sectionName}
+                        section={section}
+                        showRemove={hasSectionChoice}
+                        engagementDays={
+                          sectionDerived[index]?.engagementDays ?? 0
+                        }
+                        totalAmount={sectionDerived[index]?.totalAmount ?? 0}
+                        ratePerDay={ratePerDay}
+                        onRemove={() => toggleSection(section.sectionName)}
+                        onChange={(field, value) =>
+                          updateSectionField(section.sectionName, field, value)
+                        }
+                      />
+                    ))}
                   </div>
                 </div>
-                {invalidDateRange && (
-                  <p className="mt-2 text-xs font-medium text-red-500">
-                    Period To cannot be earlier than Period From.
-                  </p>
-                )}
-              </div>
+              )}
 
-              {/* Section 3: Justification & PPEs */}
-              <div>
-                <h2 className="mb-5 flex items-center gap-2 text-[13px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
-                  <HardHat size={16} /> Justification & PPEs
-                </h2>
-
-                <div className="flex flex-col gap-6">
-                  <div className="flex flex-col gap-2">
-                    <label className="text-[13px] font-medium text-[#7c5a5a]">
-                      Justification <span className="text-red-500">*</span>
-                    </label>
-                    <textarea
-                      className="h-24 resize-none rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 py-3 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
-                      placeholder="State the reason casual staff are required..."
-                      value={formData.justification}
-                      required
-                      onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
-                        updateField("justification", e.target.value)
-                      }
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-2">
-                    <label className="text-[13px] font-medium text-[#7c5a5a]">
-                      PPEs Required <span className="text-red-500">*</span>
-                    </label>
-                    <textarea
-                      className="h-24 resize-none rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 py-3 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
-                      placeholder="List the personal protective equipment required..."
-                      value={formData.ppesRequired}
-                      required
-                      onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
-                        updateField("ppesRequired", e.target.value)
-                      }
-                    />
+              {/* Section 3: Overall Summary */}
+              {formData.sections.length > 0 && (
+                <div className="col-span-full">
+                  <h2 className="mb-5 flex items-center gap-2 text-[13px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
+                    <Wallet size={16} /> Overall Summary
+                  </h2>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div className="flex items-center justify-between rounded-2xl border border-rose-700/30 bg-linear-to-r from-rose-900/80 to-rose-800/80 px-5 py-5 font-semibold text-rose-50">
+                      <span>Total Casuals</span>
+                      <span className="text-xl">{overallTotalCasuals}</span>
+                    </div>
+                    <div className="flex items-center justify-between rounded-2xl bg-linear-to-r from-slate-800 to-rose-900 px-5 py-5 font-semibold text-white shadow-lg">
+                      <span>Total (KES)</span>
+                      <span className="text-xl">
+                        {overallTotalAmount.toLocaleString()}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-
-              {/* Section 4: Rate Summary */}
-              <div className="col-span-full">
-                <h2 className="mb-5 flex items-center gap-2 text-[13px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
-                  <Wallet size={16} /> Rate Summary
-                </h2>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                  <div className="flex items-center justify-between rounded-2xl border border-rose-700/30 bg-linear-to-r from-rose-900/80 to-rose-800/80 px-5 py-5 font-semibold text-rose-50">
-                    <span>Rate / Day</span>
-                    <span className="text-xl">
-                      KES {ratePerDay.toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between rounded-2xl border border-rose-700/30 bg-linear-to-r from-rose-900/80 to-rose-800/80 px-5 py-5 font-semibold text-rose-50">
-                    <span>Engagement Days</span>
-                    <span className="text-xl">{engagementDays}</span>
-                  </div>
-                  <div className="flex items-center justify-between rounded-2xl bg-linear-to-r from-slate-800 to-rose-900 px-5 py-5 font-semibold text-white shadow-lg">
-                    <span>Total (KES)</span>
-                    <span className="text-xl">
-                      {totalAmount.toLocaleString()}
-                    </span>
-                  </div>
-                </div>
-              </div>
+              )}
 
               {/* Submit Button */}
               <div className="mt-4">
@@ -399,31 +454,142 @@ export default function CasualRequisitionForm() {
 
 // ---- Helper Components ----
 
-function FormInput({
-  label,
-  type = "text",
-  placeholder,
-  value,
+function SectionFieldset({
+  section,
+  showRemove,
+  engagementDays,
+  totalAmount,
+  ratePerDay,
+  onRemove,
   onChange,
-}: FormInputProps) {
+}: {
+  section: CasualSectionFormData;
+  showRemove: boolean;
+  engagementDays: number;
+  totalAmount: number;
+  ratePerDay: number;
+  onRemove: () => void;
+  onChange: <K extends keyof CasualSectionFormData>(
+    field: K,
+    value: CasualSectionFormData[K],
+  ) => void;
+}) {
+  const invalidDateRange =
+    !!section.periodFrom &&
+    !!section.periodTo &&
+    section.periodTo < section.periodFrom;
+
   return (
-    <div className="flex flex-col gap-2">
-      <label className="text-[13px] font-medium text-[#7c5a5a]">
-        {label} <span className="text-red-500">*</span>
-      </label>
-      <input
-        type={type}
-        min={type === "number" ? 1 : undefined}
-        className="h-10 rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
-        placeholder={placeholder}
-        value={value || ""}
-        onChange={(e: ChangeEvent<HTMLInputElement>) => {
-          const val =
-            type === "number" ? Number(e.target.value) : e.target.value;
-          onChange(val);
-        }}
-        required
-      />
+    <div className="rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white/70 p-5">
+      <div className="mb-4 flex items-center justify-between">
+        <h3 className="text-[14px] font-semibold text-[#1e1b1b]">
+          {section.sectionName}
+        </h3>
+        {showRemove && (
+          <button
+            type="button"
+            onClick={onRemove}
+            className="flex cursor-pointer items-center gap-1 text-[12px] font-medium text-rose-600 hover:text-rose-700"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            Remove
+          </button>
+        )}
+      </div>
+
+      <div className="grid grid-cols-2 gap-5 max-sm:grid-cols-1">
+        <div className="flex flex-col gap-2">
+          <label className="text-[13px] font-medium text-[#7c5a5a]">
+            Number of Casuals <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="number"
+            min={1}
+            className="h-10 rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
+            value={section.numberOfCasuals || ""}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              onChange("numberOfCasuals", Number(e.target.value))
+            }
+            required
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <label className="text-[13px] font-medium text-[#7c5a5a]">
+            Period From <span className="text-red-500">*</span>
+          </label>
+          <DatePicker
+            value={section.periodFrom}
+            onChange={(v) => onChange("periodFrom", v)}
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <label className="text-[13px] font-medium text-[#7c5a5a]">
+            Period To <span className="text-red-500">*</span>
+          </label>
+          <DatePicker
+            value={section.periodTo}
+            onChange={(v) => onChange("periodTo", v)}
+            minDate={section.periodFrom || undefined}
+          />
+        </div>
+      </div>
+      {invalidDateRange && (
+        <p className="mt-2 text-xs font-medium text-red-500">
+          Period To cannot be earlier than Period From.
+        </p>
+      )}
+
+      <div className="mt-5 flex flex-col gap-4">
+        <div className="flex flex-col gap-2">
+          <label className="text-[13px] font-medium text-[#7c5a5a]">
+            Justification <span className="text-red-500">*</span>
+          </label>
+          <textarea
+            className="h-20 resize-none rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 py-3 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
+            placeholder="State the reason casual staff are required..."
+            value={section.justification}
+            required
+            onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+              onChange("justification", e.target.value)
+            }
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <label className="text-[13px] font-medium text-[#7c5a5a]">
+            PPEs Required <span className="text-red-500">*</span>
+          </label>
+          <textarea
+            className="h-20 resize-none rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 py-3 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
+            placeholder="List the personal protective equipment required..."
+            value={section.ppesRequired}
+            required
+            onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+              onChange("ppesRequired", e.target.value)
+            }
+          />
+        </div>
+      </div>
+
+      <div className="mt-5 grid grid-cols-3 gap-3 max-sm:grid-cols-1">
+        <div className="rounded-xl border border-gray-100 bg-gray-50 px-3 py-3 text-center">
+          <p className="text-[11px] text-[#7c5a5a]">Rate / Day</p>
+          <p className="mt-0.5 text-[14px] font-semibold text-[#1e1b1b]">
+            KES {ratePerDay.toLocaleString()}
+          </p>
+        </div>
+        <div className="rounded-xl border border-gray-100 bg-gray-50 px-3 py-3 text-center">
+          <p className="text-[11px] text-[#7c5a5a]">Engagement Days</p>
+          <p className="mt-0.5 text-[14px] font-semibold text-[#1e1b1b]">
+            {engagementDays}
+          </p>
+        </div>
+        <div className="rounded-xl bg-linear-to-r from-slate-800 to-rose-900 px-3 py-3 text-center text-white">
+          <p className="text-[11px] text-white/70">Total (KES)</p>
+          <p className="mt-0.5 text-[14px] font-semibold">
+            {totalAmount.toLocaleString()}
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

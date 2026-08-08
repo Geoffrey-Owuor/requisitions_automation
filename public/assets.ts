@@ -87,23 +87,37 @@ export function isValidCasualStage(stage: unknown): stage is CasualStage {
   );
 }
 
-export const CASUAL_LOCATIONS = [
-  "Ruiru",
-  "Imaara",
-  "Galleria",
-  "Garden City",
-  "Village Market",
-  "Karen",
-  "Diani",
-  "Likoni",
-  "Kisumu",
-  "Eldoret",
-  "CBD",
-  "Riara",
-  "Nyali",
-  "Sarit",
-  "Yaya",
-];
+export const CASUAL_LOCATION_SECTIONS: Record<string, string[]> = {
+  Ruiru: [
+    "Inbound",
+    "Outbound",
+    "Bond",
+    "DO2 Store",
+    "CKD Store",
+    "RHW2/RHW3",
+    "Other",
+  ],
+  Imaara: ["Imaara"],
+  Galleria: ["Galleria"],
+  "Garden City": ["Garden City"],
+  "Village Market": ["Village Market"],
+  Karen: ["Karen"],
+  Diani: ["Diani"],
+  Likoni: ["Likoni"],
+  Kisumu: ["Kisumu"],
+  Eldoret: ["Eldoret"],
+  CBD: ["CBD"],
+  Riara: ["Riara"],
+  Nyali: ["Nyali"],
+  Sarit: ["Sarit Showroom", "Sarit SVC"],
+  Yaya: ["Yaya"],
+};
+
+export const CASUAL_LOCATIONS = Object.keys(CASUAL_LOCATION_SECTIONS);
+
+export function getCasualSections(location: string): string[] {
+  return CASUAL_LOCATION_SECTIONS[location] ?? [];
+}
 
 export function getCasualRatePerDay(location: string) {
   return location === "Ruiru" ? 798 : 868;
