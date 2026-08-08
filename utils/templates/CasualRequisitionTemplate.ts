@@ -1,6 +1,7 @@
 import {
   CasualEmailDataValues,
   CasualEmailDataProps,
+  CasualSectionValues,
 } from "@/services/CasualEmailSender";
 import { dateFormatter } from "@/public/assets";
 import { BASE_URL } from "@/public/assets";
@@ -18,9 +19,6 @@ export function CasualRequisitionTemplate({
   reviewLink,
   showPdfDownload,
 }: CasualRequisitionProps) {
-  const formattedPeriodFrom = dateFormatter(emailData.periodfrom);
-  const formattedPeriodTo = dateFormatter(emailData.periodto);
-
   const buttonStyle =
     role !== "user" ? "display: inline-block;" : "display: none;";
   const pdfButtonStyle = showPdfDownload
@@ -60,24 +58,20 @@ export function CasualRequisitionTemplate({
               ${modernRow("Email", emailData.emailaddress)}
               ${modernRow("Department", emailData.department)}
               ${modernRow("Location", emailData.location)}
-              ${modernRow("Engagement Period", `${formattedPeriodFrom} - ${formattedPeriodTo} (${emailData.engagementdays} day(s))`)}
-              ${modernRow("Number of Casuals", String(emailData.numberofcasuals))}
-              ${emailData.hrapprovedcasuals !== null && emailData.hrapprovedcasuals !== undefined ? modernRow("HR Approved Casuals", String(emailData.hrapprovedcasuals)) : ""}
-              ${modernRow("PPEs Required", emailData.ppesrequired)}
-              ${modernRow("Justification", emailData.justification)}
             </table>
           </div>
 
+          <div style="margin-bottom: 24px;">
+            <p style="font-size: 11px; font-weight: 700; color: #a31d1d; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px;">Sections</p>
+            ${emailData.sections.map((section) => sectionCard(section)).join("")}
+          </div>
+
           <div style="background-color: #2c1a1a; border-radius: 20px; padding: 24px; margin-bottom: 24px; border: 1px solid rgba(163,29,29,0.2);">
-            <p style="margin: 0 0 16px; font-size: 10px; font-weight: 800; color: #a31d1d; text-transform: uppercase; letter-spacing: 2px;">Rate Summary</p>
+            <p style="margin: 0 0 16px; font-size: 10px; font-weight: 800; color: #a31d1d; text-transform: uppercase; letter-spacing: 2px;">Overall Summary</p>
             <table width="100%">
               <tr>
-                <td style="padding-bottom: 12px; font-size: 12px; color: #c9a8a8;">Rate / Day</td>
-                <td style="padding-bottom: 12px; font-size: 12px; color: #ffffff; text-align: right; font-weight: 600;">KES ${Number(emailData.rateperday).toLocaleString()}</td>
-              </tr>
-              <tr>
-                <td style="padding-bottom: 12px; font-size: 12px; color: #c9a8a8;">Engagement Days</td>
-                <td style="padding-bottom: 12px; font-size: 12px; color: #ffffff; text-align: right; font-weight: 600;">${emailData.engagementdays}</td>
+                <td style="padding-bottom: 12px; font-size: 12px; color: #c9a8a8;">Total Casuals</td>
+                <td style="padding-bottom: 12px; font-size: 12px; color: #ffffff; text-align: right; font-weight: 600;">${emailData.totalcasuals}</td>
               </tr>
               <tr>
                 <td colspan="2" style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px;">
@@ -128,6 +122,35 @@ function modernRow(label: string, value: string) {
       <td style="padding: 10px 0; font-size: 12px; color: #5a3a3a; width: 35%; border-bottom: 1px solid #f7f0f0;">${label}</td>
       <td style="padding: 10px 0; font-size: 13px; color: #1a0f0f; font-weight: 500; border-bottom: 1px solid #f7f0f0; overflow-wrap: break-word; white-space: pre-wrap;">${value || "—"}</td>
     </tr>`;
+}
+
+/**
+ * HELPER: SECTION CARD (per casual_requisition_sections row)
+ */
+function sectionCard(section: CasualSectionValues) {
+  const formattedPeriodFrom = dateFormatter(section.periodfrom);
+  const formattedPeriodTo = dateFormatter(section.periodto);
+
+  return `
+    <div style="background-color: #ffffff; border-radius: 16px; padding: 18px 20px; margin-bottom: 16px; border: 1px solid #f0e6e6;">
+      <p style="margin: 0 0 10px; font-size: 13px; font-weight: 700; color: #1a0f0f;">${section.sectionname}</p>
+      <table width="100%" style="border-collapse: collapse;">
+        ${modernRow("Engagement Period", `${formattedPeriodFrom} - ${formattedPeriodTo} (${section.engagementdays} day(s))`)}
+        ${modernRow("Number of Casuals", String(section.numberofcasuals))}
+        ${section.hrapprovedcasuals !== null && section.hrapprovedcasuals !== undefined ? modernRow("HR Approved Casuals", String(section.hrapprovedcasuals)) : ""}
+        ${modernRow("PPEs Required", section.ppesrequired)}
+        ${modernRow("Justification", section.justification)}
+        ${modernRow("Rate / Day", `KES ${Number(section.rateperday).toLocaleString()}`)}
+      </table>
+      <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #f7f0f0; display: flex;">
+        <table width="100%">
+          <tr>
+            <td style="font-size: 12px; font-weight: 700; color: #a31d1d;">Section Total</td>
+            <td style="font-size: 14px; font-weight: 700; color: #1a0f0f; text-align: right;">KES ${Number(section.totalamount).toLocaleString()}</td>
+          </tr>
+        </table>
+      </div>
+    </div>`;
 }
 
 /**

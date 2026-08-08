@@ -17,12 +17,28 @@ import {
 import { assets, dateFormatter } from "@/public/assets";
 import SubmittingOverlay from "@/components/SubmittingOverlay";
 import { AlertInfo } from "@/components/TravelRequisitionPage";
-import { UpdateCasualStatus } from "@/serverActions/UpdateCasualStatus";
+import {
+  UpdateCasualStatus,
+  HrSectionApproval,
+} from "@/serverActions/UpdateCasualStatus";
 import ApprovalAlert from "@/components/Approvers/TravelApprovers/ApprovalAlert";
 import { initialsHelper } from "@/public/assets";
 import Image from "next/image";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
+
+export interface CasualApprovalSection {
+  sectionId: string;
+  sectionName: string;
+  justification: string;
+  numberOfCasuals: number;
+  ppesRequired: string;
+  periodFrom: string;
+  periodTo: string;
+  engagementDays: number;
+  ratePerDay: number;
+  totalAmount: number;
+}
 
 export interface CasualApprovalModalProps {
   uuid: string;
@@ -33,15 +49,8 @@ export interface CasualApprovalModalProps {
   submitterEmail: string;
   department: string;
   location: string;
-  justification: string;
-  numberOfCasuals: number;
-  ppesRequired: string;
-  periodFrom: string;
-  periodTo: string;
-  engagementDays: number;
-  ratePerDay: number;
-  totalAmount: number;
   requestCreatedAt: string;
+  sections: CasualApprovalSection[];
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -95,19 +104,16 @@ const CasualApprovalModal = ({
   submitterEmail,
   department,
   location,
-  justification,
-  numberOfCasuals,
-  ppesRequired,
-  periodFrom,
-  periodTo,
-  engagementDays,
-  ratePerDay,
-  totalAmount,
   requestCreatedAt,
+  sections,
 }: CasualApprovalModalProps) => {
   const [comments, setComments] = useState("");
-  const [hrApprovedCasuals, setHrApprovedCasuals] = useState<number | "">(
-    numberOfCasuals,
+  const [hrApprovedCasuals, setHrApprovedCasuals] = useState<
+    Record<string, number | "">
+  >(
+    Object.fromEntries(
+      sections.map((section) => [section.sectionId, section.numberOfCasuals]),
+    ),
   );
   const [approving, setApproving] = useState(false);
   const [declining, setDeclining] = useState(false);
@@ -120,7 +126,20 @@ const CasualApprovalModal = ({
   const roleLabel = stageLabel[stage] ?? "Approver";
   const isHrStage = stage === "hr";
   const hrApprovalInvalid =
-    isHrStage && (hrApprovedCasuals === "" || hrApprovedCasuals < 0);
+    isHrStage &&
+    sections.some((section) => {
+      const value = hrApprovedCasuals[section.sectionId];
+      return value === "" || value < 0;
+    });
+
+  const overallTotalAmount = sections.reduce(
+    (sum, s) => sum + s.totalAmount,
+    0,
+  );
+  const overallTotalCasuals = sections.reduce(
+    (sum, s) => sum + s.numberOfCasuals,
+    0,
+  );
 
   // Approval/ decline function
   const handleApproval = async (status: string) => {
@@ -131,6 +150,14 @@ const CasualApprovalModal = ({
     const commentsPayload =
       comments.trim() === "" ? "No comments" : comments.trim();
 
+    const hrPayload: HrSectionApproval[] | undefined =
+      isHrStage && status === "approved"
+        ? sections.map((section) => ({
+            sectionId: section.sectionId,
+            approvedCasuals: Number(hrApprovedCasuals[section.sectionId]),
+          }))
+        : undefined;
+
     try {
       // Call our approval server action
       const response = await UpdateCasualStatus({
@@ -140,10 +167,7 @@ const CasualApprovalModal = ({
         comments: commentsPayload,
         approverName,
         approverEmail,
-        hrApprovedCasuals:
-          isHrStage && status === "approved" && hrApprovedCasuals !== ""
-            ? Number(hrApprovedCasuals)
-            : undefined,
+        hrApprovedCasuals: hrPayload,
       });
 
       // Set the alert info
@@ -265,108 +289,164 @@ const CasualApprovalModal = ({
                 <div className="flex flex-col gap-2.5">
                   <DetailRow icon={MapPin} label="Location" value={location} />
                   <DetailRow
-                    icon={CalendarDays}
-                    label="Period From"
-                    value={dateFormatter(periodFrom)}
-                  />
-                  <DetailRow
-                    icon={CalendarDays}
-                    label="Period To"
-                    value={dateFormatter(periodTo)}
+                    icon={Users}
+                    label="Sections"
+                    value={String(sections.length)}
                   />
                   <DetailRow
                     icon={Users}
-                    label="Number of Casuals"
-                    value={String(numberOfCasuals)}
+                    label="Total Casuals"
+                    value={String(overallTotalCasuals)}
                   />
                 </div>
               </div>
             </div>
 
-            {/* ── Justification ── */}
+            {/* ── Sections ── */}
             <div className="mb-6 border-t border-[rgba(240,180,180,0.4)] pt-6">
-              <SectionLabel>Justification</SectionLabel>
-              <p className="rounded-xl border border-[rgba(240,180,180,0.3)] bg-white/60 px-4 py-3.5 text-[13px] leading-relaxed wrap-break-word whitespace-pre-wrap text-[#1e1b1b]">
-                {justification}
-              </p>
-            </div>
-
-            {/* ── PPEs Required ── */}
-            <div className="mb-6 border-t border-[rgba(240,180,180,0.4)] pt-6">
-              <div className="flex items-center gap-1.5">
-                <HardHat className="mb-2.5 h-3.5 w-3.5 text-rose-400" />
-                <SectionLabel>PPEs Required</SectionLabel>
-              </div>
-              <p className="rounded-xl border border-[rgba(240,180,180,0.3)] bg-white/60 px-4 py-3.5 text-[13px] leading-relaxed wrap-break-word whitespace-pre-wrap text-[#1e1b1b]">
-                {ppesRequired}
-              </p>
-            </div>
-
-            {/* ── Rate Breakdown ── */}
-            <div className="mb-6 border-t border-[rgba(240,180,180,0.4)] pt-6">
-              <SectionLabel>Rate Breakdown (KES)</SectionLabel>
-              <div className="mb-3 grid grid-cols-3 gap-2 max-sm:grid-cols-2">
-                {[
-                  { label: "Rate / Day", value: ratePerDay, Icon: Wallet },
-                  {
-                    label: "Engagement Days",
-                    value: engagementDays,
-                    Icon: CalendarDays,
-                  },
-                  {
-                    label: "Casuals",
-                    value: numberOfCasuals,
-                    Icon: Users,
-                  },
-                ].map(({ label, value, Icon }) => (
+              <SectionLabel>Sections</SectionLabel>
+              <div className="flex flex-col gap-4">
+                {sections.map((section) => (
                   <div
-                    key={label}
-                    className="rounded-xl border border-gray-100 bg-gray-50 px-3 py-3 text-center"
+                    key={section.sectionId}
+                    className="rounded-2xl border border-[rgba(240,180,180,0.4)] bg-white/60 p-5"
                   >
-                    <Icon className="mx-auto mb-1 h-4 w-4 text-rose-400" />
-                    <p className="text-[11px] text-[#7c5a5a]">{label}</p>
-                    <p className="mt-0.5 text-[15px] font-semibold text-[#1e1b1b]">
-                      {value.toLocaleString()}
-                    </p>
+                    <h3 className="mb-3 text-[13px] font-semibold text-[#1e1b1b]">
+                      {section.sectionName}
+                    </h3>
+
+                    <div className="mb-3 grid grid-cols-2 gap-3 text-[13px] max-sm:grid-cols-1">
+                      <DetailRow
+                        icon={CalendarDays}
+                        label="Period From"
+                        value={dateFormatter(section.periodFrom)}
+                      />
+                      <DetailRow
+                        icon={CalendarDays}
+                        label="Period To"
+                        value={dateFormatter(section.periodTo)}
+                      />
+                      <DetailRow
+                        icon={Users}
+                        label="Number of Casuals"
+                        value={String(section.numberOfCasuals)}
+                      />
+                    </div>
+
+                    <div className="mb-3">
+                      <p className="mb-1 flex items-center gap-1.5 text-[11px] font-semibold tracking-[0.4px] text-[#b0a0a0] uppercase">
+                        <HardHat className="h-3.5 w-3.5 text-rose-400" />
+                        Justification
+                      </p>
+                      <p className="rounded-xl border border-[rgba(240,180,180,0.3)] bg-white/70 px-4 py-3 text-[13px] leading-relaxed wrap-break-word whitespace-pre-wrap text-[#1e1b1b]">
+                        {section.justification}
+                      </p>
+                    </div>
+
+                    <div className="mb-4">
+                      <p className="mb-1 text-[11px] font-semibold tracking-[0.4px] text-[#b0a0a0] uppercase">
+                        PPEs Required
+                      </p>
+                      <p className="rounded-xl border border-[rgba(240,180,180,0.3)] bg-white/70 px-4 py-3 text-[13px] leading-relaxed wrap-break-word whitespace-pre-wrap text-[#1e1b1b]">
+                        {section.ppesRequired}
+                      </p>
+                    </div>
+
+                    <div className="mb-3 grid grid-cols-3 gap-2 max-sm:grid-cols-2">
+                      {[
+                        {
+                          label: "Rate / Day",
+                          value: section.ratePerDay,
+                          Icon: Wallet,
+                        },
+                        {
+                          label: "Engagement Days",
+                          value: section.engagementDays,
+                          Icon: CalendarDays,
+                        },
+                        {
+                          label: "Casuals",
+                          value: section.numberOfCasuals,
+                          Icon: Users,
+                        },
+                      ].map(({ label, value, Icon }) => (
+                        <div
+                          key={label}
+                          className="rounded-xl border border-gray-100 bg-gray-50 px-3 py-3 text-center"
+                        >
+                          <Icon className="mx-auto mb-1 h-4 w-4 text-rose-400" />
+                          <p className="text-[11px] text-[#7c5a5a]">{label}</p>
+                          <p className="mt-0.5 text-[15px] font-semibold text-[#1e1b1b]">
+                            {value.toLocaleString()}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-between rounded-2xl bg-linear-to-r from-slate-800 to-rose-900 px-5 py-4 text-white">
+                      <div className="flex items-center gap-1.5">
+                        <BadgeDollarSign className="h-4 w-4 text-white/60" />
+                        <span className="text-[13px] text-white/70">
+                          Section Total
+                        </span>
+                      </div>
+                      <span className="text-[16px] font-semibold">
+                        KES {section.totalAmount.toLocaleString()}
+                      </span>
+                    </div>
+
+                    {/* ── HR: Approved Number of Casuals (per section) ── */}
+                    {isHrStage && (
+                      <div className="mt-4 border-t border-[rgba(240,180,180,0.4)] pt-4">
+                        <label className="mb-1.5 block text-[11px] font-semibold tracking-[0.4px] text-[#b0a0a0] uppercase">
+                          Approved Number of Casuals *
+                        </label>
+                        <input
+                          type="number"
+                          min={0}
+                          value={hrApprovedCasuals[section.sectionId]}
+                          onChange={(e) =>
+                            setHrApprovedCasuals((prev) => ({
+                              ...prev,
+                              [section.sectionId]:
+                                e.target.value === ""
+                                  ? ""
+                                  : Number(e.target.value),
+                            }))
+                          }
+                          className="h-10 w-full rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
+                          required
+                        />
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
-
-              <div className="flex flex-wrap items-center justify-between rounded-2xl bg-linear-to-r from-slate-800 to-rose-900 px-5 py-4 text-white">
-                <div className="flex items-center gap-1.5">
-                  <BadgeDollarSign className="h-4 w-4 text-white/60" />
-                  <span className="text-[13px] text-white/70">
-                    Total Amount
-                  </span>
-                </div>
-                <span className="text-[16px] font-semibold">
-                  KES {totalAmount.toLocaleString()}
-                </span>
-              </div>
             </div>
 
-            {/* ── HR: Approved Number of Casuals ── */}
-            {isHrStage && (
-              <div className="mb-6 border-t border-[rgba(240,180,180,0.4)] pt-6">
-                <SectionLabel>Approved Number of Casuals *</SectionLabel>
-                <input
-                  type="number"
-                  min={0}
-                  value={hrApprovedCasuals}
-                  onChange={(e) =>
-                    setHrApprovedCasuals(
-                      e.target.value === "" ? "" : Number(e.target.value),
-                    )
-                  }
-                  className="h-10 w-full rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
-                  required
-                />
-                <p className="mt-1.5 text-[11px] text-[#b0a0a0]">
-                  Required to finalize approval. The total amount will be
-                  recalculated using this value.
-                </p>
+            {/* ── Overall Summary ── */}
+            <div className="mb-6 border-t border-[rgba(240,180,180,0.4)] pt-6">
+              <SectionLabel>Overall Summary</SectionLabel>
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                <div className="flex items-center justify-between rounded-2xl border border-rose-700/30 bg-linear-to-r from-rose-900/80 to-rose-800/80 px-5 py-5 font-semibold text-rose-50">
+                  <span>Total Casuals</span>
+                  <span className="text-xl">{overallTotalCasuals}</span>
+                </div>
+                <div className="flex items-center justify-between rounded-2xl bg-linear-to-r from-slate-800 to-rose-900 px-5 py-5 font-semibold text-white shadow-lg">
+                  <span>Total Amount</span>
+                  <span className="text-xl">
+                    KES {overallTotalAmount.toLocaleString()}
+                  </span>
+                </div>
               </div>
-            )}
+              {isHrStage && (
+                <p className="mt-2 text-[11px] text-[#b0a0a0]">
+                  Final total casual headcount per section can be changed in the
+                  HR stage. Each section&apos;s total amount will be
+                  recalculated using its approved headcount.
+                </p>
+              )}
+            </div>
 
             {/* ── Approver Comments ── */}
             <div className="mb-6 border-t border-[rgba(240,180,180,0.4)] pt-6">

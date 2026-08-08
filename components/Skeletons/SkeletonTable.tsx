@@ -1,6 +1,6 @@
 export const SkeletonTable = () => {
   return (
-    <div className="z-10 w-full animate-pulse space-y-4">
+    <div className="z-10 mb-4 w-full animate-pulse space-y-4">
       {/* Table Title Placeholder */}
       <div className="mb-4 h-6 w-64 rounded-xl bg-neutral-200" />
       <div className="mb-6 h-10 w-100 rounded-xl bg-neutral-200" />

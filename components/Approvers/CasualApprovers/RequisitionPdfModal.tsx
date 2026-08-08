@@ -1,5 +1,8 @@
 "use client";
-import { CasualEmailDataValues as CasualPdfValues } from "@/services/CasualEmailSender";
+import {
+  CasualEmailDataValues as CasualPdfValues,
+  CasualSectionValues,
+} from "@/services/CasualEmailSender";
 import { Printer } from "lucide-react";
 import StatusFormatter from "@/components/Dashboard/StatusFormatter";
 import { dateFormatter } from "@/public/assets";
@@ -48,6 +51,56 @@ const approvalStages = [
     commentsKey: "hrcomments" as const,
   },
 ];
+
+const RequisitionSectionCard = ({
+  section,
+  formatCost,
+}: {
+  section: CasualSectionValues;
+  formatCost: (val: string | number) => string;
+}) => (
+  <div className="mb-4 rounded-2xl border border-[rgba(240,180,180,0.4)] bg-white/60 p-5">
+    <h3 className="mb-3 text-[13px] font-semibold text-[#1e1b1b]">
+      {section.sectionname}
+    </h3>
+    <div className="mb-4 grid grid-cols-3 gap-x-6 gap-y-4 max-sm:grid-cols-1">
+      <Field label="Period From" value={dateFormatter(section.periodfrom)} />
+      <Field label="Period To" value={dateFormatter(section.periodto)} />
+      <Field label="Engagement Days" value={section.engagementdays} />
+      <Field label="Number of Casuals" value={section.numberofcasuals} />
+      {section.hrapprovedcasuals !== null &&
+        section.hrapprovedcasuals !== undefined && (
+          <Field label="HR Approved Casuals" value={section.hrapprovedcasuals} />
+        )}
+      <Field label="Rate / Day" value={formatCost(section.rateperday)} />
+    </div>
+
+    <div className="mb-3">
+      <span className="text-[11px] font-medium tracking-[0.4px] text-[#b0a0a0] uppercase">
+        Justification
+      </span>
+      <p className="mt-1.5 text-[13px] leading-relaxed wrap-break-word whitespace-pre-wrap text-[#1e1b1b]">
+        {section.justification}
+      </p>
+    </div>
+
+    <div className="mb-4">
+      <span className="text-[11px] font-medium tracking-[0.4px] text-[#b0a0a0] uppercase">
+        PPEs Required
+      </span>
+      <p className="mt-1.5 text-[13px] leading-relaxed wrap-break-word whitespace-pre-wrap text-[#1e1b1b]">
+        {section.ppesrequired}
+      </p>
+    </div>
+
+    <div className="flex items-center justify-between border-t border-[rgba(240,180,180,0.4)] pt-3">
+      <span className="font-semibold text-[#1e1b1b]">Section Total</span>
+      <span className="text-lg font-bold text-rose-700">
+        {formatCost(section.totalamount)}
+      </span>
+    </div>
+  </div>
+);
 
 const RequisitionPdfModal = ({ pdfData }: { pdfData: CasualPdfValues }) => {
   const [mounted, setMounted] = useState(false);
@@ -113,76 +166,28 @@ const RequisitionPdfModal = ({ pdfData }: { pdfData: CasualPdfValues }) => {
             </div>
           </div>
 
-          {/* Section 2: Engagement */}
+          {/* Section 2: Sections */}
           <div className="mb-8 border-t border-[rgba(240,180,180,0.4)] pt-8">
-            <SectionHeading title="Engagement Information" />
-            <div className="grid grid-cols-3 gap-x-6 gap-y-5 max-sm:grid-cols-1">
-              <Field
-                label="Period From"
-                value={dateFormatter(pdfData.periodfrom)}
+            <SectionHeading title="Sections" />
+            {pdfData.sections.map((section) => (
+              <RequisitionSectionCard
+                key={section.sectionname}
+                section={section}
+                formatCost={formatCost}
               />
-              <Field
-                label="Period To"
-                value={dateFormatter(pdfData.periodto)}
-              />
-              <Field label="Engagement Days" value={pdfData.engagementdays} />
-              <Field
-                label="Number of Casuals"
-                value={pdfData.numberofcasuals}
-              />
-              {pdfData.hrapprovedcasuals !== null &&
-                pdfData.hrapprovedcasuals !== undefined && (
-                  <Field
-                    label="HR Approved Casuals"
-                    value={pdfData.hrapprovedcasuals}
-                  />
-                )}
-            </div>
-
-            {/* Justification */}
-            <div className="mt-5">
-              <span className="text-[11px] font-medium tracking-[0.4px] text-[#b0a0a0] uppercase">
-                Justification
-              </span>
-              <p className="mt-1.5 text-[13px] leading-relaxed wrap-break-word whitespace-pre-wrap text-[#1e1b1b]">
-                {pdfData.justification}
-              </p>
-            </div>
-
-            {/* PPEs Required */}
-            <div className="mt-5">
-              <span className="text-[11px] font-medium tracking-[0.4px] text-[#b0a0a0] uppercase">
-                PPEs Required
-              </span>
-              <p className="mt-1.5 text-[13px] leading-relaxed wrap-break-word whitespace-pre-wrap text-[#1e1b1b]">
-                {pdfData.ppesrequired}
-              </p>
-            </div>
+            ))}
           </div>
 
-          {/* Section 3: Rate Summary */}
+          {/* Section 3: Overall Summary */}
           <div className="mb-8 border-t border-[rgba(240,180,180,0.4)] pt-8">
-            <SectionHeading title="Rate Summary (KES)" />
+            <SectionHeading title="Overall Summary (KES)" />
 
             <div className="my-6 rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white/60 p-6">
-              <div className="flex flex-col gap-3">
-                {[
-                  { label: "Rate / Day", value: pdfData.rateperday },
-                  {
-                    label: "Engagement Days",
-                    value: pdfData.engagementdays,
-                  },
-                ].map(({ label, value }) => (
-                  <div
-                    key={label}
-                    className="flex items-center justify-between"
-                  >
-                    <span className="text-sm text-[#7c5a5a]">{label}</span>
-                    <span className="text-sm font-semibold text-[#1e1b1b]">
-                      {label === "Engagement Days" ? value : formatCost(value)}
-                    </span>
-                  </div>
-                ))}
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-[#7c5a5a]">Total Casuals</span>
+                <span className="text-sm font-semibold text-[#1e1b1b]">
+                  {pdfData.totalcasuals}
+                </span>
               </div>
 
               {/* Divider + Total */}

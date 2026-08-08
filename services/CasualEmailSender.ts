@@ -3,11 +3,8 @@ import { query } from "@/lib/db";
 import { CasualRequisitionTemplate } from "@/utils/templates/CasualRequisitionTemplate";
 import { sendEmail } from "./EmailService";
 
-export interface CasualEmailDataValues {
-  emailaddress: string;
-  submittername: string;
-  department: string;
-  location: string;
+export interface CasualSectionValues {
+  sectionname: string;
   justification: string;
   numberofcasuals: number;
   hrapprovedcasuals: number | null;
@@ -17,6 +14,13 @@ export interface CasualEmailDataValues {
   engagementdays: number;
   rateperday: number;
   totalamount: number;
+}
+
+export interface CasualEmailDataValues {
+  emailaddress: string;
+  submittername: string;
+  department: string;
+  location: string;
   hodapprovalstatus: string;
   financeapprovalstatus: string;
   hrapprovalstatus: string;
@@ -29,6 +33,9 @@ export interface CasualEmailDataValues {
   hrapprover: string;
   hremail: string;
   hrcomments: string;
+  sections: CasualSectionValues[];
+  totalamount: number;
+  totalcasuals: number;
 }
 
 export const casualDataQuery = `
@@ -37,15 +44,6 @@ export const casualDataQuery = `
        submitter_name AS submittername,
        employee_department AS department,
        casual_location AS location,
-       casual_justification AS justification,
-       number_of_casuals AS numberofcasuals,
-       hr_approved_casuals AS hrapprovedcasuals,
-       ppes_required AS ppesrequired,
-       engagement_period_from AS periodfrom,
-       engagement_period_to AS periodto,
-       engagement_days AS engagementdays,
-       casual_rate_per_day AS rateperday,
-       casual_total_amount AS totalamount,
        casual_hod_approval_status AS hodapprovalstatus,
        casual_finance_approval_status AS financeapprovalstatus,
        casual_hr_approval_status AS hrapprovalstatus,
@@ -61,6 +59,21 @@ export const casualDataQuery = `
        FROM casual_requisitions WHERE request_id = $1
 `;
 
+export const casualSectionsQuery = `
+     SELECT
+       section_name AS sectionname,
+       casual_justification AS justification,
+       number_of_casuals AS numberofcasuals,
+       hr_approved_casuals AS hrapprovedcasuals,
+       ppes_required AS ppesrequired,
+       engagement_period_from AS periodfrom,
+       engagement_period_to AS periodto,
+       engagement_days AS engagementdays,
+       casual_rate_per_day AS rateperday,
+       casual_total_amount AS totalamount
+       FROM casual_requisition_sections WHERE request_id = $1 ORDER BY section_name
+`;
+
 export interface CasualEmailDataProps {
   to: string | string[];
   requestId: string;
@@ -73,10 +86,38 @@ export interface CasualEmailDataProps {
 
 // Cached query — repeated calls with the same requestId hit the DB only once
 export const getCasualEmailData = cache(async (requestId: string) => {
-  const result = await query<CasualEmailDataValues>(casualDataQuery, [
-    requestId,
+  const [headerResult, sections] = await Promise.all([
+    query<
+      Omit<CasualEmailDataValues, "sections" | "totalamount" | "totalcasuals">
+    >(casualDataQuery, [requestId]),
+    query<CasualSectionValues>(casualSectionsQuery, [requestId]),
   ]);
-  return result[0];
+
+  const totalamount = sections.reduce((sum, s) => sum + s.totalamount, 0);
+
+  // Get the HR Approved casuals
+  const totalHrApprovedCasuals = sections.reduce(
+    (sum, s) => sum + (s.hrapprovedcasuals ?? 0),
+    0,
+  );
+
+  // Get the initial number of casuals
+  const totalInitialCasuals = sections.reduce(
+    (sum, s) => sum + s.numberofcasuals,
+    0,
+  );
+  const totalcasuals =
+    totalHrApprovedCasuals === totalInitialCasuals ||
+    totalHrApprovedCasuals === 0
+      ? totalInitialCasuals
+      : totalHrApprovedCasuals;
+
+  return {
+    ...headerResult[0],
+    sections,
+    totalamount,
+    totalcasuals,
+  } as CasualEmailDataValues;
 });
 
 export async function CasualEmailSender({

@@ -61,9 +61,7 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
         casual_${stage}_approval_status AS approval_status,
         casual_${stage}_approver AS approver_name,
         request_created_at, submitter_name, submitter_email, employee_department,
-        casual_location, casual_justification, number_of_casuals, ppes_required,
-        engagement_period_from, engagement_period_to, engagement_days,
-        casual_rate_per_day, casual_total_amount
+        casual_location
         FROM casual_requisitions
         WHERE request_id = $1
       `;
@@ -74,6 +72,19 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
   if (result.length === 0) return <NotFoundRequest />;
 
   const requestData = result[0];
+
+  const sectionsResult = await query(
+    `
+      SELECT
+        section_id, section_name, casual_justification, number_of_casuals,
+        ppes_required, engagement_period_from, engagement_period_to,
+        engagement_days, casual_rate_per_day, casual_total_amount
+        FROM casual_requisition_sections
+        WHERE request_id = $1
+        ORDER BY section_name
+      `,
+    [uuid],
+  );
 
   // Check if request is already processed
   const approvalStatus = requestData.approval_status;
@@ -109,15 +120,19 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
               submitterEmail={requestData.submitter_email}
               department={requestData.employee_department}
               location={requestData.casual_location}
-              justification={requestData.casual_justification}
-              numberOfCasuals={requestData.number_of_casuals}
-              ppesRequired={requestData.ppes_required}
-              periodFrom={requestData.engagement_period_from}
-              periodTo={requestData.engagement_period_to}
-              engagementDays={requestData.engagement_days}
-              ratePerDay={requestData.casual_rate_per_day}
-              totalAmount={requestData.casual_total_amount}
               requestCreatedAt={requestData.request_created_at}
+              sections={sectionsResult.map((section) => ({
+                sectionId: section.section_id,
+                sectionName: section.section_name,
+                justification: section.casual_justification,
+                numberOfCasuals: section.number_of_casuals,
+                ppesRequired: section.ppes_required,
+                periodFrom: section.engagement_period_from,
+                periodTo: section.engagement_period_to,
+                engagementDays: section.engagement_days,
+                ratePerDay: section.casual_rate_per_day,
+                totalAmount: section.casual_total_amount,
+              }))}
             />
           </Suspense>
         </RequisitionPagesWrapper>

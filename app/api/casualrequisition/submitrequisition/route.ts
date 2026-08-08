@@ -3,7 +3,7 @@ import { loadFinanceArray } from "@/lib/loadAppDataV2";
 import { query } from "@/lib/db";
 import { CasualEmailSender } from "@/services/CasualEmailSender";
 import { getSession } from "@/lib/session";
-import { getCasualRatePerDay } from "@/public/assets";
+import { getCasualRatePerDay, getCasualSections } from "@/public/assets";
 
 // Inclusive day-count between two ISO (YYYY-MM-DD) date strings
 function engagementDaysBetween(from: string, to: string) {
@@ -16,6 +16,15 @@ function engagementDaysBetween(from: string, to: string) {
 
   return diffDays;
 }
+
+type CasualSectionInput = {
+  sectionName: string;
+  justification: string;
+  numberOfCasuals: number;
+  ppesRequired: string;
+  periodFrom: string;
+  periodTo: string;
+};
 
 export async function POST(request: NextRequest) {
   // Check if we have a valid session
@@ -31,7 +40,7 @@ export async function POST(request: NextRequest) {
   const FINANCE_ARRAY = await loadFinanceArray();
 
   try {
-    const { formData, totalAmount, submittedBy } = await request.json();
+    const { formData, submittedBy } = await request.json();
 
     // Destructure the submitted by area to get a valid name and email
     const { name, email } = submittedBy;
@@ -45,66 +54,91 @@ export async function POST(request: NextRequest) {
     }
 
     // Destructure form data
-    const {
-      department,
-      hodApprover,
-      location,
-      justification,
-      numberOfCasuals,
-      ppesRequired,
-      periodFrom,
-      periodTo,
-    } = formData;
+    const { department, hodApprover, location, sections } = formData;
 
     // More robust validation logic
     // Returns true only if the value is genuinely missing (Allowing 0 values)
     const isEmpty = (val: unknown) =>
       val === null || val === undefined || val === "";
 
-    const missingFields = Object.values(formData).some((value) =>
-      isEmpty(value),
-    );
-
-    if (missingFields) {
+    if (isEmpty(department) || isEmpty(hodApprover) || isEmpty(location)) {
       return NextResponse.json(
         { message: "Your requisition is missing some required form fields" },
         { status: 400 },
       );
     }
 
-    // Hard stops per requisition rules
-    if (Number(numberOfCasuals) <= 0) {
-      return NextResponse.json(
-        { message: "The number of casuals requested must be at least 1" },
-        { status: 400 },
-      );
-    }
-
-    if (periodTo < periodFrom) {
+    if (!Array.isArray(sections) || sections.length === 0) {
       return NextResponse.json(
         {
           message:
-            "The casual engagement period's end date cannot be earlier than the start date",
+            "At least one section is required to submit this requisition",
         },
         { status: 400 },
       );
     }
+
+    // The set of sections valid for this location - guards against tampering
+    const allowedSections = getCasualSections(location);
+
+    for (const section of sections as CasualSectionInput[]) {
+      if (!allowedSections.includes(section.sectionName)) {
+        return NextResponse.json(
+          {
+            message: `"${section.sectionName}" is not a valid section for the selected location`,
+          },
+          { status: 400 },
+        );
+      }
+
+      if (
+        isEmpty(section.justification) ||
+        isEmpty(section.ppesRequired) ||
+        isEmpty(section.periodFrom) ||
+        isEmpty(section.periodTo)
+      ) {
+        return NextResponse.json(
+          {
+            message: `Section "${section.sectionName}" is missing some required fields`,
+          },
+          { status: 400 },
+        );
+      }
+
+      if (Number(section.numberOfCasuals) <= 0) {
+        return NextResponse.json(
+          {
+            message: `Section "${section.sectionName}" must request at least 1 casual`,
+          },
+          { status: 400 },
+        );
+      }
+
+      if (section.periodTo < section.periodFrom) {
+        return NextResponse.json(
+          {
+            message: `Section "${section.sectionName}"'s engagement period end date cannot be earlier than its start date`,
+          },
+          { status: 400 },
+        );
+      }
+    }
+
+    const ratePerDay = getCasualRatePerDay(location);
 
     // Recompute the derived values server-side rather than trusting the client
-    const engagementDays = engagementDaysBetween(periodFrom, periodTo);
-    const ratePerDay = getCasualRatePerDay(location);
-    const computedTotalAmount =
-      Number(numberOfCasuals) * ratePerDay * engagementDays;
+    const computedSections = (sections as CasualSectionInput[]).map(
+      (section) => {
+        const engagementDays = engagementDaysBetween(
+          section.periodFrom,
+          section.periodTo,
+        );
+        const totalAmount =
+          Number(section.numberOfCasuals) * ratePerDay * engagementDays;
 
-    if (computedTotalAmount !== Number(totalAmount)) {
-      return NextResponse.json(
-        {
-          message:
-            "The submitted total amount does not match the computed amount for this requisition",
-        },
-        { status: 400 },
-      );
-    }
+        return { ...section, engagementDays, totalAmount };
+      },
+    );
 
     const hodApproverResult = await query(
       `
@@ -129,16 +163,14 @@ export async function POST(request: NextRequest) {
     const hodUuid = hodApproverResult[0].uuid;
     const hodEmail = hodApproverResult[0].email;
 
-    // Create the insert query - all three stages are always active (no tiering)
+    // Create the header insert query - all three stages are always active (no tiering)
     const insertQuery = `
     INSERT INTO casual_requisitions
     (submitter_email, submitter_name, employee_department, casual_location,
-    casual_justification, number_of_casuals, ppes_required, engagement_period_from,
-    engagement_period_to, engagement_days, casual_rate_per_day, casual_total_amount,
     casual_hod_approval_status, casual_finance_approval_status, casual_hr_approval_status,
     casual_hod_approver, casual_hod_email)
     VALUES
-    ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+    ($1, $2, $3, $4, $5, $6, $7, $8, $9)
     RETURNING request_id
     `;
 
@@ -147,14 +179,6 @@ export async function POST(request: NextRequest) {
       name,
       department,
       location,
-      justification,
-      numberOfCasuals,
-      ppesRequired,
-      periodFrom,
-      periodTo,
-      engagementDays,
-      ratePerDay,
-      computedTotalAmount,
       "pending",
       "pending",
       "pending",
@@ -167,6 +191,39 @@ export async function POST(request: NextRequest) {
 
     // Get the returned uuid
     const requestUuid = result[0].request_id;
+
+    // Bulk-insert one row per section, linked to the header via request_id
+    const sectionColumns = 10;
+    const sectionValuesClause = computedSections
+      .map(
+        (_, index) =>
+          `($${index * sectionColumns + 1}, $${index * sectionColumns + 2}, $${index * sectionColumns + 3}, $${index * sectionColumns + 4}, $${index * sectionColumns + 5}, $${index * sectionColumns + 6}, $${index * sectionColumns + 7}, $${index * sectionColumns + 8}, $${index * sectionColumns + 9}, $${index * sectionColumns + 10})`,
+      )
+      .join(", ");
+
+    const sectionParams = computedSections.flatMap((section) => [
+      requestUuid,
+      section.sectionName,
+      section.justification,
+      Number(section.numberOfCasuals),
+      section.ppesRequired,
+      section.periodFrom,
+      section.periodTo,
+      section.engagementDays,
+      ratePerDay,
+      section.totalAmount,
+    ]);
+
+    await query(
+      `
+      INSERT INTO casual_requisition_sections
+      (request_id, section_name, casual_justification, number_of_casuals,
+      ppes_required, engagement_period_from, engagement_period_to,
+      engagement_days, casual_rate_per_day, casual_total_amount)
+      VALUES ${sectionValuesClause}
+      `,
+      sectionParams,
+    );
 
     // Running an update if the requestor is the HOD
     if (hodEmail === email) {
