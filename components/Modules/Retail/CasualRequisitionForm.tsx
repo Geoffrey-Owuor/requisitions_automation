@@ -11,6 +11,8 @@ import {
   Wallet,
   Check,
   Trash2,
+  Search,
+  X,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { loadHodApprovers, loadBaseDepartments } from "@/lib/loadAppDataV2";
@@ -594,7 +596,7 @@ function SectionFieldset({
   );
 }
 
-function FormSelect({
+export function FormSelect({
   label,
   options,
   value,
@@ -602,6 +604,18 @@ function FormSelect({
   loading,
 }: FormSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
+
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredOptions = useMemo(() => {
+    if (!searchQuery.trim()) return options;
+
+    const searchValue = searchQuery.toLowerCase();
+
+    return options.filter((option) =>
+      option.toLowerCase().includes(searchValue),
+    );
+  }, [options, searchQuery]);
 
   return (
     <div className="relative flex flex-col gap-2">
@@ -629,19 +643,55 @@ function FormSelect({
             className="fixed inset-0 z-40"
             onClick={() => setIsOpen(false)}
           />
-          <div className="absolute top-full right-0 left-0 z-50 mt-1 max-h-60 scrollbar-thin overflow-y-auto rounded-xl border border-[rgba(240,180,180,0.6)] bg-white p-1 shadow-[0_10px_25px_rgba(160,60,60,0.1)]">
-            {options.map((opt) => (
-              <div
-                key={opt}
-                className="cursor-pointer rounded-lg px-3 py-2.5 text-sm text-[#1e1b1b] transition-all duration-200 hover:bg-rose-50 hover:text-rose-600"
-                onClick={() => {
-                  onChange(opt);
-                  setIsOpen(false);
-                }}
-              >
-                {opt}
+          <div className="absolute top-full right-0 left-0 z-50 mt-1 rounded-xl border border-[rgba(240,180,180,0.6)] bg-white px-1 py-2 shadow-[0_10px_25px_rgba(160,60,60,0.1)]">
+            {/* SEARCH INPUT - Search threshold of six*/}
+            {options.length > 6 && (
+              <div className="relative px-1 pb-2">
+                <div className="relative flex items-center">
+                  <Search className="absolute left-2.5 h-3.5 w-3.5 text-neutral-400" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search..."
+                    className="w-full rounded-full border border-neutral-200 bg-neutral-100 py-2 pr-8 pl-8 text-xs text-neutral-900 placeholder-neutral-400 transition-colors focus:border-rose-500 focus:bg-white focus:outline-none"
+                  />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery("")}
+                      className="absolute right-2 rounded-full p-0.5 text-neutral-400 hover:bg-neutral-200 hover:text-neutral-600"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  )}
+                </div>
               </div>
-            ))}
+            )}
+
+            <div className="max-h-60 scrollbar-thin overflow-y-auto">
+              {filteredOptions.length > 0 ? (
+                filteredOptions.map((opt) => (
+                  <div
+                    key={opt}
+                    className="cursor-pointer rounded-lg px-3 py-2.5 text-sm text-[#1e1b1b] transition-all duration-200 hover:bg-rose-50 hover:text-rose-600"
+                    onClick={() => {
+                      onChange(opt);
+                      setIsOpen(false);
+                    }}
+                  >
+                    {opt}
+                  </div>
+                ))
+              ) : (
+                /* Fallback state when no options exist */
+                <div className="px-3 py-6 text-center text-sm text-neutral-400">
+                  {searchQuery
+                    ? "No matching results found."
+                    : "No results found for this selection"}
+                </div>
+              )}
+            </div>
           </div>
         </>
       )}
