@@ -57,7 +57,7 @@ export default function MoreMenuModal({
 
       {isOpen && (
         <div
-          className={`absolute z-9999 min-w-48 rounded-2xl border border-slate-300 bg-white p-2 shadow-2xl backdrop-blur-xl duration-200 ${positionClasses}`}
+          className={`absolute z-9999 min-w-48 rounded-2xl bg-white p-2 shadow-2xl duration-200 ${positionClasses}`}
         >
           {items.map((item) => {
             const commonClassName =

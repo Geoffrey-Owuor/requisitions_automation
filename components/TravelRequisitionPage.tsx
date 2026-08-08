@@ -4,7 +4,6 @@ import { useUser } from "@/context/UserContext";
 import { useState, ChangeEvent, useMemo } from "react";
 import { DatePicker } from "./DatePicker";
 import {
-  ChevronDown,
   Wallet,
   UserRound,
   ArrowRight,
@@ -29,6 +28,7 @@ import SubmittingOverlay from "./SubmittingOverlay";
 import AlertModal from "./AlertModal";
 import { useToggleStore } from "@/store/useToggleStore";
 import { EngineeringJobFields, EngineeringJob } from "./EngineeringJobFields";
+import { FormSelect } from "./Modules/Retail/CasualRequisitionForm";
 
 export interface TravelFormData {
   employeeName: string;
@@ -79,14 +79,6 @@ interface FormInputProps {
   placeholder?: string;
   value: string | number;
   onChange: (value: string | number) => void;
-}
-
-interface FormSelectProps {
-  label: string;
-  options: string[];
-  value: string;
-  loading?: boolean;
-  onChange: (value: string) => void;
 }
 
 export default function TravelRequisitionPage() {
@@ -609,61 +601,6 @@ function FormInput({
         }}
         required
       />
-    </div>
-  );
-}
-
-function FormSelect({
-  label,
-  options,
-  value,
-  onChange,
-  loading,
-}: FormSelectProps) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  return (
-    <div className="relative flex flex-col gap-2">
-      <label className="text-[13px] font-medium text-[#7c5a5a]">
-        {label} <span className="text-red-500">*</span>
-      </label>
-      <button
-        disabled={loading}
-        type="button"
-        className="flex h-10 cursor-pointer items-center justify-between rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none disabled:cursor-progress"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        <span>{value || "Select..."}</span>
-        <ChevronDown
-          size={14}
-          className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
-        />
-      </button>
-
-      {isOpen && (
-        <>
-          {/* Backdrop */}
-          <div
-            className="fixed inset-0 z-40"
-            onClick={() => setIsOpen(false)}
-          />
-          {/* Dropdown */}
-          <div className="absolute top-full right-0 left-0 z-50 mt-1 max-h-60 scrollbar-thin overflow-y-auto rounded-xl border border-[rgba(240,180,180,0.6)] bg-white p-1 shadow-[0_10px_25px_rgba(160,60,60,0.1)]">
-            {options.map((opt) => (
-              <div
-                key={opt}
-                className="cursor-pointer rounded-lg px-3 py-2.5 text-sm text-[#1e1b1b] transition-all duration-200 hover:bg-rose-50 hover:text-rose-600"
-                onClick={() => {
-                  onChange(opt);
-                  setIsOpen(false);
-                }}
-              >
-                {opt}
-              </div>
-            ))}
-          </div>
-        </>
-      )}
     </div>
   );
 }

@@ -440,7 +440,7 @@ const CasualApprovalModal = ({
                 </div>
               </div>
               {isHrStage && (
-                <p className="mt-2 text-[11px] text-[#b0a0a0]">
+                <p className="mt-2 text-[11px] text-slate-500">
                   Final total casual headcount per section can be changed in the
                   HR stage. Each section&apos;s total amount will be
                   recalculated using its approved headcount.

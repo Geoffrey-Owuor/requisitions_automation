@@ -104,9 +104,9 @@ const DashboardBrand = ({ showText = false }: { showText?: boolean }) => {
 
 const AppMenu = () => {
   return (
-    <div className="absolute top-12 left-0 z-50 w-88 overflow-hidden rounded-[28px] border border-gray-100/80 bg-white/95 p-4 shadow-[0_20px_50px_rgba(0,0,0,0.12)] backdrop-blur-xl transition-all">
+    <div className="absolute top-12 left-0 z-50 w-88 overflow-hidden rounded-[28px] bg-white p-4 shadow-2xl transition-all">
       {/* Grid Container */}
-      <div className="scrollbar-thin scrollbar-thumb-gray-200 max-h-80 overflow-y-auto pr-1">
+      <div className="max-h-80 scrollbar-thin scrollbar-thumb-gray-200 overflow-y-auto pr-1">
         <div className="grid grid-cols-3 gap-2">
           {launcherApps.map((app) => {
             const Icon = app.icon;
