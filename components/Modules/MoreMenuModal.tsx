@@ -67,7 +67,7 @@ export default function MoreMenuModal({
               <>
                 <item.Icon
                   size={16}
-                  className="text-slate-400 transition-colors group-hover:text-rose-500"
+                  className="transition-colors group-hover:text-rose-500"
                 />
                 {item.label}
               </>

@@ -13,6 +13,7 @@ import {
   Check,
   X,
   MessageSquareText,
+  Pencil,
 } from "lucide-react";
 import { assets, dateFormatter } from "@/public/assets";
 import SubmittingOverlay from "@/components/SubmittingOverlay";
@@ -93,6 +94,15 @@ function DetailRow({
   );
 }
 
+function EditedValuePill({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-amber-400 px-2.5 py-1 text-[11px] font-semibold whitespace-nowrap text-amber-950 shadow-sm">
+      <Pencil className="h-3 w-3" />
+      {children}
+    </span>
+  );
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 const CasualApprovalModal = ({
@@ -140,6 +150,26 @@ const CasualApprovalModal = ({
     (sum, s) => sum + s.numberOfCasuals,
     0,
   );
+
+  // Effective (HR-edited) casual count for a section, falling back to the original value
+  const getEditedCasuals = (section: CasualApprovalSection) => {
+    const raw = hrApprovedCasuals[section.sectionId];
+    return raw === "" ? section.numberOfCasuals : Number(raw);
+  };
+  const isSectionEdited = (section: CasualApprovalSection) =>
+    isHrStage && getEditedCasuals(section) !== section.numberOfCasuals;
+  const getDerivedSectionTotal = (section: CasualApprovalSection) =>
+    getEditedCasuals(section) * section.ratePerDay * section.engagementDays;
+
+  const overallDerivedTotalCasuals = sections.reduce(
+    (sum, s) => sum + getEditedCasuals(s),
+    0,
+  );
+  const overallDerivedTotalAmount = sections.reduce(
+    (sum, s) => sum + getDerivedSectionTotal(s),
+    0,
+  );
+  const anySectionEdited = isHrStage && sections.some(isSectionEdited);
 
   // Approval/ decline function
   const handleApproval = async (status: string) => {
@@ -306,7 +336,12 @@ const CasualApprovalModal = ({
             <div className="mb-6 border-t border-[rgba(240,180,180,0.4)] pt-6">
               <SectionLabel>Sections</SectionLabel>
               <div className="flex flex-col gap-4">
-                {sections.map((section) => (
+                {sections.map((section) => {
+                  const sectionEdited = isSectionEdited(section);
+                  const derivedSectionTotal = getDerivedSectionTotal(section);
+                  const editedCasuals = getEditedCasuals(section);
+
+                  return (
                   <div
                     key={section.sectionId}
                     className="rounded-2xl border border-[rgba(240,180,180,0.4)] bg-white/60 p-5"
@@ -369,18 +404,31 @@ const CasualApprovalModal = ({
                           value: section.numberOfCasuals,
                           Icon: Users,
                         },
-                      ].map(({ label, value, Icon }) => (
-                        <div
-                          key={label}
-                          className="rounded-xl border border-gray-100 bg-gray-50 px-3 py-3 text-center"
-                        >
-                          <Icon className="mx-auto mb-1 h-4 w-4 text-rose-400" />
-                          <p className="text-[11px] text-[#7c5a5a]">{label}</p>
-                          <p className="mt-0.5 text-[15px] font-semibold text-[#1e1b1b]">
-                            {value.toLocaleString()}
-                          </p>
-                        </div>
-                      ))}
+                      ].map(({ label, value, Icon }) => {
+                        const isCasualsStat = label === "Casuals";
+                        const showPill = isCasualsStat && sectionEdited;
+                        return (
+                          <div
+                            key={label}
+                            className="rounded-xl border border-gray-100 bg-gray-50 px-3 py-3 text-center"
+                          >
+                            <Icon className="mx-auto mb-1 h-4 w-4 text-rose-400" />
+                            <p className="text-[11px] text-[#7c5a5a]">
+                              {label}
+                            </p>
+                            <div className="mt-0.5 flex items-center justify-center gap-1.5">
+                              {showPill && (
+                                <EditedValuePill>
+                                  {editedCasuals.toLocaleString()}
+                                </EditedValuePill>
+                              )}
+                              <p className="text-[15px] font-semibold text-[#1e1b1b]">
+                                {value.toLocaleString()}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
 
                     <div className="flex flex-wrap items-center justify-between rounded-2xl bg-linear-to-r from-slate-800 to-rose-900 px-5 py-4 text-white">
@@ -390,9 +438,16 @@ const CasualApprovalModal = ({
                           Section Total
                         </span>
                       </div>
-                      <span className="text-[16px] font-semibold">
-                        KES {section.totalAmount.toLocaleString()}
-                      </span>
+                      <div className="flex items-center gap-1.5">
+                        {sectionEdited && (
+                          <EditedValuePill>
+                            KES {derivedSectionTotal.toLocaleString()}
+                          </EditedValuePill>
+                        )}
+                        <span className="text-[16px] font-semibold">
+                          KES {section.totalAmount.toLocaleString()}
+                        </span>
+                      </div>
                     </div>
 
                     {/* ── HR: Approved Number of Casuals (per section) ── */}
@@ -420,7 +475,8 @@ const CasualApprovalModal = ({
                       </div>
                     )}
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
@@ -430,13 +486,27 @@ const CasualApprovalModal = ({
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 <div className="flex items-center justify-between rounded-2xl border border-rose-700/30 bg-linear-to-r from-rose-900/80 to-rose-800/80 px-5 py-5 font-semibold text-rose-50">
                   <span>Total Casuals</span>
-                  <span className="text-xl">{overallTotalCasuals}</span>
+                  <div className="flex items-center gap-1.5">
+                    {anySectionEdited && (
+                      <EditedValuePill>
+                        {overallDerivedTotalCasuals.toLocaleString()}
+                      </EditedValuePill>
+                    )}
+                    <span className="text-xl">{overallTotalCasuals}</span>
+                  </div>
                 </div>
                 <div className="flex items-center justify-between rounded-2xl bg-linear-to-r from-slate-800 to-rose-900 px-5 py-5 font-semibold text-white shadow-lg">
                   <span>Total Amount</span>
-                  <span className="text-xl">
-                    KES {overallTotalAmount.toLocaleString()}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    {anySectionEdited && (
+                      <EditedValuePill>
+                        KES {overallDerivedTotalAmount.toLocaleString()}
+                      </EditedValuePill>
+                    )}
+                    <span className="text-xl">
+                      KES {overallTotalAmount.toLocaleString()}
+                    </span>
+                  </div>
                 </div>
               </div>
               {isHrStage && (
