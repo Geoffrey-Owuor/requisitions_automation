@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { SkeletonTable } from "@/components/Skeletons/SkeletonTable";
 import {
   getITRequisitionData,
@@ -9,10 +9,10 @@ import { Search, Monitor, Plus, Info, RotateCcw, X } from "lucide-react";
 import { TablePagination } from "../TablePagination";
 import { ITRequisitionModal } from "./ITRequisitionsModal";
 import StatusFormatter from "../StatusFormatter";
-import { useQuery } from "@tanstack/react-query";
 import { QueryResultRow } from "pg";
 import ITDataExport from "./ITDataExport";
 import { useToggleStore } from "@/store/useToggleStore";
+import { useServerPagination } from "@/hooks/useServerPagination";
 
 export default function ITRequisitionsTable({
   userEmail,
@@ -26,40 +26,52 @@ export default function ITRequisitionsTable({
   const setShowITRequisition = useToggleStore(
     (state) => state.setShowITRequisition,
   );
-  const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
   const [selectedRequest, setSelectedRequest] = useState<QueryResultRow | null>(
     null,
   );
-  const [itemsPerPage, setItemsPerPage] = useState(6);
+  // Sticky "does this dataFlag have any data at all" signal — distinct from
+  // totalCount, which reflects the current (possibly search-filtered) count.
+  const [hasData, setHasData] = useState(false);
+  const [committedTotalCount, setCommittedTotalCount] = useState<number | null>(
+    null,
+  );
 
   const {
-    data: initialData = [],
-    isPending: loading,
+    data: paginatedData,
+    totalCount,
+    isLoading: loading,
+    isFetching,
     refetch,
-  } = useQuery({
-    queryKey: ["ITRequisitionsData", { userEmail, dataFlag, hodEmail }],
-    queryFn: () => getITRequisitionData({ userEmail, dataFlag, hodEmail }),
+    searchTerm,
+    setSearchTerm,
+    clearSearch,
+    isSearchActive,
+    currentPage,
+    setCurrentPage,
+    itemsPerPage,
+    setItemsPerPage,
+  } = useServerPagination({
+    queryKey: ["ITRequisitionsData"],
+    params: { userEmail, dataFlag, hodEmail },
+    queryFn: ({ params, page, pageSize, searchTerm }) =>
+      getITRequisitionData({ ...params, page, pageSize, searchTerm }),
   });
 
-  const filteredData = useMemo(() => {
-    if (!searchTerm) return initialData;
-    return initialData.filter((item) =>
-      Object.values(item).some((val) =>
-        String(val).toLowerCase().includes(searchTerm.toLowerCase()),
-      ),
-    );
-  }, [searchTerm, initialData]);
+  // Commit the sticky "has any data" signal during render (not in an effect)
+  // whenever an unfiltered totalCount becomes available — only trust
+  // totalCount while no search filter is active, since a search can
+  // legitimately drop totalCount to 0 without the table being truly empty.
+  const canCommit = !loading && !isSearchActive;
+  if (canCommit && totalCount !== committedTotalCount) {
+    setCommittedTotalCount(totalCount);
+    setHasData(totalCount > 0);
+  }
 
-  const paginatedData = useMemo(() => {
-    const start = (currentPage - 1) * itemsPerPage;
-    return filteredData.slice(start, start + itemsPerPage);
-  }, [filteredData, currentPage, itemsPerPage]);
-
-  // Report whether this table ended up with any data, once loaded
+  // Notifying the parent is a side effect on an external system, so it
+  // belongs in an effect rather than during render.
   useEffect(() => {
-    if (!loading) onStatusChange?.(initialData.length > 0);
-  }, [loading, initialData.length, onStatusChange]);
+    if (canCommit) onStatusChange?.(totalCount > 0);
+  }, [canCommit, totalCount, onStatusChange]);
 
   // Render different titles based on the data flag
   const baseTitle = "IT Requisitions";
@@ -75,7 +87,7 @@ export default function ITRequisitionsTable({
 
   return (
     <>
-      {initialData.length > 0 && (
+      {hasData && (
         <div>
           <span className="mb-4 flex items-center gap-2 font-medium text-neutral-600">
             <Monitor className="h-5 w-5" />
@@ -93,18 +105,12 @@ export default function ITRequisitionsTable({
                   type="text"
                   placeholder="Search employee, department or status..."
                   value={searchTerm}
-                  onChange={(e) => {
-                    setSearchTerm(e.target.value);
-                    setCurrentPage(1);
-                  }}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full rounded-xl border border-gray-300 bg-white/60 py-2.5 pr-4 pl-12 text-sm shadow-[0_8px_16px_rgba(60,100,160,0.02)] outline-hidden backdrop-blur-xl transition-all focus:border-red-400 focus:ring-4 focus:ring-red-500/5"
                 />
                 {searchTerm && (
                   <button
-                    onClick={() => {
-                      setSearchTerm("");
-                      setCurrentPage(1);
-                    }}
+                    onClick={clearSearch}
                     className="absolute top-1/2 right-4 z-10 -translate-y-1/2 rounded-full p-1 hover:bg-gray-200"
                   >
                     <X className="h-3 w-3" />
@@ -122,7 +128,9 @@ export default function ITRequisitionsTable({
             </div>
 
             {/* Table Container */}
-            <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white/50 shadow-[0_24px_48px_rgba(160,60,60,0.08)] backdrop-blur-2xl">
+            <div
+              className={`overflow-x-auto rounded-2xl border border-gray-200 bg-white/50 shadow-[0_24px_48px_rgba(160,60,60,0.08)] backdrop-blur-2xl transition-opacity ${isFetching ? "animate-pulse opacity-60" : ""}`}
+            >
               <table className="w-full border-collapse text-left">
                 <thead>
                   <tr className="border-b border-neutral-200/50 bg-neutral-100/30">
@@ -146,7 +154,7 @@ export default function ITRequisitionsTable({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-red-50">
-                  {filteredData.length > 0 ? (
+                  {totalCount > 0 ? (
                     paginatedData.map((req) => (
                       <tr
                         key={req.request_id}
@@ -255,7 +263,7 @@ export default function ITRequisitionsTable({
 
                           {searchTerm && (
                             <button
-                              onClick={() => setSearchTerm("")}
+                              onClick={clearSearch}
                               className="mt-5 text-[12px] font-bold tracking-wider text-red-600 uppercase transition-colors hover:text-red-700"
                             >
                               Clear search
@@ -271,14 +279,11 @@ export default function ITRequisitionsTable({
 
             {/* Pagination */}
             <TablePagination
-              totalItems={filteredData.length}
+              totalItems={totalCount}
               itemsPerPage={itemsPerPage}
               currentPage={currentPage}
               onPageChange={setCurrentPage}
-              onItemsPerPageChange={(n) => {
-                setItemsPerPage(n);
-                setCurrentPage(1);
-              }}
+              onItemsPerPageChange={setItemsPerPage}
             />
 
             {/* Details Modal */}

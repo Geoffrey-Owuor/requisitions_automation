@@ -352,12 +352,14 @@ export default function CasualRequisitionForm() {
               {/* Section 2: Sections */}
               {formData.location && (
                 <div>
-                  <h2 className="mb-2 flex items-center gap-2 text-[13px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
+                  <h2 className="mb-4 flex items-center gap-2 text-[13px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
                     <HardHat size={16} /> Sections
                   </h2>
-                  <h4 className="mb-4 text-xs text-neutral-600">
-                    Select the sections you&apos;re requesting casuals for
-                  </h4>
+                  {hasSectionChoice && (
+                    <h4 className="mb-4 text-[13px] text-[#a18080]">
+                      Select the sections you&apos;re requesting casuals for
+                    </h4>
+                  )}
 
                   {hasSectionChoice && (
                     <div className="mb-6 flex flex-wrap gap-2.5">
