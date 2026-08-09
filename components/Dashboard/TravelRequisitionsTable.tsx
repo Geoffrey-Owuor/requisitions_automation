@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   getTravelRequisitionData,
   TravelRequisitionDataProps,
@@ -17,9 +17,9 @@ import { TablePagination } from "./TablePagination";
 import { TravelDetailsModal } from "./TravelDetailsModal";
 import StatusFormatter from "./StatusFormatter";
 import { QueryResultRow } from "pg";
-import { useQuery } from "@tanstack/react-query";
 import { useToggleStore } from "@/store/useToggleStore";
 import { SkeletonTable } from "../Skeletons/SkeletonTable";
+import { useServerPagination } from "@/hooks/useServerPagination";
 
 export default function TravelRequisitionsTable({
   dataFlag,
@@ -34,43 +34,52 @@ export default function TravelRequisitionsTable({
     (state) => state.setShowTravelRequisition,
   );
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
   const [selectedRequest, setSelectedRequest] = useState<QueryResultRow | null>(
     null,
   );
-  const [itemsPerPage, setItemsPerPage] = useState(6);
+  // Sticky "does this dataFlag have any data at all" signal — distinct from
+  // totalCount, which reflects the current (possibly search-filtered) count.
+  const [hasData, setHasData] = useState(false);
+  const [committedTotalCount, setCommittedTotalCount] = useState<number | null>(
+    null,
+  );
 
   const {
-    data: initialData = [],
-    isPending: loading,
+    data: paginatedData,
+    totalCount,
+    isLoading: loading,
+    isFetching,
     refetch,
-  } = useQuery({
-    queryKey: ["TravelRequisitionsData", { dataFlag, userEmail, hodEmail }],
-    queryFn: () => getTravelRequisitionData({ dataFlag, userEmail, hodEmail }),
+    searchTerm,
+    setSearchTerm,
+    clearSearch,
+    isSearchActive,
+    currentPage,
+    setCurrentPage,
+    itemsPerPage,
+    setItemsPerPage,
+  } = useServerPagination({
+    queryKey: ["TravelRequisitionsData"],
+    params: { dataFlag, userEmail, hodEmail },
+    queryFn: ({ params, page, pageSize, searchTerm }) =>
+      getTravelRequisitionData({ ...params, page, pageSize, searchTerm }),
   });
 
-  // 1. Shallow Search Logic using useMemo
-  const filteredData = useMemo(() => {
-    if (!searchTerm) return initialData;
+  // Commit the sticky "has any data" signal during render (not in an effect)
+  // whenever an unfiltered totalCount becomes available — only trust
+  // totalCount while no search filter is active, since a search can
+  // legitimately drop totalCount to 0 without the table being truly empty.
+  const canCommit = !loading && !isSearchActive;
+  if (canCommit && totalCount !== committedTotalCount) {
+    setCommittedTotalCount(totalCount);
+    setHasData(totalCount > 0);
+  }
 
-    return initialData.filter((item) =>
-      Object.values(item).some((val) =>
-        String(val).toLowerCase().includes(searchTerm.toLowerCase()),
-      ),
-    );
-  }, [searchTerm, initialData]);
-
-  // 2. Pagination Logic
-  const paginatedData = useMemo(() => {
-    const start = (currentPage - 1) * itemsPerPage;
-    return filteredData.slice(start, start + itemsPerPage);
-  }, [filteredData, currentPage, itemsPerPage]);
-
-  // Report whether this table ended up with any data, once loaded
+  // Notifying the parent is a side effect on an external system, so it
+  // belongs in an effect rather than during render.
   useEffect(() => {
-    if (!loading) onStatusChange?.(initialData.length > 0);
-  }, [loading, initialData.length, onStatusChange]);
+    if (canCommit) onStatusChange?.(totalCount > 0);
+  }, [canCommit, totalCount, onStatusChange]);
 
   // Render different titles based on the data flag
   const baseTitle = "Travel Requisitions";
@@ -86,7 +95,7 @@ export default function TravelRequisitionsTable({
 
   return (
     <>
-      {initialData.length > 0 && (
+      {hasData && (
         <div>
           <span className="mb-4 flex items-center gap-2 font-medium text-neutral-600">
             <BriefcaseBusiness className="h-5 w-5" />
@@ -104,18 +113,12 @@ export default function TravelRequisitionsTable({
                   type="text"
                   placeholder="Search employee, department or status..."
                   value={searchTerm}
-                  onChange={(e) => {
-                    setSearchTerm(e.target.value);
-                    setCurrentPage(1);
-                  }}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full rounded-xl border border-gray-300 bg-white/60 px-3 py-2.5 pr-4 pl-12 text-sm shadow-[0_8px_16px_rgba(60,100,160,0.02)] outline-hidden backdrop-blur-xl transition-all focus:border-red-400 focus:ring-4 focus:ring-red-500/5"
                 />
                 {searchTerm && (
                   <button
-                    onClick={() => {
-                      setSearchTerm("");
-                      setCurrentPage(1);
-                    }}
+                    onClick={clearSearch}
                     className="absolute top-1/2 right-4 z-10 -translate-y-1/2 rounded-full p-1 hover:bg-gray-200"
                   >
                     <X className="h-3 w-3" />
@@ -132,7 +135,9 @@ export default function TravelRequisitionsTable({
             </div>
 
             {/* Table Container */}
-            <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white/50 shadow-[0_24px_48px_rgba(160,60,60,0.08)] backdrop-blur-2xl">
+            <div
+              className={`overflow-x-auto rounded-2xl border border-gray-200 bg-white/50 shadow-[0_24px_48px_rgba(160,60,60,0.08)] backdrop-blur-2xl transition-opacity ${isFetching ? "animate-pulse opacity-60" : ""}`}
+            >
               <table className="w-full border-collapse text-left">
                 <thead>
                   <tr className="border-b border-rose-100/50 bg-rose-50/30">
@@ -163,7 +168,7 @@ export default function TravelRequisitionsTable({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-rose-50">
-                  {filteredData.length > 0 ? (
+                  {totalCount > 0 ? (
                     paginatedData.map((req) => (
                       <tr
                         key={req.request_id}
@@ -262,7 +267,7 @@ export default function TravelRequisitionsTable({
                           {/* Optional Action Button for Search Fallback */}
                           {searchTerm && (
                             <button
-                              onClick={() => setSearchTerm("")}
+                              onClick={clearSearch}
                               className="mt-5 text-[12px] font-bold tracking-wider text-rose-600 uppercase transition-colors hover:text-rose-700"
                             >
                               Clear search
@@ -278,14 +283,11 @@ export default function TravelRequisitionsTable({
 
             {/* Pagination */}
             <TablePagination
-              totalItems={filteredData.length}
+              totalItems={totalCount}
               itemsPerPage={itemsPerPage}
               currentPage={currentPage}
               onPageChange={setCurrentPage}
-              onItemsPerPageChange={(n) => {
-                setItemsPerPage(n);
-                setCurrentPage(1);
-              }}
+              onItemsPerPageChange={setItemsPerPage}
             />
 
             {/* Details Modal */}
