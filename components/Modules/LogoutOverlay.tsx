@@ -27,15 +27,15 @@ const LogoutOverlay = () => {
         aria-live="polite"
         aria-busy="true"
       >
-        <div className="w-full max-w-sm rounded-4xl border border-rose-100 bg-white px-10 py-8 shadow-xl shadow-rose-100/30">
+        <div className="w-full max-w-sm px-10 py-8">
           <div className="flex flex-col items-center text-center">
             {/* Loader */}
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-rose-50">
-              <CustomLoader className="h-10 w-10 animate-spin text-rose-600" />
+            <div className="flex h-20 w-20 items-center justify-center rounded-full">
+              <CustomLoader className="h-16 w-16 animate-spin text-rose-600" />
             </div>
 
             {/* Heading */}
-            <h2 className="mt-6 text-lg font-semibold tracking-tight text-slate-900">
+            <h2 className="mt-4 text-lg font-semibold tracking-tight text-slate-900">
               Signing you out
             </h2>
 
