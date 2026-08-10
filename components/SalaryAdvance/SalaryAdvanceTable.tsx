@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 import { SkeletonTable } from "@/components/Skeletons/SkeletonTable";
 import {
   Search,
@@ -14,17 +14,15 @@ import { TablePagination } from "../Dashboard/TablePagination";
 import { SalaryAdvanceModal } from "./SalaryAdvanceModal";
 import { SalaryAdvanceBatchModal } from "./SalaryAdvanceBatchModal";
 import StatusFormatter from "../Dashboard/StatusFormatter";
-import { useQuery } from "@tanstack/react-query";
 import {
   GetSalaryAdvanceData,
   SalaryAdvanceData,
 } from "@/serverActions/GetSalaryAdvanceData";
 import { SalaryAdvanceExportModal } from "./SalaryAdvanceExportModal";
 import { Checkbox } from "./Checkbox";
+import { useServerPagination } from "@/hooks/useServerPagination";
 
 export default function SalaryAdvanceTable() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
   const [selectedRequest, setSelectedRequest] =
     useState<SalaryAdvanceData | null>(null);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
@@ -32,30 +30,26 @@ export default function SalaryAdvanceTable() {
   const [batchStatus, setBatchStatus] = useState<
     "approved" | "declined" | null
   >(null);
-  const [itemsPerPage, setItemsPerPage] = useState(6);
 
   const {
-    data: initialData = [],
-    isPending: loading,
+    data: paginatedData,
+    totalCount,
+    isLoading: loading,
+    isFetching,
     refetch,
-  } = useQuery({
+    searchTerm,
+    setSearchTerm,
+    clearSearch,
+    currentPage,
+    setCurrentPage,
+    itemsPerPage,
+    setItemsPerPage,
+  } = useServerPagination({
     queryKey: ["SalaryAdvancesData"],
-    queryFn: () => GetSalaryAdvanceData(),
+    params: {},
+    queryFn: ({ page, pageSize, searchTerm }) =>
+      GetSalaryAdvanceData({ page, pageSize, searchTerm }),
   });
-
-  const filteredData = useMemo(() => {
-    if (!searchTerm) return initialData;
-    return initialData.filter((item) =>
-      Object.values(item).some((val) =>
-        String(val).toLowerCase().includes(searchTerm.toLowerCase()),
-      ),
-    );
-  }, [searchTerm, initialData]);
-
-  const paginatedData = useMemo(() => {
-    const start = (currentPage - 1) * itemsPerPage;
-    return filteredData.slice(start, start + itemsPerPage);
-  }, [filteredData, currentPage, itemsPerPage]);
 
   // Only pending requests are eligible for batch review
   const selectablePageIds = useMemo(
@@ -112,18 +106,12 @@ export default function SalaryAdvanceTable() {
               type="text"
               placeholder="Search employee, department or status..."
               value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setCurrentPage(1);
-              }}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full rounded-xl border border-gray-300 bg-white/60 py-2.5 pr-4 pl-12 text-sm shadow-[0_8px_16px_rgba(60,100,160,0.02)] outline-hidden backdrop-blur-xl transition-all focus:border-red-400 focus:ring-4 focus:ring-red-500/5"
             />
             {searchTerm && (
               <button
-                onClick={() => {
-                  setSearchTerm("");
-                  setCurrentPage(1);
-                }}
+                onClick={clearSearch}
                 className="absolute top-1/2 right-4 z-10 -translate-y-1/2 rounded-full p-1 hover:bg-gray-200"
               >
                 <X className="h-3 w-3" />
@@ -169,7 +157,9 @@ export default function SalaryAdvanceTable() {
         </div>
 
         {/* Table Container */}
-        <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white/50 shadow-[0_24px_48px_rgba(160,60,60,0.08)] backdrop-blur-2xl">
+        <div
+          className={`overflow-x-auto rounded-2xl border border-gray-200 bg-white/50 shadow-[0_24px_48px_rgba(160,60,60,0.08)] backdrop-blur-2xl transition-opacity ${isFetching ? "animate-pulse opacity-60" : ""}`}
+        >
           <table className="w-full border-collapse text-left">
             <thead>
               <tr className="border-b border-neutral-200/50 bg-neutral-100/30">
@@ -199,7 +189,7 @@ export default function SalaryAdvanceTable() {
               </tr>
             </thead>
             <tbody className="divide-y divide-red-50">
-              {filteredData.length > 0 ? (
+              {totalCount > 0 ? (
                 paginatedData.map((req, idx) => {
                   const isPending =
                     req.approval_status?.toLowerCase() === "pending";
@@ -312,7 +302,7 @@ export default function SalaryAdvanceTable() {
                       </p>
                       {searchTerm && (
                         <button
-                          onClick={() => setSearchTerm("")}
+                          onClick={clearSearch}
                           className="mt-5 text-[12px] font-bold tracking-wider text-red-600 uppercase transition-colors hover:text-red-700"
                         >
                           Clear search
@@ -335,14 +325,11 @@ export default function SalaryAdvanceTable() {
 
         {/* Pagination */}
         <TablePagination
-          totalItems={filteredData.length}
+          totalItems={totalCount}
           itemsPerPage={itemsPerPage}
           currentPage={currentPage}
           onPageChange={setCurrentPage}
-          onItemsPerPageChange={(n) => {
-            setItemsPerPage(n);
-            setCurrentPage(1);
-          }}
+          onItemsPerPageChange={setItemsPerPage}
         />
 
         {/* Details & Review Modal */}

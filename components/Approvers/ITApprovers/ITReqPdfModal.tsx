@@ -134,7 +134,7 @@ const ITReqPdfModal = ({ pdfData }: { pdfData: ITPdfValues }) => {
                 <span className="mb-2 block text-[11px] font-medium tracking-[0.4px] text-[#b0a0a0] uppercase">
                   Other Requirements / Notes
                 </span>
-                <p className="text-[13px] leading-relaxed text-[#1e1b1b]">
+                <p className="text-[13px] leading-relaxed wrap-break-word whitespace-pre-wrap text-[#1e1b1b]">
                   {pdfData.otherrequirements}
                 </p>
               </div>

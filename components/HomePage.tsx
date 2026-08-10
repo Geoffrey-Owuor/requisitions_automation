@@ -6,17 +6,17 @@ import {
   MapPin,
   Shield,
   Monitor,
-  CheckCircle2,
   CircleGauge,
   ShoppingBag,
   ShieldAlert,
-  Workflow,
   BriefcaseBusiness,
   CircleArrowOutUpRight,
   LockKeyhole,
   LaptopMinimalCheck,
   ArrowRight,
   CircleDollarSign,
+  BookText,
+  HardHat,
 } from "lucide-react";
 import { JSX, ReactNode } from "react";
 import Header from "./Header";
@@ -28,7 +28,6 @@ interface Requisitions {
   description: string;
   icon: JSX.Element;
   accent: string;
-  shadow: string;
   badge: string;
   workflow: string[];
   tiers?: { label: string; cost: string; icon: JSX.Element }[] | null;
@@ -42,8 +41,7 @@ const requisitions: Requisitions[] = [
     description:
       "Apply for a salary advance, requests should be submitted before the 14th of every month",
     icon: <CircleDollarSign size={22} className="h-5 w-5 sm:w-6" />,
-    accent: "from-mist-500 to-mist-600",
-    shadow: "shadow-mist-200",
+    accent: "bg-mist-700",
     badge: "HR",
     workflow: ["Submit", "Wait for HR & Finance to review and approve"],
     tiers: null,
@@ -55,8 +53,7 @@ const requisitions: Requisitions[] = [
     description:
       "Site visits, local flights, road travel, and international travel with automated multi-tier approvals.",
     icon: <BriefcaseBusiness size={22} className="h-5 w-5 sm:h-6 sm:w-6" />,
-    accent: "from-rose-500 to-rose-600",
-    shadow: "shadow-rose-200",
+    accent: "bg-rose-700",
     badge: "HR",
     workflow: ["Submit", "HOD", "HR", "Director"],
     tiers: [
@@ -71,10 +68,20 @@ const requisitions: Requisitions[] = [
     description:
       "Request laptops, peripherals, and software. Routed to HOD then fulfilled by IT Team.",
     icon: <Monitor size={22} className="h-5 w-5 sm:h-6 sm:w-6" />,
-    accent: "from-slate-800 to-slate-900",
-    shadow: "shadow-slate-200",
+    accent: "bg-slate-800",
     badge: "IT",
     workflow: ["Submit", "HOD", "IT Fulfilment"],
+    tiers: null,
+  },
+  {
+    id: "casual",
+    label: "Casual Requisition",
+    description:
+      "Request casual staff engagements for a defined period. Routed to HOD, then Finance, then HR for approval.",
+    icon: <HardHat size={22} className="h-5 w-5 sm:h-6 sm:w-6" />,
+    accent: "bg-orange-800",
+    badge: "HR",
+    workflow: ["Submit", "HOD", "Finance", "HR"],
     tiers: null,
   },
   {
@@ -83,8 +90,7 @@ const requisitions: Requisitions[] = [
     description:
       "Submit an IT issue/ticket through our internal IT HelpDesk platform.",
     icon: <LaptopMinimalCheck size={22} className="h-5 w-5 sm:h-6 sm:w-6" />,
-    accent: "from-neutral-800 to-neutral-900",
-    shadow: "shadow-neutral-200",
+    accent: "bg-neutral-800",
     badge: "IT",
     workflow: ["Submit Issue", "Track issue until it's resolved"],
     tiers: null,
@@ -95,8 +101,7 @@ const requisitions: Requisitions[] = [
     description:
       "The purchase portal for making purchase requisitions at discounted staff prices.",
     icon: <ShoppingBag size={22} className="h-5 w-5 sm:h-6 sm:w-6" />,
-    accent: "from-red-800 to-red-900",
-    shadow: "shadow-red-200",
+    accent: "bg-red-800",
     badge: "HR",
     workflow: ["Submit", "Payroll", "HR", "Credit Control", "Invoicing"],
     tiers: null,
@@ -107,8 +112,7 @@ const requisitions: Requisitions[] = [
     description:
       "Submit a request for Key(s) and Access Code Issuance. Routed to your designated HOD then completed by security.",
     icon: <LockKeyhole size={22} className="h-5 w-5 sm:h-6 sm:w-6" />,
-    accent: "from-zinc-800 to-zinc-900",
-    shadow: "shadow-zinc-200",
+    accent: "bg-zinc-800",
     badge: "Retail",
     workflow: ["Submit", "HOD", "Security finalizes"],
     tiers: null,
@@ -117,14 +121,16 @@ const requisitions: Requisitions[] = [
 
 export default function HomePage() {
   return (
-    <div className="layout-scrollbar relative flex h-screen flex-col bg-[#fafafa] text-slate-900 selection:bg-rose-100 selection:text-rose-900">
+    <div className="layout-scrollbar relative flex h-screen flex-col bg-[#fdfbfb] text-slate-900 selection:bg-rose-100 selection:text-rose-900">
       {/* Quick Sign In component */}
       <QuickSignIn />
 
       {/* ── AMBIENT BACKGROUND ── */}
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-        <div className="absolute -top-[10%] -left-[10%] h-[50%] w-[50%] rounded-full bg-rose-100/50 blur-[80px] sm:h-[40%] sm:w-[40%] sm:blur-[120px]" />
-        <div className="absolute top-[20%] -right-[10%] h-[40%] w-[40%] rounded-full bg-blue-50/50 blur-[80px] sm:h-[30%] sm:w-[30%] sm:blur-[100px]" />
+        <div className="animate-aurora absolute top-[-15%] left-[-10%] h-[55%] w-[55%] rounded-full bg-rose-200/45 blur-[90px] sm:h-[45%] sm:w-[45%] sm:blur-[130px]" />
+        <div className="animate-drift absolute top-[10%] right-[-12%] h-[45%] w-[45%] rounded-full bg-orange-100/50 blur-[90px] sm:h-[35%] sm:w-[35%] sm:blur-[110px]" />
+        <div className="animate-drift absolute bottom-[-10%] left-[20%] h-[40%] w-[40%] rounded-full bg-blue-100/40 blur-[100px]" />
+        <div className="hero-grid absolute inset-x-0 top-0 h-[70vh]" />
       </div>
 
       {/* Header */}
@@ -132,64 +138,80 @@ export default function HomePage() {
 
       <main className="relative z-10">
         {/* ── HERO SECTION ── */}
-        <section className="mx-auto max-w-6xl px-4 py-12 text-center sm:px-6 sm:py-16 lg:text-left">
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-5 lg:gap-12">
-            <div className="lg:col-span-3">
-              <div className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-rose-100 bg-rose-50/50 px-3 py-1 text-[9px] font-bold tracking-wide text-rose-600 uppercase sm:gap-2 sm:px-4 sm:py-1.5 sm:text-[10px]">
-                <Workflow size={14} className="h-3 w-3 sm:h-3.5 sm:w-3.5" />{" "}
-                Internal Applications
-              </div>
-              <h1 className="mb-2 text-3xl font-semibold tracking-tight text-slate-900 sm:mb-6 sm:text-[42px]">
+        <section className="mx-auto max-w-6xl px-4 pt-8 pb-14 sm:px-6 sm:pt-12 sm:pb-20">
+          <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-5 lg:gap-14">
+            <div className="animate-rise text-center lg:col-span-3 lg:text-left">
+              <h1 className="mb-4 text-4xl font-semibold tracking-tight text-slate-900 sm:mb-6 sm:text-[52px] sm:leading-[1.05]">
                 Hotpoint{" "}
-                <span className="bg-linear-to-r from-rose-500 to-rose-700 bg-clip-text text-transparent">
+                <span className="relative inline-block text-rose-600">
                   Apps
                 </span>{" "}
                 Hub
               </h1>
-              <ul className="mx-auto max-w-xl list-none space-y-1 px-4 text-sm leading-relaxed text-slate-500 sm:px-0 sm:text-base lg:mx-0">
-                <li>
-                  Central hub for accessing internal apps and online forms. Some
-                  forms may require you to be signed into your work account.
-                </li>
-                <li className="font-semibold">
-                  See the{" "}
-                  <Link
-                    href="/guidelines"
-                    className="text-blue-500 hover:underline"
-                  >
-                    guidelines
-                  </Link>{" "}
-                  page if you need clarification on a certain app or online
-                  form.
-                </li>
-              </ul>
+
+              <p className="mx-auto max-w-xl text-[15px] leading-relaxed text-slate-500 sm:text-base lg:mx-0">
+                Access all your internal apps and forms in one place. Depending
+                on the feature, you may be asked to sign in with your work
+                credentials or verify your identity using the personal email
+                address on file from your onboarding.
+              </p>
+
+              {/* Hero actions */}
+              <div className="mt-7 flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-start">
+                <Link
+                  href="/dashboard"
+                  className="group flex w-full items-center justify-center gap-2 rounded-full bg-rose-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors duration-200 hover:bg-rose-700 active:scale-[0.98] sm:w-auto"
+                >
+                  Go to my dashboard
+                  <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
+                </Link>
+                <Link
+                  href="/guidelines"
+                  className="flex w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 shadow-sm transition-colors duration-200 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700 active:scale-[0.98] sm:w-auto"
+                >
+                  <BookText className="h-4 w-4" />
+                  Read the guidelines
+                </Link>
+              </div>
+
+              <p className="mt-4 text-center text-[12.5px] text-slate-400 lg:text-left">
+                Not sure which form you need? The guidelines page breaks down
+                every app and requisition type.
+              </p>
             </div>
 
             {/* Quick Stats/Links Card */}
-            <div className="lg:col-span-2">
-              <div className="rounded-3xl border border-slate-200 bg-white p-2 shadow-xl shadow-slate-200/50 sm:rounded-3xl">
-                <div className="flex flex-col gap-1">
-                  <QuickLink
-                    href="/dashboard"
-                    icon={<CircleGauge size={18} />}
-                    label="View My Dashboard"
-                    sub="Track your requisitions"
-                  />
+            <div className="animate-rise lg:col-span-2">
+              <div className="relative">
+                <div className="relative rounded-4xl border border-slate-200 bg-white p-2.5 shadow-[0_2px_4px_rgba(140,40,60,0.03),0_24px_48px_-20px_rgba(140,40,60,0.28)]">
+                  <div className="flex items-center gap-2 px-3 pt-2 pb-3">
+                    <span className="text-[10px] font-bold tracking-[0.15em] text-slate-400 uppercase">
+                      Jump straight in
+                    </span>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <QuickLink
+                      href="/dashboard"
+                      icon={<CircleGauge size={18} />}
+                      label="View My Dashboard"
+                      sub="Track your requisitions"
+                    />
 
-                  <QuickLink
-                    href="/dashboard/staffproductpurchase"
-                    icon={<ShoppingBag size={18} />}
-                    label="Staff Product Purchase"
-                    sub="Make a purchase request"
-                    isExternal
-                  />
-                  <QuickLink
-                    href="/dashboard/helpdesk"
-                    icon={<LaptopMinimalCheck size={18} />}
-                    label="HelpDesk"
-                    sub="Submit an IT ticket"
-                    isExternal
-                  />
+                    <QuickLink
+                      href="/dashboard/staffproductpurchase"
+                      icon={<ShoppingBag size={18} />}
+                      label="Staff Product Purchase"
+                      sub="Make a purchase request"
+                      isExternal
+                    />
+                    <QuickLink
+                      href="/dashboard/helpdesk"
+                      icon={<LaptopMinimalCheck size={18} />}
+                      label="HelpDesk"
+                      sub="Submit an IT ticket"
+                      isExternal
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -197,51 +219,56 @@ export default function HomePage() {
         </section>
 
         {/* ── REQUISITION GRID ── */}
-        <section className="mx-auto max-w-6xl px-4 pb-20 sm:px-6 sm:pb-32">
+        <section className="mx-auto max-w-6xl px-4 pb-20 sm:px-6 sm:pb-28">
           <div className="mb-8 flex items-center gap-4 sm:mb-10">
-            <h2 className="text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase sm:text-sm">
+            <h2 className="shrink-0 rounded-full border border-slate-200 bg-white px-4 py-1.5 text-[10px] font-bold tracking-[0.18em] text-slate-500 uppercase sm:text-[11px]">
               Available apps and forms
             </h2>
             <div className="h-px flex-1 bg-slate-200" />
           </div>
 
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-8">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-7">
             {requisitions.map((req) => (
               <div
                 key={req.id}
-                className="group relative flex flex-col justify-between overflow-hidden rounded-4xl border border-slate-200 bg-white p-6 transition-all duration-300 hover:border-rose-200 hover:shadow-2xl hover:shadow-rose-100 sm:rounded-[2.5rem] sm:p-8"
+                className="group relative flex flex-col justify-between overflow-hidden rounded-4xl border border-slate-200 bg-white p-6 shadow-[0_1px_2px_rgba(140,40,60,0.03)] transition-all duration-300 hover:-translate-y-1 hover:border-rose-200 hover:shadow-[0_24px_48px_-20px_rgba(140,40,60,0.3)] sm:rounded-[2.25rem] sm:p-8"
               >
-                <div>
-                  <div className="mb-6 flex items-start justify-between sm:mb-8">
+                <div className="relative">
+                  <div className="mb-6 flex items-start justify-between sm:mb-7">
                     <div
-                      className={`flex h-12 w-12 items-center justify-center rounded-xl bg-linear-to-br ${req.accent} text-white shadow-lg ${req.shadow} sm:h-14 sm:w-14 sm:rounded-2xl`}
+                      className={`flex h-12 w-12 items-center justify-center rounded-2xl ${req.accent} text-white shadow-sm transition-transform duration-300 group-hover:scale-105 sm:h-14 sm:w-14`}
                     >
                       {req.icon}
                     </div>
-                    <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold tracking-tight text-slate-500 uppercase sm:px-3 sm:text-[11px]">
+                    <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[10px] font-bold tracking-wider text-slate-500 uppercase sm:text-[11px]">
                       {req.badge}
                     </span>
                   </div>
 
-                  <h3 className="mb-2 text-xl font-semibold text-slate-900 sm:mb-3 sm:text-2xl">
+                  <h3 className="mb-2 text-xl font-semibold tracking-tight text-slate-900 sm:mb-3 sm:text-2xl">
                     {req.label}
                   </h3>
-                  <p className="mb-6 text-sm leading-relaxed text-slate-500 sm:mb-8 sm:text-base">
+                  <p className="mb-6 text-sm leading-relaxed text-slate-500 sm:mb-7 sm:text-[15px]">
                     {req.description}
                   </p>
 
-                  {/* Visual Workflow Steps - flex-wrap ensures they don't break on narrow screens */}
-                  <div className="mb-6 flex flex-wrap items-center gap-x-2 gap-y-3 sm:mb-8">
+                  {/* Visual Workflow Steps */}
+                  <div className="mb-6 flex flex-wrap items-center gap-x-1.5 gap-y-2 sm:mb-7">
                     {req.workflow.map((step, i) => (
-                      <div key={step} className="flex items-center gap-2">
-                        <div className="flex items-center gap-1.5 rounded-lg border border-slate-100 bg-slate-50/50 px-2.5 py-1">
-                          <CheckCircle2 size={12} className="text-rose-500" />
+                      <div key={step} className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-slate-50/80 py-1 pr-3 pl-1.5">
+                          <span className="flex h-4 w-4 items-center justify-center rounded-full bg-rose-100 text-[9px] font-bold text-rose-600">
+                            {i + 1}
+                          </span>
                           <span className="text-[10px] font-semibold text-slate-700 sm:text-[11px]">
                             {step}
                           </span>
                         </div>
                         {i < req.workflow.length - 1 && (
-                          <div className="h-px w-2 bg-slate-200 sm:w-4" />
+                          <ArrowRight
+                            size={11}
+                            className="shrink-0 text-slate-300"
+                          />
                         )}
                       </div>
                     ))}
@@ -249,11 +276,11 @@ export default function HomePage() {
 
                   {/* Tier Pills (If travel) */}
                   {req.tiers && (
-                    <div className="mb-6 flex flex-wrap gap-2 sm:mb-8">
+                    <div className="mb-6 flex flex-wrap gap-2 sm:mb-7">
                       {req.tiers.map((tier) => (
                         <div
                           key={tier.label}
-                          className="flex items-center gap-1.5 rounded-xl border border-slate-100 px-2.5 py-1.5 text-[11px] sm:gap-2 sm:px-3 sm:py-2 sm:text-[12px]"
+                          className="flex items-center gap-1.5 rounded-full border border-rose-100 bg-rose-50/50 px-3 py-1.5 text-[11px] sm:gap-2 sm:text-[12px]"
                         >
                           <span className="text-rose-500">{tier.icon}</span>
                           <span className="font-semibold text-slate-800">
@@ -265,14 +292,15 @@ export default function HomePage() {
                     </div>
                   )}
                 </div>
+
                 {/* Link if available */}
                 {req.link && (
                   <Link
                     href={req.link}
-                    className="inline-flex w-full items-center justify-center gap-4 rounded-xl bg-mist-900 px-4 py-3 font-medium text-white hover:bg-mist-800"
+                    className="group/cta relative inline-flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-full bg-mist-900 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-mist-900/20 transition-all duration-200 hover:bg-mist-800 hover:shadow-xl hover:shadow-mist-900/25 active:scale-[0.98]"
                   >
                     Submit a Request
-                    <ArrowRight className="h-5 w-5" />
+                    <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover/cta:translate-x-1" />
                   </Link>
                 )}
               </div>
@@ -280,9 +308,9 @@ export default function HomePage() {
           </div>
 
           {/* COMPLIANCE FOOTNOTE */}
-          <div className="mt-8 flex items-center justify-center gap-2 text-slate-500 sm:mt-12 sm:gap-3">
+          <div className="mx-auto mt-10 flex max-w-2xl items-center justify-center gap-3 rounded-full border border-amber-200 bg-amber-50 px-5 py-3 text-amber-800 sm:mt-14">
             <ShieldAlert size={16} className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
-            <p className="text-xs italic sm:text-sm">
+            <p className="text-center text-xs sm:text-[13px]">
               Standard compliance and procedures for online form requisitions
               must be adhered to.
             </p>
@@ -313,10 +341,10 @@ function QuickLink({
   return (
     <Link
       href={href}
-      className="group flex items-center justify-between rounded-xl p-3 transition-colors hover:bg-slate-50 sm:rounded-2xl sm:p-4"
+      className="group flex items-center justify-between rounded-full p-2.5 transition-colors hover:bg-rose-50/70 sm:p-3"
     >
       <div className="flex items-center gap-3 sm:gap-4">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-rose-50 text-rose-600 transition-colors group-hover:bg-rose-600 group-hover:text-white sm:h-10 sm:w-10 sm:rounded-xl">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-rose-50 text-rose-600 ring-1 ring-rose-100 transition-colors duration-200 group-hover:bg-rose-600 group-hover:text-white group-hover:ring-rose-300 sm:h-10 sm:w-10">
           {icon}
         </div>
         <div className="text-left">
@@ -326,11 +354,16 @@ function QuickLink({
           </p>
         </div>
       </div>
-      {isExternal ? (
-        <CircleArrowOutUpRight size={14} className="text-slate-300" />
-      ) : (
-        <ArrowRight size={14} className="text-slate-300" />
-      )}
+      <span className="mr-1.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-slate-300 transition-all duration-200 group-hover:bg-white group-hover:text-rose-500 group-hover:shadow-sm">
+        {isExternal ? (
+          <CircleArrowOutUpRight size={14} />
+        ) : (
+          <ArrowRight
+            size={14}
+            className="transition-transform duration-200 group-hover:translate-x-0.5"
+          />
+        )}
+      </span>
     </Link>
   );
 }

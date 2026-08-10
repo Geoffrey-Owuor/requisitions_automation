@@ -12,13 +12,13 @@ const LoginWrapper = () => {
       className="w-full"
       onSubmit={() => setIsLoading(true)}
     >
-      {/* Custom keyframes for the sequential color swap. 
+      {/* Custom keyframes for the sequential color swap.
         It fades between a very light rose-100 (#ffe4e6) and a deep rose-600 (#e11d48)
       */}
       <style>{`
         @keyframes color-chase {
-          0%, 60%, 100% { background-color: #ffe4e6; } 
-          30% { background-color: #e11d48; } 
+          0%, 60%, 100% { background-color: #ffe4e6; }
+          30% { background-color: #e11d48; }
         }
         .chase-dot {
           animation: color-chase 1.2s infinite ease-in-out;
@@ -31,12 +31,17 @@ const LoginWrapper = () => {
       <button
         type="submit"
         disabled={isLoading}
-        className="group flex w-full cursor-pointer items-center justify-center gap-3 rounded-xl border border-rose-100/80 bg-white px-5 py-3.5 text-[14.5px] font-medium text-slate-700 shadow-[inset_0_1px_0_rgba(255,255,255,1),0_2px_8px_rgba(140,40,60,0.04),0_1px_2px_rgba(140,40,60,0.02)] transition-all duration-200 hover:border-rose-200 hover:bg-rose-50/40 hover:text-rose-900 hover:shadow-[inset_0_1px_0_rgba(255,255,255,1),0_6px_16px_rgba(140,40,60,0.06),0_2px_4px_rgba(140,40,60,0.03)] active:scale-[0.98] active:shadow-sm disabled:pointer-events-none disabled:opacity-85"
+        className="group relative flex w-full cursor-pointer items-center justify-center gap-3 overflow-hidden rounded-full border border-rose-100 bg-white px-5 py-3.5 text-[14.5px] font-semibold text-slate-700 shadow-[inset_0_1px_0_rgba(255,255,255,1),0_2px_8px_rgba(140,40,60,0.06),0_8px_20px_-10px_rgba(140,40,60,0.25)] transition-all duration-200 hover:border-rose-200 hover:text-rose-900 hover:shadow-[inset_0_1px_0_rgba(255,255,255,1),0_4px_12px_rgba(140,40,60,0.08),0_14px_28px_-12px_rgba(140,40,60,0.35)] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-90"
       >
-        <MicrosoftIcon />
+        {/* Warm wash that sweeps in on hover */}
+        <span className="pointer-events-none absolute inset-0 bg-linear-to-r from-rose-50 via-white to-rose-50 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+
+        <span className="relative flex shrink-0 items-center justify-center rounded-full">
+          <MicrosoftIcon />
+        </span>
 
         {/* Fixed width prevents the button from resizing when the text changes */}
-        <span className="flex w-47.5 items-center justify-center">
+        <span className="relative flex w-47.5 items-center justify-center">
           {isLoading ? (
             <span className="flex items-center gap-1.5 text-rose-900">
               Getting things ready

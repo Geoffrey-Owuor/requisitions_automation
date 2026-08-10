@@ -81,11 +81,11 @@ export default function UserDropdown({
         {/* ── DROPDOWN MENU ── */}
         {isOpen && (
           <div
-            className={`absolute ${positionClasses} animate-in fade-in zoom-in-95 w-60 rounded-2xl border border-slate-200/80 bg-white/95 p-2 shadow-[0_16px_40px_rgba(0,0,0,0.08)] backdrop-blur-xl duration-200`}
+            className={`absolute ${positionClasses} w-60 rounded-2xl bg-white p-2 shadow-2xl duration-200`}
           >
             {/* User Info Header */}
 
-            <div className="mb-1 flex flex-col gap-0.5 rounded-xl bg-slate-100/60 px-4 py-3">
+            <div className="mb-1 flex flex-col gap-0.5 rounded-xl bg-slate-100/70 px-4 py-3">
               <span className="truncate text-[14px] font-semibold text-slate-900">
                 {username}
               </span>
