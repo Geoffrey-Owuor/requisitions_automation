@@ -10,6 +10,8 @@ import {
   X,
   Monitor,
   CircleQuestionMark,
+  Ellipsis,
+  HardHat,
   LaptopMinimalCheck,
   ShoppingBag,
   HousePlug,
@@ -23,6 +25,8 @@ import TravelRequisitionPage from "./TravelRequisitionPage";
 import { usePathname } from "next/navigation";
 import { useToggleStore } from "@/store/useToggleStore";
 import KeyAccessRequisitionForm from "./Modules/Retail/KeyAccessRequisitionForm";
+import CasualRequisitionForm from "./Modules/Retail/CasualRequisitionForm";
+import MoreMenuModal from "./Modules/MoreMenuModal";
 
 const links = [
   {
@@ -64,6 +68,13 @@ const MobileHeader = () => {
     (state) => state.setShowAccessRequisition,
   );
 
+  const showCasualRequisition = useToggleStore(
+    (state) => state.showCasualRequisition,
+  );
+  const setShowCasualRequisition = useToggleStore(
+    (state) => state.setShowCasualRequisition,
+  );
+
   const handleButtonClick = (
     setAction: (value: boolean) => void,
     value: boolean,
@@ -98,6 +109,14 @@ const MobileHeader = () => {
         <KeyAccessRequisitionForm />
       </ModalWrapper>
 
+      {/* Casual Requisition Modal */}
+      <ModalWrapper
+        isOpen={showCasualRequisition}
+        onClose={() => setShowCasualRequisition(false)}
+      >
+        <CasualRequisitionForm />
+      </ModalWrapper>
+
       {/* Overlay & Sliding Mobile Sidebar */}
       <div
         className={`fixed inset-0 z-70 ${
@@ -116,7 +135,7 @@ const MobileHeader = () => {
         <aside
           className={`relative z-10 h-full ${
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
-          } flex w-64 flex-col bg-white shadow-2xl transition-transform duration-200`}
+          } flex w-80 flex-col bg-white shadow-2xl transition-transform duration-200`}
         >
           <div className="flex h-16 items-center justify-between border-b border-slate-100 px-6">
             <Brand showText={true} />
@@ -128,7 +147,7 @@ const MobileHeader = () => {
             </button>
           </div>
 
-          <nav className="flex flex-col gap-1 overflow-y-auto p-4">
+          <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-4">
             {/* Home Link */}
             <Link
               href="/dashboard"
@@ -219,17 +238,44 @@ const MobileHeader = () => {
               Salary Advance
             </Link>
 
-            {/* Access Requisition button */}
-            <button
-              onClick={() => handleButtonClick(setShowAccessRequisition, true)}
-              className="group flex items-center gap-3 rounded-xl px-4 py-3 text-[14px] font-semibold text-slate-600 transition-all hover:bg-red-50 hover:text-red-950"
-            >
-              <LockKeyhole
-                size={18}
-                className="text-slate-500 transition-colors group-hover:text-red-950"
-              />
-              Access/ Key Issuance
-            </button>
+            {/* More menu - holds secondary links (Guidelines, future additions) */}
+            <MoreMenuModal
+              align="bottom"
+              triggerClassName="group flex w-full items-center gap-3 rounded-xl px-4 py-3 text-[14px] font-semibold text-slate-600 transition-all hover:bg-red-50 hover:text-red-950"
+              trigger={
+                <>
+                  <Ellipsis
+                    size={18}
+                    className="text-slate-500 transition-colors group-hover:text-red-950"
+                  />
+                  More
+                </>
+              }
+              items={[
+                {
+                  key: "casual",
+                  label: "Casual Requisition",
+                  Icon: HardHat,
+                  onClick: () =>
+                    handleButtonClick(setShowCasualRequisition, true),
+                },
+                {
+                  key: "access",
+                  label: "Key & Access",
+                  Icon: LockKeyhole,
+                  onClick: () =>
+                    handleButtonClick(setShowAccessRequisition, true),
+                },
+                {
+                  key: "guidelines",
+                  label: "Guidelines",
+                  Icon: CircleQuestionMark,
+                  onClick: () => setSidebarOpen(false),
+                  href: "/guidelines",
+                  external: true,
+                },
+              ]}
+            />
           </nav>
         </aside>
       </div>

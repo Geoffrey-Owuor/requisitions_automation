@@ -100,7 +100,7 @@ const AccessPdfModal = ({ pdfData }: { pdfData: AccessPdfValues }) => {
               <span className="mb-2 block text-[11px] font-medium tracking-[0.4px] text-[#b0a0a0] uppercase">
                 Access Locations
               </span>
-              <p className="text-[13px] leading-relaxed whitespace-pre-wrap text-[#1e1b1b]">
+              <p className="text-[13px] leading-relaxed wrap-break-word whitespace-pre-wrap text-[#1e1b1b]">
                 {pdfData.locations || "No locations specified"}
               </p>
             </div>
@@ -110,7 +110,7 @@ const AccessPdfModal = ({ pdfData }: { pdfData: AccessPdfValues }) => {
               <span className="mb-2 block text-[11px] font-medium tracking-[0.4px] text-[#b0a0a0] uppercase">
                 Requirements / Justification
               </span>
-              <p className="text-[13px] leading-relaxed whitespace-pre-wrap text-[#1e1b1b]">
+              <p className="text-[13px] leading-relaxed wrap-break-word whitespace-pre-wrap text-[#1e1b1b]">
                 {pdfData.requirements ||
                   "No specific requirements/keys provided"}
               </p>

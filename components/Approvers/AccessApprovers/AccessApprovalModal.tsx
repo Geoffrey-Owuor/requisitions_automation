@@ -273,7 +273,7 @@ const AccessApprovalModal = ({ data }: { data: AccessRequisitionData }) => {
                   <SectionLabel>Locations</SectionLabel>
                 </div>
 
-                <span className="px-5 py-1.5 text-[12px] font-medium text-slate-800">
+                <span className="px-5 py-1.5 text-[12px] font-medium wrap-break-word whitespace-pre-wrap text-slate-800">
                   {accessLocations}
                 </span>
               </div>
@@ -284,7 +284,7 @@ const AccessApprovalModal = ({ data }: { data: AccessRequisitionData }) => {
                   <Key className="mb-2.5 h-3.5 w-3.5 text-rose-400" />
                   <SectionLabel>Requirements / Justification</SectionLabel>
                 </div>
-                <span className="px-5 py-1.5 text-[12px] font-medium text-slate-800">
+                <span className="px-5 py-1.5 text-[12px] font-medium wrap-break-word whitespace-pre-wrap text-slate-800">
                   {accessRequirements}
                 </span>
               </div>

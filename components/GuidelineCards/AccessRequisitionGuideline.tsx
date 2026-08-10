@@ -4,32 +4,32 @@ import {
   UserCircle,
   LockKeyhole,
 } from "lucide-react";
-import { GeneralNote, InfoCard } from "./GuidelinesPage";
+import {
+  GeneralNote,
+  GuidelineHeading,
+  InfoCard,
+  SectionTitle,
+} from "./GuidelinesPage";
 
 export default function AccessRequisitionGuideline() {
   return (
     <div className="mx-auto max-w-4xl space-y-10 pb-16">
-      <div className="space-y-3">
-        <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-100/80 px-3 py-1.5 text-[11px] font-semibold tracking-wide text-slate-700 uppercase">
-          <LockKeyhole size={14} /> Access Requisition
-        </div>
-        <h2 className="text-3xl font-semibold tracking-tight text-slate-900">
-          Access Requisition Guidelines
-        </h2>
-        <p className="text-slate-500">
-          Procedures for requesting physical and logical access permissions,
-          keys, and location clearances for staff members.
-        </p>
-      </div>
+      <GuidelineHeading
+        icon={<LockKeyhole size={13} />}
+        eyebrow="Access Requisition"
+        title="Access Requisition Guidelines"
+      >
+        Procedures for requesting physical and logical access permissions, keys,
+        and location clearances for staff members.
+      </GuidelineHeading>
 
       <GeneralNote />
 
       {/* Required Fields Section */}
-      <section className="space-y-6">
-        <h3 className="flex items-center gap-2 text-lg font-semibold text-slate-800">
-          <CheckCircle2 size={20} className="text-slate-600" />
+      <section className="space-y-5">
+        <SectionTitle icon={<CheckCircle2 size={17} />}>
           Required Submission Fields
-        </h3>
+        </SectionTitle>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <InfoCard
             icon={<UserCircle size={18} />}

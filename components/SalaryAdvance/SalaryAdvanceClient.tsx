@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { DatePicker } from "../DatePicker";
 import {
   ArrowRight,
@@ -9,6 +9,11 @@ import {
   UserRound,
   CircleDollarSign,
   Lightbulb,
+  Mail,
+  ShieldCheck,
+  CircleAlert,
+  RotateCw,
+  PencilLine,
 } from "lucide-react";
 import { AlertInfo } from "../TravelRequisitionPage";
 import SubmittingOverlay from "../SubmittingOverlay";
@@ -62,6 +67,23 @@ const REQUEST_TYPE_OPTIONS: DropdownOption[] = [
 ];
 
 const RESEND_COOLDOWN_SECONDS = 60;
+const CODE_LENGTH = 6;
+const CODE_SLOTS = Array.from({ length: CODE_LENGTH }, (_, index) => index);
+
+const VERIFICATION_STEPS = [
+  {
+    title: "Verify your email",
+    detail: "We send a 6-digit code to the address on your staff record.",
+  },
+  {
+    title: "Complete the form",
+    detail: "Your staff details are filled in for you once verified.",
+  },
+  {
+    title: "HR & Finance review",
+    detail: "You'll be notified by email as your request is processed.",
+  },
+];
 
 function toISODate(date: Date): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
@@ -93,7 +115,7 @@ function StaffInfoField({ label, value }: { label: string; value: string }) {
       <label className="text-[13px] font-medium text-[#7c5a5a]">
         {label} <span className="text-red-500">*</span>
       </label>
-      <div className="flex h-10 w-full items-center rounded-xl border border-[rgba(240,180,180,0.6)] bg-gray-100 px-3.5 text-sm text-slate-700 select-none">
+      <div className="flex h-10 w-full cursor-not-allowed items-center rounded-xl border border-[rgba(240,180,180,0.6)] bg-gray-100 px-3.5 text-sm text-slate-700 select-none">
         {value}
       </div>
     </div>
@@ -119,6 +141,20 @@ export default function SalaryAdvanceClient() {
     alertType: "",
     alertMessage: "",
   });
+
+  const codeInputsRef = useRef<(HTMLInputElement | null)[]>([]);
+  // Tracks the last complete code we auto-submitted, so a failed attempt
+  // isn't retried on every render.
+  const autoSubmittedCodeRef = useRef("");
+  // Mirrors `code` synchronously (state updates apply on next render), so
+  // handlers that fire focus events right after setCode see the current
+  // value instead of a stale closure.
+  const codeRef = useRef("");
+
+  const updateCode = (next: string) => {
+    codeRef.current = next;
+    setCode(next);
+  };
 
   // Repayment must start on the 15th of the submission month (processing
   // date), up to the 1st of the month following the one the form is
@@ -204,6 +240,8 @@ export default function SalaryAdvanceClient() {
 
       if (response.type === "error") throw new Error(response.message);
 
+      updateCode("");
+      autoSubmittedCodeRef.current = "";
       setVerifyStage("code");
       setResendSecondsLeft(RESEND_COOLDOWN_SECONDS);
     } catch (error) {
@@ -221,7 +259,10 @@ export default function SalaryAdvanceClient() {
     try {
       const response = await RequestVerificationCode(email);
       if (response.type === "error") throw new Error(response.message);
+      updateCode("");
+      autoSubmittedCodeRef.current = "";
       setResendSecondsLeft(RESEND_COOLDOWN_SECONDS);
+      focusCodeInput(0);
     } catch (error) {
       if (error instanceof Error) setVerifyError(error.message);
     } finally {
@@ -229,13 +270,13 @@ export default function SalaryAdvanceClient() {
     }
   };
 
-  const handleVerifyCode = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const verifyCode = async (submittedCode: string) => {
+    if (submitting) return;
     setSubmitting(true);
     setVerifyError("");
 
     try {
-      const response = await VerifyAdvanceCode(email, code);
+      const response = await VerifyAdvanceCode(email, submittedCode);
 
       if (response.type === "error") throw new Error(response.message);
 
@@ -246,10 +287,108 @@ export default function SalaryAdvanceClient() {
       setStep(2);
     } catch (error) {
       if (error instanceof Error) setVerifyError(error.message);
+      // Clear the boxes so the next attempt starts from a clean slate.
+      updateCode("");
+      autoSubmittedCodeRef.current = "";
+      codeInputsRef.current[0]?.focus();
     } finally {
       setSubmitting(false);
     }
   };
+
+  const handleVerifyCode = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (code.length < CODE_LENGTH) return;
+    autoSubmittedCodeRef.current = code;
+    verifyCode(code);
+  };
+
+  const focusCodeInput = (index: number) => {
+    const clamped = Math.min(Math.max(index, 0), CODE_LENGTH - 1);
+    const target = codeInputsRef.current[clamped];
+    target?.focus();
+    target?.select();
+  };
+
+  // The code is always filled left to right, so it never has gaps — clicking
+  // ahead of the next empty box just lands on that box instead. Reads from
+  // codeRef (not the `code` state) because this can fire synchronously right
+  // after updateCode(), before the component has re-rendered with the new
+  // value.
+  const handleDigitFocus = (index: number) => {
+    if (index > codeRef.current.length) focusCodeInput(codeRef.current.length);
+  };
+
+  const handleDigitChange = (index: number, rawValue: string) => {
+    const digits = rawValue.replace(/\D/g, "");
+
+    if (!digits) {
+      updateCode(
+        codeRef.current.slice(0, index) + codeRef.current.slice(index + 1),
+      );
+      return;
+    }
+
+    updateCode(
+      (
+        codeRef.current.slice(0, index) +
+        digits +
+        codeRef.current.slice(index + digits.length)
+      ).slice(0, CODE_LENGTH),
+    );
+
+    focusCodeInput(index + digits.length);
+  };
+
+  const handleDigitKeyDown = (
+    index: number,
+    e: React.KeyboardEvent<HTMLInputElement>,
+  ) => {
+    if (e.key === "Backspace" && !code[index] && index > 0) {
+      e.preventDefault();
+      updateCode(
+        codeRef.current.slice(0, index - 1) + codeRef.current.slice(index),
+      );
+      focusCodeInput(index - 1);
+      return;
+    }
+    if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      focusCodeInput(index - 1);
+      return;
+    }
+    if (e.key === "ArrowRight") {
+      e.preventDefault();
+      focusCodeInput(index + 1);
+    }
+  };
+
+  const handleCodePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    const digits = e.clipboardData
+      .getData("text")
+      .replace(/\D/g, "")
+      .slice(0, CODE_LENGTH);
+    if (!digits) return;
+    e.preventDefault();
+    updateCode(digits);
+    focusCodeInput(digits.length);
+  };
+
+  // Submit as soon as the last digit lands — typing or pasting.
+  useEffect(() => {
+    if (step !== 1 || verifyStage !== "code") return;
+    if (code.length !== CODE_LENGTH) return;
+    if (autoSubmittedCodeRef.current === code) return;
+    autoSubmittedCodeRef.current = code;
+    verifyCode(code);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [code, step, verifyStage]);
+
+  // Drop the caret into the first box when the code stage opens.
+  useEffect(() => {
+    if (step !== 1 || verifyStage !== "code") return;
+    codeInputsRef.current[0]?.focus();
+  }, [step, verifyStage]);
 
   const handleSubmit = async () => {
     setSubmitting(true);
@@ -304,124 +443,266 @@ export default function SalaryAdvanceClient() {
       {step === 1 && checkingSession && <SalaryAdvanceFormSkeleton />}
 
       {step === 1 && !checkingSession && (
-        <div className="flex h-full flex-col items-center justify-center">
-          <div className="flex flex-1 items-center justify-center p-4">
-            <div className="w-full max-w-115 rounded-3xl border border-slate-200 p-8 shadow-inner">
-              {verifyStage === "email" ? (
-                <>
-                  <h2 className="mb-4 text-center text-2xl font-semibold">
-                    Verify Your Identity
-                  </h2>
-                  <p className="mb-4 text-sm text-slate-600">
-                    Enter the email address registered by HR during your
-                    onboarding. We&apos;ll send a verification code to confirm
-                    it&apos;s you
-                  </p>
-                  <span className="mb-4 inline-flex items-center gap-2 rounded-full bg-blue-50 px-4 py-2 text-xs text-blue-900">
-                    <Lightbulb className="h-4 w-4 shrink-0" />
-                    This is likely the email address where you receive your
-                    payslips
+        <div className="animate-rise mx-auto flex min-h-[70vh] w-full max-w-5xl items-center py-6 sm:py-10">
+          <div className="w-full">
+            <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-14">
+              {/* ── Context panel ── */}
+              <div className="order-2 lg:order-1">
+                <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-rose-200/70 bg-white/70 py-1.5 pr-4 pl-1.5 text-[10px] font-bold tracking-wide text-rose-700 uppercase shadow-sm backdrop-blur-sm sm:text-[11px]">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-rose-600 text-white">
+                    <ShieldCheck size={11} />
                   </span>
-                  <p className="mb-6 rounded-xl bg-neutral-200/50 p-3 text-xs text-neutral-800">
-                    Verification requires access to the email address you
-                    provided. If you no longer have access to it, contact HR to
-                    update your records before proceeding with your salary
-                    advance request.
+                  Secure verification
+                </div>
+
+                <h1 className="mb-3 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl sm:leading-[1.1]">
+                  Salary Advance <span className="text-rose-700">Request</span>
+                </h1>
+
+                <p className="mb-7 max-w-md text-[15px] leading-relaxed text-slate-500">
+                  Before you fill in the form, we need to confirm it&apos;s
+                  really you. Verification uses the personal email address HR
+                  registered during your onboarding.
+                </p>
+
+                <ol className="mb-7 flex flex-col gap-4">
+                  {VERIFICATION_STEPS.map((item, index) => (
+                    <li key={item.title} className="flex items-start gap-3.5">
+                      <span
+                        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ring-1 ${
+                          index === 0
+                            ? "bg-rose-600 text-white ring-rose-300"
+                            : "bg-white/80 text-slate-400 ring-slate-200"
+                        }`}
+                      >
+                        {index + 1}
+                      </span>
+                      <div>
+                        <p className="text-sm font-semibold text-slate-800">
+                          {item.title}
+                        </p>
+                        <p className="text-[12.5px] leading-relaxed text-slate-500">
+                          {item.detail}
+                        </p>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+
+                <div className="flex max-w-md items-start gap-3 rounded-2xl border border-amber-200/70 bg-amber-50/60 px-4 py-3 text-amber-900 backdrop-blur-sm">
+                  <Lightbulb size={16} className="mt-0.5 shrink-0" />
+                  <p className="text-xs leading-relaxed">
+                    Verification requires access to that mailbox. If you no
+                    longer have access to it, contact HR to update your records
+                    before requesting a salary advance.
                   </p>
+                </div>
+              </div>
 
-                  {verifyError && (
-                    <p className="mb-6 text-sm text-red-600">{verifyError}</p>
-                  )}
+              {/* ── Verification card ── */}
+              <div className="relative order-1 lg:order-2">
+                <div className="pointer-events-none absolute -inset-2 rounded-[2.5rem] bg-rose-100/40 blur-xl" />
 
-                  <form
-                    onSubmit={handleRequestCode}
-                    className="flex flex-col gap-4"
-                  >
-                    <input
-                      type="email"
-                      required
-                      className="h-12 rounded-full border border-slate-300 px-4 text-center outline-none focus:border-slate-500"
-                      placeholder="you@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                    />
-                    <button
-                      type="submit"
-                      disabled={submitting}
-                      className="mt-2 rounded-full bg-slate-900 py-3 font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg disabled:opacity-50"
-                    >
-                      {submitting ? "Sending..." : "Send Verification Code"}
-                    </button>
-                  </form>
-                </>
-              ) : (
-                <>
-                  <h2 className="mb-4 text-center text-2xl font-semibold">
-                    Enter Verification Code
-                  </h2>
-                  <p className="mb-6 text-sm text-slate-600">
-                    If <strong>{email}</strong> is in our records, a 6-digit
-                    code has been sent to it. The code expires in 10 minutes.
-                  </p>
-
-                  {verifyError && (
-                    <p className="mb-6 text-sm text-red-600">{verifyError}</p>
-                  )}
-
-                  <form
-                    onSubmit={handleVerifyCode}
-                    className="flex flex-col gap-4"
-                  >
-                    <input
-                      type="text"
-                      required
-                      className="h-12 rounded-full border border-slate-300 px-4 text-center tracking-widest outline-none focus:border-slate-500"
-                      placeholder="Enter Code"
-                      value={code}
-                      maxLength={6}
-                      onChange={(e) => setCode(e.target.value)}
-                    />
-                    <button
-                      type="submit"
-                      disabled={submitting}
-                      className="mt-2 rounded-full bg-slate-900 py-3 font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg disabled:opacity-50"
-                    >
-                      {submitting ? "Verifying..." : "Verify & Proceed"}
-                    </button>
-                  </form>
-
-                  <div className="mt-4 flex items-center justify-between text-xs text-slate-500">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setVerifyStage("email");
-                        setCode("");
-                        setVerifyError("");
-                      }}
-                      className="cursor-pointer underline"
-                    >
-                      Change email
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleResendCode}
-                      disabled={resendSecondsLeft > 0 || submitting}
-                      className="cursor-pointer underline disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      {resendSecondsLeft > 0
-                        ? `Resend code (${resendSecondsLeft}s)`
-                        : "Resend code"}
-                    </button>
+                <div className="relative rounded-4xl border border-white/80 bg-white/85 p-6 shadow-[0_2px_4px_rgba(140,40,60,0.03),0_24px_48px_-20px_rgba(140,40,60,0.28)] backdrop-blur-xl sm:p-8">
+                  {/* Stage progress */}
+                  <div className="mb-6 flex items-center gap-3">
+                    <div className="flex flex-1 gap-1.5">
+                      <span className="h-1 flex-1 rounded-full bg-rose-600" />
+                      <span
+                        className={`h-1 flex-1 rounded-full transition-colors duration-300 ${
+                          verifyStage === "code"
+                            ? "bg-rose-600"
+                            : "bg-slate-200"
+                        }`}
+                      />
+                    </div>
+                    <span className="shrink-0 text-[10px] font-bold tracking-[0.15em] text-slate-400 uppercase">
+                      Step {verifyStage === "code" ? 2 : 1} of 2
+                    </span>
                   </div>
-                </>
-              )}
-            </div>
-          </div>
 
-          {/* Footer */}
-          <footer className="mt-auto py-6 text-center font-semibold text-slate-600">
-            <p>For assistance, you contact the HR Department.</p>
-          </footer>
+                  <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-600 text-white shadow-lg shadow-rose-300/60">
+                    {verifyStage === "code" ? (
+                      <ShieldCheck size={22} />
+                    ) : (
+                      <Mail size={22} />
+                    )}
+                  </div>
+
+                  {verifyStage === "email" ? (
+                    <>
+                      <h2 className="mb-2 text-2xl font-semibold tracking-tight text-slate-900">
+                        Verify your identity
+                      </h2>
+                      <p className="mb-6 text-sm leading-relaxed text-slate-500">
+                        Enter the email address registered by HR during your
+                        onboarding and we&apos;ll send you a 6-digit code.
+                      </p>
+
+                      {verifyError && (
+                        <div
+                          role="alert"
+                          className="mb-5 flex items-start gap-2.5 rounded-2xl border border-rose-200 bg-rose-50/80 px-4 py-3 text-rose-700"
+                        >
+                          <CircleAlert size={16} className="mt-0.5 shrink-0" />
+                          <p className="text-[13px] leading-relaxed">
+                            {verifyError}
+                          </p>
+                        </div>
+                      )}
+
+                      <form
+                        onSubmit={handleRequestCode}
+                        className="flex flex-col gap-5"
+                      >
+                        <div>
+                          <label
+                            htmlFor="advance-email"
+                            className="mb-2 block text-[13px] font-medium text-slate-600"
+                          >
+                            Email address{" "}
+                            <span className="text-rose-500">*</span>
+                          </label>
+                          <div className="relative">
+                            <Mail
+                              size={18}
+                              className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-slate-400"
+                            />
+                            <input
+                              id="advance-email"
+                              type="email"
+                              required
+                              autoFocus
+                              autoComplete="email"
+                              className="h-13 w-full rounded-2xl border border-slate-200 bg-white/80 pr-4 pl-11 text-sm text-slate-900 transition-all duration-200 outline-none placeholder:text-slate-400 focus:border-rose-400 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.12)]"
+                              placeholder="you@example.com"
+                              value={email}
+                              onChange={(e) => setEmail(e.target.value)}
+                            />
+                          </div>
+                          <p className="mt-2.5 flex items-start gap-1.5 text-[11.5px] leading-relaxed text-slate-400">
+                            <Lightbulb size={13} className="mt-0.5 shrink-0" />
+                            This is likely the address where you receive your
+                            payslips.
+                          </p>
+                        </div>
+
+                        <button
+                          type="submit"
+                          disabled={submitting}
+                          className="group flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-rose-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-rose-500/25 transition-all duration-200 hover:bg-rose-700 hover:shadow-xl hover:shadow-rose-500/35 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none"
+                        >
+                          {submitting ? "Sending code..." : "Send my code"}
+                          <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
+                        </button>
+                      </form>
+                    </>
+                  ) : (
+                    <>
+                      <h2 className="mb-2 text-2xl font-semibold tracking-tight text-slate-900">
+                        Enter your code
+                      </h2>
+                      <p className="mb-6 text-sm leading-relaxed text-slate-500">
+                        If{" "}
+                        <span className="font-semibold text-slate-800">
+                          {email}
+                        </span>{" "}
+                        is in our records, a 6-digit code is on its way. It
+                        expires in 10 minutes.
+                      </p>
+
+                      {verifyError && (
+                        <div
+                          role="alert"
+                          className="mb-5 flex items-start gap-2.5 rounded-2xl border border-rose-200 bg-rose-50/80 px-4 py-3 text-rose-700"
+                        >
+                          <CircleAlert size={16} className="mt-0.5 shrink-0" />
+                          <p className="text-[13px] leading-relaxed">
+                            {verifyError}
+                          </p>
+                        </div>
+                      )}
+
+                      <form
+                        onSubmit={handleVerifyCode}
+                        className="flex flex-col gap-5"
+                      >
+                        <div className="flex items-center gap-2 sm:gap-2.5">
+                          {CODE_SLOTS.map((slot) => (
+                            <input
+                              key={slot}
+                              ref={(el) => {
+                                codeInputsRef.current[slot] = el;
+                              }}
+                              type="text"
+                              inputMode="numeric"
+                              autoComplete={
+                                slot === 0 ? "one-time-code" : "off"
+                              }
+                              maxLength={1}
+                              aria-label={`Verification code digit ${slot + 1}`}
+                              value={code[slot] ?? ""}
+                              onChange={(e) =>
+                                handleDigitChange(slot, e.target.value)
+                              }
+                              onKeyDown={(e) => handleDigitKeyDown(slot, e)}
+                              onFocus={() => handleDigitFocus(slot)}
+                              onPaste={handleCodePaste}
+                              className={`h-14 w-full min-w-0 rounded-2xl border bg-white/80 text-center text-xl font-semibold text-slate-900 transition-all duration-200 outline-none focus:border-rose-400 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.12)] ${
+                                code[slot]
+                                  ? "border-rose-300"
+                                  : "border-slate-200"
+                              }`}
+                            />
+                          ))}
+                        </div>
+
+                        <button
+                          type="submit"
+                          disabled={submitting || code.length < CODE_LENGTH}
+                          className="group flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-rose-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-rose-500/25 transition-all duration-200 hover:bg-rose-700 hover:shadow-xl hover:shadow-rose-500/35 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none"
+                        >
+                          {submitting ? "Verifying..." : "Verify & proceed"}
+                          <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
+                        </button>
+                      </form>
+
+                      <div className="mt-5 flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setVerifyStage("email");
+                            updateCode("");
+                            autoSubmittedCodeRef.current = "";
+                            setVerifyError("");
+                          }}
+                          className="flex cursor-pointer items-center gap-1.5 rounded-full px-2.5 py-1.5 text-xs font-semibold text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800"
+                        >
+                          <PencilLine size={13} />
+                          Change email
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleResendCode}
+                          disabled={resendSecondsLeft > 0 || submitting}
+                          className="flex cursor-pointer items-center gap-1.5 rounded-full px-2.5 py-1.5 text-xs font-semibold text-rose-600 transition-colors hover:bg-rose-50 disabled:cursor-not-allowed disabled:text-slate-400 disabled:hover:bg-transparent"
+                        >
+                          <RotateCw size={13} />
+                          {resendSecondsLeft > 0
+                            ? `Resend in ${resendSecondsLeft}s`
+                            : "Resend code"}
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <p className="mt-10 text-center text-xs text-slate-400">
+              Having trouble? Contact the HR Department for assistance.
+            </p>
+          </div>
         </div>
       )}
 

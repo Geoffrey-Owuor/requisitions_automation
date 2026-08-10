@@ -36,6 +36,17 @@ export async function GET(request: NextRequest) {
     // Run the query
     const rows = await query(baseQuery);
 
+    // If the returned data length is zero - no advance submissions were made for the current month
+    // Only return a success message
+    if (rows.length === 0) {
+      return NextResponse.json(
+        {
+          message: `0 rows returned, no salary advances data for date:${date}`,
+        },
+        { status: 200 },
+      );
+    }
+
     // Creating a workbook with exceljs and adding a new worksheet;
     const workbook = new Workbook();
     const worksheet = workbook.addWorksheet("Salary_Advances");

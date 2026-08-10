@@ -5,49 +5,43 @@ import {
   Monitor,
   UserCircle,
 } from "lucide-react";
-import { GeneralNote, InfoCard } from "./GuidelinesPage";
+import {
+  Callout,
+  GeneralNote,
+  GuidelineHeading,
+  InfoCard,
+  SectionTitle,
+} from "./GuidelinesPage";
 
 export default function ITRequisitionGuideline() {
   return (
     <div className="mx-auto max-w-4xl space-y-10 pb-16">
-      <div className="space-y-3">
-        <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-100/80 px-3 py-1.5 text-[11px] font-semibold tracking-wide text-slate-700 uppercase">
-          <Monitor size={14} /> IT Requisition
-        </div>
-        <h2 className="text-3xl font-semibold tracking-tight text-slate-900">
-          IT Requisition Guidelines
-        </h2>
-        <p className="text-slate-500">
-          Procedures for requesting hardware, software, and technical
-          peripherals for staff members.
-        </p>
-      </div>
+      <GuidelineHeading
+        icon={<Monitor size={13} />}
+        eyebrow="IT Requisition"
+        title="IT Requisition Guidelines"
+      >
+        Procedures for requesting hardware, software, and technical peripherals
+        for staff members.
+      </GuidelineHeading>
 
       <GeneralNote />
 
       {/* Planning Callout */}
-      <div className="flex items-start gap-4 rounded-2xl border border-rose-100 bg-rose-50 p-5">
-        <div className="rounded-full bg-rose-100 p-2 text-rose-600">
-          <Lightbulb size={20} />
-        </div>
-        <div>
-          <h4 className="font-semibold text-rose-900">
-            Advance Notice Recommended
-          </h4>
-          <p className="mt-1 text-sm leading-relaxed text-rose-700">
-            IT recommends making a requisition at least 2 weeks prior to
-            facilitate proper planning and preparation for the requested
-            equipment.
-          </p>
-        </div>
-      </div>
+      <Callout
+        icon={<Lightbulb size={18} />}
+        title="Advance Notice Recommended"
+        tone="rose"
+      >
+        IT recommends making a requisition at least 2 weeks prior to facilitate
+        proper planning and preparation for the requested equipment.
+      </Callout>
 
       {/* Required Fields Section */}
-      <section className="space-y-6">
-        <h3 className="flex items-center gap-2 text-lg font-semibold text-slate-800">
-          <CheckCircle2 size={20} className="text-slate-600" />
+      <section className="space-y-5">
+        <SectionTitle icon={<CheckCircle2 size={17} />}>
           Required Submission Fields
-        </h3>
+        </SectionTitle>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <InfoCard
             icon={<UserCircle size={18} />}

@@ -5,54 +5,50 @@ import {
   Paperclip,
   LaptopMinimalCheck,
 } from "lucide-react";
-import { InfoCard } from "./GuidelinesPage";
+import {
+  Callout,
+  GuidelineHeading,
+  InfoCard,
+  SectionTitle,
+} from "./GuidelinesPage";
 import Link from "next/link";
 
 export default function HelpdeskGuideline() {
   return (
     <div className="mx-auto max-w-4xl space-y-10 pb-16">
-      <div className="space-y-3">
-        <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-100/80 px-3 py-1.5 text-[11px] font-semibold tracking-wide text-slate-700 uppercase">
-          <LaptopMinimalCheck size={14} /> HelpDesk
-        </div>
-        <h2 className="text-3xl font-semibold tracking-tight text-slate-900">
-          HelpDesk Issue Submission
-        </h2>
-        <p className="text-slate-500">
-          Procedures for reporting issues, requesting assistance, and routing
-          tickets to the IT department.
-        </p>
-      </div>
+      <GuidelineHeading
+        icon={<LaptopMinimalCheck size={13} />}
+        eyebrow="HelpDesk"
+        title="HelpDesk Issue Submission"
+      >
+        Procedures for reporting issues, requesting assistance, and routing
+        tickets to the IT department.
+      </GuidelineHeading>
 
       {/* Manual Link Callout */}
-      <div className="flex items-start gap-4 rounded-2xl border border-blue-100 bg-blue-50 p-5">
-        <div className="rounded-full bg-blue-100 p-2 text-blue-600">
-          <Lightbulb size={20} />
-        </div>
-        <div>
-          <h4 className="font-semibold text-blue-900">Need More Details?</h4>
-          <p className="mt-1 text-sm leading-relaxed text-blue-800">
-            For comprehensive information on issue types, priority levels, and
-            more - please review the{" "}
-            <Link
-              target="_blank"
-              rel="noopener noreferrer"
-              href="/helpdesk/manual"
-              className="font-semibold underline underline-offset-2 transition-colors hover:text-blue-600"
-            >
-              HelpDesk Manual
-            </Link>
-            .
-          </p>
-        </div>
-      </div>
+      <Callout
+        icon={<Lightbulb size={18} />}
+        title="Need More Details?"
+        tone="blue"
+      >
+        For comprehensive information on issue types, priority levels, and more
+        - please review the{" "}
+        <Link
+          target="_blank"
+          rel="noopener noreferrer"
+          href="/helpdesk/manual"
+          className="font-semibold text-blue-700 underline underline-offset-2 transition-colors hover:text-blue-500"
+        >
+          HelpDesk Manual
+        </Link>
+        .
+      </Callout>
 
       {/* Required Fields Section */}
-      <section className="space-y-6">
-        <h3 className="flex items-center gap-2 text-lg font-semibold text-slate-800">
-          <CheckCircle2 size={20} className="text-slate-600" />
+      <section className="space-y-5">
+        <SectionTitle icon={<CheckCircle2 size={17} />}>
           Submission Requirements
-        </h3>
+        </SectionTitle>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <InfoCard
             icon={<LayoutList size={18} />}
