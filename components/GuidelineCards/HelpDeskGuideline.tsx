@@ -19,7 +19,7 @@ export default function HelpdeskGuideline() {
       <GuidelineHeading
         icon={<LaptopMinimalCheck size={13} />}
         eyebrow="HelpDesk"
-        title="HelpDesk Issue Submission"
+        title="HelpDesk Issue"
       >
         Procedures for reporting issues, requesting assistance, and routing
         tickets to the IT department.

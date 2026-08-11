@@ -21,7 +21,7 @@ export default function TravelRequisitionGuideline() {
       <GuidelineHeading
         icon={<Plane size={13} />}
         eyebrow="Travel Requisition"
-        title="Travel Requisition Guidelines"
+        title="Travel Requisition"
       >
         Essential requirements and approval tiers for site visits, local
         flights, and international business travel.

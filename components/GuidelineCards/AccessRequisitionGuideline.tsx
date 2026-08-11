@@ -17,7 +17,7 @@ export default function AccessRequisitionGuideline() {
       <GuidelineHeading
         icon={<LockKeyhole size={13} />}
         eyebrow="Access Requisition"
-        title="Access Requisition Guidelines"
+        title="Access Requisition"
       >
         Procedures for requesting physical and logical access permissions, keys,
         and location clearances for staff members.
