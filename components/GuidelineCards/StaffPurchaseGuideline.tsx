@@ -20,7 +20,7 @@ export default function StaffPurchaseGuideline() {
       <GuidelineHeading
         icon={<ShoppingBag size={13} />}
         eyebrow="Staff Product Purchase"
-        title="Staff Purchase Guidelines"
+        title="Staff Purchase"
       >
         Step-by-step procedures for navigating the portal, searching for
         products, and submitting a purchase request.

@@ -19,7 +19,7 @@ export default function ITRequisitionGuideline() {
       <GuidelineHeading
         icon={<Monitor size={13} />}
         eyebrow="IT Requisition"
-        title="IT Requisition Guidelines"
+        title="IT Requisition"
       >
         Procedures for requesting hardware, software, and technical peripherals
         for staff members.
