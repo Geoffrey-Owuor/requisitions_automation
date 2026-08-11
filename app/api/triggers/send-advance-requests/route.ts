@@ -158,7 +158,7 @@ export async function GET(request: NextRequest) {
     // Send the email with the generated buffer as an attachment
     const emailResult = await sendEmail({
       from: process.env.ADVANCE_EMAIL_SENDER!,
-      to: process.env.FIRST_HR_EMAIL!,
+      to: [process.env.FIRST_HR_EMAIL!, process.env.SECOND_HR_EMAIL!],
       subject: `Monthly Salary Advances Report - ${dateString}`,
       html: emailHtml,
       attachments: [

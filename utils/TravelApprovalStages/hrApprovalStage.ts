@@ -63,7 +63,7 @@ export async function hrApprovalStage({
   }
 
   if (status === "approved") {
-    if (approvalTier === "Tier 2") {
+    if (approvalTier === "Tier 1" || approvalTier === "Tier 2") {
       // Hr
       EmailSender({
         to: approverEmail,

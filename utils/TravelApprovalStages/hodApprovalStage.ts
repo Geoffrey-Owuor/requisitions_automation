@@ -7,7 +7,6 @@ type HodApprovalStageProps = {
   status: string;
   approverEmail: string;
   approverName: string;
-  approvalTier: string;
 };
 export async function hodApprovalStage({
   uuid,
@@ -15,7 +14,6 @@ export async function hodApprovalStage({
   status,
   approverEmail,
   approverName,
-  approvalTier,
 }: HodApprovalStageProps) {
   const HR_ARRAY = await loadHrArray();
 
@@ -41,69 +39,36 @@ export async function hodApprovalStage({
     });
   }
 
-  // HOD approved request - check if tier 1 or 2 and send the appropiate emails
+  // HOD approved request - HR approval is mandatory for every tier, so always forward to HR
   if (status === "approved") {
-    if (approvalTier === "Tier 1") {
-      // Hod
+    HR_ARRAY.forEach((hrApprover) => {
       EmailSender({
-        to: approverEmail,
-        requestId: uuid,
-        message: "You have approved this travel requisition",
-        title: "Final Update: Travel Requisition Approved",
-        role: "user",
-        showPdfDownload: true,
-      });
-
-      // User
-      EmailSender({
-        to: userEmail,
-        requestId: uuid,
-        message: `Your travel requisition has been approved by ${approverName}`,
-        title: `Final Update: Travel Requisition Approved By ${approverName}`,
-        role: "user",
-        showPdfDownload: true,
-      });
-
-      // Finance
-      EmailSender({
-        to: process.env.FIRST_FINANCE_EMAIL!,
-        requestId: uuid,
-        message: `This travel requisition has been approved by ${approverName}`,
-        title: `Final Update: Travel Requisition Approved By ${approverName}`,
-        role: "user",
-        showPdfDownload: true,
-      });
-    } else {
-      //  Requisition requires the next approval - HR
-      HR_ARRAY.forEach((hrApprover) => {
-        EmailSender({
-          to: hrApprover.email,
-          requestId: uuid,
-          message:
-            "A new travel requisition has been submitted and requires your approval",
-          title: "Action Required: New Travel Requisition",
-          role: "HR",
-          reviewLink: `?token=${hrApprover.uuid}&stage=hr`,
-        });
-      });
-
-      // Notify involved parties (Hod and Submitter)
-      EmailSender({
-        to: approverEmail,
+        to: hrApprover.email,
         requestId: uuid,
         message:
-          "You have approved this travel requisition. It has been forwarded to HR for the next approval stage",
-        title: "Update: Travel Requisition Approved",
-        role: "user",
+          "A new travel requisition has been submitted and requires your approval",
+        title: "Action Required: New Travel Requisition",
+        role: "HR",
+        reviewLink: `?token=${hrApprover.uuid}&stage=hr`,
       });
+    });
 
-      EmailSender({
-        to: userEmail,
-        requestId: uuid,
-        message: `Your travel requisition has been approved by ${approverName} and has been forwaded to HR for the next approval stage`,
-        title: `Update: Travel Requisition Approved By ${approverName}`,
-        role: "user",
-      });
-    }
+    // Notify involved parties (Hod and Submitter)
+    EmailSender({
+      to: approverEmail,
+      requestId: uuid,
+      message:
+        "You have approved this travel requisition. It has been forwarded to HR for the next approval stage",
+      title: "Update: Travel Requisition Approved",
+      role: "user",
+    });
+
+    EmailSender({
+      to: userEmail,
+      requestId: uuid,
+      message: `Your travel requisition has been approved by ${approverName} and has been forwaded to HR for the next approval stage`,
+      title: `Update: Travel Requisition Approved By ${approverName}`,
+      role: "user",
+    });
   }
 }

@@ -64,7 +64,7 @@ export default function TravelRequisitionGuideline() {
             tier="Tier 1"
             type="Local Road Travel"
             cost="Under KES 30k"
-            approvers={["HOD Approval"]}
+            approvers={["HOD Approval", "HR Approval"]}
             icon={<MapPin size={22} />}
           />
           <TierCard

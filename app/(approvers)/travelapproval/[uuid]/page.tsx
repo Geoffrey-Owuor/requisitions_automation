@@ -78,6 +78,11 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
 
   const requestData = result[0];
 
+  // Director is only part of the chain for Tier 3 - a director-stage link
+  // for a lower tier is not a valid request, regardless of token validity.
+  if (stage === "director" && requestData.travel_approval_tier !== "Tier 3")
+    return <NotFoundRequest />;
+
   // Check if request is already processed
   const approvalStatus = requestData.approval_status;
   const approverName = requestData.approver_name;
