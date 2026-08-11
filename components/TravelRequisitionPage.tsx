@@ -24,6 +24,7 @@ import { useQuery } from "@tanstack/react-query";
 import { loadBaseDepartments, loadHodApprovers } from "@/lib/loadAppDataV2";
 import TravelConfirmationModal from "./TravelConfirmationModal";
 import { ApiHandler } from "@/utils/ApiHandler";
+import { calculateTravelApprovalTier } from "@/utils/calculateTravelApprovalTier";
 import SubmittingOverlay from "./SubmittingOverlay";
 import AlertModal from "./AlertModal";
 import { useToggleStore } from "@/store/useToggleStore";
@@ -135,20 +136,10 @@ export default function TravelRequisitionPage() {
     formData.transportCost + formData.otherCost + formData.perDiem;
 
   // Generating an approval tier
-  const generatedAprovalTier = useMemo(() => {
-    if (!totalCost || totalCost === 0) return "Tier 1";
-
-    let approvalTier;
-    if (Number(totalCost) <= 30000) {
-      approvalTier = "Tier 1";
-    } else if (Number(totalCost) >= 100000) {
-      approvalTier = "Tier 3";
-    } else {
-      approvalTier = "Tier 2";
-    }
-
-    return approvalTier;
-  }, [totalCost]);
+  const generatedAprovalTier = useMemo(
+    () => calculateTravelApprovalTier(Number(totalCost)),
+    [totalCost],
+  );
 
   // Calculate total engineering job costs
   const totalEngineeringCost = useMemo(() => {
@@ -311,6 +302,9 @@ export default function TravelRequisitionPage() {
                 <div className="flex flex-wrap gap-1.5 sm:shrink-0 sm:justify-end">
                   <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-600">
                     <CheckCircle2 className="h-3 w-3 text-emerald-500" /> HOD
+                  </span>
+                  <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-600">
+                    <CheckCircle2 className="h-3 w-3 text-emerald-500" /> HR
                   </span>
                 </div>
               </div>

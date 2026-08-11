@@ -3,6 +3,7 @@ import { loadHrArray } from "@/lib/loadAppDataV2";
 import { query } from "@/lib/db";
 import { EmailSender } from "@/services/EmailSender";
 import { getSession } from "@/lib/session";
+import { calculateTravelApprovalTier } from "@/utils/calculateTravelApprovalTier";
 
 export async function POST(request: NextRequest) {
   // Check if we have a valid session
@@ -17,8 +18,7 @@ export async function POST(request: NextRequest) {
 
   const HR_ARRAY = await loadHrArray();
   try {
-    const { formData, totalCost, approvalTier, submittedBy } =
-      await request.json();
+    const { formData, submittedBy } = await request.json();
 
     // Destructure the submitted by area to get a valid name and email
     const { name, email } = submittedBy;
@@ -50,6 +50,11 @@ export async function POST(request: NextRequest) {
       withinBudget,
       engineeringJobs,
     } = formData;
+
+    // Recompute total cost and approval tier server-side rather than trusting
+    // the client-supplied values, so a tampered request can't skip HR/Director review.
+    const totalCost = Number(transportCost) + Number(otherCost) + Number(perDiem);
+    const approvalTier = calculateTravelApprovalTier(totalCost);
 
     const isEngineering = department === "Engineering & HVAC";
 
@@ -98,10 +103,7 @@ export async function POST(request: NextRequest) {
 
     // Generate status for HOD Approval, HR Approval and Director Approval Statuses
     const hodStatus = "pending";
-    const hrStatus =
-      approvalTier === "Tier 2" || approvalTier === "Tier 3"
-        ? "pending"
-        : "N/A";
+    const hrStatus = "pending"; // HR is now mandatory for every tier
     const directorStatus = approvalTier === "Tier 3" ? "pending" : "N/A";
 
     // Create the insert query
@@ -173,42 +175,31 @@ export async function POST(request: NextRequest) {
       ];
       await query(updateQuery, updateParams);
 
-      // EMAIL SERVICE
-      if (approvalTier === "Tier 1") {
+      // EMAIL SERVICE - HR approval is mandatory for every tier, so
+      // self-approving HODs are always forwarded to HR, never finalized here.
+      // Send mail to HR Approvers
+      HR_ARRAY.forEach((hrApprover) => {
+        // Send Mail to HR
         EmailSender({
-          to: email,
+          to: hrApprover.email,
           requestId: requestUuid,
           message:
-            "This is an automatic HOD approval for your travel requisition",
-          title: "Final Update: Travel Requisition Approved",
-          role: "user",
-          showPdfDownload: true,
+            "A new travel requisition has been submitted and requires your approval",
+          title: "Action Required: New Travel Requisition",
+          role: "HR",
+          reviewLink: `?token=${hrApprover.uuid}&stage=hr`,
         });
-      } else {
-        // Send mail to HR Approvers
-        HR_ARRAY.forEach((hrApprover) => {
-          // Send Mail to HR
-          EmailSender({
-            to: hrApprover.email,
-            requestId: requestUuid,
-            message:
-              "A new travel requisition has been submitted and requires your approval",
-            title: "Action Required: New Travel Requisition",
-            role: "HR",
-            reviewLink: `?token=${hrApprover.uuid}&stage=hr`,
-          });
-        });
+      });
 
-        // Send confirmation email to HOD
-        EmailSender({
-          to: email,
-          requestId: requestUuid,
-          message:
-            "Your travel requisition has been successfully submitted and forwarded to HR for approval",
-          title: "Update: Travel requisition submitted successfully",
-          role: "user",
-        });
-      }
+      // Send confirmation email to HOD
+      EmailSender({
+        to: email,
+        requestId: requestUuid,
+        message:
+          "Your travel requisition has been successfully submitted and forwarded to HR for approval",
+        title: "Update: Travel requisition submitted successfully",
+        role: "user",
+      });
     } else {
       // Normal workflow - Normal user (Send email to user and HOD)
       // HOD Send
