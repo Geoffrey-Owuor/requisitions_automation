@@ -66,7 +66,7 @@ const approvalStages = [
 ] as const;
 
 const tierStageCount: Record<string, number> = {
-  "Tier 1": 1,
+  "Tier 1": 2,
   "Tier 2": 2,
   "Tier 3": 3,
 };

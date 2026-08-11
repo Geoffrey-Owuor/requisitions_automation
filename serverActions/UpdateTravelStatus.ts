@@ -97,6 +97,17 @@ export async function UpdateTravelStatus(
     const hrEmail = reviewedResult[0].travel_hr_email;
     const approvalTier = reviewedResult[0].travel_approval_tier;
 
+    // Director is only part of the chain for Tier 3 - reject action on that
+    // stage for lower tiers even if a valid director approval token is used.
+    if (payload.stage === "director" && approvalTier !== "Tier 3") {
+      await client.query("ROLLBACK");
+      return {
+        alertType: "error",
+        alertMessage:
+          "This approval stage does not apply to this requisition, no action is required",
+      };
+    }
+
     if (isReviewed !== "pending" && isReviewed !== "N/A") {
       await client.query("ROLLBACK");
       return {
@@ -117,7 +128,6 @@ export async function UpdateTravelStatus(
           status: payload.status,
           approverEmail: payload.approverEmail,
           approverName: payload.approverName,
-          approvalTier,
         });
         break;
       case "hr":
