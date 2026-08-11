@@ -20,11 +20,10 @@ export default function CasualRequisitionGuideline() {
       <GuidelineHeading
         icon={<HardHat size={13} />}
         eyebrow="Casual Requisition"
-        title="Casual Requisition Guidelines"
+        title="Casual Requisition"
       >
-        Procedures for requesting casual staff engagements, including
-        engagement period, PPE requirements, and the automated approval
-        workflow.
+        Procedures for requesting casual staff engagements, including engagement
+        period, PPE requirements, and the automated approval workflow.
       </GuidelineHeading>
 
       <GeneralNote />

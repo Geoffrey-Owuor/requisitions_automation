@@ -19,7 +19,7 @@ export default function SalaryAdvanceGuideline() {
       <GuidelineHeading
         icon={<CircleDollarSign size={13} />}
         eyebrow="Salary Advance"
-        title="Salary Advance Guidelines"
+        title="Salary Advance"
       >
         Policies and procedures governing the request, processing, and repayment
         of employee salary advances to ensure compliance and efficient financial
