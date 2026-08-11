@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Brand from "./Brand";
-import { BookText, CircleGauge, LogIn } from "lucide-react";
+import { BookText, CircleGauge } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -27,7 +27,6 @@ const Header = () => {
                   disabled={isLoading}
                   className="flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-slate-600 transition-colors hover:bg-rose-50 hover:text-rose-700 disabled:opacity-60 sm:px-4 sm:text-sm"
                 >
-                  <LogIn size={14} className="h-3.5 w-3.5" />
                   {isLoading ? "Redirecting…" : "Login"}
                 </button>
               </form>
