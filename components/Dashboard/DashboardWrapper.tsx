@@ -3,7 +3,7 @@ import MobileHeader from "../MobileHeader";
 
 const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="min-h-screen bg-linear-to-br from-red-950 via-red-950 to-red-900">
+    <div className="min-h-screen bg-red-950">
       {/* Mobile header handles screens below lg */}
       <MobileHeader />
 

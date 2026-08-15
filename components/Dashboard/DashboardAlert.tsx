@@ -55,7 +55,7 @@ const DashboardAlert = () => {
   return (
     <ClientPortal>
       <div
-        className={`fixed top-2 right-4 z-100 hidden items-center gap-3 rounded-full bg-neutral-900 px-5 py-3 text-white shadow-2xl sm:flex ${isExiting ? "animate-slide-out-top" : "animate-slide-in-top"} `}
+        className={`fixed top-4 right-6 z-100 hidden items-center gap-3 rounded-full bg-neutral-900 px-5 py-3 text-white shadow-2xl sm:flex ${isExiting ? "animate-slide-out-top" : "animate-slide-in-top"} `}
       >
         <div className="flex items-center justify-center rounded-full bg-white/20 p-1.5">
           <Bell className="h-4 w-4 text-white" />
