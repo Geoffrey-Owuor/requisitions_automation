@@ -18,6 +18,7 @@ import {
   Briefcase,
   LockKeyhole,
   CircleDollarSign,
+  UserRoundPlus,
 } from "lucide-react";
 import ModalWrapper from "./Modules/ModalWrapper";
 import ITRequisitionPage from "./ITRequisition/ITRequisitionPage";
@@ -26,6 +27,7 @@ import { usePathname } from "next/navigation";
 import { useToggleStore } from "@/store/useToggleStore";
 import KeyAccessRequisitionForm from "./Modules/Retail/KeyAccessRequisitionForm";
 import CasualRequisitionForm from "./Modules/Retail/CasualRequisitionForm";
+import EmployeeRequisitionForm from "./Modules/Retail/EmployeeRequisitionForm";
 import MoreMenuModal from "./Modules/MoreMenuModal";
 
 const links = [
@@ -75,6 +77,13 @@ const MobileHeader = () => {
     (state) => state.setShowCasualRequisition,
   );
 
+  const showEmployeeRequisition = useToggleStore(
+    (state) => state.showEmployeeRequisition,
+  );
+  const setShowEmployeeRequisition = useToggleStore(
+    (state) => state.setShowEmployeeRequisition,
+  );
+
   const handleButtonClick = (
     setAction: (value: boolean) => void,
     value: boolean,
@@ -117,6 +126,14 @@ const MobileHeader = () => {
         <CasualRequisitionForm />
       </ModalWrapper>
 
+      {/* Employee Requisition Modal */}
+      <ModalWrapper
+        isOpen={showEmployeeRequisition}
+        onClose={() => setShowEmployeeRequisition(false)}
+      >
+        <EmployeeRequisitionForm />
+      </ModalWrapper>
+
       {/* Overlay & Sliding Mobile Sidebar */}
       <div
         className={`fixed inset-0 z-70 ${
@@ -135,7 +152,7 @@ const MobileHeader = () => {
         <aside
           className={`relative z-10 h-full ${
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
-          } flex w-80 flex-col bg-white shadow-2xl transition-transform duration-200`}
+          } custom:hidden flex w-full flex-col bg-white shadow-2xl transition-transform duration-200`}
         >
           <div className="flex h-16 items-center justify-between border-b border-slate-100 px-6">
             <Brand showText={true} />
@@ -258,6 +275,13 @@ const MobileHeader = () => {
                   Icon: HardHat,
                   onClick: () =>
                     handleButtonClick(setShowCasualRequisition, true),
+                },
+                {
+                  key: "employee",
+                  label: "Employee Requisition",
+                  Icon: UserRoundPlus,
+                  onClick: () =>
+                    handleButtonClick(setShowEmployeeRequisition, true),
                 },
                 {
                   key: "access",
