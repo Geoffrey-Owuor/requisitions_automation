@@ -81,8 +81,8 @@ const PositionCard = ({
         {position.attachments.map((attachment) => (
           <AttachmentLink
             key={attachment.attachmentid}
+            attachmentId={attachment.attachmentid}
             label={attachment.originalfilename}
-            url={`/api/employeerequisition/attachment/${attachment.attachmentid}`}
           />
         ))}
       </div>

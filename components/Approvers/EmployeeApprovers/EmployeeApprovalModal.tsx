@@ -321,8 +321,9 @@ const EmployeeApprovalModal = ({
                         {position.attachments.map((attachment) => (
                           <AttachmentLink
                             key={attachment.attachmentId}
+                            attachmentId={attachment.attachmentId}
                             label={attachment.originalFilename}
-                            url={`/api/employeerequisition/attachment/${attachment.attachmentId}?token=${token}&stage=${stage}`}
+                            queryString={`token=${token}&stage=${stage}`}
                           />
                         ))}
                       </div>
