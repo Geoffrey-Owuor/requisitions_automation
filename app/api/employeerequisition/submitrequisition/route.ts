@@ -1,9 +1,10 @@
 import { NextResponse, NextRequest } from "next/server";
 import { randomUUID } from "crypto";
-import { loadDirectorArray } from "@/lib/loadAppDataV2";
+import { loadDirectorArray, loadHrArray } from "@/lib/loadAppDataV2";
 import { query, pool } from "@/lib/db";
 import { EmployeeEmailSender } from "@/services/EmployeeEmailSender";
 import { getSession } from "@/lib/session";
+import { isDirectorEmail } from "@/utils/isDirectorEmail";
 import {
   isAllowedAttachmentType,
   writePositionAttachments,
@@ -352,28 +353,77 @@ export async function POST(request: NextRequest) {
         [hodEmail, "approved", "Automatic HOD Approval", requestId],
       );
 
-      const DIRECTOR_ARRAY = await loadDirectorArray();
+      // If this self-approving HOD is also a Director/CEO, auto-approve the
+      // CEO stage too and forward straight to HR, rather than asking the
+      // same person to approve their own requisition twice.
+      const hodIsDirector = await isDirectorEmail(pool, hodEmail);
 
-      DIRECTOR_ARRAY.forEach((directorApprover) => {
-        EmployeeEmailSender({
-          to: directorApprover.email,
-          requestId: requestId!,
-          message:
-            "A new employee requisition has been submitted and requires your approval",
-          title: "Action Required: New Employee Requisition",
-          role: "CEO",
-          reviewLink: `?token=${directorApprover.uuid}&stage=director`,
+      if (hodIsDirector) {
+        await query(
+          `
+          UPDATE employee_requisitions
+          SET employee_director_approval_date = CURRENT_TIMESTAMP,
+          employee_director_approval_status = $1,
+          employee_director_approver = $2,
+          employee_director_email = $3,
+          employee_director_comments = $4
+          WHERE request_id = $5
+          `,
+          [
+            "approved",
+            name,
+            hodEmail,
+            "Automatically approved - the HOD is also a Director/CEO, so a separate CEO approval is not required",
+            requestId,
+          ],
+        );
+
+        const HR_ARRAY = await loadHrArray();
+
+        HR_ARRAY.forEach((hrApprover) => {
+          EmployeeEmailSender({
+            to: hrApprover.email,
+            requestId: requestId!,
+            message:
+              "A new employee requisition has been submitted and requires your approval",
+            title: "Action Required: New Employee Requisition",
+            role: "HR",
+            reviewLink: `?token=${hrApprover.uuid}&stage=hr`,
+          });
         });
-      });
 
-      EmployeeEmailSender({
-        to: email,
-        requestId,
-        message:
-          "Your employee requisition has been successfully submitted and forwarded to the CEO for approval",
-        title: "Update: Employee requisition submitted successfully",
-        role: "user",
-      });
+        EmployeeEmailSender({
+          to: email,
+          requestId,
+          message:
+            "Your employee requisition has been successfully submitted. As you are also a Director/CEO, the CEO approval stage was automatically approved and this has been forwarded to HR for approval",
+          title: "Update: Employee requisition submitted successfully",
+          role: "user",
+        });
+      } else {
+        const DIRECTOR_ARRAY = await loadDirectorArray();
+
+        DIRECTOR_ARRAY.forEach((directorApprover) => {
+          EmployeeEmailSender({
+            to: directorApprover.email,
+            requestId: requestId!,
+            message:
+              "A new employee requisition has been submitted and requires your approval",
+            title: "Action Required: New Employee Requisition",
+            role: "CEO",
+            reviewLink: `?token=${directorApprover.uuid}&stage=director`,
+          });
+        });
+
+        EmployeeEmailSender({
+          to: email,
+          requestId,
+          message:
+            "Your employee requisition has been successfully submitted and forwarded to the CEO for approval",
+          title: "Update: Employee requisition submitted successfully",
+          role: "user",
+        });
+      }
     } else {
       EmployeeEmailSender({
         to: hodEmail,

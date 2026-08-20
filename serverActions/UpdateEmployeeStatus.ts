@@ -8,6 +8,7 @@ import { directorApprovalStage } from "@/utils/EmployeeApprovalStages/directorAp
 import { hrApprovalStage } from "@/utils/EmployeeApprovalStages/hrApprovalStage";
 import { EmployeeEmailSender } from "@/services/EmployeeEmailSender";
 import { isValidEmployeeStage } from "@/public/assets";
+import { isDirectorEmail } from "@/utils/isDirectorEmail";
 
 export type UpdateRequestStatusProps = {
   uuid: string;
@@ -106,6 +107,29 @@ export async function UpdateEmployeeStatus(
 
     await client.query(baseUpdateQuery, baseParams);
 
+    // If the approving HOD is also a Director/CEO, auto-approve the CEO
+    // stage in the same transaction so the same person is never asked to
+    // approve twice under two different roles.
+    let skipDirectorStage = false;
+    if (payload.stage === "hod" && payload.status === "approved") {
+      skipDirectorStage = await isDirectorEmail(client, payload.approverEmail);
+
+      if (skipDirectorStage) {
+        await client.query(
+          `
+          UPDATE employee_requisitions
+          SET employee_director_approval_date = CURRENT_TIMESTAMP,
+          employee_director_approval_status = 'approved',
+          employee_director_approver = $1,
+          employee_director_email = $2,
+          employee_director_comments = 'Automatically approved - the HOD is also a Director/CEO, so a separate CEO approval is not required'
+          WHERE request_id = $3
+          `,
+          [payload.approverName, payload.approverEmail, payload.uuid],
+        );
+      }
+    }
+
     await client.query("COMMIT");
 
     switch (payload.stage) {
@@ -116,6 +140,7 @@ export async function UpdateEmployeeStatus(
           status: payload.status,
           approverEmail: payload.approverEmail,
           approverName: payload.approverName,
+          skipDirectorStage,
         });
         break;
       case "director":

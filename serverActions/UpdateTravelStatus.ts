@@ -8,6 +8,7 @@ import { hrApprovalStage } from "@/utils/TravelApprovalStages/hrApprovalStage";
 import { directorApprovalStage } from "@/utils/TravelApprovalStages/directorApprovalStage";
 import { EmailSender } from "@/services/EmailSender";
 import { isValidTravelStage } from "@/public/assets";
+import { isDirectorEmail } from "@/utils/isDirectorEmail";
 
 export type UpdateRequestStatusProps = {
   uuid: string;
@@ -59,7 +60,7 @@ export async function UpdateTravelStatus(
     const { rows: reviewedResult } = await client.query(
       `SELECT travel_${payload.stage}_approval_status AS approval_status,
        travel_${payload.stage}_approver AS approver,
-       travel_approval_tier, submitter_email, travel_hod_email, travel_hr_email
+       travel_approval_tier, submitter_email, travel_hod_email, travel_hod_approver, travel_hr_email
         FROM travel_requisitions WHERE request_id = $1 FOR UPDATE`,
       [payload.uuid],
     );
@@ -94,6 +95,7 @@ export async function UpdateTravelStatus(
     // Required stages data
     const userEmail = reviewedResult[0].submitter_email;
     const hodEmail = reviewedResult[0].travel_hod_email;
+    const hodApprover = reviewedResult[0].travel_hod_approver;
     const hrEmail = reviewedResult[0].travel_hr_email;
     const approvalTier = reviewedResult[0].travel_approval_tier;
 
@@ -118,6 +120,33 @@ export async function UpdateTravelStatus(
 
     await client.query(baseUpdateQuery, baseParams);
 
+    // If HR is approving a Tier 3 requisition whose HOD is also a Director,
+    // auto-approve the Director stage in the same transaction so the same
+    // person is never asked to approve twice under two different roles.
+    let skipDirectorStage = false;
+    if (
+      payload.stage === "hr" &&
+      payload.status === "approved" &&
+      approvalTier === "Tier 3"
+    ) {
+      skipDirectorStage = await isDirectorEmail(client, hodEmail);
+
+      if (skipDirectorStage) {
+        await client.query(
+          `
+          UPDATE travel_requisitions
+          SET travel_director_approval_date = CURRENT_TIMESTAMP,
+          travel_director_approval_status = 'approved',
+          travel_director_approver = $1,
+          travel_director_email = $2,
+          travel_director_comments = 'Automatically approved - the selected HOD is also a Director, so a separate Director approval is not required'
+          WHERE request_id = $3
+          `,
+          [hodApprover, hodEmail, payload.uuid],
+        );
+      }
+    }
+
     await client.query("COMMIT");
 
     switch (payload.stage) {
@@ -139,6 +168,7 @@ export async function UpdateTravelStatus(
           approverEmail: payload.approverEmail,
           approverName: payload.approverName,
           approvalTier,
+          skipDirectorStage,
         });
         break;
       case "director":
