@@ -12,3 +12,19 @@ export async function ApiHandler(
 
   return response;
 }
+
+// A variant for endpoints that accept file uploads (multipart/form-data).
+// Content-Type is intentionally left unset so the browser attaches its own
+// multipart boundary.
+export async function ApiFormHandler(
+  apiUrl: string,
+  method: string,
+  formData: FormData,
+) {
+  const response = await fetch(apiUrl, {
+    method: method,
+    body: formData,
+  });
+
+  return response;
+}

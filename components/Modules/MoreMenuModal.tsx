@@ -57,11 +57,11 @@ export default function MoreMenuModal({
 
       {isOpen && (
         <div
-          className={`absolute z-9999 min-w-48 rounded-2xl bg-white p-2 shadow-2xl duration-200 ${positionClasses}`}
+          className={`absolute z-9999 min-w-55 rounded-2xl bg-white p-2 shadow-2xl duration-200 ${positionClasses}`}
         >
           {items.map((item) => {
             const commonClassName =
-              "group flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-[13px] font-semibold text-slate-600 transition-all hover:bg-rose-50 hover:text-rose-600 active:scale-[0.98]";
+              "group flex w-full items-center text-left gap-3 rounded-xl px-4 py-2.5 text-[13px] font-semibold text-slate-600 transition-all hover:bg-rose-50 hover:text-rose-600 active:scale-[0.98]";
 
             const content = (
               <>

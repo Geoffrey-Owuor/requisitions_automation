@@ -5,6 +5,7 @@ import { ITEmailSender } from "@/services/ITEmailSender";
 import { AccessEmailSender } from "@/services/AccessEmailSender";
 import { AdvanceEmailSender } from "@/services/AdvanceEmailSender";
 import { CasualEmailSender } from "@/services/CasualEmailSender";
+import { EmployeeEmailSender } from "@/services/EmployeeEmailSender";
 
 // An api to re-trigger a notification approval email for travel requisition
 export async function POST(request: NextRequest) {
@@ -88,6 +89,18 @@ export async function POST(request: NextRequest) {
           role: role ? role : "user",
           showPdfDownload: !!showPdfDownload,
         });
+        break;
+      case "employee":
+        EmployeeEmailSender({
+          to,
+          requestId,
+          reviewLink: reviewLink ? reviewLink : undefined,
+          message,
+          title,
+          role: role ? role : "user",
+          showViewLink: true,
+        });
+        break;
       default:
         return NextResponse.json(
           { message: "Unknown form type passed, try checking the spelling" },

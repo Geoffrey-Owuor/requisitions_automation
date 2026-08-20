@@ -26,6 +26,18 @@ An internal web application for Hotpoint Appliances Ltd that automates requisiti
 - Request physical access or key issuance for retail/other sites
 - Approval workflow: HOD Approval → Security Approval
 
+### Casual Requisition
+
+- Request casual staff engagements for one or more sections/locations over a defined period
+- Approval workflow: HOD Approval → Finance Approval → HR Approval (HR can adjust the final approved headcount per section)
+- Daily rate is derived automatically from the selected location; total cost = casuals × rate/day × engagement days
+
+### Employee Requisition
+
+- Request one or more open positions to be filled, each with its own headcount, justification, reporting line, and target fill date
+- Requires at least one supporting document (Job Description/KPIs) per position — Word, Excel, or PDF, up to 5MB per position
+- Approval workflow: HOD Approval → CEO Approval → HR Approval
+
 ### Salary Advance
 
 - Staff salary advance requests with a monthly submission window

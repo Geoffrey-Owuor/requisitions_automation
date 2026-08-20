@@ -13,6 +13,7 @@ import {
   ShoppingBag,
   CircleDollarSign,
   HardHat,
+  UserRoundPlus,
 } from "lucide-react";
 import ITRequisitionGuideline from "./ITRequisitionGuideline";
 import TravelRequisitionGuideline from "./TravelRequisitionGuideline";
@@ -21,12 +22,14 @@ import AccessRequisitionGuideline from "./AccessRequisitionGuideline";
 import StaffPurchaseGuideline from "./StaffPurchaseGuideline";
 import SalaryAdvanceGuideline from "./SalaryAdvanceGuideline";
 import CasualRequisitionGuideline from "./CasualRequisitionGuideline";
+import EmployeeRequisitionGuideline from "./EmployeeRequisitionGuideline";
 
 // Types
 type TabId =
   | "travel"
   | "it"
   | "casual"
+  | "employee"
   | "access"
   | "desk"
   | "purchase"
@@ -245,6 +248,11 @@ export default function GuidelinesPage() {
       label: "Casual Requisition",
       icon: <HardHat size={15} />,
     },
+    {
+      id: "employee",
+      label: "Employee Requisition",
+      icon: <UserRoundPlus size={15} />,
+    },
     { id: "desk", label: "HelpDesk", icon: <LaptopMinimalCheck size={15} /> },
     {
       id: "purchase",
@@ -313,6 +321,7 @@ export default function GuidelinesPage() {
           {activeTab === "travel" && <TravelRequisitionGuideline />}
           {activeTab === "it" && <ITRequisitionGuideline />}
           {activeTab === "casual" && <CasualRequisitionGuideline />}
+          {activeTab === "employee" && <EmployeeRequisitionGuideline />}
           {activeTab === "desk" && <HelpdeskGuideline />}
           {activeTab === "purchase" && <StaffPurchaseGuideline />}
           {activeTab === "access" && <AccessRequisitionGuideline />}

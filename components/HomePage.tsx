@@ -17,6 +17,7 @@ import {
   CircleDollarSign,
   BookText,
   HardHat,
+  UserRoundPlus,
 } from "lucide-react";
 import { JSX, ReactNode } from "react";
 import Header from "./Header";
@@ -82,6 +83,17 @@ const requisitions: Requisitions[] = [
     accent: "bg-orange-800",
     badge: "HR",
     workflow: ["Submit", "HOD", "Finance", "HR"],
+    tiers: null,
+  },
+  {
+    id: "employee",
+    label: "Employee Requisition",
+    description:
+      "Request one or more open positions to be filled. Routed to HOD, then CEO, then HR for approval.",
+    icon: <UserRoundPlus size={22} className="h-5 w-5 sm:h-6 sm:w-6" />,
+    accent: "bg-teal-800",
+    badge: "HR",
+    workflow: ["Submit", "HOD", "CEO", "HR"],
     tiers: null,
   },
   {
