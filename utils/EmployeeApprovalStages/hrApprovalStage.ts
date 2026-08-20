@@ -30,7 +30,8 @@ export function hrApprovalStage({
 
     if (hodEmail === userEmail) {
       EmployeeEmailSender({
-        to: [directorEmail, userEmail],
+        // Hod and director may be the same person if the HOD is also a Director/CEO
+        to: hodEmail === directorEmail ? userEmail : [directorEmail, userEmail],
         requestId: uuid,
         message:
           "This employee requisition has been declined in the HR approval stage",
@@ -39,7 +40,8 @@ export function hrApprovalStage({
       });
     } else {
       EmployeeEmailSender({
-        to: [hodEmail, directorEmail],
+        // Hod and director may be the same person if the HOD is also a Director/CEO
+        to: hodEmail === directorEmail ? hodEmail : [hodEmail, directorEmail],
         requestId: uuid,
         message:
           "This employee requisition has been declined in the HR approval stage",
@@ -70,9 +72,10 @@ export function hrApprovalStage({
     });
 
     if (hodEmail === userEmail) {
-      // Director (CEO) and Submitter (who is also the HOD)
+      // Director (CEO) and Submitter (who is also the HOD) - may also be
+      // the same person as the Director if the HOD is also a Director/CEO
       EmployeeEmailSender({
-        to: [directorEmail, userEmail],
+        to: hodEmail === directorEmail ? userEmail : [directorEmail, userEmail],
         requestId: uuid,
         message: `This employee requisition has been approved by ${approverName}`,
         title: `Final Update: Employee Requisition Approved By ${approverName}`,
@@ -80,9 +83,10 @@ export function hrApprovalStage({
         showViewLink: true,
       });
     } else {
-      // Hod and Director (CEO)
+      // Hod and Director (CEO) - may be the same person if the HOD is also
+      // a Director/CEO
       EmployeeEmailSender({
-        to: [hodEmail, directorEmail],
+        to: hodEmail === directorEmail ? hodEmail : [hodEmail, directorEmail],
         requestId: uuid,
         message: `This employee requisition has been approved by ${approverName}`,
         title: `Final Update: Employee Requisition Approved By ${approverName}`,

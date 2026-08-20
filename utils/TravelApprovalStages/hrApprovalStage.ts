@@ -9,6 +9,7 @@ type HrApprovalStageProps = {
   approverEmail: string;
   approverName: string;
   approvalTier: string;
+  skipDirectorStage?: boolean;
 };
 export async function hrApprovalStage({
   uuid,
@@ -18,6 +19,7 @@ export async function hrApprovalStage({
   approverEmail,
   approverName,
   approvalTier,
+  skipDirectorStage = false,
 }: HrApprovalStageProps) {
   const DIRECTOR_ARRAY = await loadDirectorArray();
   if (status === "declined") {
@@ -63,7 +65,11 @@ export async function hrApprovalStage({
   }
 
   if (status === "approved") {
-    if (approvalTier === "Tier 1" || approvalTier === "Tier 2") {
+    if (
+      approvalTier === "Tier 1" ||
+      approvalTier === "Tier 2" ||
+      skipDirectorStage
+    ) {
       // Hr
       EmailSender({
         to: approverEmail,
