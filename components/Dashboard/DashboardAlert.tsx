@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Bell, X } from "lucide-react";
+import { SmileIcon, X } from "lucide-react";
 import ClientPortal from "../ClientPortal";
 import { getDailyGreeting } from "@/public/assets";
 
@@ -55,17 +55,24 @@ const DashboardAlert = () => {
   return (
     <ClientPortal>
       <div
-        className={`fixed top-4 right-6 z-100 hidden items-center gap-3 rounded-full bg-neutral-900 px-5 py-3 text-white shadow-2xl sm:flex ${isExiting ? "animate-slide-out-top" : "animate-slide-in-top"} `}
+        className={`fixed right-6 bottom-6 z-100 hidden w-88 max-w-[calc(100vw-3rem)] items-start gap-3 rounded-2xl border border-white/10 bg-neutral-900/95 p-4 text-white shadow-2xl backdrop-blur-md sm:flex ${isExiting ? "animate-slide-out-bottom-right" : "animate-slide-in-bottom-right"} `}
       >
-        <div className="flex items-center justify-center rounded-full bg-white/20 p-1.5">
-          <Bell className="h-4 w-4 text-white" />
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-amber-400/25 to-orange-500/25">
+          <SmileIcon className="h-5 w-5 text-amber-300" />
         </div>
-        <p className="pr-2 text-sm font-medium tracking-wide">{greeting}</p>
+        <div className="flex-1 pt-1">
+          <p className="text-xs font-semibold tracking-wide text-white/50 uppercase">
+            Hey there
+          </p>
+          <p className="mt-0.5 text-sm leading-snug font-medium tracking-wide text-white">
+            {greeting}
+          </p>
+        </div>
         <button
           onClick={handleClose}
-          className="rounded-full p-1 transition-colors hover:bg-white/20"
+          className="shrink-0 rounded-full p-1 text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
         >
-          <X className="h-4 w-4 text-gray-300 hover:text-white" />
+          <X className="h-4 w-4" />
         </button>
       </div>
     </ClientPortal>
