@@ -51,7 +51,7 @@ const InitialFormState: SalaryAdvanceFormData = {
   requestAmount: "",
   installments: "",
   repaymentStartDate: "",
-  requestType: "oneoff",
+  requestType: "",
 };
 
 // Define these arrays
@@ -174,6 +174,17 @@ export default function SalaryAdvanceClient() {
     value: SalaryAdvanceFormData[K],
   ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  // Continuous requests are always repaid in a single installment, so the
+  // installments field is locked to "1" and hidden as soon as this is chosen;
+  // switching back to one-off clears it so the user picks explicitly again.
+  const handleRequestTypeChange = (value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      requestType: value,
+      installments: value === "continuous" ? "1" : "",
+    }));
   };
 
   // On mount, check whether the user already has a valid verified form session,
@@ -724,7 +735,7 @@ export default function SalaryAdvanceClient() {
               Salary Advance Request
             </h1>
             <p className="mt-1 text-[14px] text-[#7c5a5a]">
-              Submit your salary advance details below.
+              Enter your salary advance details below.
             </p>
           </header>
 
@@ -783,6 +794,7 @@ export default function SalaryAdvanceClient() {
                     <input
                       type="number"
                       required
+                      min={1}
                       className="h-10 rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
                       value={formData.requestAmount}
                       onChange={(e) =>
@@ -791,12 +803,12 @@ export default function SalaryAdvanceClient() {
                     />
                   </div>
 
-                  {/* Installments DropDown */}
+                  {/* Request Type Dropdown */}
                   <CustomDropdown
-                    label="No. of Installments"
-                    options={INSTALLMENT_OPTIONS}
-                    value={formData.installments}
-                    onChange={(val) => updateField("installments", val)}
+                    label="Request Type"
+                    options={REQUEST_TYPE_OPTIONS}
+                    value={formData.requestType}
+                    onChange={handleRequestTypeChange}
                   />
 
                   <div className="flex flex-col gap-2">
@@ -812,13 +824,27 @@ export default function SalaryAdvanceClient() {
                     />
                   </div>
 
-                  {/* Request Type Dropdown */}
-                  <CustomDropdown
-                    label="Request Type"
-                    options={REQUEST_TYPE_OPTIONS}
-                    value={formData.requestType}
-                    onChange={(val) => updateField("requestType", val)}
-                  />
+                  {/* Installments: only shown once a request type is chosen;
+                      continuous requests skip straight to a locked-at-one note. */}
+                  {formData.requestType === "continuous" ? (
+                    <div className="flex flex-col gap-2">
+                      <label className="text-[13px] font-medium text-[#7c5a5a]">
+                        No. of Installments
+                      </label>
+                      <div className="flex h-10 items-center rounded-xl border border-[rgba(240,180,180,0.6)] bg-gray-100 px-3.5 text-[13px] text-slate-600">
+                        Continuous requests are repaid in a single installment.
+                      </div>
+                    </div>
+                  ) : (
+                    formData.requestType === "oneoff" && (
+                      <CustomDropdown
+                        label="No. of Installments"
+                        options={INSTALLMENT_OPTIONS}
+                        value={formData.installments}
+                        onChange={(val) => updateField("installments", val)}
+                      />
+                    )
+                  )}
                 </div>
               </div>
 
