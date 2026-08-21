@@ -152,7 +152,7 @@ const MobileHeader = () => {
         <aside
           className={`relative z-10 h-full ${
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
-          } custom:hidden flex w-full flex-col bg-white shadow-2xl transition-transform duration-200`}
+          } custom:hidden layout-scrollbar flex w-80 flex-col bg-white shadow-2xl transition-transform duration-200`}
         >
           <div className="flex h-16 items-center justify-between border-b border-slate-100 px-6">
             <Brand showText={true} />
