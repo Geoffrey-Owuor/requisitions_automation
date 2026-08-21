@@ -14,6 +14,7 @@ import {
   CircleDollarSign,
   HardHat,
   UserRoundPlus,
+  Search,
 } from "lucide-react";
 import ITRequisitionGuideline from "./ITRequisitionGuideline";
 import TravelRequisitionGuideline from "./TravelRequisitionGuideline";
@@ -235,6 +236,7 @@ export const SectionTitle = ({
 // Main Page Component
 export default function GuidelinesPage() {
   const [activeTab, setActiveTab] = useState<TabId>("travel");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const tabs = [
     {
@@ -267,6 +269,10 @@ export default function GuidelinesPage() {
     },
   ] as const;
 
+  const filteredTabs = tabs.filter((tab) =>
+    tab.label.toLowerCase().includes(searchQuery.trim().toLowerCase()),
+  );
+
   return (
     <div className="layout-scrollbar flex h-screen flex-col bg-[#fdfbfb] text-slate-900 selection:bg-rose-100 selection:text-rose-900">
       {/* Ambient Background */}
@@ -283,36 +289,57 @@ export default function GuidelinesPage() {
         {/* Sidebar */}
         <aside className="w-full min-w-0 md:w-60 md:shrink-0">
           {/* Mobile: horizontal pill strip · Desktop: sticky rail */}
-          <nav className="scrollbar-hide flex flex-row gap-1.5 overflow-x-auto py-2 md:sticky md:top-24 md:flex-col md:gap-1 md:rounded-[1.75rem] md:border md:border-slate-200/70 md:bg-white/70 md:p-2 md:shadow-sm md:backdrop-blur-xl">
-            <span className="hidden px-3 pt-2 pb-2 text-[10px] font-bold tracking-[0.16em] text-slate-400 uppercase md:block">
+          <nav className="flex flex-col gap-2 py-2 md:sticky md:top-24 md:rounded-[1.75rem] md:border md:border-slate-200/70 md:bg-white/70 md:p-2 md:shadow-sm md:backdrop-blur-xl">
+            <span className="hidden px-3 pt-1 text-[10px] font-bold tracking-[0.16em] text-slate-400 uppercase md:block">
               Guidelines
             </span>
-            {tabs.map((tab) => {
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  aria-current={isActive ? "page" : undefined}
-                  className={`group relative flex shrink-0 cursor-pointer items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold transition-all duration-200 md:w-full md:text-[13px] ${
-                    isActive
-                      ? "bg-rose-700 text-white shadow-md shadow-rose-500/25"
-                      : "border border-slate-200/70 bg-white/70 text-slate-600 hover:border-rose-200 hover:bg-rose-50/70 hover:text-rose-700 md:border-transparent md:bg-transparent"
-                  }`}
-                >
-                  <span
-                    className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-colors ${
+
+            {/* Search */}
+            <div className="relative px-0.5">
+              <Search className="pointer-events-none absolute top-1/2 left-3.5 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search guidelines..."
+                className="w-full rounded-full border border-slate-200 bg-white py-2 pr-3 pl-9 text-xs text-slate-600 shadow-sm placeholder:text-slate-400 focus:border-rose-300 focus:ring-2 focus:ring-rose-100 focus:outline-none"
+              />
+            </div>
+
+            {/* Tab list: horizontal scroll on mobile, height-capped vertical scroll on desktop */}
+            <div className="scrollbar-hide flex flex-row gap-1.5 overflow-x-auto md:max-h-88 md:flex-col md:gap-1 md:overflow-x-visible md:overflow-y-auto md:pr-1">
+              {filteredTabs.length === 0 && (
+                <p className="px-3 py-4 text-xs whitespace-nowrap text-slate-400 md:whitespace-normal">
+                  No guidelines match &ldquo;{searchQuery}&rdquo;
+                </p>
+              )}
+              {filteredTabs.map((tab) => {
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    aria-current={isActive ? "page" : undefined}
+                    className={`group relative flex shrink-0 cursor-pointer items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold transition-all duration-200 md:w-full md:text-[13px] ${
                       isActive
-                        ? "bg-white/20 text-white"
-                        : "bg-rose-50 text-rose-500 group-hover:bg-white"
+                        ? "bg-rose-700 text-white shadow-md shadow-rose-500/25"
+                        : "border border-slate-200/70 bg-white/70 text-slate-600 hover:border-rose-200 hover:bg-rose-50/70 hover:text-rose-700 md:border-transparent md:bg-transparent"
                     }`}
                   >
-                    {tab.icon}
-                  </span>
-                  <span className="whitespace-nowrap">{tab.label}</span>
-                </button>
-              );
-            })}
+                    <span
+                      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-colors ${
+                        isActive
+                          ? "bg-white/20 text-white"
+                          : "bg-rose-50 text-rose-500 group-hover:bg-white"
+                      }`}
+                    >
+                      {tab.icon}
+                    </span>
+                    <span className="whitespace-nowrap">{tab.label}</span>
+                  </button>
+                );
+              })}
+            </div>
           </nav>
         </aside>
 
