@@ -26,10 +26,10 @@ Hotpoint Apps Hub is an internal Next.js 16 (App Router) portal for submitting/a
 
 ### Route groups (`app/`)
 
-- `(protected)/dashboard` — authenticated area. Nested groups: `(embeddings)` (HelpDesk / Staff Purchase SSO iframes), `(pdfs)` (PDF viewers), plus `advance` (salary advance).
-- `(approvers)` — public, per-UUID approval pages for approvers acting on emailed links.
+- `(protected)/dashboard` — authenticated area. Nested groups: `(embeddings)` (HelpDesk / Staff Purchase SSO iframes), `(pdfs)` (PDF viewers, e.g. `casualpdf`), plus `advance` (salary advance) and `employeeview` (session-gated, read-only Employee Requisition viewer — no PDF export, so it deliberately lives outside `(pdfs)`).
+- `(approvers)` — public, per-UUID approval pages for approvers acting on emailed links (`casualapproval`, `employeeapproval`, etc.).
 - `advance/page.tsx` and `login/page.tsx` are public entry points gated by `proxy.ts`.
-- `api/` — form submission routes (`{access,it,travel}requisition/submitrequisition`), auth routes, mail triggers, `CRON_SECRET`-gated scheduled triggers (`api/triggers/*`), and `REVALIDATE_TAG_KEY`-gated cache revalidation (`api/revalidate-tag`).
+- `api/` — form submission routes (`{access,it,travel,casual,employee}requisition/submitrequisition`), auth routes, mail triggers, `CRON_SECRET`-gated scheduled triggers (`api/triggers/*`), `REVALIDATE_TAG_KEY`-gated cache revalidation (`api/revalidate-tag`), and `api/employeerequisition/attachment/[attachmentId]` — an authenticated file-streaming route (session or approver-token gated) since Employee Requisition attachments are stored on disk under `UPLOAD_DIRECTORY`, outside `public/`.
 
 ### Approval workflows
 
@@ -38,6 +38,8 @@ Each requisition type has its own multi-stage chain under `utils/`:
 - `utils/ITApprovalStages/` — hodApprovalStage → itApprovalStage
 - `utils/AccessApprovalStages/` — hodApprovalStage → securityApprovalStage
 - `utils/TravelApprovalStages/` — hodApprovalStage → hrApprovalStage → directorApprovalStage, tiered by cost (<30K HOD only, 30K–100K +HR, >100K +Director)
+- `utils/CasualApprovalStages/` — hodApprovalStage → financeApprovalStage → hrApprovalStage, always all three stages (no tiering); Finance/HR stages are array-based (`finance_array`/`hr_array` — any member can act, first click wins) and HR can adjust the final approved headcount per section
+- `utils/EmployeeApprovalStages/` — hodApprovalStage → directorApprovalStage → hrApprovalStage, always all three stages; CEO and HR stages are array-based (`director_array`/`hr_array`, reused from Travel/Casual — any member can act, first click wins). Approval is whole-requisition (no per-position adjustment). Introduces the app's first file-attachment handling (`lib/attachmentStorage.ts`, disk-backed under the `UPLOAD_DIRECTORY` env var)
 
 Status transitions live in `serverActions/Update{IT,Travel,AccessRequisitionStatus}` and each fires an email via the matching `services/*EmailSender.ts`, rendered from templates in `utils/templates/`.
 
@@ -47,7 +49,7 @@ Status transitions live in `serverActions/Update{IT,Travel,AccessRequisitionStat
 
 ### Email
 
-`services/EmailService.ts` / `services/EmailSender.ts` are the shared send path; `AccessEmailSender`, `AdvanceEmailSender`, `ITEmailSender` are per-flow wrappers. Sends go through Nodemailer and/or Microsoft Graph `Mail.Send`, with sender addresses set per flow via `EMAIL_SENDER`, `IT_EMAIL_SENDER`, `ACCESS_EMAIL_SENDER`, `ADVANCE_EMAIL_SENDER`.
+`services/EmailService.ts` / `services/EmailSender.ts` are the shared send path; `AccessEmailSender`, `AdvanceEmailSender`, `ITEmailSender`, `CasualEmailSender`, `EmployeeEmailSender` are per-flow wrappers. Sends go through Nodemailer and/or Microsoft Graph `Mail.Send`, with sender addresses set per flow via `EMAIL_SENDER`, `IT_EMAIL_SENDER`, `ACCESS_EMAIL_SENDER`, `ADVANCE_EMAIL_SENDER`, `CASUAL_EMAIL_SENDER`, `EMPLOYEE_EMAIL_SENDER`. Employee Requisition emails never include attachments — only links to them (`api/employeerequisition/attachment/[attachmentId]`) — due to Microsoft Graph payload size limits.
 
 ### State management split
 

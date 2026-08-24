@@ -3,11 +3,11 @@
 import { pool } from "@/lib/db";
 import { PoolClient } from "pg";
 import { AlertInfo } from "@/components/TravelRequisitionPage";
-import { hodApprovalStage } from "@/utils/TravelApprovalStages/hodApprovalStage";
-import { hrApprovalStage } from "@/utils/TravelApprovalStages/hrApprovalStage";
-import { directorApprovalStage } from "@/utils/TravelApprovalStages/directorApprovalStage";
-import { EmailSender } from "@/services/EmailSender";
-import { isValidTravelStage } from "@/public/assets";
+import { hodApprovalStage } from "@/utils/EmployeeApprovalStages/hodApprovalStage";
+import { directorApprovalStage } from "@/utils/EmployeeApprovalStages/directorApprovalStage";
+import { hrApprovalStage } from "@/utils/EmployeeApprovalStages/hrApprovalStage";
+import { EmployeeEmailSender } from "@/services/EmployeeEmailSender";
+import { isValidEmployeeStage } from "@/public/assets";
 import { isDirectorEmail } from "@/utils/isDirectorEmail";
 
 export type UpdateRequestStatusProps = {
@@ -19,10 +19,10 @@ export type UpdateRequestStatusProps = {
   approverEmail: string;
 };
 
-export async function UpdateTravelStatus(
+export async function UpdateEmployeeStatus(
   payload: UpdateRequestStatusProps,
 ): Promise<AlertInfo> {
-  if (!isValidTravelStage(payload.stage)) {
+  if (!isValidEmployeeStage(payload.stage)) {
     return {
       alertType: "error",
       alertMessage: "Invalid approval stage provided",
@@ -33,12 +33,12 @@ export async function UpdateTravelStatus(
 
   // Our base update query and params
   const baseUpdateQuery = `
-    UPDATE travel_requisitions
-    SET travel_${payload.stage}_approval_date = CURRENT_TIMESTAMP,
-    travel_${payload.stage}_approval_status = $1,
-    travel_${payload.stage}_approver = $2,
-    travel_${payload.stage}_email = $3,
-    travel_${payload.stage}_comments = $4
+    UPDATE employee_requisitions
+    SET employee_${payload.stage}_approval_date = CURRENT_TIMESTAMP,
+    employee_${payload.stage}_approval_status = $1,
+    employee_${payload.stage}_approver = $2,
+    employee_${payload.stage}_email = $3,
+    employee_${payload.stage}_comments = $4
     WHERE request_id = $5
     `;
 
@@ -58,10 +58,10 @@ export async function UpdateTravelStatus(
 
     // Check if the requisition has already been acted upon
     const { rows: reviewedResult } = await client.query(
-      `SELECT travel_${payload.stage}_approval_status AS approval_status,
-       travel_${payload.stage}_approver AS approver,
-       travel_approval_tier, submitter_email, travel_hod_email, travel_hod_approver, travel_hr_email
-        FROM travel_requisitions WHERE request_id = $1 FOR UPDATE`,
+      `SELECT employee_${payload.stage}_approval_status AS approval_status,
+       employee_${payload.stage}_approver AS approver,
+       submitter_email, employee_hod_email, employee_director_email
+        FROM employee_requisitions WHERE request_id = $1 FOR UPDATE`,
       [payload.uuid],
     );
 
@@ -94,23 +94,10 @@ export async function UpdateTravelStatus(
 
     // Required stages data
     const userEmail = reviewedResult[0].submitter_email;
-    const hodEmail = reviewedResult[0].travel_hod_email;
-    const hodApprover = reviewedResult[0].travel_hod_approver;
-    const hrEmail = reviewedResult[0].travel_hr_email;
-    const approvalTier = reviewedResult[0].travel_approval_tier;
+    const hodEmail = reviewedResult[0].employee_hod_email;
+    const directorEmail = reviewedResult[0].employee_director_email;
 
-    // Director is only part of the chain for Tier 3 - reject action on that
-    // stage for lower tiers even if a valid director approval token is used.
-    if (payload.stage === "director" && approvalTier !== "Tier 3") {
-      await client.query("ROLLBACK");
-      return {
-        alertType: "error",
-        alertMessage:
-          "This approval stage does not apply to this requisition, no action is required",
-      };
-    }
-
-    if (isReviewed !== "pending" && isReviewed !== "N/A") {
+    if (isReviewed !== "pending") {
       await client.query("ROLLBACK");
       return {
         alertType: "error",
@@ -120,29 +107,25 @@ export async function UpdateTravelStatus(
 
     await client.query(baseUpdateQuery, baseParams);
 
-    // If HR is approving a Tier 3 requisition whose HOD is also a Director,
-    // auto-approve the Director stage in the same transaction so the same
-    // person is never asked to approve twice under two different roles.
+    // If the approving HOD is also a Director/CEO, auto-approve the CEO
+    // stage in the same transaction so the same person is never asked to
+    // approve twice under two different roles.
     let skipDirectorStage = false;
-    if (
-      payload.stage === "hr" &&
-      payload.status === "approved" &&
-      approvalTier === "Tier 3"
-    ) {
-      skipDirectorStage = await isDirectorEmail(client, hodEmail);
+    if (payload.stage === "hod" && payload.status === "approved") {
+      skipDirectorStage = await isDirectorEmail(client, payload.approverEmail);
 
       if (skipDirectorStage) {
         await client.query(
           `
-          UPDATE travel_requisitions
-          SET travel_director_approval_date = CURRENT_TIMESTAMP,
-          travel_director_approval_status = 'approved',
-          travel_director_approver = $1,
-          travel_director_email = $2,
-          travel_director_comments = 'Automatically approved - the selected HOD is also a Director, so a separate Director approval is not required'
+          UPDATE employee_requisitions
+          SET employee_director_approval_date = CURRENT_TIMESTAMP,
+          employee_director_approval_status = 'approved',
+          employee_director_approver = $1,
+          employee_director_email = $2,
+          employee_director_comments = 'Automatically approved - the HOD is also a Director/CEO, so a separate CEO approval is not required'
           WHERE request_id = $3
           `,
-          [hodApprover, hodEmail, payload.uuid],
+          [payload.approverName, payload.approverEmail, payload.uuid],
         );
       }
     }
@@ -157,17 +140,6 @@ export async function UpdateTravelStatus(
           status: payload.status,
           approverEmail: payload.approverEmail,
           approverName: payload.approverName,
-        });
-        break;
-      case "hr":
-        hrApprovalStage({
-          uuid: payload.uuid,
-          userEmail,
-          hodEmail,
-          status: payload.status,
-          approverEmail: payload.approverEmail,
-          approverName: payload.approverName,
-          approvalTier,
           skipDirectorStage,
         });
         break;
@@ -176,19 +148,29 @@ export async function UpdateTravelStatus(
           uuid: payload.uuid,
           userEmail,
           hodEmail,
-          hrEmail,
+          status: payload.status,
+          approverEmail: payload.approverEmail,
+          approverName: payload.approverName,
+        });
+        break;
+      case "hr":
+        hrApprovalStage({
+          uuid: payload.uuid,
+          userEmail,
+          hodEmail,
+          directorEmail,
           status: payload.status,
           approverEmail: payload.approverEmail,
           approverName: payload.approverName,
         });
         break;
       default:
-        EmailSender({
-          to: "geoffrey@hotpoint.co.ke",
+        EmployeeEmailSender({
+          to: process.env.ACCESS_EMAIL_SENDER!,
           requestId: payload.uuid,
           message:
-            "A wrong stage was passed in the travel requisition approval workflow for this requistion",
-          title: "Wrong stage passed to travel requisition approval workflow",
+            "A wrong stage was passed in the employee requisition approval workflow for this requistion",
+          title: "Wrong stage passed to employee requisition approval workflow",
           role: "user",
         });
         break;

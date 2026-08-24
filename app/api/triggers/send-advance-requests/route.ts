@@ -177,7 +177,7 @@ export async function GET(request: NextRequest) {
     // Return a success response
     return NextResponse.json(
       {
-        message: `Salary advance data for date: ${date} exported and emailed successfully`,
+        message: `Salary advance data for date: ${date} exported and emailed successfully, Rows: ${rows.length}`,
       },
       { status: 200 },
     );
