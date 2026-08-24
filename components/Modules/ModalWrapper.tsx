@@ -53,16 +53,14 @@ const ModalWrapper = ({ isOpen, onClose, children }: ModalWrapperProps) => {
       {/* Backdrop transition */}
       <div
         onClick={onClose}
-        className={`fixed inset-0 z-50 flex justify-end bg-black/50 transition-opacity duration-200 ease-in-out ${
+        className={`custom:top-2 custom:bottom-2 custom:right-2 fixed inset-0 z-50 flex justify-end transition-opacity duration-200 ease-in-out ${
           animate ? "opacity-100" : "opacity-0"
         }`}
       >
         {/* Modal Panel */}
         <div
           onClick={(e) => e.stopPropagation()}
-          className={`relative flex h-full w-full flex-col bg-white shadow-2xl transition-transform duration-200 ease-in-out lg:w-4/5 ${
-            animate ? "translate-x-0" : "translate-x-full"
-          }`}
+          className={`custom:w-4/5 custom:rounded-r-2xl relative flex h-full w-full flex-col rounded-r-none transition-transform duration-200 ${animate ? "custom:translate-none translate-x-0" : "custom:translate-none translate-x-full"} bg-white shadow-[0_35px_60px_-15px_rgba(0,0,0,0.4)]`}
         >
           <div className="flex items-center justify-between border-b border-gray-200 px-4 py-2">
             <Brand showText={true} />

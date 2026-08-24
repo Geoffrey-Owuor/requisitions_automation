@@ -17,8 +17,10 @@ import {
   CircleDollarSign,
   BookText,
   HardHat,
+  UserRoundPlus,
+  Search,
 } from "lucide-react";
-import { JSX, ReactNode } from "react";
+import { JSX, ReactNode, useState } from "react";
 import Header from "./Header";
 import QuickSignIn from "./QuickSignIn";
 
@@ -85,6 +87,17 @@ const requisitions: Requisitions[] = [
     tiers: null,
   },
   {
+    id: "employee",
+    label: "Employee Requisition",
+    description:
+      "Request one or more open positions to be filled. Routed to HOD, then CEO, then HR for approval.",
+    icon: <UserRoundPlus size={22} className="h-5 w-5 sm:h-6 sm:w-6" />,
+    accent: "bg-teal-800",
+    badge: "HR",
+    workflow: ["Submit", "HOD", "CEO", "HR"],
+    tiers: null,
+  },
+  {
     id: "desk",
     label: "HelpDesk",
     description:
@@ -120,6 +133,18 @@ const requisitions: Requisitions[] = [
 ];
 
 export default function HomePage() {
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredRequisitions = requisitions.filter((req) => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return true;
+    return (
+      req.label.toLowerCase().includes(query) ||
+      req.description.toLowerCase().includes(query) ||
+      req.badge.toLowerCase().includes(query)
+    );
+  });
+
   return (
     <div className="layout-scrollbar relative flex h-screen flex-col bg-[#fdfbfb] text-slate-900 selection:bg-rose-100 selection:text-rose-900">
       {/* Quick Sign In component */}
@@ -220,15 +245,38 @@ export default function HomePage() {
 
         {/* ── REQUISITION GRID ── */}
         <section className="mx-auto max-w-6xl px-4 pb-20 sm:px-6 sm:pb-28">
-          <div className="mb-8 flex items-center gap-4 sm:mb-10">
+          <div className="mb-4 flex items-center gap-4 sm:mb-6">
             <h2 className="shrink-0 rounded-full border border-slate-200 bg-white px-4 py-1.5 text-[10px] font-bold tracking-[0.18em] text-slate-500 uppercase sm:text-[11px]">
               Available apps and forms
             </h2>
             <div className="h-px flex-1 bg-slate-200" />
           </div>
 
+          {/* Search */}
+          <div className="relative mb-4 sm:mb-6">
+            <Search className="pointer-events-none absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search apps and forms..."
+              className="w-full rounded-full border border-slate-200 bg-white py-3 pr-4 pl-11 text-sm text-slate-700 shadow-sm placeholder:text-slate-400 focus:border-rose-300 focus:ring-2 focus:ring-rose-100 focus:outline-none sm:max-w-sm"
+            />
+          </div>
+
+          {filteredRequisitions.length === 0 && (
+            <div className="mb-8 flex flex-col items-center justify-center rounded-4xl border border-dashed border-slate-200 bg-white/60 py-14 text-center sm:mb-10 sm:rounded-[2.25rem]">
+              <p className="text-sm font-semibold text-slate-600">
+                No apps or forms match &ldquo;{searchQuery}&rdquo;
+              </p>
+              <p className="mt-1 text-xs text-slate-400">
+                Try a different search term.
+              </p>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-7">
-            {requisitions.map((req) => (
+            {filteredRequisitions.map((req) => (
               <div
                 key={req.id}
                 className="group relative flex flex-col justify-between overflow-hidden rounded-4xl border border-slate-200 bg-white p-6 shadow-[0_1px_2px_rgba(140,40,60,0.03)] transition-all duration-300 hover:-translate-y-1 hover:border-rose-200 hover:shadow-[0_24px_48px_-20px_rgba(140,40,60,0.3)] sm:rounded-[2.25rem] sm:p-8"

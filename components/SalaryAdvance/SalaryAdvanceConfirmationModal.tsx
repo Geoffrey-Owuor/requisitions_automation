@@ -28,12 +28,18 @@ export default function SalaryAdvanceConfirmationModal({
 
   const advanceDetails: { label: string; value: string }[] = [
     { label: "Request Amount", value: formData.requestAmount },
-    { label: "Installments", value: formData.installments },
-    { label: "Start Date", value: formData.repaymentStartDate },
     {
       label: "Request Type",
       value: formData.requestType === "continuous" ? "Continuous" : "One-off",
     },
+    {
+      label: "Installments",
+      value:
+        formData.requestType === "continuous"
+          ? "1 (fixed for continuous requests)"
+          : formData.installments,
+    },
+    { label: "Start Date", value: formData.repaymentStartDate },
   ];
 
   return (

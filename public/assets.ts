@@ -6,6 +6,7 @@ import it_form_image from "./it_form_image.png";
 import access_key_image from "./access_key_image.png";
 import advance_form_image from "./advance_form_image.png";
 import casual_form_image from "./casual_form_image.png";
+import employee_form_image from "./employee_form_image.png";
 
 export const assets = {
   access_key_image,
@@ -16,6 +17,7 @@ export const assets = {
   hotpoint_black_logo,
   it_form_image,
   casual_form_image,
+  employee_form_image,
 };
 
 // Date formatter
@@ -53,12 +55,14 @@ export const ALLOWED_TRAVEL_STAGES = ["hod", "hr", "director"] as const;
 export const ALLOWED_ACCESS_STAGES = ["hod", "security"] as const;
 export const ALLOWED_IT_STAGES = ["hod", "it"] as const;
 export const ALLOWED_CASUAL_STAGES = ["hod", "finance", "hr"] as const;
+export const ALLOWED_EMPLOYEE_STAGES = ["hod", "director", "hr"] as const;
 
 // Create a TypeScript union type: "manager" | "director" | "hr" | "finance"
 export type TravelStage = (typeof ALLOWED_TRAVEL_STAGES)[number];
 export type AccessStage = (typeof ALLOWED_ACCESS_STAGES)[number];
 export type itStage = (typeof ALLOWED_IT_STAGES)[number];
 export type CasualStage = (typeof ALLOWED_CASUAL_STAGES)[number];
+export type EmployeeStage = (typeof ALLOWED_EMPLOYEE_STAGES)[number];
 
 /**
  * Type guard to check if an untrusted string is a valid Stage
@@ -84,6 +88,12 @@ export function isValidCasualStage(stage: unknown): stage is CasualStage {
   return (
     typeof stage === "string" &&
     ALLOWED_CASUAL_STAGES.includes(stage as CasualStage)
+  );
+}
+export function isValidEmployeeStage(stage: unknown): stage is EmployeeStage {
+  return (
+    typeof stage === "string" &&
+    ALLOWED_EMPLOYEE_STAGES.includes(stage as EmployeeStage)
   );
 }
 

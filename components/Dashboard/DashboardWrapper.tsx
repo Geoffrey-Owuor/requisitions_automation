@@ -3,7 +3,7 @@ import MobileHeader from "../MobileHeader";
 
 const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="min-h-screen bg-linear-to-br from-red-950 via-red-950 to-red-900">
+    <div className="min-h-screen bg-red-950">
       {/* Mobile header handles screens below lg */}
       <MobileHeader />
 
@@ -11,7 +11,7 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
       <DashboardSidebar />
       <div
         id="dashboard-wrapper"
-        className="layout-scrollbar fixed top-16 right-0 bottom-0 left-0 rounded-t-3xl bg-white sm:rounded-t-2xl lg:top-0 lg:left-20 lg:rounded-tr-none"
+        className="layout-scrollbar custom:bottom-2 custom:right-2 custom:top-2 custom:left-20 custom:rounded-b-2xl fixed top-16 right-0 bottom-0 left-0 rounded-t-2xl bg-white"
       >
         <div className="flex h-full w-full flex-col">{children}</div>
       </div>

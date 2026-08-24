@@ -51,8 +51,12 @@ export async function SubmitAdvanceForm(
 
     const { staffNumber, staffName, staffEmail, department, location } =
       verifiedStaff;
-    const { requestAmount, installments, repaymentStartDate, requestType } =
-      formData;
+    const { requestAmount, repaymentStartDate, requestType } = formData;
+
+    // Continuous requests are always repaid in a single installment —
+    // enforced here too, not just on the client.
+    const installments =
+      requestType === "continuous" ? "1" : formData.installments;
 
     // RULE 2: Check if the staff has already selected "continuous" in any previous request
     const continuousCheckRes = await query(
