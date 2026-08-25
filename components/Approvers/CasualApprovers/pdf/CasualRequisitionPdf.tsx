@@ -93,11 +93,7 @@ const PdfSectionBlock = ({ section }: { section: CasualSectionValues }) => {
         <Text style={tw("text-[8px] font-medium text-[#b0a0a0] uppercase")}>
           Justification
         </Text>
-        <Text
-          style={tw(
-            "mt-0.5 text-[9px] leading-relaxed break-words whitespace-pre-wrap text-[#1e1b1b]",
-          )}
-        >
+        <Text style={tw("mt-0.5 text-[9px] leading-relaxed text-[#1e1b1b]")}>
           {section.justification}
         </Text>
       </View>
@@ -106,11 +102,7 @@ const PdfSectionBlock = ({ section }: { section: CasualSectionValues }) => {
         <Text style={tw("text-[8px] font-medium text-[#b0a0a0] uppercase")}>
           PPEs Required
         </Text>
-        <Text
-          style={tw(
-            "mt-0.5 text-[9px] leading-relaxed break-words whitespace-pre-wrap text-[#1e1b1b]",
-          )}
-        >
+        <Text style={tw("mt-0.5 text-[9px] leading-relaxed text-[#1e1b1b]")}>
           {section.ppesrequired}
         </Text>
       </View>
