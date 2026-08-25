@@ -38,7 +38,7 @@ Each requisition type has its own multi-stage chain under `utils/`:
 - `utils/ITApprovalStages/` — hodApprovalStage → itApprovalStage
 - `utils/AccessApprovalStages/` — hodApprovalStage → securityApprovalStage
 - `utils/TravelApprovalStages/` — hodApprovalStage → hrApprovalStage → directorApprovalStage, tiered by cost (<30K HOD only, 30K–100K +HR, >100K +Director)
-- `utils/CasualApprovalStages/` — hodApprovalStage → financeApprovalStage → hrApprovalStage, always all three stages (no tiering); Finance/HR stages are array-based (`finance_array`/`hr_array` — any member can act, first click wins) and HR can adjust the final approved headcount per section
+- `utils/CasualApprovalStages/` — hodApprovalStage → hrApprovalStage (no Finance stage, no tiering); both stages are array-based (`hod_array`/`hr_array` — any member can act, first click wins) and HR can adjust the final approved headcount per section. On HR approval, a generated PDF summary is attached to the HR approver's confirmation email and to a notification sent to the external casual-labor provider (`EXTERNAL_CASUAL_PROVIDER`); `loadFinanceArray()` in `lib/loadAppDataV2.ts` is kept but unused by this flow
 - `utils/EmployeeApprovalStages/` — hodApprovalStage → directorApprovalStage → hrApprovalStage, always all three stages; CEO and HR stages are array-based (`director_array`/`hr_array`, reused from Travel/Casual — any member can act, first click wins). Approval is whole-requisition (no per-position adjustment). Introduces the app's first file-attachment handling (`lib/attachmentStorage.ts`, disk-backed under the `UPLOAD_DIRECTORY` env var)
 
 Status transitions live in `serverActions/Update{IT,Travel,AccessRequisitionStatus}` and each fires an email via the matching `services/*EmailSender.ts`, rendered from templates in `utils/templates/`.
@@ -49,7 +49,7 @@ Status transitions live in `serverActions/Update{IT,Travel,AccessRequisitionStat
 
 ### Email
 
-`services/EmailService.ts` / `services/EmailSender.ts` are the shared send path; `AccessEmailSender`, `AdvanceEmailSender`, `ITEmailSender`, `CasualEmailSender`, `EmployeeEmailSender` are per-flow wrappers. Sends go through Nodemailer and/or Microsoft Graph `Mail.Send`, with sender addresses set per flow via `EMAIL_SENDER`, `IT_EMAIL_SENDER`, `ACCESS_EMAIL_SENDER`, `ADVANCE_EMAIL_SENDER`, `CASUAL_EMAIL_SENDER`, `EMPLOYEE_EMAIL_SENDER`. Employee Requisition emails never include attachments — only links to them (`api/employeerequisition/attachment/[attachmentId]`) — due to Microsoft Graph payload size limits.
+`services/EmailService.ts` / `services/EmailSender.ts` are the shared send path; `AccessEmailSender`, `AdvanceEmailSender`, `ITEmailSender`, `CasualEmailSender`, `EmployeeEmailSender` are per-flow wrappers. Sends go through Nodemailer and/or Microsoft Graph `Mail.Send`, with sender addresses set per flow via `EMAIL_SENDER`, `IT_EMAIL_SENDER`, `ACCESS_EMAIL_SENDER`, `ADVANCE_EMAIL_SENDER`, `CASUAL_EMAIL_SENDER`, `EMPLOYEE_EMAIL_SENDER`. Employee Requisition emails never include attachments — only links to them (`api/employeerequisition/attachment/[attachmentId]`) — due to Microsoft Graph payload size limits. Casual Requisition is the one flow that does attach a file: on final HR approval, `sendEmail`'s `attachments` param (Graph `fileAttachment`, base64-encoded) carries a server-rendered PDF (`@react-pdf/renderer`'s `renderToBuffer`) to the HR approver and to `EXTERNAL_CASUAL_PROVIDER`, an external casual-labor provider notified for action on every approved casual requisition.
 
 ### State management split
 

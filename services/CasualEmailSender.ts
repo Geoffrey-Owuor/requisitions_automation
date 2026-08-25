@@ -22,14 +22,10 @@ export interface CasualEmailDataValues {
   department: string;
   location: string;
   hodapprovalstatus: string;
-  financeapprovalstatus: string;
   hrapprovalstatus: string;
   hodapprover: string;
   hodemail: string;
   hodcomments: string;
-  financeapprover: string;
-  financeemail: string;
-  financecomments: string;
   hrapprover: string;
   hremail: string;
   hrcomments: string;
@@ -45,14 +41,10 @@ export const casualDataQuery = `
        employee_department AS department,
        casual_location AS location,
        casual_hod_approval_status AS hodapprovalstatus,
-       casual_finance_approval_status AS financeapprovalstatus,
        casual_hr_approval_status AS hrapprovalstatus,
        casual_hod_approver AS hodapprover,
        casual_hod_email AS hodemail,
        casual_hod_comments AS hodcomments,
-       casual_finance_approver AS financeapprover,
-       casual_finance_email AS financeemail,
-       casual_finance_comments AS financecomments,
        casual_hr_approver AS hrapprover,
        casual_hr_email AS hremail,
        casual_hr_comments AS hrcomments
@@ -82,6 +74,7 @@ export interface CasualEmailDataProps {
   role: string;
   reviewLink?: string;
   showPdfDownload?: boolean;
+  attachments?: { filename: string; content: Buffer }[];
 }
 
 // Cached query — repeated calls with the same requestId hit the DB only once
@@ -128,6 +121,7 @@ export async function CasualEmailSender({
   role,
   reviewLink,
   showPdfDownload = false,
+  attachments,
 }: CasualEmailDataProps) {
   const emailData = await getCasualEmailData(requestId);
 
@@ -146,5 +140,6 @@ export async function CasualEmailSender({
     to: to,
     subject: title,
     html: emailHtml,
+    attachments,
   });
 }

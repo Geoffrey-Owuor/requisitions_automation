@@ -1,5 +1,5 @@
 import { CasualEmailSender } from "@/services/CasualEmailSender";
-import { loadFinanceArray } from "@/lib/loadAppDataV2";
+import { loadHrArray } from "@/lib/loadAppDataV2";
 
 type HodApprovalStageProps = {
   uuid: string;
@@ -15,7 +15,7 @@ export async function hodApprovalStage({
   approverEmail,
   approverName,
 }: HodApprovalStageProps) {
-  const FINANCE_ARRAY = await loadFinanceArray();
+  const HR_ARRAY = await loadHrArray();
 
   // HOD declined the request - Notify the HOD and submitter
   if (status === "declined") {
@@ -39,17 +39,17 @@ export async function hodApprovalStage({
     });
   }
 
-  // HOD approved request - forward to Finance for the next approval stage
+  // HOD approved request - forward to HR for the next approval stage
   if (status === "approved") {
-    FINANCE_ARRAY.forEach((financeApprover) => {
+    HR_ARRAY.forEach((hrApprover) => {
       CasualEmailSender({
-        to: financeApprover.email,
+        to: hrApprover.email,
         requestId: uuid,
         message:
           "A new casual requisition has been submitted and requires your approval",
         title: "Action Required: New Casual Requisition",
-        role: "Finance",
-        reviewLink: `?token=${financeApprover.uuid}&stage=finance`,
+        role: "HR",
+        reviewLink: `?token=${hrApprover.uuid}&stage=hr`,
       });
     });
 
@@ -58,7 +58,7 @@ export async function hodApprovalStage({
       to: approverEmail,
       requestId: uuid,
       message:
-        "You have approved this casual requisition. It has been forwarded to Finance for the next approval stage",
+        "You have approved this casual requisition. It has been forwarded to HR for the next approval stage",
       title: "Update: Casual Requisition Approved",
       role: "user",
     });
@@ -66,7 +66,7 @@ export async function hodApprovalStage({
     CasualEmailSender({
       to: userEmail,
       requestId: uuid,
-      message: `Your casual requisition has been approved by ${approverName} and has been forwaded to Finance for the next approval stage`,
+      message: `Your casual requisition has been approved by ${approverName} and has been forwaded to HR for the next approval stage`,
       title: `Update: Casual Requisition Approved By ${approverName}`,
       role: "user",
     });

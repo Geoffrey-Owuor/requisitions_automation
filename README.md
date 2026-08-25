@@ -28,9 +28,9 @@ An internal web application for Hotpoint Appliances Ltd that automates requisiti
 
 ### Casual Requisition
 
-- Request casual staff engagements for one or more sections/locations over a defined period
-- Approval workflow: HOD Approval → Finance Approval → HR Approval (HR can adjust the final approved headcount per section)
-- Daily rate is derived automatically from the selected location; total cost = casuals × rate/day × engagement days
+- Request casual staff engagements for one or more sections over a defined period; available locations and sections depend on the requesting department
+- Approval workflow: HOD Approval → HR Approval (HR can adjust the final approved headcount per section); on approval, a PDF summary is emailed to HR and to an external casual-labor provider for action
+- Daily rate is derived automatically from the selected location (Ruiru vs. other locations), except for the Engineering & HVAC department, which uses a Technician/Welder category rate instead; total cost = casuals × rate/day × engagement days
 
 ### Employee Requisition
 
