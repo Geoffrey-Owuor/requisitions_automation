@@ -66,6 +66,7 @@ export default function CasualRequisitionGuideline() {
             items={[
               "Ruiru location: KES 798 per casual, per day.",
               "All other locations: KES 868 per casual, per day.",
+              "Engineering & HVAC department: KES 1,000 per casual, per day for Technicians, KES 1,500 for Welders (overrides the location-based rate).",
               "Total cost = Number of Casuals &times; Rate per Day &times; Engagement Days.",
             ]}
           />
@@ -82,7 +83,7 @@ export default function CasualRequisitionGuideline() {
             tier="All Requests"
             type="Standard Approval Chain"
             cost="Applies to every casual requisition, regardless of cost"
-            approvers={["HOD Approval", "Finance Approval", "HR Approval"]}
+            approvers={["HOD Approval", "HR Approval"]}
             icon={<HardHat size={22} />}
           />
         </div>

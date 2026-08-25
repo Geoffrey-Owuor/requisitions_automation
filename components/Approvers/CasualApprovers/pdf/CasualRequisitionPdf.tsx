@@ -1,5 +1,3 @@
-"use client";
-
 import { Document, Page, Text, View } from "@react-pdf/renderer";
 import { createTw } from "react-pdf-tailwind";
 import {
@@ -51,13 +49,6 @@ const approvalStages = [
     emailKey: "hodemail",
     statusKey: "hodapprovalstatus",
     commentsKey: "hodcomments",
-  },
-  {
-    role: "Finance Approval",
-    approverKey: "financeapprover",
-    emailKey: "financeemail",
-    statusKey: "financeapprovalstatus",
-    commentsKey: "financecomments",
   },
   {
     role: "HR Approval",

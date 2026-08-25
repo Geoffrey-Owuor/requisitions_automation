@@ -79,11 +79,11 @@ const requisitions: Requisitions[] = [
     id: "casual",
     label: "Casual Requisition",
     description:
-      "Request casual staff engagements for a defined period. Routed to HOD, then Finance, then HR for approval.",
+      "Request casual staff engagements for a defined period. Routed to HOD, then HR for approval.",
     icon: <HardHat size={22} className="h-5 w-5 sm:h-6 sm:w-6" />,
     accent: "bg-orange-800",
     badge: "HR",
-    workflow: ["Submit", "HOD", "Finance", "HR"],
+    workflow: ["Submit", "HOD", "HR"],
     tiers: null,
   },
   {

@@ -1,9 +1,15 @@
 import { NextResponse, NextRequest } from "next/server";
-import { loadFinanceArray } from "@/lib/loadAppDataV2";
+import { loadHrArray } from "@/lib/loadAppDataV2";
 import { query } from "@/lib/db";
 import { CasualEmailSender } from "@/services/CasualEmailSender";
 import { getSession } from "@/lib/session";
-import { getCasualRatePerDay, getCasualSections } from "@/public/assets";
+import {
+  getCasualRatePerDay,
+  getCasualSections,
+  ENGINEERING_HVAC_DEPARTMENT,
+  CASUAL_CATEGORIES,
+  CasualCategory,
+} from "@/public/assets";
 
 // Inclusive day-count between two ISO (YYYY-MM-DD) date strings
 function engagementDaysBetween(from: string, to: string) {
@@ -37,7 +43,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const FINANCE_ARRAY = await loadFinanceArray();
+  const HR_ARRAY = await loadHrArray();
 
   try {
     const { formData, submittedBy } = await request.json();
@@ -54,7 +60,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Destructure form data
-    const { department, hodApprover, location, sections } = formData;
+    const { department, hodApprover, location, sections, casualCategory } =
+      formData;
 
     // More robust validation logic
     // Returns true only if the value is genuinely missing (Allowing 0 values)
@@ -64,6 +71,19 @@ export async function POST(request: NextRequest) {
     if (isEmpty(department) || isEmpty(hodApprover) || isEmpty(location)) {
       return NextResponse.json(
         { message: "Your requisition is missing some required form fields" },
+        { status: 400 },
+      );
+    }
+
+    if (
+      department === ENGINEERING_HVAC_DEPARTMENT &&
+      !CASUAL_CATEGORIES.includes(casualCategory)
+    ) {
+      return NextResponse.json(
+        {
+          message:
+            "A valid casual category (Technician or Welder) is required for the Engineering & HVAC department",
+        },
         { status: 400 },
       );
     }
@@ -78,8 +98,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // The set of sections valid for this location - guards against tampering
-    const allowedSections = getCasualSections(location);
+    // The set of sections valid for this department/location - guards against tampering
+    const allowedSections = getCasualSections(department, location);
 
     for (const section of sections as CasualSectionInput[]) {
       if (!allowedSections.includes(section.sectionName)) {
@@ -124,7 +144,11 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const ratePerDay = getCasualRatePerDay(location);
+    const ratePerDay = getCasualRatePerDay(
+      location,
+      department,
+      casualCategory as CasualCategory | undefined,
+    );
 
     // Recompute the derived values server-side rather than trusting the client
     const computedSections = (sections as CasualSectionInput[]).map(
@@ -163,14 +187,14 @@ export async function POST(request: NextRequest) {
     const hodUuid = hodApproverResult[0].uuid;
     const hodEmail = hodApproverResult[0].email;
 
-    // Create the header insert query - all three stages are always active (no tiering)
+    // Create the header insert query - both stages are always active (no tiering)
     const insertQuery = `
     INSERT INTO casual_requisitions
     (submitter_email, submitter_name, employee_department, casual_location,
-    casual_hod_approval_status, casual_finance_approval_status, casual_hr_approval_status,
+    casual_hod_approval_status, casual_hr_approval_status,
     casual_hod_approver, casual_hod_email)
     VALUES
-    ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+    ($1, $2, $3, $4, $5, $6, $7, $8)
     RETURNING request_id
     `;
 
@@ -179,7 +203,6 @@ export async function POST(request: NextRequest) {
       name,
       department,
       location,
-      "pending",
       "pending",
       "pending",
       hodApprover,
@@ -245,16 +268,16 @@ export async function POST(request: NextRequest) {
       ];
       await query(updateQuery, updateParams);
 
-      // Send mail to Finance Approvers
-      FINANCE_ARRAY.forEach((financeApprover) => {
+      // Send mail to HR Approvers
+      HR_ARRAY.forEach((hrApprover) => {
         CasualEmailSender({
-          to: financeApprover.email,
+          to: hrApprover.email,
           requestId: requestUuid,
           message:
             "A new casual requisition has been submitted and requires your approval",
           title: "Action Required: New Casual Requisition",
-          role: "Finance",
-          reviewLink: `?token=${financeApprover.uuid}&stage=finance`,
+          role: "HR",
+          reviewLink: `?token=${hrApprover.uuid}&stage=hr`,
         });
       });
 
@@ -263,7 +286,7 @@ export async function POST(request: NextRequest) {
         to: email,
         requestId: requestUuid,
         message:
-          "Your casual requisition has been successfully submitted and forwarded to Finance for approval",
+          "Your casual requisition has been successfully submitted and forwarded to HR for approval",
         title: "Update: Casual requisition submitted successfully",
         role: "user",
       });

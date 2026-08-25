@@ -40,6 +40,9 @@ export default function CasualConfirmationModal({
     { label: "Department", value: formData.department },
     { label: "HOD Approver", value: formData.hodApprover },
     { label: "Location", value: formData.location },
+    ...(formData.casualCategory
+      ? [{ label: "Casual Category", value: formData.casualCategory }]
+      : []),
   ];
 
   return (

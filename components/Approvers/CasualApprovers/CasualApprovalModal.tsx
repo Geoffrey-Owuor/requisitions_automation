@@ -58,7 +58,6 @@ export interface CasualApprovalModalProps {
 
 const stageLabel: Record<string, string> = {
   hod: "Head of Department",
-  finance: "Finance",
   hr: "Human Resources",
 };
 
