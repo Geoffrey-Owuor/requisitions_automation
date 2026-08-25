@@ -11,7 +11,7 @@ const Header = () => {
   const pathname = usePathname();
   return (
     <header className="sticky top-0 z-50 backdrop-blur-xl">
-      <div className="mx-auto max-w-6xl px-4 py-2.5 sm:px-6 sm:py-3">
+      <div className="mx-auto max-w-6xl px-4 py-2.5 sm:py-3">
         <div className="flex items-center justify-between rounded-full pr-2 pl-4 sm:pl-5">
           <Brand showText={true} />
 

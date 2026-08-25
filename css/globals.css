@@ -29,6 +29,27 @@ html {
   overflow: hidden;
 }
 
+/* ── Accessibility: user-selectable app font ──
+   Scoped to `html`'s inherited font-family only, so it doesn't touch the
+   `font-sans` utility (used by PDF/print previews, which must stay consistent
+   regardless of the reader's chosen accessibility font). */
+html[data-font="geist"],
+html:not([data-font]) {
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+html[data-font="inter"] {
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+html[data-font="merriweather"] {
+  font-family: var(--font-merriweather), Georgia, "Times New Roman", serif;
+}
+
+html[data-font="lora"] {
+  font-family: var(--font-lora), Georgia, "Times New Roman", serif;
+}
+
 /* Default pages scrollbar navigations */
 .layout-scrollbar {
   scrollbar-color: #a3a3a3 transparent;
