@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
-import FontSwitcher from "./FontSwitcher";
 
 const Footer = () => {
   return (
@@ -23,7 +22,6 @@ const Footer = () => {
             >
               Guidelines
             </Link>
-            <FontSwitcher />
           </div>
         </div>
       </div>
