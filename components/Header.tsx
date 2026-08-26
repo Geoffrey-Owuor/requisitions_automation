@@ -10,9 +10,9 @@ const Header = () => {
   const [isLoading, setIsLoading] = useState(false);
   const pathname = usePathname();
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 mb-4 border-b border-gray-200 bg-inherit">
       <div className="mx-auto max-w-6xl px-4 py-2.5 sm:py-3">
-        <div className="flex items-center justify-between rounded-full pr-2 pl-4 sm:pl-5">
+        <div className="flex items-center justify-between rounded-full">
           <Brand showText={true} />
 
           {pathname !== "/guidelines" ? (

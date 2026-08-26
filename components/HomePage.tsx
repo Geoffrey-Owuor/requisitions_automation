@@ -41,7 +41,7 @@ const requisitions: Requisitions[] = [
     id: "advance",
     label: "Salary Advance",
     description:
-      "Apply for a salary advance, requests should be submitted before the 14th of every month",
+      "Apply for a salary advance, requests should be submitted by the 10th of every month before 5.00pm",
     icon: <CircleDollarSign size={22} className="h-5 w-5 sm:w-6" />,
     accent: "bg-mist-700",
     badge: "HR",
@@ -163,7 +163,7 @@ export default function HomePage() {
 
       <main className="relative z-10">
         {/* ── HERO SECTION ── */}
-        <section className="mx-auto max-w-6xl px-4 pt-8 pb-14 sm:px-6 sm:pt-12 sm:pb-20">
+        <section className="mx-auto max-w-6xl px-4 pt-8 pb-14 sm:pt-12 sm:pb-20">
           <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-5 lg:gap-14">
             <div className="animate-rise text-center lg:col-span-3 lg:text-left">
               <h1 className="mb-4 text-4xl font-semibold tracking-tight text-slate-900 sm:mb-6 sm:text-[52px] sm:leading-[1.05]">
@@ -244,7 +244,7 @@ export default function HomePage() {
         </section>
 
         {/* ── REQUISITION GRID ── */}
-        <section className="mx-auto max-w-6xl px-4 pb-20 sm:px-6 sm:pb-28">
+        <section className="mx-auto max-w-6xl px-4 pb-20 sm:pb-28">
           <div className="mb-4 flex items-center gap-4 sm:mb-6">
             <h2 className="shrink-0 rounded-full border border-slate-200 bg-white px-4 py-1.5 text-[10px] font-bold tracking-[0.18em] text-slate-500 uppercase sm:text-[11px]">
               Available apps and forms

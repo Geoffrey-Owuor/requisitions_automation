@@ -39,7 +39,7 @@ export default function SalaryAdvancePage() {
 
   if (isLocked) {
     return (
-      <div className="flex h-full flex-col items-center justify-center p-6 text-center">
+      <div className="mx-auto flex h-full max-w-6xl flex-col items-center justify-center rounded-xl border border-dashed p-6 text-center">
         <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-rose-100 text-rose-600">
           <Lock size={32} />
         </div>

@@ -61,6 +61,12 @@ Status transitions live in `serverActions/Update{IT,Travel,AccessRequisitionStat
 
 Enforced on both client and server: locked after the 10th of the month at 17:00 local time, additionally gated by a DB flag from `serverActions/GetSalaryAdvanceLock.ts` (see `components/SalaryAdvance/SalaryAdvancePage.tsx`).
 
+### Salary advance active-request lock and self-service alterations
+
+`serverActions/PublicServerActions/SubmitAdvanceForm.ts` blocks a new submission while the staff member (identified by `staff_number`) has an active request — `approval_status != 'declined'` — whose installment period hasn't elapsed: a `continuous` request blocks indefinitely (no end date), a `oneoff` request blocks until `repayment_start_date + no_of_installments` months has passed. This check, plus the alteration-eligibility lookup below, share their "months elapsed/remaining" logic via `lib/salaryAdvanceRules.ts` rather than duplicating the SQL.
+
+Instead of waiting out that lock, a staff member can request a self-service **alteration** to an eligible active request from the "Modify Existing Request" toggle in `components/SalaryAdvance/SalaryAdvanceClient.tsx` (`SalaryAdvanceAlterationSection.tsx`): switch an active `continuous` request to `oneoff`, or reduce the remaining installments of an active `oneoff` request that has more than one installment left. `serverActions/PublicServerActions/GetAlterationEligibility.ts` computes which of the staff's requests qualify (empty result drives a fallback UI); `serverActions/PublicServerActions/SubmitAlterationRequest.ts` re-validates eligibility server-side before applying the change and logs it to `salary_advance_alterations` (FK to `salary_advances.request_id`). Alterations take effect immediately — no HR approval step, no email — and only appear in the monthly export from `app/api/triggers/send-advance-requests/route.ts` (a second "Alterations" worksheet, scoped to alterations created in the current calendar month).
+
 ### Embedded SSO portals
 
 The HelpDesk and Staff Product Purchase dashboard pages render an iframe against an internally reverse-proxied SSO URL (`SSO_SHARED_SECRET`) — they're portals into separate internal systems, not requisition forms, and don't follow the requisition/approval patterns above.

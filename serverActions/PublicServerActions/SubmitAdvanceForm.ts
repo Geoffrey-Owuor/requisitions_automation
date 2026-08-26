@@ -6,6 +6,10 @@ import {
   getAdvanceFormSession,
   deleteAdvanceFormSession,
 } from "@/lib/advanceVerificationSession";
+import {
+  getBlockingActiveAdvance,
+  getInstallmentCompletionDate,
+} from "@/lib/salaryAdvanceRules";
 
 export interface MessageResponse {
   type: "error" | "success";
@@ -58,37 +62,27 @@ export async function SubmitAdvanceForm(
     const installments =
       requestType === "continuous" ? "1" : formData.installments;
 
-    // RULE 2: Check if the staff has already selected "continuous" in any previous request
-    const continuousCheckRes = await query(
-      `SELECT request_id FROM salary_advances 
-           WHERE staff_number = $1 AND request_type = 'continuous' 
-           LIMIT 1`,
-      [staffNumber],
-    );
+    // RULE 2: Block submission while the staff has an active continuous
+    // request (never completes), or an active one-off request whose
+    // installment period hasn't elapsed yet. Declined requests don't block.
+    const blockingAdvance = await getBlockingActiveAdvance(staffNumber);
 
-    if (continuousCheckRes.length > 0) {
+    if (blockingAdvance) {
+      if (blockingAdvance.requestType === "continuous") {
+        return {
+          type: "error",
+          message:
+            "You have a pre-existing continuous request on file. No further submissions are needed.",
+        };
+      }
+
+      const completionDate = getInstallmentCompletionDate(
+        blockingAdvance.repaymentStartDate,
+        blockingAdvance.noOfInstallments,
+      );
       return {
         type: "error",
-        message:
-          "You have a pre-existing continuous request on file. No further submissions are needed.",
-      };
-    }
-
-    // RULE 3: Check if staff has already submitted a request THIS month
-    const thisMonthCheckRes = await query(
-      `SELECT request_id FROM salary_advances 
-       WHERE staff_number = $1 
-       AND EXTRACT(MONTH FROM request_created_at) = EXTRACT(MONTH FROM CURRENT_DATE)
-       AND EXTRACT(YEAR FROM request_created_at) = EXTRACT(YEAR FROM CURRENT_DATE)
-       LIMIT 1`,
-      [staffNumber],
-    );
-
-    if (thisMonthCheckRes.length > 0) {
-      return {
-        type: "error",
-        message:
-          "You have already submitted a salary advance request for this month. Multiple advances are strictly not allowed.",
+        message: `You have an active salary advance request whose repayment installments are not yet complete. You can submit a new request once installments are complete on ${completionDate.toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" })}.`,
       };
     }
 

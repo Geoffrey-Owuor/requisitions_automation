@@ -49,7 +49,8 @@ export default function SalaryAdvanceGuideline() {
             items={[
               "Legal Compliance: All advances must strictly align with the one-third (1/3) rule.",
               "Repayment Terms: The maximum repayment period for any advance is three (3) months.",
-              "Limitation: Multiple active salary advances are strictly not allowed.",
+              "Limitation: A new request cannot be submitted until any active advance's repayment installments are fully complete.",
+              "Alterations: An active continuous request can be switched to one-off, or an active one-off request's remaining installments reduced, from the \"Modify Existing Request\" option — applied immediately, with no new email or approval needed.",
             ]}
           />
         </div>

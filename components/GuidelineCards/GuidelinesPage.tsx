@@ -285,11 +285,11 @@ export default function GuidelinesPage() {
       <Header />
 
       {/* Main Content Area */}
-      <main className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col gap-4 px-4 sm:px-6 md:flex-row md:gap-8">
+      <main className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col gap-4 px-4 md:flex-row md:gap-8">
         {/* Sidebar */}
         <aside className="w-full min-w-0 md:w-60 md:shrink-0">
           {/* Mobile: horizontal pill strip · Desktop: sticky rail */}
-          <nav className="flex flex-col gap-2 py-2 md:sticky md:top-24 md:rounded-[1.75rem] md:border md:border-slate-200/70 md:bg-white/70 md:p-2 md:shadow-sm md:backdrop-blur-xl">
+          <nav className="flex flex-col gap-2 py-2 md:sticky md:top-24 md:rounded-3xl md:border md:border-slate-200/70 md:bg-white/70 md:p-2 md:shadow-sm md:backdrop-blur-xl">
             <span className="hidden px-3 pt-1 text-[10px] font-bold tracking-[0.16em] text-slate-400 uppercase md:block">
               Guidelines
             </span>
@@ -307,7 +307,7 @@ export default function GuidelinesPage() {
             </div>
 
             {/* Tab list: horizontal scroll on mobile, height-capped vertical scroll on desktop */}
-            <div className="scrollbar-hide flex flex-row gap-1.5 overflow-x-auto md:max-h-88 md:flex-col md:gap-1 md:overflow-x-visible md:overflow-y-auto md:pr-1">
+            <div className="flex scrollbar-none flex-row gap-1.5 overflow-x-auto md:max-h-75 md:scrollbar-thin md:flex-col md:gap-1 md:overflow-y-auto md:pr-1">
               {filteredTabs.length === 0 && (
                 <p className="px-3 py-4 text-xs whitespace-nowrap text-slate-400 md:whitespace-normal">
                   No guidelines match &ldquo;{searchQuery}&rdquo;

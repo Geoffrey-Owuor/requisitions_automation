@@ -14,6 +14,7 @@ interface CustomDropdownProps {
   value: string;
   onChange: (value: string) => void;
   required?: boolean;
+  openUpwards?: boolean;
 }
 
 export default function CustomDropdown({
@@ -22,6 +23,7 @@ export default function CustomDropdown({
   value,
   onChange,
   required = true,
+  openUpwards = false,
 }: CustomDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -59,14 +61,16 @@ export default function CustomDropdown({
             onClick={() => setIsOpen(false)}
           />
           {/* Dropdown Menu */}
-          <div className="absolute top-[calc(100%+4px)] right-0 left-0 z-50 max-h-60 overflow-y-auto rounded-xl border border-slate-200 bg-white p-1 shadow-lg [scrollbar-width:thin]">
+          <div
+            className={`absolute right-0 ${openUpwards ? "bottom-[calc(100%-22px)]" : "top-[calc(100%+4px)]"} left-0 z-50 max-h-60 scrollbar-thin overflow-y-auto rounded-xl border border-slate-200 bg-white p-1 shadow-lg`}
+          >
             {options.map((opt) => (
               <div
                 key={opt.value}
                 className={`cursor-pointer rounded-lg px-3 py-2.5 text-[14px] transition-all duration-200 ${
                   String(value) === String(opt.value)
-                    ? "bg-rose-50 font-medium text-rose-700"
-                    : "text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+                    ? "bg-rose-100 font-medium text-rose-700"
+                    : "text-slate-700 hover:bg-slate-100 hover:text-slate-900"
                 }`}
                 onClick={() => {
                   onChange(opt.value);
