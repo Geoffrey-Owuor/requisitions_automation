@@ -42,6 +42,8 @@ An internal web application for Hotpoint Appliances Ltd that automates requisiti
 
 - Staff salary advance requests with a monthly submission window
 - Requests automatically lock after the 10th of the month at 17:00 (also gated by an admin-controlled DB flag)
+- A new request is blocked while any active (non-declined) request's repayment installments haven't fully elapsed — a continuous request blocks indefinitely, a one-off request blocks until its `repayment_start_date + no_of_installments` has passed
+- Staff can self-service alter an eligible active request instead of submitting a new one — switch a continuous request to one-off, or reduce a one-off request's remaining installments — applied immediately with no HR approval or email, logged in `salary_advance_alterations` and surfaced only in the monthly report
 
 ### Embedded Internal Portals (SSO)
 
