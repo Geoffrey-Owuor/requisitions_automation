@@ -35,6 +35,7 @@ An internal web application for Hotpoint Appliances Ltd that automates requisiti
 ### Employee Requisition
 
 - Request one or more open positions to be filled, each with its own headcount, justification, reporting line, and target fill date
+- Each position also records whether it's a Replacement or a New position, its Job Grade (Assistant Officer through Director), and a Salary Range in KES (minimum cannot be 0, maximum cannot be less than the minimum)
 - Requires at least one supporting document (Job Description/KPIs) per position — Word, Excel, or PDF, up to 5MB per position
 - Approval workflow: HOD Approval → CEO Approval → HR Approval
 

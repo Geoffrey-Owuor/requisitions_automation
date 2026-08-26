@@ -133,6 +133,29 @@ export const CASUAL_CATEGORY_RATES: Record<CasualCategory, number> = {
   Welder: 1500,
 };
 
+export const REPLACEMENT_OR_NEW_OPTIONS = ["Replacement", "New"] as const;
+export type ReplacementOrNew = (typeof REPLACEMENT_OR_NEW_OPTIONS)[number];
+
+export const JOB_GRADES = [
+  "Assistant Officer",
+  "Officer",
+  "Supervisor",
+  "Executive",
+  "Senior Executive",
+  "Manager",
+  "Senior Manager",
+  "Head",
+  "Director",
+] as const;
+export type JobGrade = (typeof JOB_GRADES)[number];
+export function getJobGradeNumber(grade: string): number {
+  return JOB_GRADES.indexOf(grade as JobGrade) + 1;
+}
+
+export function formatSalaryRange(min: number, max: number): string {
+  return `${min} - ${max}`;
+}
+
 // Locations available per department. Departments not listed here fall back
 // to showing all locations rather than blocking the form.
 export const CASUAL_DEPARTMENT_LOCATIONS: Record<string, string[]> = {

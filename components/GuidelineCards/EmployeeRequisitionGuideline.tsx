@@ -39,6 +39,7 @@ export default function EmployeeRequisitionGuideline() {
             items={[
               "Requesting department and the reporting HOD approver.",
               "One or more positions, each with its own title, number required, and target fill date.",
+              "Whether each position is a Replacement or New, its Job Grade, and its Salary Range in KES (minimum cannot be 0, maximum cannot be less than the minimum).",
               "Business justification and reporting line for each position.",
             ]}
           />

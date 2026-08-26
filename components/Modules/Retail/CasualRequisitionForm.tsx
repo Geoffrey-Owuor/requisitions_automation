@@ -87,6 +87,7 @@ interface FormSelectProps {
   value: string;
   loading?: boolean;
   onChange: (value: string) => void;
+  optionLabel?: (option: string) => string;
 }
 
 // ---- Main Page ----
@@ -639,6 +640,7 @@ export function FormSelect({
   value,
   onChange,
   loading,
+  optionLabel,
 }: FormSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -666,7 +668,7 @@ export function FormSelect({
         disabled={loading}
       >
         <span className={value ? "text-[#1e1b1b]" : "text-[#a18080]"}>
-          {value || "Select..."}
+          {value ? (optionLabel ? optionLabel(value) : value) : "Select..."}
         </span>
         <ChevronDown
           size={14}
@@ -717,7 +719,7 @@ export function FormSelect({
                       setIsOpen(false);
                     }}
                   >
-                    {opt}
+                    {optionLabel ? optionLabel(opt) : opt}
                   </div>
                 ))
               ) : (

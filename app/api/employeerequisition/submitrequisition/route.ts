@@ -13,10 +13,19 @@ import {
   MAX_ATTACHMENTS_PER_POSITION,
   StoredAttachment,
 } from "@/lib/attachmentStorage";
+import {
+  REPLACEMENT_OR_NEW_OPTIONS,
+  JOB_GRADES,
+  formatSalaryRange,
+} from "@/public/assets";
 
 type PositionInput = {
   title: string;
   numberRequired: number;
+  replacementOrNew: string;
+  jobGrade: string;
+  salaryMin: number;
+  salaryMax: number;
   justification: string;
   reportingTo: string;
   dateFilled: string;
@@ -127,6 +136,50 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
           {
             message: `Position ${index + 1}'s target fill date cannot be in the past`,
+          },
+          { status: 400 },
+        );
+      }
+
+      if (
+        !REPLACEMENT_OR_NEW_OPTIONS.includes(
+          position.replacementOrNew as (typeof REPLACEMENT_OR_NEW_OPTIONS)[number],
+        )
+      ) {
+        return NextResponse.json(
+          {
+            message: `Position ${index + 1} has an invalid Replacement/New selection`,
+          },
+          { status: 400 },
+        );
+      }
+
+      if (!JOB_GRADES.includes(position.jobGrade as (typeof JOB_GRADES)[number])) {
+        return NextResponse.json(
+          { message: `Position ${index + 1} has an invalid Job Grade selection` },
+          { status: 400 },
+        );
+      }
+
+      if (
+        !Number.isFinite(Number(position.salaryMin)) ||
+        Number(position.salaryMin) <= 0
+      ) {
+        return NextResponse.json(
+          {
+            message: `Position ${index + 1}'s minimum salary must be greater than 0`,
+          },
+          { status: 400 },
+        );
+      }
+
+      if (
+        !Number.isFinite(Number(position.salaryMax)) ||
+        Number(position.salaryMax) < Number(position.salaryMin)
+      ) {
+        return NextResponse.json(
+          {
+            message: `Position ${index + 1}'s maximum salary cannot be less than the minimum salary`,
           },
           { status: 400 },
         );
@@ -255,11 +308,11 @@ export async function POST(request: NextRequest) {
         ],
       );
 
-      const positionColumns = 7;
+      const positionColumns = 10;
       const positionValuesClause = positions
         .map(
           (_, index) =>
-            `($${index * positionColumns + 1}, $${index * positionColumns + 2}, $${index * positionColumns + 3}, $${index * positionColumns + 4}, $${index * positionColumns + 5}, $${index * positionColumns + 6}, $${index * positionColumns + 7})`,
+            `($${index * positionColumns + 1}, $${index * positionColumns + 2}, $${index * positionColumns + 3}, $${index * positionColumns + 4}, $${index * positionColumns + 5}, $${index * positionColumns + 6}, $${index * positionColumns + 7}, $${index * positionColumns + 8}, $${index * positionColumns + 9}, $${index * positionColumns + 10})`,
         )
         .join(", ");
 
@@ -271,13 +324,17 @@ export async function POST(request: NextRequest) {
         position.justification,
         position.reportingTo,
         position.dateFilled,
+        position.replacementOrNew,
+        position.jobGrade,
+        formatSalaryRange(Number(position.salaryMin), Number(position.salaryMax)),
       ]);
 
       await client.query(
         `
         INSERT INTO employee_requisition_positions
         (position_id, request_id, position_title, number_required,
-        position_justification, position_reporting_to, date_position_filled)
+        position_justification, position_reporting_to, date_position_filled,
+        position_replacement_or_new, position_job_grade, position_salary_range)
         VALUES ${positionValuesClause}
         `,
         positionParams,
