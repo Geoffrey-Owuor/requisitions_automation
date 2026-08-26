@@ -2,7 +2,7 @@
 
 import { ArrowLeft, Send } from "lucide-react";
 import { EmployeeFormData } from "./EmployeeRequisitionForm";
-import { dateFormatter } from "@/public/assets";
+import { dateFormatter, getJobGradeNumber } from "@/public/assets";
 import { useUser } from "@/context/UserContext";
 import { initialsHelper } from "@/public/assets";
 
@@ -110,6 +110,28 @@ export default function EmployeeConfirmationModal({
                   <span className="font-medium text-[#1e1b1b]">
                     {position.dateFilled
                       ? dateFormatter(position.dateFilled)
+                      : "—"}
+                  </span>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <span className="text-[#7c5a5a]">Replacement/New</span>
+                  <span className="font-medium text-[#1e1b1b]">
+                    {position.replacementOrNew || "—"}
+                  </span>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <span className="text-[#7c5a5a]">Job Grade</span>
+                  <span className="font-medium text-[#1e1b1b]">
+                    {position.jobGrade
+                      ? `${position.jobGrade} (Grade ${getJobGradeNumber(position.jobGrade)})`
+                      : "—"}
+                  </span>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <span className="text-[#7c5a5a]">Salary Range (KES)</span>
+                  <span className="font-medium text-[#1e1b1b]">
+                    {position.salaryMin && position.salaryMax
+                      ? `${position.salaryMin.toLocaleString()} – ${position.salaryMax.toLocaleString()}`
                       : "—"}
                   </span>
                 </div>

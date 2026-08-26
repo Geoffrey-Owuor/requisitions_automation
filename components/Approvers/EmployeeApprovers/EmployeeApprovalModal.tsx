@@ -11,8 +11,11 @@ import {
   X,
   MessageSquareText,
   UserRound,
+  Repeat,
+  Layers,
+  Wallet,
 } from "lucide-react";
-import { assets, dateFormatter } from "@/public/assets";
+import { assets, dateFormatter, getJobGradeNumber } from "@/public/assets";
 import SubmittingOverlay from "@/components/SubmittingOverlay";
 import { AlertInfo } from "@/components/TravelRequisitionPage";
 import { UpdateEmployeeStatus } from "@/serverActions/UpdateEmployeeStatus";
@@ -32,6 +35,9 @@ export interface EmployeeApprovalPosition {
   positionId: string;
   positionTitle: string;
   numberRequired: number;
+  replacementOrNew: string;
+  jobGrade: string;
+  salaryRange: string;
   justification: string;
   reportingTo: string;
   dateFilled: string;
@@ -300,6 +306,21 @@ const EmployeeApprovalModal = ({
                         icon={CalendarDays}
                         label="Date To Be Filled"
                         value={dateFormatter(position.dateFilled)}
+                      />
+                      <DetailRow
+                        icon={Repeat}
+                        label="Replacement/New"
+                        value={position.replacementOrNew}
+                      />
+                      <DetailRow
+                        icon={Layers}
+                        label="Job Grade"
+                        value={`${position.jobGrade} (Grade ${getJobGradeNumber(position.jobGrade)})`}
+                      />
+                      <DetailRow
+                        icon={Wallet}
+                        label="Salary Range (KES)"
+                        value={position.salaryRange}
                       />
                     </div>
 

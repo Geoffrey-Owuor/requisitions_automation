@@ -13,7 +13,12 @@ import {
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { loadHodApprovers, loadBaseDepartments } from "@/lib/loadAppDataV2";
-import { assets } from "@/public/assets";
+import {
+  assets,
+  REPLACEMENT_OR_NEW_OPTIONS,
+  JOB_GRADES,
+  getJobGradeNumber,
+} from "@/public/assets";
 import { ApiFormHandler } from "@/utils/ApiHandler";
 import SubmittingOverlay from "@/components/SubmittingOverlay";
 import AlertModal from "@/components/AlertModal";
@@ -39,6 +44,10 @@ export interface EmployeePositionFormData {
   clientId: string;
   title: string;
   numberRequired: number;
+  replacementOrNew: string;
+  jobGrade: string;
+  salaryMin: number;
+  salaryMax: number;
   justification: string;
   reportingTo: string;
   dateFilled: string;
@@ -56,6 +65,10 @@ function EmptyPosition(): EmployeePositionFormData {
     clientId: crypto.randomUUID(),
     title: "",
     numberRequired: 1,
+    replacementOrNew: "",
+    jobGrade: "",
+    salaryMin: 0,
+    salaryMax: 0,
     justification: "",
     reportingTo: "",
     dateFilled: "",
@@ -119,6 +132,10 @@ export default function EmployeeRequisitionForm() {
         isEmpty(position.dateFilled) ||
         position.dateFilled < today ||
         Number(position.numberRequired) < 1 ||
+        isEmpty(position.replacementOrNew) ||
+        isEmpty(position.jobGrade) ||
+        Number(position.salaryMin) <= 0 ||
+        Number(position.salaryMax) < Number(position.salaryMin) ||
         position.files.length === 0 ||
         position.files.length > MAX_ATTACHMENTS_PER_POSITION ||
         position.files.reduce((sum, f) => sum + f.size, 0) >
@@ -196,6 +213,10 @@ export default function EmployeeRequisitionForm() {
         positions: formData.positions.map((p) => ({
           title: p.title,
           numberRequired: Number(p.numberRequired),
+          replacementOrNew: p.replacementOrNew,
+          jobGrade: p.jobGrade,
+          salaryMin: Number(p.salaryMin),
+          salaryMax: Number(p.salaryMax),
           justification: p.justification,
           reportingTo: p.reportingTo,
           dateFilled: p.dateFilled,
@@ -492,6 +513,54 @@ function PositionFieldset({
             value={position.dateFilled}
             onChange={(v) => onChange("dateFilled", v)}
             minDate={today}
+          />
+        </div>
+        <FormSelect
+          label="Replacement/New"
+          options={[...REPLACEMENT_OR_NEW_OPTIONS]}
+          value={position.replacementOrNew}
+          onChange={(v) => onChange("replacementOrNew", v)}
+        />
+        <FormSelect
+          label="Job Grade"
+          options={[...JOB_GRADES]}
+          value={position.jobGrade}
+          onChange={(v) => onChange("jobGrade", v)}
+          optionLabel={(grade) => `${getJobGradeNumber(grade)}. ${grade}`}
+        />
+        <span className="col-span-2 text-[13px] font-semibold text-rose-600">
+          Salary Range (KES)
+        </span>
+
+        <div className="flex flex-col gap-2">
+          <label className="text-[13px] font-medium text-[#7c5a5a]">
+            Minimum Salary<span className="text-red-500">*</span>
+          </label>
+          <input
+            type="number"
+            min={1}
+            className="h-10 rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
+            value={position.salaryMin || ""}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              onChange("salaryMin", Number(e.target.value))
+            }
+            required
+          />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <label className="text-[13px] font-medium text-[#7c5a5a]">
+            Maximum Salary<span className="text-red-500">*</span>
+          </label>
+          <input
+            type="number"
+            min={1}
+            className="h-10 rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
+            value={position.salaryMax || ""}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              onChange("salaryMax", Number(e.target.value))
+            }
+            required
           />
         </div>
       </div>
