@@ -9,6 +9,8 @@ export interface ActiveAdvanceRow {
   repayment_start_date: string;
   elapsed_installments: number;
   remaining_installments: number;
+  exported: boolean;
+  approval_status: string;
 }
 
 // Months elapsed and remaining are computed in SQL (AGE against
@@ -24,7 +26,9 @@ const ACTIVE_ADVANCES_QUERY = `
     (EXTRACT(YEAR FROM AGE(CURRENT_DATE, repayment_start_date)) * 12
       + EXTRACT(MONTH FROM AGE(CURRENT_DATE, repayment_start_date)))::int AS elapsed_installments,
     (no_of_installments - (EXTRACT(YEAR FROM AGE(CURRENT_DATE, repayment_start_date)) * 12
-      + EXTRACT(MONTH FROM AGE(CURRENT_DATE, repayment_start_date))))::int AS remaining_installments
+      + EXTRACT(MONTH FROM AGE(CURRENT_DATE, repayment_start_date))))::int AS remaining_installments,
+    exported,
+    approval_status
   FROM salary_advances
   WHERE staff_number = $1 AND approval_status != 'declined'
   ORDER BY request_created_at DESC
@@ -76,7 +80,10 @@ export async function getBlockingActiveAdvance(
   return null;
 }
 
-export type AlterationType = "switch_to_oneoff" | "reduce_installments";
+export type AlterationType =
+  | "switch_to_oneoff"
+  | "reduce_installments"
+  | "delete_request";
 
 export interface AlterationCandidate {
   requestId: string;
@@ -87,12 +94,21 @@ export interface AlterationCandidate {
   alterationType: AlterationType;
   // For "reduce_installments": the installment counts the staff may switch to.
   installmentOptions: number[];
+  // Whether this request has already appeared in a monthly export — governs
+  // whether switching/reducing needs an audit row in salary_advance_alterations,
+  // and whether the request is still eligible for self-service deletion.
+  exported: boolean;
+  approvalStatus: string;
 }
 
 // Requests eligible for a self-service alteration:
 // - continuous -> always eligible to switch to one-off
 // - oneoff -> eligible to reduce installments only if more than one
 //   installment remains (nothing left to shorten otherwise)
+// - any type -> eligible to delete outright while still pending review and
+//   never exported (once HR has acted on it, or it's gone out in an export,
+//   self-service deletion is blocked); this can apply alongside a
+//   switch/reduce candidate for the same request.
 export async function getAlterationCandidates(
   staffNumber: string,
 ): Promise<AlterationCandidate[]> {
@@ -110,8 +126,9 @@ export async function getAlterationCandidates(
         repaymentStartDate: row.repayment_start_date,
         alterationType: "switch_to_oneoff",
         installmentOptions: [],
+        exported: row.exported,
+        approvalStatus: row.approval_status,
       });
-      continue;
     }
 
     if (row.request_type === "oneoff" && row.remaining_installments > 1) {
@@ -134,8 +151,24 @@ export async function getAlterationCandidates(
           repaymentStartDate: row.repayment_start_date,
           alterationType: "reduce_installments",
           installmentOptions: options,
+          exported: row.exported,
+          approvalStatus: row.approval_status,
         });
       }
+    }
+
+    if (row.approval_status === "pending" && !row.exported) {
+      candidates.push({
+        requestId: row.request_id,
+        requestType: row.request_type === "continuous" ? "continuous" : "oneoff",
+        requestAmount: row.request_amount,
+        noOfInstallments: row.no_of_installments,
+        repaymentStartDate: row.repayment_start_date,
+        alterationType: "delete_request",
+        installmentOptions: [],
+        exported: row.exported,
+        approvalStatus: row.approval_status,
+      });
     }
   }
 

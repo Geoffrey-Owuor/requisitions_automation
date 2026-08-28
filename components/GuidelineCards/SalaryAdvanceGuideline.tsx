@@ -38,9 +38,8 @@ export default function SalaryAdvanceGuideline() {
             icon={<CalendarClock size={18} />}
             title="Schedules & Deadlines"
             items={[
-              "Submission Deadline: Requests must be submitted no later than the 10th of every month.",
+              "Submission Timing: Requests may be submitted at any time and are picked up in the next monthly processing run.",
               "Processing Schedule: Advances are processed once per month, specifically by the 15th.",
-              "Exception: Requests received outside the deadline will not be processed, except in documented, verified emergencies.",
             ]}
           />
           <InfoCard

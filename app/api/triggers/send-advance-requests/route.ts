@@ -18,32 +18,35 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  // The base fetch query
+  // The base fetch query — everything not yet exported, plus continuous
+  // requests every run (they need to keep appearing as a standing deduction
+  // reminder regardless of the exported flag).
   const baseQuery = `
     SELECT
+    request_id,
     TO_CHAR(request_created_at, 'YYYY-MM-DD HH24:MI:SS') AS request_created_at,
     staff_number, staff_name, staff_email, staff_department,
     staff_location, request_amount, no_of_installments,
     TO_CHAR(repayment_start_date, 'YYYY-MM-DD HH24:MI:SS') AS repayment_start_date,
     request_type, approval_status, approver_comments
     FROM salary_advances
-    WHERE DATE_TRUNC('month', request_created_at) = DATE_TRUNC('month', CURRENT_DATE)
-    OR request_type = 'continuous'
+    WHERE exported = false OR request_type = 'continuous'
     ORDER BY request_created_at ASC
     `;
 
   // Self-service alteration requests (continuous->oneoff switches, installment
-  // reductions) submitted this month — these don't trigger email, so the
-  // monthly report is the only place HR sees them.
+  // reductions) not yet exported — these don't trigger email, so the monthly
+  // report is the only place HR sees them.
   const alterationsQuery = `
     SELECT
+    a.alteration_id,
     TO_CHAR(a.created_at, 'YYYY-MM-DD HH24:MI:SS') AS created_at,
     s.staff_number, s.staff_name, s.staff_email,
     a.alteration_type, a.previous_request_type, a.new_request_type,
     a.previous_installments, a.new_installments
     FROM salary_advance_alterations a
     JOIN salary_advances s ON s.request_id = a.request_id
-    WHERE DATE_TRUNC('month', a.created_at) = DATE_TRUNC('month', CURRENT_DATE)
+    WHERE a.exported = false
     ORDER BY a.created_at ASC
     `;
 
@@ -54,7 +57,7 @@ export async function GET(request: NextRequest) {
       query(alterationsQuery),
     ]);
 
-    // If both are empty - no advance activity of any kind for the current month
+    // If both are empty - nothing unexported (and no continuous requests) to report
     // Only return a success message
     if (rows.length === 0 && alterationRows.length === 0) {
       return NextResponse.json(
@@ -96,8 +99,22 @@ export async function GET(request: NextRequest) {
       worksheet.addRows(sheetRows);
     };
 
-    addSheet("Salary_Advances", rows);
-    addSheet("Alterations", alterationRows);
+    // Ids are needed to flip the exported flag after a successful send, but
+    // shouldn't appear as worksheet columns (columns are auto-derived from
+    // the row keys).
+    const sheetRows = rows.map((row) =>
+      Object.fromEntries(
+        Object.entries(row).filter(([key]) => key !== "request_id"),
+      ),
+    );
+    const alterationSheetRows = alterationRows.map((row) =>
+      Object.fromEntries(
+        Object.entries(row).filter(([key]) => key !== "alteration_id"),
+      ),
+    );
+
+    addSheet("Salary_Advances", sheetRows);
+    addSheet("Alterations", alterationSheetRows);
 
     // Generate a buffer from the workbook
     const arrayBuffer = await workbook.xlsx.writeBuffer();
@@ -158,7 +175,7 @@ export async function GET(request: NextRequest) {
               <table width="100%">
                 <tr>
                   <td style="padding-bottom: 12px; font-size: 12px; color: #94a3b8;">Data Scope</td>
-                  <td style="padding-bottom: 12px; font-size: 12px; color: #ffffff; text-align: right; font-weight: 600;">Current Month &amp; Continuous</td>
+                  <td style="padding-bottom: 12px; font-size: 12px; color: #ffffff; text-align: right; font-weight: 600;">Not Yet Exported &amp; Continuous</td>
                 </tr>
                 <tr>
                   <td style="padding-bottom: 12px; font-size: 12px; color: #94a3b8;">Advance Requests Included</td>
@@ -204,6 +221,26 @@ export async function GET(request: NextRequest) {
     if (!emailResult.success) {
       throw new Error(emailResult.error || "Unknown email sending error");
     }
+
+    // Only flip the flags once the export has actually gone out — otherwise
+    // a failed send would silently drop these rows from every future export.
+    await Promise.all(
+      rows.map((row) =>
+        query(
+          `UPDATE salary_advances SET exported = true WHERE request_id = $1 AND exported = false`,
+          [row.request_id],
+        ),
+      ),
+    );
+
+    await Promise.all(
+      alterationRows.map((row) =>
+        query(
+          `UPDATE salary_advance_alterations SET exported = true WHERE alteration_id = $1`,
+          [row.alteration_id],
+        ),
+      ),
+    );
 
     // Return a success response
     return NextResponse.json(

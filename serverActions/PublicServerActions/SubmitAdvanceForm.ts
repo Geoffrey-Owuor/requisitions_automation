@@ -2,10 +2,7 @@
 import { SalaryAdvanceFormData } from "@/components/SalaryAdvance/SalaryAdvanceClient";
 import { query } from "@/lib/db";
 import { AdvanceEmailSender } from "@/services/AdvanceEmailSender";
-import {
-  getAdvanceFormSession,
-  deleteAdvanceFormSession,
-} from "@/lib/advanceVerificationSession";
+import { getAdvanceFormSession } from "@/lib/advanceVerificationSession";
 import {
   getBlockingActiveAdvance,
   getInstallmentCompletionDate,
@@ -19,29 +16,6 @@ export async function SubmitAdvanceForm(
   formData: SalaryAdvanceFormData,
 ): Promise<MessageResponse> {
   try {
-    // FORM LOCKED CHECK
-    // Get query for checking whether the form is locked
-    const lockedResult = await query(
-      "SELECT lock_advance_form FROM salary_advance_metadata ORDER BY id LIMIT 1",
-    );
-    const lockAdvanceSubmission = lockedResult[0]?.lock_advance_form === true;
-
-    // Time check logic (EAT timezone assumed based on your server config, but Date() uses system local time)
-    const now = new Date();
-    const currentDay = now.getDate();
-    const currentHour = now.getHours();
-
-    // Beyond 5.00pm (17:00) on the 10th of the month
-    const isPastDeadline =
-      currentDay > 10 || (currentDay === 10 && currentHour >= 17);
-
-    if (isPastDeadline && lockAdvanceSubmission) {
-      return {
-        type: "error",
-        message: "Submission deadline has passed, please contact admin",
-      };
-    }
-
     // Staff identity must come from a verified email+code session, never from client-submitted fields.
     const verifiedStaff = await getAdvanceFormSession();
 
@@ -121,9 +95,6 @@ export async function SubmitAdvanceForm(
     await query(`DELETE FROM verification_codes WHERE staff_email = $1`, [
       staffEmail,
     ]);
-
-    // Verified session is single-use: force re-verification for any further requests.
-    await deleteAdvanceFormSession();
 
     return {
       type: "success",

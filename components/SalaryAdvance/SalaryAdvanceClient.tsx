@@ -15,9 +15,8 @@ import {
   RotateCw,
   PencilLine,
 } from "lucide-react";
-import { AlertInfo } from "../TravelRequisitionPage";
 import SubmittingOverlay from "../SubmittingOverlay";
-import AlertModal from "../AlertModal";
+import { useAlertStore } from "@/store/useAlertStore";
 import { useToggleStore } from "@/store/useToggleStore";
 import SalaryAdvanceConfirmationModal from "./SalaryAdvanceConfirmationModal";
 import Image from "next/image";
@@ -145,10 +144,7 @@ export default function SalaryAdvanceClient() {
     useState<SalaryAdvanceFormData>(InitialFormState);
   const [submitting, setSubmitting] = useState(false);
   const [policyAccepted, setPolicyAccepted] = useState(false);
-  const [alertInfo, setAlertInfo] = useState<AlertInfo>({
-    alertType: "",
-    alertMessage: "",
-  });
+  const triggerAlert = useAlertStore((state) => state.triggerAlert);
 
   const codeInputsRef = useRef<(HTMLInputElement | null)[]>([]);
   // Tracks the last complete code we auto-submitted, so a failed attempt
@@ -414,21 +410,18 @@ export default function SalaryAdvanceClient() {
     try {
       const response = await SubmitAdvanceForm(formData);
 
-      setAlertInfo({
-        alertType: response.type,
-        alertMessage: response.message,
-      });
+      triggerAlert(response.type, response.message);
 
       if (response.type === "success") {
         setFormData(InitialFormState);
       }
 
-      setStep(4);
+      setStep(2);
     } catch (error) {
       if (error instanceof Error) {
         console.error("Error while trying to submit a salary advance:", error);
-        setAlertInfo({ alertType: "error", alertMessage: error.toString() });
-        setStep(4);
+        triggerAlert("error", error.toString());
+        setStep(2);
       }
     } finally {
       setSubmitting(false);
@@ -438,13 +431,6 @@ export default function SalaryAdvanceClient() {
   return (
     <div className="relative flex-1 p-4">
       {submitting && <SubmittingOverlay />}
-      {step === 4 && (
-        <AlertModal
-          alertInfo={alertInfo}
-          onBack={() => setStep(2)}
-          hideButton={true}
-        />
-      )}
 
       {step === 3 && (
         <SalaryAdvanceConfirmationModal
@@ -901,20 +887,14 @@ export default function SalaryAdvanceClient() {
                       the 15th of each month.
                     </li>
                     <li>
-                      <strong>Submission Deadline:</strong> All requests must be
-                      submitted through the system no later than the 10th of
-                      every month - latest by 5.00pm
+                      <strong>Submission Timing:</strong> Requests may be
+                      submitted at any time and are picked up in the next
+                      monthly processing run.
                     </li>
                     <li>
                       <strong>Legal Compliance:</strong> All salary advances
                       must be processed in strict alignment with the one-third
                       (1/3) rule.
-                    </li>
-                    <li>
-                      <strong>Exception:</strong> Any salary advance requests
-                      received outside of the stipulated submission deadlines
-                      will not be processed, except in the case of a documented,
-                      verified emergency.
                     </li>
                     <li>
                       <strong>Repayment Terms:</strong> The maximum repayment
