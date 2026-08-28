@@ -1,9 +1,6 @@
 "use server";
 import { query } from "@/lib/db";
-import {
-  getAdvanceFormSession,
-  deleteAdvanceFormSession,
-} from "@/lib/advanceVerificationSession";
+import { getAdvanceFormSession } from "@/lib/advanceVerificationSession";
 import { getAlterationCandidates, AlterationType } from "@/lib/salaryAdvanceRules";
 import { MessageResponse } from "./SubmitAdvanceForm";
 
@@ -52,13 +49,18 @@ export async function SubmitAlterationRequest(
         [candidate.requestId],
       );
 
-      await query(
-        `INSERT INTO salary_advance_alterations
-          (request_id, alteration_type, previous_request_type, new_request_type)
-         VALUES ($1, $2, $3, $4)`,
-        [candidate.requestId, "switch_to_oneoff", "continuous", "oneoff"],
-      );
-    } else {
+      // Only log the alteration if the request had already gone out in a
+      // prior export — otherwise there's nothing to reconcile yet, the
+      // updated row itself will be picked up by the next export as-is.
+      if (candidate.exported) {
+        await query(
+          `INSERT INTO salary_advance_alterations
+            (request_id, alteration_type, previous_request_type, new_request_type)
+           VALUES ($1, $2, $3, $4)`,
+          [candidate.requestId, "switch_to_oneoff", "continuous", "oneoff"],
+        );
+      }
+    } else if (input.alterationType === "reduce_installments") {
       const newInstallments = input.newInstallments;
       if (
         !newInstallments ||
@@ -75,21 +77,39 @@ export async function SubmitAlterationRequest(
         [newInstallments, candidate.requestId],
       );
 
-      await query(
-        `INSERT INTO salary_advance_alterations
-          (request_id, alteration_type, previous_installments, new_installments)
-         VALUES ($1, $2, $3, $4)`,
-        [
-          candidate.requestId,
-          "reduce_installments",
-          candidate.noOfInstallments,
-          newInstallments,
-        ],
-      );
-    }
+      if (candidate.exported) {
+        await query(
+          `INSERT INTO salary_advance_alterations
+            (request_id, alteration_type, previous_installments, new_installments)
+           VALUES ($1, $2, $3, $4)`,
+          [
+            candidate.requestId,
+            "reduce_installments",
+            candidate.noOfInstallments,
+            newInstallments,
+          ],
+        );
+      }
+    } else {
+      // delete_request — only ever offered while pending review and
+      // unexported; re-verify both server-side before deleting outright.
+      if (candidate.approvalStatus !== "pending" || candidate.exported) {
+        return {
+          type: "error",
+          message:
+            "This request is no longer eligible for deletion. Please refresh and try again.",
+        };
+      }
 
-    // Verified session is single-use, matching SubmitAdvanceForm's behavior.
-    await deleteAdvanceFormSession();
+      await query(`DELETE FROM salary_advances WHERE request_id = $1`, [
+        candidate.requestId,
+      ]);
+
+      return {
+        type: "success",
+        message: "Your salary advance request has been deleted.",
+      };
+    }
 
     return {
       type: "success",
