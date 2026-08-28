@@ -160,13 +160,12 @@ export default function SalaryAdvanceClient() {
     setCode(next);
   };
 
-  // Repayment must start on the 15th of the submission month (processing
-  // date), up to the 1st of the month following the one the form is
-  // submitted in.
+  // Repayment may start any day from the submission date through the last
+  // day of the month following the one the form is submitted in.
   const { repaymentMinDate, repaymentMaxDate } = useMemo(() => {
     const now = new Date();
-    const min = new Date(now.getFullYear(), now.getMonth(), 15);
-    const max = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    const min = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const max = new Date(now.getFullYear(), now.getMonth() + 2, 0);
     return {
       repaymentMinDate: toISODate(min),
       repaymentMaxDate: toISODate(max),
@@ -413,7 +412,18 @@ export default function SalaryAdvanceClient() {
       triggerAlert(response.type, response.message);
 
       if (response.type === "success") {
-        setFormData(InitialFormState);
+        // Keep the staff info pulled from the session (staff number, name,
+        // email, department, location) so it stays visible for the next
+        // request; only the fields the staff member actually filled in
+        // reset.
+        setFormData((prev) => ({
+          ...InitialFormState,
+          staffNumber: prev.staffNumber,
+          staffName: prev.staffName,
+          staffEmail: prev.staffEmail,
+          department: prev.department,
+          location: prev.location,
+        }));
       }
 
       setStep(2);
