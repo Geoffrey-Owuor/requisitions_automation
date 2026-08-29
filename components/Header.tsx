@@ -48,7 +48,7 @@ const Header = () => {
             </Link>
           ) : (
             <Link
-              href="/guidelines"
+              href="/guidelines/travel"
               className="rounded-control bg-brand-600 hover:bg-brand-700 flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold text-white transition-colors"
             >
               <BookText size={14} />

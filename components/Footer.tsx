@@ -17,7 +17,7 @@ const Footer = () => {
               Internal Use Only
             </span>
             <Link
-              href="/guidelines"
+              href="/guidelines/travel"
               className="rounded-full px-3 py-1 text-[12px] font-medium text-slate-500 transition-colors hover:bg-white hover:text-rose-600"
             >
               Guidelines
