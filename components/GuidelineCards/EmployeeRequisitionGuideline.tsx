@@ -47,9 +47,9 @@ export default function EmployeeRequisitionGuideline() {
             icon={<Paperclip size={18} />}
             title="Attachments"
             items={[
-              "At least one supporting document (Job Description / KPIs) is required per position.",
+              "A Job Description, KPIs, and Org Chart document are each required per position.",
               "Allowed file types: Microsoft Word, Excel, and PDF.",
-              "Maximum size of 5MB for all documents attached to a single position.",
+              "Maximum size of 2MB per document.",
             ]}
           />
         </div>

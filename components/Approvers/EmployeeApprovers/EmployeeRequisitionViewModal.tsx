@@ -3,7 +3,7 @@
 import { EmployeeEmailDataValues } from "@/services/EmployeeEmailSender";
 import StatusFormatter from "@/components/Dashboard/StatusFormatter";
 import { dateFormatter, getJobGradeNumber } from "@/public/assets";
-import AttachmentLink from "./AttachmentLink";
+import AttachmentTypeGroups from "./AttachmentTypeGroups";
 
 const Field = ({ label, value }: { label: string; value: string | number }) => (
   <div className="flex flex-col gap-1">
@@ -83,14 +83,14 @@ const PositionCard = ({
       <span className="text-[11px] font-medium tracking-[0.4px] text-[#b0a0a0] uppercase">
         Attachments
       </span>
-      <div className="mt-2 flex flex-wrap gap-2">
-        {position.attachments.map((attachment) => (
-          <AttachmentLink
-            key={attachment.attachmentid}
-            attachmentId={attachment.attachmentid}
-            label={attachment.originalfilename}
-          />
-        ))}
+      <div className="mt-2">
+        <AttachmentTypeGroups
+          attachments={position.attachments.map((attachment) => ({
+            attachmentId: attachment.attachmentid,
+            originalFilename: attachment.originalfilename,
+            attachmentType: attachment.attachmenttype,
+          }))}
+        />
       </div>
     </div>
   </div>

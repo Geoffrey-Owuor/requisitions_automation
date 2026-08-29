@@ -3,8 +3,11 @@ import {
   EmployeeEmailDataProps,
   EmployeePositionValues,
 } from "@/services/EmployeeEmailSender";
-import { dateFormatter } from "@/public/assets";
-import { BASE_URL } from "@/public/assets";
+import {
+  dateFormatter,
+  BASE_URL,
+  EMPLOYEE_ATTACHMENT_TYPE_LABELS,
+} from "@/public/assets";
 
 interface EmployeeRequisitionProps
   extends Omit<EmployeeEmailDataProps, "to"> {
@@ -136,8 +139,9 @@ function positionCard(position: EmployeePositionValues, reviewLink?: string) {
 
   const attachmentLinks = position.attachments
     .map(
-      (attachment) =>
-        `<a href="${BASE_URL}/api/employeerequisition/attachment/${attachment.attachmentid}${reviewLink ?? ""}" style="color: #a31d1d; font-size: 12px; font-weight: 600; text-decoration: underline; display: block; margin-top: 4px;">${attachment.originalfilename}</a>`,
+      (attachment) => `
+        <p style="margin: 8px 0 2px; font-size: 11px; font-weight: 700; color: #5a3a3a; text-transform: uppercase; letter-spacing: 0.5px;">${EMPLOYEE_ATTACHMENT_TYPE_LABELS[attachment.attachmenttype]}</p>
+        <a href="${BASE_URL}/api/employeerequisition/attachment/${attachment.attachmentid}${reviewLink ?? ""}" style="color: #a31d1d; font-size: 12px; font-weight: 600; text-decoration: underline; display: block;">${attachment.originalfilename}</a>`,
     )
     .join("");
 
