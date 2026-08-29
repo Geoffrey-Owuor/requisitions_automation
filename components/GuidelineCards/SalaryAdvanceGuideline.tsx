@@ -11,14 +11,13 @@ import {
   GuidelineHeading,
   InfoCard,
   SectionTitle,
-} from "./GuidelinesPage";
+} from "./GuidelinePrimitives";
 
 export default function SalaryAdvanceGuideline() {
   return (
-    <div className="mx-auto max-w-4xl space-y-10 pb-16">
+    <div className="max-w-4xl space-y-7 pb-10">
       <GuidelineHeading
         icon={<CircleDollarSign size={13} />}
-        eyebrow="Salary Advance"
         title="Salary Advance"
       >
         Policies and procedures governing the request, processing, and repayment
@@ -29,11 +28,11 @@ export default function SalaryAdvanceGuideline() {
       <GeneralNote />
 
       {/* Policy Provisions Section */}
-      <section className="space-y-5">
+      <section className="space-y-4">
         <SectionTitle icon={<Scale size={17} />}>
           Policy Provisions
         </SectionTitle>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           <InfoCard
             icon={<CalendarClock size={18} />}
             title="Schedules & Deadlines"
@@ -49,18 +48,18 @@ export default function SalaryAdvanceGuideline() {
               "Legal Compliance: All advances must strictly align with the one-third (1/3) rule.",
               "Repayment Terms: The maximum repayment period for any advance is three (3) months.",
               "Limitation: A new request cannot be submitted until any active advance's repayment installments are fully complete.",
-              "Alterations: An active continuous request can be switched to one-off, or an active one-off request's remaining installments reduced, from the \"Modify Existing Request\" option — applied immediately, with no new email or approval needed.",
+              'Alterations: An active continuous request can be switched to one-off, or an active one-off request\'s remaining installments reduced, from the "Modify Existing Request" option — applied immediately, with no new email or approval needed.',
             ]}
           />
         </div>
       </section>
 
       {/* Required Fields Section */}
-      <section className="space-y-5">
+      <section className="space-y-4">
         <SectionTitle icon={<CheckCircle2 size={17} />}>
           Required Submission Fields
         </SectionTitle>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           <InfoCard
             icon={<UserCircle size={18} />}
             title="Employee Information"

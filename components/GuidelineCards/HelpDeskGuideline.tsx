@@ -10,15 +10,14 @@ import {
   GuidelineHeading,
   InfoCard,
   SectionTitle,
-} from "./GuidelinesPage";
+} from "./GuidelinePrimitives";
 import Link from "next/link";
 
 export default function HelpdeskGuideline() {
   return (
-    <div className="mx-auto max-w-4xl space-y-10 pb-16">
+    <div className="max-w-4xl space-y-7 pb-10">
       <GuidelineHeading
         icon={<LaptopMinimalCheck size={13} />}
-        eyebrow="HelpDesk"
         title="HelpDesk"
       >
         Procedures for reporting issues, requesting assistance, and routing
@@ -45,11 +44,11 @@ export default function HelpdeskGuideline() {
       </Callout>
 
       {/* Required Fields Section */}
-      <section className="space-y-5">
+      <section className="space-y-4">
         <SectionTitle icon={<CheckCircle2 size={17} />}>
           Submission Requirements
         </SectionTitle>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           <InfoCard
             icon={<LayoutList size={18} />}
             title="Ticket Details"

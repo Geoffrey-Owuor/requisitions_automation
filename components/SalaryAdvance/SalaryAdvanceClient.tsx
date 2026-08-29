@@ -601,7 +601,7 @@ export default function SalaryAdvanceClient() {
                         <button
                           type="submit"
                           disabled={submitting}
-                          className="group flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-rose-600 px-6 py-3.5 text-sm font-semibold text-white transition-colors duration-200 hover:bg-rose-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+                          className="group flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-rose-600 px-6 py-3.5 text-sm font-semibold text-white transition-colors duration-200 hover:bg-rose-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           {submitting ? "Sending code..." : "Send my code"}
                           <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
@@ -671,7 +671,7 @@ export default function SalaryAdvanceClient() {
                         <button
                           type="submit"
                           disabled={submitting || code.length < CODE_LENGTH}
-                          className="group flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-rose-600 px-6 py-3.5 text-sm font-semibold text-white transition-colors duration-200 hover:bg-rose-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+                          className="group flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-rose-600 px-6 py-3.5 text-sm font-semibold text-white transition-colors duration-200 hover:bg-rose-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           {submitting ? "Verifying..." : "Verify & proceed"}
                           <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
