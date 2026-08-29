@@ -58,7 +58,7 @@ export default async function LoginPage({ searchParams }: Props) {
         <main className="flex flex-1 items-center justify-center py-6">
           <div className="animate-rise relative w-full max-w-sm">
             {/* Neomorphic Enterprise Card */}
-            <div className="rounded-surface relative overflow-hidden border border-white/80 bg-white/90 p-8 shadow-[0_2px_4px_rgba(140,40,60,0.03),0_28px_56px_-24px_rgba(140,40,60,0.35),inset_0_1px_0_rgba(255,255,255,1)] backdrop-blur-xl sm:p-9">
+            <div className="relative overflow-hidden rounded-2xl border border-white/80 bg-white/90 p-8 shadow-[0_2px_4px_rgba(140,40,60,0.03),0_28px_56px_-24px_rgba(140,40,60,0.35),inset_0_1px_0_rgba(255,255,255,1)] backdrop-blur-xl sm:p-9">
               {/* Top gradient hairline */}
               <div className="absolute inset-x-10 top-0 h-px bg-linear-to-r from-transparent via-rose-400/60 to-transparent" />
 
