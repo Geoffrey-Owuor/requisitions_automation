@@ -34,7 +34,8 @@ export async function GET(req: Request) {
     !storedCodeVerifier ||
     state !== storedState
   ) {
-    return new Response("Invalid OAuth state pairing", { status: 400 });
+    // Send the user back to a real page rather than a bare text response.
+    return Response.redirect(new URL("/login?error=invalid_state", origin));
   }
 
   try {
@@ -75,6 +76,6 @@ export async function GET(req: Request) {
     return Response.redirect(new URL(safeReturnTo, origin));
   } catch (error) {
     console.error("Authentication handshake error:", error);
-    return new Response("Authentication failed", { status: 500 });
+    return Response.redirect(new URL("/login?error=auth_failed", origin));
   }
 }

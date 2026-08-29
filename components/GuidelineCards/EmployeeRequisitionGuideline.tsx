@@ -11,14 +11,13 @@ import {
   InfoCard,
   SectionTitle,
   TierCard,
-} from "./GuidelinesPage";
+} from "./GuidelinePrimitives";
 
 export default function EmployeeRequisitionGuideline() {
   return (
-    <div className="mx-auto max-w-4xl space-y-10 pb-16">
+    <div className="max-w-4xl space-y-7 pb-10">
       <GuidelineHeading
         icon={<UserRoundPlus size={13} />}
-        eyebrow="Employee Requisition"
         title="Employee Requisition"
       >
         Procedures for requesting one or more open positions to be filled,
@@ -28,11 +27,11 @@ export default function EmployeeRequisitionGuideline() {
       <GeneralNote />
 
       {/* Required Fields Section */}
-      <section className="space-y-5">
+      <section className="space-y-4">
         <SectionTitle icon={<CheckCircle2 size={17} />}>
           Required Submission Fields
         </SectionTitle>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           <InfoCard
             icon={<UserCircle size={18} />}
             title="Requisition Details"
@@ -56,11 +55,11 @@ export default function EmployeeRequisitionGuideline() {
       </section>
 
       {/* Approval Workflow Section */}
-      <section className="space-y-5">
+      <section className="space-y-4">
         <SectionTitle icon={<ShieldCheck size={17} />}>
           Approval Workflow
         </SectionTitle>
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3">
           <TierCard
             tier="All Requests"
             type="Standard Approval Chain"

@@ -12,15 +12,14 @@ import {
   GuidelineHeading,
   InfoCard,
   SectionTitle,
-} from "./GuidelinesPage";
+} from "./GuidelinePrimitives";
 
 export default function StaffPurchaseGuideline() {
   return (
-    <div className="mx-auto max-w-4xl space-y-10 pb-16">
+    <div className="max-w-4xl space-y-7 pb-10">
       <GuidelineHeading
         icon={<ShoppingBag size={13} />}
-        eyebrow="Staff Product Purchase"
-        title="Staff Purchase"
+        title="Staff Product Purchase"
       >
         Step-by-step procedures for navigating the portal, searching for
         products, and submitting a purchase request.
@@ -59,11 +58,11 @@ export default function StaffPurchaseGuideline() {
       </Callout>
 
       {/* Required Fields Section */}
-      <section className="space-y-5">
+      <section className="space-y-4">
         <SectionTitle icon={<CheckCircle2 size={17} />}>
           Submission Process
         </SectionTitle>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           <InfoCard
             icon={<MousePointerClick size={18} />}
             title="1. Navigation & Setup"

@@ -1,12 +1,12 @@
-import GuidelinesPage from "@/components/GuidelineCards/GuidelinesPage";
-import { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { appDirectory } from "@/lib/appDirectory";
 
-export const metadata: Metadata = {
-  title: "Guidelines",
-  description: "Guidelines for various apps and online forms",
-};
+/**
+ * `/guidelines` is kept as a stable entry point (it is linked from the header,
+ * footer and homepage) and lands on the first guideline in the directory.
+ */
 const page = () => {
-  return <GuidelinesPage />;
+  redirect(`/guidelines/${appDirectory[0].slug}`);
 };
 
 export default page;

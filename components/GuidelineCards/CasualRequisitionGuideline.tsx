@@ -12,16 +12,12 @@ import {
   InfoCard,
   SectionTitle,
   TierCard,
-} from "./GuidelinesPage";
+} from "./GuidelinePrimitives";
 
 export default function CasualRequisitionGuideline() {
   return (
-    <div className="mx-auto max-w-4xl space-y-10 pb-16">
-      <GuidelineHeading
-        icon={<HardHat size={13} />}
-        eyebrow="Casual Requisition"
-        title="Casual Requisition"
-      >
+    <div className="max-w-4xl space-y-7 pb-10">
+      <GuidelineHeading icon={<HardHat size={13} />} title="Casual Requisition">
         Procedures for requesting casual staff engagements, including engagement
         period, PPE requirements, and the automated approval workflow.
       </GuidelineHeading>
@@ -29,11 +25,11 @@ export default function CasualRequisitionGuideline() {
       <GeneralNote />
 
       {/* Required Fields Section */}
-      <section className="space-y-5">
+      <section className="space-y-4">
         <SectionTitle icon={<CheckCircle2 size={17} />}>
           Required Submission Fields
         </SectionTitle>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           <InfoCard
             icon={<UserCircle size={18} />}
             title="Requisition Details"
@@ -55,11 +51,11 @@ export default function CasualRequisitionGuideline() {
       </section>
 
       {/* Rate Section */}
-      <section className="space-y-5">
+      <section className="space-y-4">
         <SectionTitle icon={<Wallet size={17} />}>
           Rate Calculation
         </SectionTitle>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           <InfoCard
             icon={<Wallet size={18} />}
             title="Daily Rate"
@@ -74,11 +70,11 @@ export default function CasualRequisitionGuideline() {
       </section>
 
       {/* Approval Workflow Section */}
-      <section className="space-y-5">
+      <section className="space-y-4">
         <SectionTitle icon={<ShieldCheck size={17} />}>
           Approval Workflow
         </SectionTitle>
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3">
           <TierCard
             tier="All Requests"
             type="Standard Approval Chain"
