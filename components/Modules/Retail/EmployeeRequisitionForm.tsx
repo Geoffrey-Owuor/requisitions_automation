@@ -18,6 +18,9 @@ import {
   REPLACEMENT_OR_NEW_OPTIONS,
   JOB_GRADES,
   getJobGradeNumber,
+  EMPLOYEE_ATTACHMENT_TYPES,
+  EMPLOYEE_ATTACHMENT_TYPE_LABELS,
+  EmployeeAttachmentType,
 } from "@/public/assets";
 import { ApiFormHandler } from "@/utils/ApiHandler";
 import SubmittingOverlay from "@/components/SubmittingOverlay";
@@ -36,8 +39,7 @@ export const ALLOWED_ATTACHMENT_EXTENSIONS = [
   ".xlsx",
   ".pdf",
 ];
-export const MAX_ATTACHMENT_BYTES_PER_POSITION = 5 * 1024 * 1024; // 5MB
-export const MAX_ATTACHMENTS_PER_POSITION = 10;
+export const MAX_ATTACHMENT_BYTES_PER_FILE = 2 * 1024 * 1024; // 2MB
 
 // ---- Types ----
 export interface EmployeePositionFormData {
@@ -51,7 +53,7 @@ export interface EmployeePositionFormData {
   justification: string;
   reportingTo: string;
   dateFilled: string;
-  files: File[];
+  files: Partial<Record<EmployeeAttachmentType, File>>;
 }
 
 export interface EmployeeFormData {
@@ -72,7 +74,7 @@ function EmptyPosition(): EmployeePositionFormData {
     justification: "",
     reportingTo: "",
     dateFilled: "",
-    files: [],
+    files: {},
   };
 }
 
@@ -136,11 +138,14 @@ export default function EmployeeRequisitionForm() {
         isEmpty(position.jobGrade) ||
         Number(position.salaryMin) <= 0 ||
         Number(position.salaryMax) < Number(position.salaryMin) ||
-        position.files.length === 0 ||
-        position.files.length > MAX_ATTACHMENTS_PER_POSITION ||
-        position.files.reduce((sum, f) => sum + f.size, 0) >
-          MAX_ATTACHMENT_BYTES_PER_POSITION ||
-        position.files.some((f) => hasDisallowedExtension(f.name))
+        EMPLOYEE_ATTACHMENT_TYPES.some((type) => {
+          const file = position.files[type];
+          return (
+            !file ||
+            file.size > MAX_ATTACHMENT_BYTES_PER_FILE ||
+            hasDisallowedExtension(file.name)
+          );
+        })
       );
     });
 
@@ -183,23 +188,49 @@ export default function EmployeeRequisitionForm() {
     }));
   };
 
-  const handleFilesChange = (clientId: string, fileList: FileList | null) => {
-    const files = fileList ? Array.from(fileList) : [];
+  const fileErrorKey = (clientId: string, type: EmployeeAttachmentType) =>
+    `${clientId}:${type}`;
+
+  const handleFileChange = (
+    clientId: string,
+    type: EmployeeAttachmentType,
+    fileList: FileList | null,
+  ) => {
+    const file = fileList?.[0];
 
     let error = "";
-    if (files.length > MAX_ATTACHMENTS_PER_POSITION) {
-      error = `A maximum of ${MAX_ATTACHMENTS_PER_POSITION} attachments is allowed`;
-    } else if (files.some((f) => hasDisallowedExtension(f.name))) {
-      error = "Only Word, Excel, and PDF documents are allowed";
-    } else if (
-      files.reduce((sum, f) => sum + f.size, 0) >
-      MAX_ATTACHMENT_BYTES_PER_POSITION
-    ) {
-      error = "Attachments must not exceed 5MB in total";
+    if (file) {
+      if (hasDisallowedExtension(file.name)) {
+        error = "Only Word, Excel, and PDF documents are allowed";
+      } else if (file.size > MAX_ATTACHMENT_BYTES_PER_FILE) {
+        error = "Attachment must not exceed 2MB";
+      }
     }
 
-    setFileErrors((prev) => ({ ...prev, [clientId]: error }));
-    updatePositionField(clientId, "files", files);
+    setFileErrors((prev) => ({ ...prev, [fileErrorKey(clientId, type)]: error }));
+
+    setFormData((prev) => ({
+      ...prev,
+      positions: prev.positions.map((p) =>
+        p.clientId === clientId
+          ? { ...p, files: { ...p.files, [type]: file } }
+          : p,
+      ),
+    }));
+  };
+
+  const removeFile = (clientId: string, type: EmployeeAttachmentType) => {
+    setFileErrors((prev) => ({ ...prev, [fileErrorKey(clientId, type)]: "" }));
+
+    setFormData((prev) => ({
+      ...prev,
+      positions: prev.positions.map((p) => {
+        if (p.clientId !== clientId) return p;
+        const files = { ...p.files };
+        delete files[type];
+        return { ...p, files };
+      }),
+    }));
   };
 
   const handleSubmit = async () => {
@@ -225,8 +256,9 @@ export default function EmployeeRequisitionForm() {
     );
 
     formData.positions.forEach((position, index) => {
-      position.files.forEach((file) => {
-        payload.append(`positionFiles_${index}`, file);
+      EMPLOYEE_ATTACHMENT_TYPES.forEach((type) => {
+        const file = position.files[type];
+        if (file) payload.append(`positionFiles_${index}_${type}`, file);
       });
     });
 
@@ -370,13 +402,16 @@ export default function EmployeeRequisitionForm() {
                       index={index}
                       today={today}
                       showRemove={formData.positions.length > 1}
-                      fileError={fileErrors[position.clientId]}
+                      fileErrors={fileErrors}
                       onRemove={() => removePosition(position.clientId)}
                       onChange={(field, value) =>
                         updatePositionField(position.clientId, field, value)
                       }
-                      onFilesChange={(files) =>
-                        handleFilesChange(position.clientId, files)
+                      onFileChange={(type, files) =>
+                        handleFileChange(position.clientId, type, files)
+                      }
+                      onRemoveFile={(type) =>
+                        removeFile(position.clientId, type)
                       }
                     />
                   ))}
@@ -404,8 +439,9 @@ export default function EmployeeRequisitionForm() {
                   <ArrowRight className="h-4 w-4" />
                 </button>
                 <p className="mt-3 text-center text-xs text-[#7c5a5a]">
-                  All fields are required to proceed. Each position needs at
-                  least one attachment (Word, Excel, or PDF, max 5MB total).
+                  All fields are required to proceed. Each position needs a
+                  Job Description, KPIs, and Org Chart document (Word, Excel,
+                  or PDF, max 2MB each).
                 </p>
               </div>
             </form>
@@ -423,22 +459,27 @@ function PositionFieldset({
   index,
   today,
   showRemove,
-  fileError,
+  fileErrors,
   onRemove,
   onChange,
-  onFilesChange,
+  onFileChange,
+  onRemoveFile,
 }: {
   position: EmployeePositionFormData;
   index: number;
   today: string;
   showRemove: boolean;
-  fileError?: string;
+  fileErrors: Record<string, string>;
   onRemove: () => void;
   onChange: <K extends keyof EmployeePositionFormData>(
     field: K,
     value: EmployeePositionFormData[K],
   ) => void;
-  onFilesChange: (files: FileList | null) => void;
+  onFileChange: (
+    type: EmployeeAttachmentType,
+    files: FileList | null,
+  ) => void;
+  onRemoveFile: (type: EmployeeAttachmentType) => void;
 }) {
   return (
     <div className="rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white/70 p-5">
@@ -580,51 +621,51 @@ function PositionFieldset({
         />
       </div>
 
-      <div className="mt-5 flex flex-col gap-2">
-        <label className="text-[13px] font-medium text-[#7c5a5a]">
-          Attachments (Updated Job Description, KPIs & Org Chart){" "}
-          <span className="text-red-500">*</span>
-        </label>
-        <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-[rgba(240,180,180,0.8)] bg-white/60 px-3.5 py-4 text-[13px] font-medium text-rose-600 transition-all duration-200 hover:bg-rose-50">
-          <Paperclip className="h-4 w-4" />
-          Upload Word, Excel, or PDF documents (Max 5MB)
-          <input
-            type="file"
-            multiple
-            accept=".doc,.docx,.xls,.xlsx,.pdf"
-            className="hidden"
-            onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              onFilesChange(e.target.files)
-            }
-          />
-        </label>
-        {position.files.length > 0 && (
-          <div className="flex flex-col gap-1.5">
-            {position.files.map((file, fileIndex) => (
-              <div
-                key={`${file.name}-${fileIndex}`}
-                className="flex items-center justify-between rounded-lg bg-white/80 px-3 py-2 text-[12px] text-[#1e1b1b]"
-              >
-                <span className="max-w-70 truncate">{file.name}</span>
-                <button
-                  type="button"
-                  onClick={() =>
-                    onChange(
-                      "files",
-                      position.files.filter((_, i) => i !== fileIndex),
-                    )
-                  }
-                  className="cursor-pointer text-[#a18080] hover:text-rose-600"
-                >
-                  <X className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-        {fileError && (
-          <p className="text-xs font-medium text-red-500">{fileError}</p>
-        )}
+      <div className="mt-5 flex flex-col gap-4">
+        <span className="text-[13px] font-medium text-[#7c5a5a]">
+          Attachments <span className="text-red-500">*</span>
+        </span>
+        {EMPLOYEE_ATTACHMENT_TYPES.map((type) => {
+          const file = position.files[type];
+          const error = fileErrors[`${position.clientId}:${type}`];
+
+          return (
+            <div key={type} className="flex flex-col gap-2">
+              <label className="text-[13px] font-medium text-[#7c5a5a]">
+                {EMPLOYEE_ATTACHMENT_TYPE_LABELS[type]}{" "}
+                <span className="text-red-500">*</span>
+              </label>
+              {file ? (
+                <div className="flex items-center justify-between rounded-lg bg-white/80 px-3 py-2 text-[12px] text-[#1e1b1b]">
+                  <span className="max-w-70 truncate">{file.name}</span>
+                  <button
+                    type="button"
+                    onClick={() => onRemoveFile(type)}
+                    className="cursor-pointer text-[#a18080] hover:text-rose-600"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ) : (
+                <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-[rgba(240,180,180,0.8)] bg-white/60 px-3.5 py-4 text-[13px] font-medium text-rose-600 transition-all duration-200 hover:bg-rose-50">
+                  <Paperclip className="h-4 w-4" />
+                  Upload Word, Excel, or PDF (Max 2MB)
+                  <input
+                    type="file"
+                    accept=".doc,.docx,.xls,.xlsx,.pdf"
+                    className="hidden"
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                      onFileChange(type, e.target.files)
+                    }
+                  />
+                </label>
+              )}
+              {error && (
+                <p className="text-xs font-medium text-red-500">{error}</p>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

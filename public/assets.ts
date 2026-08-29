@@ -156,6 +156,25 @@ export function formatSalaryRange(min: number, max: number): string {
   return `${min} - ${max}`;
 }
 
+// Employee Requisition position attachments: exactly one file per type is
+// required. Slugs sort alphabetically into the desired display order
+// (job-description < kpis < org-chart), so `ORDER BY attachment_type` in SQL
+// needs no CASE expression to get Job Description, KPIs, Org Chart order.
+export const EMPLOYEE_ATTACHMENT_TYPES = [
+  "job-description",
+  "kpis",
+  "org-chart",
+] as const;
+export type EmployeeAttachmentType = (typeof EMPLOYEE_ATTACHMENT_TYPES)[number];
+export const EMPLOYEE_ATTACHMENT_TYPE_LABELS: Record<
+  EmployeeAttachmentType,
+  string
+> = {
+  "job-description": "Job Description",
+  kpis: "KPIs",
+  "org-chart": "Org Chart",
+};
+
 // Locations available per department. Departments not listed here fall back
 // to showing all locations rather than blocking the form.
 export const CASUAL_DEPARTMENT_LOCATIONS: Record<string, string[]> = {

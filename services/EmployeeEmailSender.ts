@@ -2,11 +2,13 @@ import { cache } from "react";
 import { query } from "@/lib/db";
 import { EmployeeRequisitionTemplate } from "@/utils/templates/EmployeeRequisitionTemplate";
 import { sendEmail } from "./EmailService";
+import { EmployeeAttachmentType } from "@/public/assets";
 
 export interface EmployeeAttachmentValues {
   attachmentid: string;
   positionid: string;
   originalfilename: string;
+  attachmenttype: EmployeeAttachmentType;
 }
 
 export interface EmployeePositionValues {
@@ -81,8 +83,9 @@ export const employeeAttachmentsQuery = `
      SELECT
        attachment_id AS attachmentid,
        position_id AS positionid,
-       original_filename AS originalfilename
-       FROM employee_requisition_attachments WHERE request_id = $1 ORDER BY position_id, upload_index
+       original_filename AS originalfilename,
+       attachment_type AS attachmenttype
+       FROM employee_requisition_attachments WHERE request_id = $1 ORDER BY position_id, attachment_type
 `;
 
 export interface EmployeeEmailDataProps {

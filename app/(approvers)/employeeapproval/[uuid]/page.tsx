@@ -88,10 +88,10 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
 
   const attachmentsResult = await query(
     `
-      SELECT attachment_id, position_id, original_filename
+      SELECT attachment_id, position_id, original_filename, attachment_type
         FROM employee_requisition_attachments
         WHERE request_id = $1
-        ORDER BY position_id, upload_index
+        ORDER BY position_id, attachment_type
       `,
     [uuid],
   );
@@ -149,6 +149,7 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
                   .map((attachment) => ({
                     attachmentId: attachment.attachment_id,
                     originalFilename: attachment.original_filename,
+                    attachmentType: attachment.attachment_type,
                   })),
               }))}
             />
