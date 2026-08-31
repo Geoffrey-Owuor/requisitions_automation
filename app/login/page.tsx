@@ -89,7 +89,7 @@ export default async function LoginPage({ searchParams }: Props) {
 
               {/* Typography Header Group */}
               <div className="mb-6 text-center">
-                <span className="rounded-control mb-3 inline-flex items-center gap-1.5 border border-rose-100 bg-rose-50/70 px-3 py-1 text-[10px] font-bold tracking-[0.14em] text-rose-600 uppercase">
+                <span className="mb-3 inline-flex items-center gap-1.5 rounded-lg border border-rose-100 bg-rose-50/70 px-3 py-1 text-[10px] font-bold tracking-[0.14em] text-rose-600 uppercase">
                   <Lock size={10} />
                   Secure Sign In
                 </span>
@@ -126,7 +126,7 @@ export default async function LoginPage({ searchParams }: Props) {
               <div className="mt-5 text-center">
                 <Link
                   href="/"
-                  className="group rounded-control inline-flex items-center gap-1.5 px-3 py-1.5 text-[12.5px] font-medium text-slate-500 transition-colors hover:bg-rose-50/70 hover:text-rose-600"
+                  className="group inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12.5px] font-medium text-slate-500 transition-colors hover:bg-rose-50/70 hover:text-rose-600"
                 >
                   <ArrowLeft
                     size={13}

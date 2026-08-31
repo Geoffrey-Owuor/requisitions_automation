@@ -12,7 +12,7 @@ const Footer = () => {
           </p>
 
           <div className="flex items-center gap-2">
-            <span className="rounded-control inline-flex items-center gap-1.5 border border-rose-100 bg-rose-50/60 px-3 py-1 text-[11px] font-semibold tracking-wide text-rose-600 uppercase">
+            <span className="inline-flex items-center gap-1.5 rounded-lg border border-rose-100 bg-rose-50/60 px-3 py-1 text-[11px] font-semibold tracking-wide text-rose-600 uppercase">
               <ShieldCheck size={12} />
               Internal Use Only
             </span>

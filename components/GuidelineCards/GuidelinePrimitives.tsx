@@ -130,7 +130,7 @@ export const TierCard = ({
         {icon}
       </div>
       <div>
-        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold tracking-wider text-slate-500 uppercase">
+        <span className="rounded bg-slate-100 px-2 py-0.5 text-[10px] font-bold tracking-wider text-slate-500 uppercase">
           {tier}
         </span>
         <h4 className="mt-1 text-sm font-semibold text-slate-900">{type}</h4>
@@ -141,7 +141,7 @@ export const TierCard = ({
     <div className="flex flex-wrap items-center gap-1.5 sm:justify-end">
       {approvers.map((approver, idx) => (
         <Fragment key={approver}>
-          <div className="border-brand-100 bg-brand-50/60 flex items-center gap-1.5 rounded-full border py-1 pr-2.5 pl-1.5 text-xs font-semibold text-slate-700">
+          <div className="border-brand-100 bg-brand-50/60 flex items-center gap-1.5 rounded-lg border py-1 pr-2.5 pl-1.5 text-xs font-semibold text-slate-700">
             <CheckCircle2 size={12} className="text-brand-500 shrink-0" />
             {approver}
           </div>
