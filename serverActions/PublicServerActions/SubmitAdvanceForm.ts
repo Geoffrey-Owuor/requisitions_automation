@@ -2,10 +2,11 @@
 import { SalaryAdvanceFormData } from "@/components/SalaryAdvance/SalaryAdvanceClient";
 import { query } from "@/lib/db";
 import { AdvanceEmailSender } from "@/services/AdvanceEmailSender";
+import { getAdvanceFormSession } from "@/lib/advanceVerificationSession";
 import {
-  getAdvanceFormSession,
-  deleteAdvanceFormSession,
-} from "@/lib/advanceVerificationSession";
+  getBlockingActiveAdvance,
+  getInstallmentCompletionDate,
+} from "@/lib/salaryAdvanceRules";
 
 export interface MessageResponse {
   type: "error" | "success";
@@ -15,29 +16,6 @@ export async function SubmitAdvanceForm(
   formData: SalaryAdvanceFormData,
 ): Promise<MessageResponse> {
   try {
-    // FORM LOCKED CHECK
-    // Get query for checking whether the form is locked
-    const lockedResult = await query(
-      "SELECT lock_advance_form FROM salary_advance_metadata ORDER BY id LIMIT 1",
-    );
-    const lockAdvanceSubmission = lockedResult[0]?.lock_advance_form === true;
-
-    // Time check logic (EAT timezone assumed based on your server config, but Date() uses system local time)
-    const now = new Date();
-    const currentDay = now.getDate();
-    const currentHour = now.getHours();
-
-    // Beyond 5.00pm (17:00) on the 10th of the month
-    const isPastDeadline =
-      currentDay > 10 || (currentDay === 10 && currentHour >= 17);
-
-    if (isPastDeadline && lockAdvanceSubmission) {
-      return {
-        type: "error",
-        message: "Submission deadline has passed, please contact admin",
-      };
-    }
-
     // Staff identity must come from a verified email+code session, never from client-submitted fields.
     const verifiedStaff = await getAdvanceFormSession();
 
@@ -58,37 +36,27 @@ export async function SubmitAdvanceForm(
     const installments =
       requestType === "continuous" ? "1" : formData.installments;
 
-    // RULE 2: Check if the staff has already selected "continuous" in any previous request
-    const continuousCheckRes = await query(
-      `SELECT request_id FROM salary_advances 
-           WHERE staff_number = $1 AND request_type = 'continuous' 
-           LIMIT 1`,
-      [staffNumber],
-    );
+    // RULE 2: Block submission while the staff has an active continuous
+    // request (never completes), or an active one-off request whose
+    // installment period hasn't elapsed yet. Declined requests don't block.
+    const blockingAdvance = await getBlockingActiveAdvance(staffNumber);
 
-    if (continuousCheckRes.length > 0) {
+    if (blockingAdvance) {
+      if (blockingAdvance.requestType === "continuous") {
+        return {
+          type: "error",
+          message:
+            "You have a pre-existing continuous request on file. No further submissions are needed.",
+        };
+      }
+
+      const completionDate = getInstallmentCompletionDate(
+        blockingAdvance.repaymentStartDate,
+        blockingAdvance.noOfInstallments,
+      );
       return {
         type: "error",
-        message:
-          "You have a pre-existing continuous request on file. No further submissions are needed.",
-      };
-    }
-
-    // RULE 3: Check if staff has already submitted a request THIS month
-    const thisMonthCheckRes = await query(
-      `SELECT request_id FROM salary_advances 
-       WHERE staff_number = $1 
-       AND EXTRACT(MONTH FROM request_created_at) = EXTRACT(MONTH FROM CURRENT_DATE)
-       AND EXTRACT(YEAR FROM request_created_at) = EXTRACT(YEAR FROM CURRENT_DATE)
-       LIMIT 1`,
-      [staffNumber],
-    );
-
-    if (thisMonthCheckRes.length > 0) {
-      return {
-        type: "error",
-        message:
-          "You have already submitted a salary advance request for this month. Multiple advances are strictly not allowed.",
+        message: `You have an active salary advance request whose repayment installments are not yet complete. You can submit a new request once installments are complete on ${completionDate.toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" })}.`,
       };
     }
 
@@ -127,9 +95,6 @@ export async function SubmitAdvanceForm(
     await query(`DELETE FROM verification_codes WHERE staff_email = $1`, [
       staffEmail,
     ]);
-
-    // Verified session is single-use: force re-verification for any further requests.
-    await deleteAdvanceFormSession();
 
     return {
       type: "success",

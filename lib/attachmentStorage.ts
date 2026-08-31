@@ -1,5 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
+import { EmployeeAttachmentType } from "@/public/assets";
 
 // Allowed attachment types for Employee Requisition position attachments
 // (Job Description / KPI documents) — extension is the source of truth,
@@ -16,8 +17,7 @@ export const ALLOWED_ATTACHMENT_TYPES: Record<string, string[]> = {
   ".pdf": ["application/pdf"],
 };
 
-export const MAX_ATTACHMENT_BYTES_PER_POSITION = 5 * 1024 * 1024; // 5MB
-export const MAX_ATTACHMENTS_PER_POSITION = 10;
+export const MAX_ATTACHMENT_BYTES_PER_FILE = 2 * 1024 * 1024; // 2MB
 
 export function getUploadDirectory(): string {
   const uploadDir = process.env.UPLOAD_DIRECTORY;
@@ -58,26 +58,32 @@ export type StoredAttachment = {
   filePath: string; // relative to UPLOAD_DIRECTORY
   mimeType: string;
   fileSizeBytes: number;
-  uploadIndex: number;
+  attachmentType: EmployeeAttachmentType;
 };
 
-// Writes every file for a single position to
-// UPLOAD_DIRECTORY/{requestId}/{positionId}/{index}-{sanitizedName}
+// Writes each typed file for a single position to
+// UPLOAD_DIRECTORY/{requestId}/{positionId}/{attachmentType}/{sanitizedName}
 export async function writePositionAttachments(
   requestId: string,
   positionId: string,
-  files: File[],
+  files: Record<EmployeeAttachmentType, File>,
 ): Promise<StoredAttachment[]> {
-  const positionDir = path.join(getUploadDirectory(), requestId, positionId);
-  await fs.mkdir(positionDir, { recursive: true });
-
   const stored: StoredAttachment[] = [];
 
-  for (let index = 0; index < files.length; index++) {
-    const file = files[index];
-    const sanitized = sanitizeFilename(file.name);
-    const storedFilename = `${index}-${sanitized}`;
-    const absolutePath = path.join(positionDir, storedFilename);
+  for (const [attachmentType, file] of Object.entries(files) as [
+    EmployeeAttachmentType,
+    File,
+  ][]) {
+    const typeDir = path.join(
+      /*turbopackIgnore: true*/ getUploadDirectory(),
+      requestId,
+      positionId,
+      attachmentType,
+    );
+    await fs.mkdir(typeDir, { recursive: true });
+
+    const storedFilename = sanitizeFilename(file.name);
+    const absolutePath = path.join(typeDir, storedFilename);
 
     const buffer = Buffer.from(await file.arrayBuffer());
     await fs.writeFile(absolutePath, buffer);
@@ -85,10 +91,10 @@ export async function writePositionAttachments(
     stored.push({
       originalFilename: file.name,
       storedFilename,
-      filePath: path.join(requestId, positionId, storedFilename),
+      filePath: path.join(requestId, positionId, attachmentType, storedFilename),
       mimeType: file.type,
       fileSizeBytes: file.size,
-      uploadIndex: index,
+      attachmentType,
     });
   }
 
@@ -100,7 +106,10 @@ export async function writePositionAttachments(
 export async function deleteRequisitionDirectory(
   requestId: string,
 ): Promise<void> {
-  const requestDir = path.join(getUploadDirectory(), requestId);
+  const requestDir = path.join(
+    /*turbopackIgnore: true*/ getUploadDirectory(),
+    requestId,
+  );
 
   await fs.rm(requestDir, { recursive: true, force: true });
 }
@@ -108,7 +117,10 @@ export async function deleteRequisitionDirectory(
 export async function readAttachmentFile(
   relativeFilePath: string,
 ): Promise<Buffer> {
-  const absolutePath = path.join(getUploadDirectory(), relativeFilePath);
+  const absolutePath = path.join(
+    /*turbopackIgnore: true*/ getUploadDirectory(),
+    relativeFilePath,
+  );
 
   return fs.readFile(absolutePath);
 }

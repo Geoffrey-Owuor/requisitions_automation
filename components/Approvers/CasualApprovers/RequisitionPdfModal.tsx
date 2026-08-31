@@ -37,13 +37,6 @@ const approvalStages = [
     commentsKey: "hodcomments" as const,
   },
   {
-    role: "Finance Approval",
-    approverKey: "financeapprover" as const,
-    emailKey: "financeemail" as const,
-    statusKey: "financeapprovalstatus" as const,
-    commentsKey: "financecomments" as const,
-  },
-  {
     role: "HR Approval",
     approverKey: "hrapprover" as const,
     emailKey: "hremail" as const,

@@ -1,9 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const LoginWrapper = () => {
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    // Sign-in navigates away, so this component is normally torn down while
+    // pending. Coming back via the browser's back button can restore it from
+    // the bfcache with `isLoading` still true, which would leave the button
+    // permanently disabled — reset it when the page is shown again.
+    const reset = () => setIsLoading(false);
+    window.addEventListener("pageshow", reset);
+    return () => window.removeEventListener("pageshow", reset);
+  }, []);
 
   return (
     <form
@@ -12,51 +22,40 @@ const LoginWrapper = () => {
       className="w-full"
       onSubmit={() => setIsLoading(true)}
     >
-      {/* Custom keyframes for the sequential color swap.
-        It fades between a very light rose-100 (#ffe4e6) and a deep rose-600 (#e11d48)
-      */}
-      <style>{`
-        @keyframes color-chase {
-          0%, 60%, 100% { background-color: #ffe4e6; }
-          30% { background-color: #e11d48; }
-        }
-        .chase-dot {
-          animation: color-chase 1.2s infinite ease-in-out;
-        }
-        .chase-1 { animation-delay: -0.4s; }
-        .chase-2 { animation-delay: -0.2s; }
-        .chase-3 { animation-delay: 0s; }
-      `}</style>
-
       <button
         type="submit"
         disabled={isLoading}
-        className="group relative flex w-full cursor-pointer items-center justify-center gap-3 overflow-hidden rounded-full border border-rose-100 bg-white px-5 py-3.5 text-[14.5px] font-semibold text-slate-700 shadow-[inset_0_1px_0_rgba(255,255,255,1),0_2px_8px_rgba(140,40,60,0.06),0_8px_20px_-10px_rgba(140,40,60,0.25)] transition-all duration-200 hover:border-rose-200 hover:text-rose-900 hover:shadow-[inset_0_1px_0_rgba(255,255,255,1),0_4px_12px_rgba(140,40,60,0.08),0_14px_28px_-12px_rgba(140,40,60,0.35)] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-90"
+        aria-busy={isLoading}
+        className="rounded-control hover:border-brand-200 hover:bg-brand-50/60 focus-visible:outline-brand-600 flex w-full cursor-pointer items-center justify-center gap-2.5 border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 disabled:pointer-events-none disabled:opacity-90"
       >
-        {/* Warm wash that sweeps in on hover */}
-        <span className="pointer-events-none absolute inset-0 bg-linear-to-r from-rose-50 via-white to-rose-50 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+        <MicrosoftIcon />
 
-        <span className="relative flex shrink-0 items-center justify-center rounded-full">
-          <MicrosoftIcon />
-        </span>
-
-        {/* Fixed width prevents the button from resizing when the text changes */}
-        <span className="relative flex w-47.5 items-center justify-center">
-          {isLoading ? (
-            <span className="flex items-center gap-1.5 text-rose-900">
-              Getting things ready
-              {/* The sequential colored dots */}
-              <span className="flex items-center gap-0.5 pt-1">
-                <span className="chase-dot chase-1 h-1.5 w-1.5 rounded-full"></span>
-                <span className="chase-dot chase-2 h-1.5 w-1.5 rounded-full"></span>
-                <span className="chase-dot chase-3 h-1.5 w-1.5 rounded-full"></span>
-              </span>
+        {/* Both labels occupy the same grid cell, so the button keeps its width
+            when the text swaps — no hardcoded width to keep in sync with copy. */}
+        <span className="grid">
+          <span
+            className={`col-start-1 row-start-1 ${isLoading ? "invisible" : ""}`}
+          >
+            Sign in with Microsoft 365
+          </span>
+          <span
+            className={`text-brand-900 col-start-1 row-start-1 flex items-center justify-center gap-1.5 ${
+              isLoading ? "" : "invisible"
+            }`}
+          >
+            Getting things ready
+            <span className="flex items-center gap-0.5 pt-0.5">
+              <span className="chase-dot h-1.5 w-1.5 rounded-full [animation-delay:-0.4s]" />
+              <span className="chase-dot h-1.5 w-1.5 rounded-full [animation-delay:-0.2s]" />
+              <span className="chase-dot h-1.5 w-1.5 rounded-full" />
             </span>
-          ) : (
-            "Sign in with Microsoft 365"
-          )}
+          </span>
         </span>
       </button>
+
+      <span aria-live="polite" className="sr-only">
+        {isLoading ? "Redirecting to Microsoft sign in" : ""}
+      </span>
     </form>
   );
 };
@@ -71,6 +70,7 @@ function MicrosoftIcon() {
       viewBox="0 0 21 21"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
       className="shrink-0"
     >
       <rect x="1" y="1" width="9" height="9" fill="#F25022" />

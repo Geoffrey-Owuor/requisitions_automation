@@ -15,9 +15,8 @@ import {
   RotateCw,
   PencilLine,
 } from "lucide-react";
-import { AlertInfo } from "../TravelRequisitionPage";
 import SubmittingOverlay from "../SubmittingOverlay";
-import AlertModal from "../AlertModal";
+import { useAlertStore } from "@/store/useAlertStore";
 import { useToggleStore } from "@/store/useToggleStore";
 import SalaryAdvanceConfirmationModal from "./SalaryAdvanceConfirmationModal";
 import Image from "next/image";
@@ -29,6 +28,7 @@ import { VerifyAdvanceCode } from "@/serverActions/PublicServerActions/VerifyAdv
 import { GetAdvanceFormSession } from "@/serverActions/GetAdvanceFormSession";
 import { SubmitAdvanceForm } from "@/serverActions/PublicServerActions/SubmitAdvanceForm";
 import SalaryAdvanceFormSkeleton from "../Skeletons/SalaryAdvanceFormSkeleton";
+import SalaryAdvanceAlterationSection from "./SalaryAdvanceAlterationSection";
 
 export interface SalaryAdvanceFormData {
   staffNumber: string;
@@ -76,13 +76,19 @@ const VERIFICATION_STEPS = [
     detail: "We send a 6-digit code to the address on your staff record.",
   },
   {
-    title: "Complete the form",
-    detail: "Your staff details are filled in for you once verified.",
+    title: "Submit or modify a request",
+    detail:
+      "Apply for a new advance, or adjust an eligible existing one — no need to verify twice.",
   },
   {
     title: "HR & Finance review",
     detail: "You'll be notified by email as your request is processed.",
   },
+];
+
+const MODE_OPTIONS: { value: "submit" | "alter"; label: string }[] = [
+  { value: "submit", label: "Submit New Request" },
+  { value: "alter", label: "Modify Existing Request" },
 ];
 
 function toISODate(date: Date): string {
@@ -127,6 +133,7 @@ export default function SalaryAdvanceClient() {
   const scrollTrigger = useToggleStore((state) => state.scrollTrigger);
 
   const [step, setStep] = useState(1);
+  const [mode, setMode] = useState<"submit" | "alter">("submit");
   const [checkingSession, setCheckingSession] = useState(true);
   const [verifyStage, setVerifyStage] = useState<"email" | "code">("email");
   const [email, setEmail] = useState("");
@@ -137,10 +144,7 @@ export default function SalaryAdvanceClient() {
     useState<SalaryAdvanceFormData>(InitialFormState);
   const [submitting, setSubmitting] = useState(false);
   const [policyAccepted, setPolicyAccepted] = useState(false);
-  const [alertInfo, setAlertInfo] = useState<AlertInfo>({
-    alertType: "",
-    alertMessage: "",
-  });
+  const triggerAlert = useAlertStore((state) => state.triggerAlert);
 
   const codeInputsRef = useRef<(HTMLInputElement | null)[]>([]);
   // Tracks the last complete code we auto-submitted, so a failed attempt
@@ -156,13 +160,12 @@ export default function SalaryAdvanceClient() {
     setCode(next);
   };
 
-  // Repayment must start on the 15th of the submission month (processing
-  // date), up to the 1st of the month following the one the form is
-  // submitted in.
+  // Repayment may start any day from the submission date through the last
+  // day of the month following the one the form is submitted in.
   const { repaymentMinDate, repaymentMaxDate } = useMemo(() => {
     const now = new Date();
-    const min = new Date(now.getFullYear(), now.getMonth(), 15);
-    const max = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    const min = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const max = new Date(now.getFullYear(), now.getMonth() + 2, 0);
     return {
       repaymentMinDate: toISODate(min),
       repaymentMaxDate: toISODate(max),
@@ -406,21 +409,29 @@ export default function SalaryAdvanceClient() {
     try {
       const response = await SubmitAdvanceForm(formData);
 
-      setAlertInfo({
-        alertType: response.type,
-        alertMessage: response.message,
-      });
+      triggerAlert(response.type, response.message);
 
       if (response.type === "success") {
-        setFormData(InitialFormState);
+        // Keep the staff info pulled from the session (staff number, name,
+        // email, department, location) so it stays visible for the next
+        // request; only the fields the staff member actually filled in
+        // reset.
+        setFormData((prev) => ({
+          ...InitialFormState,
+          staffNumber: prev.staffNumber,
+          staffName: prev.staffName,
+          staffEmail: prev.staffEmail,
+          department: prev.department,
+          location: prev.location,
+        }));
       }
 
-      setStep(4);
+      setStep(2);
     } catch (error) {
       if (error instanceof Error) {
         console.error("Error while trying to submit a salary advance:", error);
-        setAlertInfo({ alertType: "error", alertMessage: error.toString() });
-        setStep(4);
+        triggerAlert("error", error.toString());
+        setStep(2);
       }
     } finally {
       setSubmitting(false);
@@ -430,13 +441,6 @@ export default function SalaryAdvanceClient() {
   return (
     <div className="relative flex-1 p-4">
       {submitting && <SubmittingOverlay />}
-      {step === 4 && (
-        <AlertModal
-          alertInfo={alertInfo}
-          onBack={() => setStep(2)}
-          hideButton={true}
-        />
-      )}
 
       {step === 3 && (
         <SalaryAdvanceConfirmationModal
@@ -459,10 +463,8 @@ export default function SalaryAdvanceClient() {
             <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-14">
               {/* ── Context panel ── */}
               <div className="order-2 lg:order-1">
-                <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-rose-200/70 bg-white/70 py-1.5 pr-4 pl-1.5 text-[10px] font-bold tracking-wide text-rose-700 uppercase shadow-sm backdrop-blur-sm sm:text-[11px]">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-rose-600 text-white">
-                    <ShieldCheck size={11} />
-                  </span>
+                <div className="mb-5 inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-wide text-rose-700 uppercase">
+                  <ShieldCheck size={13} />
                   Secure verification
                 </div>
 
@@ -483,7 +485,7 @@ export default function SalaryAdvanceClient() {
                         className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ring-1 ${
                           index === 0
                             ? "bg-rose-600 text-white ring-rose-300"
-                            : "bg-white/80 text-slate-400 ring-slate-200"
+                            : "bg-white text-slate-400 ring-slate-200"
                         }`}
                       >
                         {index + 1}
@@ -500,7 +502,7 @@ export default function SalaryAdvanceClient() {
                   ))}
                 </ol>
 
-                <div className="flex max-w-md items-start gap-3 rounded-2xl border border-amber-200/70 bg-amber-50/60 px-4 py-3 text-amber-900 backdrop-blur-sm">
+                <div className="flex max-w-md items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-900">
                   <Lightbulb size={16} className="mt-0.5 shrink-0" />
                   <p className="text-xs leading-relaxed">
                     Verification requires access to that mailbox. If you no
@@ -512,9 +514,7 @@ export default function SalaryAdvanceClient() {
 
               {/* ── Verification card ── */}
               <div className="relative order-1 lg:order-2">
-                <div className="pointer-events-none absolute -inset-2 rounded-[2.5rem] bg-rose-100/40 blur-xl" />
-
-                <div className="relative rounded-4xl border border-white/80 bg-white/85 p-6 shadow-[0_2px_4px_rgba(140,40,60,0.03),0_24px_48px_-20px_rgba(140,40,60,0.28)] backdrop-blur-xl sm:p-8">
+                <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
                   {/* Stage progress */}
                   <div className="mb-6 flex items-center gap-3">
                     <div className="flex flex-1 gap-1.5">
@@ -532,11 +532,11 @@ export default function SalaryAdvanceClient() {
                     </span>
                   </div>
 
-                  <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-600 text-white shadow-lg shadow-rose-300/60">
+                  <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-rose-600 text-white">
                     {verifyStage === "code" ? (
-                      <ShieldCheck size={22} />
+                      <ShieldCheck size={20} />
                     ) : (
-                      <Mail size={22} />
+                      <Mail size={20} />
                     )}
                   </div>
 
@@ -553,7 +553,7 @@ export default function SalaryAdvanceClient() {
                       {verifyError && (
                         <div
                           role="alert"
-                          className="mb-5 flex items-start gap-2.5 rounded-2xl border border-rose-200 bg-rose-50/80 px-4 py-3 text-rose-700"
+                          className="mb-5 flex items-start gap-2.5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-rose-700"
                         >
                           <CircleAlert size={16} className="mt-0.5 shrink-0" />
                           <p className="text-[13px] leading-relaxed">
@@ -585,7 +585,7 @@ export default function SalaryAdvanceClient() {
                               required
                               autoFocus
                               autoComplete="email"
-                              className="h-13 w-full rounded-2xl border border-slate-200 bg-white/80 pr-4 pl-11 text-sm text-slate-900 transition-all duration-200 outline-none placeholder:text-slate-400 focus:border-rose-400 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.12)]"
+                              className="h-13 w-full rounded-2xl border border-slate-200 bg-white pr-4 pl-11 text-sm text-slate-900 transition-all duration-200 outline-none placeholder:text-slate-400 focus:border-rose-400 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.12)]"
                               placeholder="you@example.com"
                               value={email}
                               onChange={(e) => setEmail(e.target.value)}
@@ -601,7 +601,7 @@ export default function SalaryAdvanceClient() {
                         <button
                           type="submit"
                           disabled={submitting}
-                          className="group flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-rose-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-rose-500/25 transition-all duration-200 hover:bg-rose-700 hover:shadow-xl hover:shadow-rose-500/35 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none"
+                          className="group flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-rose-600 px-6 py-3.5 text-sm font-semibold text-white transition-colors duration-200 hover:bg-rose-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           {submitting ? "Sending code..." : "Send my code"}
                           <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
@@ -625,7 +625,7 @@ export default function SalaryAdvanceClient() {
                       {verifyError && (
                         <div
                           role="alert"
-                          className="mb-5 flex items-start gap-2.5 rounded-2xl border border-rose-200 bg-rose-50/80 px-4 py-3 text-rose-700"
+                          className="mb-5 flex items-start gap-2.5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-rose-700"
                         >
                           <CircleAlert size={16} className="mt-0.5 shrink-0" />
                           <p className="text-[13px] leading-relaxed">
@@ -659,7 +659,7 @@ export default function SalaryAdvanceClient() {
                               onKeyDown={(e) => handleDigitKeyDown(slot, e)}
                               onFocus={() => handleDigitFocus(slot)}
                               onPaste={handleCodePaste}
-                              className={`h-14 w-full min-w-0 rounded-2xl border bg-white/80 text-center text-xl font-semibold text-slate-900 transition-all duration-200 outline-none focus:border-rose-400 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.12)] ${
+                              className={`h-14 w-full min-w-0 rounded-2xl border bg-white text-center text-xl font-semibold text-slate-900 transition-all duration-200 outline-none focus:border-rose-400 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.12)] ${
                                 code[slot]
                                   ? "border-rose-300"
                                   : "border-slate-200"
@@ -671,7 +671,7 @@ export default function SalaryAdvanceClient() {
                         <button
                           type="submit"
                           disabled={submitting || code.length < CODE_LENGTH}
-                          className="group flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-rose-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-rose-500/25 transition-all duration-200 hover:bg-rose-700 hover:shadow-xl hover:shadow-rose-500/35 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none"
+                          className="group flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-rose-600 px-6 py-3.5 text-sm font-semibold text-white transition-colors duration-200 hover:bg-rose-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           {submitting ? "Verifying..." : "Verify & proceed"}
                           <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
@@ -730,199 +730,235 @@ export default function SalaryAdvanceClient() {
               alt="Form Image"
             />
           </div>
-          <header className="mb-8">
+          <header className="mb-6">
             <h1 className="m-0 text-2xl font-semibold tracking-[-0.5px] text-[#1e1b1b]">
               Salary Advance Request
             </h1>
             <p className="mt-1 text-[14px] text-[#7c5a5a]">
-              Enter your salary advance details below.
+              {mode === "submit"
+                ? "Enter your salary advance details below."
+                : "Adjust an eligible, active salary advance request."}
             </p>
           </header>
 
-          <div className="rounded-3xl border border-white/85 bg-white/65 px-6 py-8 shadow-[0_24px_48px_rgba(160,60,60,0.10)] backdrop-blur-2xl sm:px-8">
-            <form
-              className="flex flex-col gap-8"
-              onSubmit={(e) => {
-                e.preventDefault();
-                setStep(3);
-                triggerScroll(!scrollTrigger);
-              }}
-            >
-              {/* Employee Information */}
-              <div>
-                <h2 className="mb-5 flex items-center gap-2 text-[13px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
-                  <UserRound size={16} /> Staff Information
-                </h2>
-                <p className="mb-4 text-xs text-slate-500">
-                  These details were verified against your staff record and
-                  can&apos;t be edited here. Contact HR if anything is
-                  incorrect.
-                </p>
-                <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                  <StaffInfoField
-                    label="Staff Number"
-                    value={formData.staffNumber}
-                  />
-                  <StaffInfoField
-                    label="Staff Name"
-                    value={formData.staffName}
-                  />
-                  <StaffInfoField
-                    label="Staff Email"
-                    value={formData.staffEmail}
-                  />
-                  <StaffInfoField
-                    label="Department"
-                    value={formData.department}
-                  />
-                  <StaffInfoField label="Location" value={formData.location} />
+          <div
+            role="tablist"
+            aria-label="Salary advance action"
+            className="mb-6 inline-flex rounded-2xl border border-slate-200 bg-slate-100 p-1"
+          >
+            {MODE_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                role="tab"
+                aria-selected={mode === option.value}
+                onClick={() => setMode(option.value)}
+                className={`cursor-pointer rounded-xl px-4 py-2 text-[13px] font-semibold transition-all ${
+                  mode === option.value
+                    ? "bg-white text-slate-900 shadow-sm"
+                    : "text-slate-500 hover:text-slate-800"
+                }`}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+
+          {mode === "alter" && <SalaryAdvanceAlterationSection />}
+
+          {mode === "submit" && (
+            <div className="rounded-3xl border border-white/85 bg-white/65 px-6 py-8 shadow-[0_24px_48px_rgba(160,60,60,0.10)] backdrop-blur-2xl sm:px-8">
+              <form
+                className="flex flex-col gap-8"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  setStep(3);
+                  triggerScroll(!scrollTrigger);
+                }}
+              >
+                {/* Employee Information */}
+                <div>
+                  <h2 className="mb-5 flex items-center gap-2 text-[13px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
+                    <UserRound size={16} /> Staff Information
+                  </h2>
+                  <p className="mb-4 text-xs text-slate-500">
+                    These details were verified against your staff record and
+                    can&apos;t be edited here. Contact HR if anything is
+                    incorrect.
+                  </p>
+                  <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                    <StaffInfoField
+                      label="Staff Number"
+                      value={formData.staffNumber}
+                    />
+                    <StaffInfoField
+                      label="Staff Name"
+                      value={formData.staffName}
+                    />
+                    <StaffInfoField
+                      label="Staff Email"
+                      value={formData.staffEmail}
+                    />
+                    <StaffInfoField
+                      label="Department"
+                      value={formData.department}
+                    />
+                    <StaffInfoField
+                      label="Location"
+                      value={formData.location}
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <hr className="border-[rgba(240,180,180,0.6)]" />
+                <hr className="border-[rgba(240,180,180,0.6)]" />
 
-              {/* Advance Details */}
-              <div>
-                <h2 className="mb-5 flex items-center gap-2 text-[13px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
-                  <CircleDollarSign size={16} /> Advance Details
-                </h2>
-                <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                  <div className="flex flex-col gap-2">
-                    <label className="text-[13px] font-medium text-[#7c5a5a]">
-                      Request Amount <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="number"
-                      required
-                      min={1}
-                      className="h-10 rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
-                      value={formData.requestAmount}
-                      onChange={(e) =>
-                        updateField("requestAmount", e.target.value)
-                      }
-                    />
-                  </div>
-
-                  {/* Request Type Dropdown */}
-                  <CustomDropdown
-                    label="Request Type"
-                    options={REQUEST_TYPE_OPTIONS}
-                    value={formData.requestType}
-                    onChange={handleRequestTypeChange}
-                  />
-
-                  <div className="flex flex-col gap-2">
-                    <label className="text-[13px] font-medium text-[#7c5a5a]">
-                      Repayment Start Date{" "}
-                      <span className="text-red-500">*</span>
-                    </label>
-                    <DatePicker
-                      value={formData.repaymentStartDate}
-                      onChange={(v) => updateField("repaymentStartDate", v)}
-                      minDate={repaymentMinDate}
-                      maxDate={repaymentMaxDate}
-                    />
-                  </div>
-
-                  {/* Installments: only shown once a request type is chosen;
-                      continuous requests skip straight to a locked-at-one note. */}
-                  {formData.requestType === "continuous" ? (
+                {/* Advance Details */}
+                <div>
+                  <h2 className="mb-5 flex items-center gap-2 text-[13px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
+                    <CircleDollarSign size={16} /> Advance Details
+                  </h2>
+                  <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                     <div className="flex flex-col gap-2">
                       <label className="text-[13px] font-medium text-[#7c5a5a]">
-                        No. of Installments
+                        Request Amount <span className="text-red-500">*</span>
                       </label>
-                      <div className="flex h-10 items-center rounded-xl border border-[rgba(240,180,180,0.6)] bg-gray-100 px-3.5 text-[13px] text-slate-600">
-                        Continuous requests are repaid in a single installment.
-                      </div>
-                    </div>
-                  ) : (
-                    formData.requestType === "oneoff" && (
-                      <CustomDropdown
-                        label="No. of Installments"
-                        options={INSTALLMENT_OPTIONS}
-                        value={formData.installments}
-                        onChange={(val) => updateField("installments", val)}
+                      <input
+                        type="number"
+                        required
+                        min={1}
+                        className="h-10 rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
+                        value={formData.requestAmount}
+                        onChange={(e) =>
+                          updateField("requestAmount", e.target.value)
+                        }
                       />
-                    )
-                  )}
-                </div>
-              </div>
+                    </div>
 
-              {/* Policy & Disclaimer */}
-              <div className="mt-4 rounded-2xl bg-red-50/30 p-6 text-sm text-slate-700 shadow-inner">
-                <h4 className="mb-3 flex items-center gap-2 font-semibold text-slate-900">
-                  <FileText size={18} /> Salary Advance Policy Guidelines
-                </h4>
-                <p className="mb-3">
-                  To ensure efficient financial management and compliance, all
-                  requests for salary advances will be required to adhere to the
-                  following guidelines:
-                </p>
-                <ul className="mb-5 list-inside list-disc space-y-1.5 pl-2 text-[13px]">
-                  <li>
-                    <strong>Processing Schedule:</strong> Salary advance
-                    requests will be processed once per month, specifically by
-                    the 15th of each month.
-                  </li>
-                  <li>
-                    <strong>Submission Deadline:</strong> All requests must be
-                    submitted through the system no later than the 10th of every
-                    month - latest by 5.00pm
-                  </li>
-                  <li>
-                    <strong>Legal Compliance:</strong> All salary advances must
-                    be processed in strict alignment with the one-third (1/3)
-                    rule.
-                  </li>
-                  <li>
-                    <strong>Exception:</strong> Any salary advance requests
-                    received outside of the stipulated submission deadlines will
-                    not be processed, except in the case of a documented,
-                    verified emergency.
-                  </li>
-                  <li>
-                    <strong>Repayment Terms:</strong> The maximum repayment
-                    period for any salary advance is three(3) months, also
-                    subject to the strict adherence of the one-third (1/3) rule.
-                  </li>
-                  <li>
-                    <strong>Limitation:</strong> Multiple salary advances are
-                    strictly not allowed.
-                  </li>
-                </ul>
+                    {/* Request Type Dropdown */}
+                    <CustomDropdown
+                      label="Request Type"
+                      options={REQUEST_TYPE_OPTIONS}
+                      value={formData.requestType}
+                      onChange={handleRequestTypeChange}
+                    />
 
-                <label className="flex cursor-pointer items-start gap-3 rounded-xl p-4 transition-all hover:bg-red-50">
-                  <span
-                    className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-all ${policyAccepted ? "border-rose-500 bg-rose-500 text-white" : "border-slate-300 bg-white"}`}
-                  >
-                    {policyAccepted && (
-                      <Check className="h-3.5 w-3.5" strokeWidth={3} />
+                    <div className="flex flex-col gap-2">
+                      <label className="text-[13px] font-medium text-[#7c5a5a]">
+                        Repayment Start Date{" "}
+                        <span className="text-red-500">*</span>
+                      </label>
+                      <DatePicker
+                        value={formData.repaymentStartDate}
+                        onChange={(v) => updateField("repaymentStartDate", v)}
+                        minDate={repaymentMinDate}
+                        maxDate={repaymentMaxDate}
+                      />
+                    </div>
+
+                    {/* Installments: only shown once a request type is chosen;
+                      continuous requests skip straight to a locked-at-one note. */}
+                    {formData.requestType === "continuous" ? (
+                      <div className="flex flex-col gap-2">
+                        <label className="text-[13px] font-medium text-[#7c5a5a]">
+                          No. of Installments
+                        </label>
+                        <div className="flex h-10 items-center rounded-xl border border-[rgba(240,180,180,0.6)] bg-gray-100 px-3.5 text-[13px] text-slate-600">
+                          Continuous requests are repaid in a single
+                          installment.
+                        </div>
+                      </div>
+                    ) : (
+                      formData.requestType === "oneoff" && (
+                        <CustomDropdown
+                          label="No. of Installments"
+                          options={INSTALLMENT_OPTIONS}
+                          value={formData.installments}
+                          onChange={(val) => updateField("installments", val)}
+                        />
+                      )
                     )}
-                  </span>
-                  <input
-                    type="checkbox"
-                    className="sr-only"
-                    checked={policyAccepted}
-                    onChange={(e) => setPolicyAccepted(e.target.checked)}
-                  />
-                  <span className="text-[13px] leading-tight font-medium">
-                    I hereby acknowledge that I have read and fully understood
-                    the Salary Advance Policy and agree to comply with all
-                    provisions contained therein.
-                  </span>
-                </label>
-              </div>
+                  </div>
+                </div>
 
-              <button
-                type="submit"
-                disabled={!isFormValid}
-                className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-slate-900 py-4 font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Proceed to Confirmation
-                <ArrowRight className="h-4 w-4" />
-              </button>
-            </form>
-          </div>
+                {/* Policy & Disclaimer */}
+                <div className="mt-4 rounded-2xl bg-red-50/30 p-6 text-sm text-slate-700 shadow-inner">
+                  <h4 className="mb-3 flex items-center gap-2 font-semibold text-slate-900">
+                    <FileText size={18} /> Salary Advance Policy Guidelines
+                  </h4>
+                  <p className="mb-3">
+                    To ensure efficient financial management and compliance, all
+                    requests for salary advances will be required to adhere to
+                    the following guidelines:
+                  </p>
+                  <ul className="mb-5 list-inside list-disc space-y-1.5 pl-2 text-[13px]">
+                    <li>
+                      <strong>Processing Schedule:</strong> Salary advance
+                      requests will be processed once per month, specifically by
+                      the 15th of each month.
+                    </li>
+                    <li>
+                      <strong>Submission Timing:</strong> Requests may be
+                      submitted at any time and are picked up in the next
+                      monthly processing run.
+                    </li>
+                    <li>
+                      <strong>Legal Compliance:</strong> All salary advances
+                      must be processed in strict alignment with the one-third
+                      (1/3) rule.
+                    </li>
+                    <li>
+                      <strong>Repayment Terms:</strong> The maximum repayment
+                      period for any salary advance is three(3) months, also
+                      subject to the strict adherence of the one-third (1/3)
+                      rule.
+                    </li>
+                    <li>
+                      <strong>Limitation:</strong> A new request cannot be
+                      submitted until the repayment installments of any active
+                      advance are fully complete.
+                    </li>
+                    <li>
+                      <strong>Alterations:</strong> An active continuous request
+                      can be switched to one-off, or an active one-off
+                      request&apos;s remaining installments reduced, via
+                      &quot;Modify Existing Request&quot; above - no new
+                      submission needed.
+                    </li>
+                  </ul>
+
+                  <label className="flex cursor-pointer items-start gap-3 rounded-xl p-4 transition-all hover:bg-red-50">
+                    <span
+                      className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-all ${policyAccepted ? "border-rose-500 bg-rose-500 text-white" : "border-slate-300 bg-white"}`}
+                    >
+                      {policyAccepted && (
+                        <Check className="h-3.5 w-3.5" strokeWidth={3} />
+                      )}
+                    </span>
+                    <input
+                      type="checkbox"
+                      className="sr-only"
+                      checked={policyAccepted}
+                      onChange={(e) => setPolicyAccepted(e.target.checked)}
+                    />
+                    <span className="text-[13px] leading-tight font-medium">
+                      I hereby acknowledge that I have read and fully understood
+                      the Salary Advance Policy and agree to comply with all
+                      provisions contained therein.
+                    </span>
+                  </label>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={!isFormValid}
+                  className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-slate-900 py-4 font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Proceed to Confirmation
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              </form>
+            </div>
+          )}
         </div>
       )}
     </div>

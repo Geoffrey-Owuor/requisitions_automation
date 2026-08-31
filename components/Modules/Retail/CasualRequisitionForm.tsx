@@ -18,9 +18,12 @@ import { useQuery } from "@tanstack/react-query";
 import { loadHodApprovers, loadBaseDepartments } from "@/lib/loadAppDataV2";
 import {
   assets,
-  CASUAL_LOCATIONS,
+  getCasualLocationsForDepartment,
   getCasualSections,
   getCasualRatePerDay,
+  ENGINEERING_HVAC_DEPARTMENT,
+  CASUAL_CATEGORIES,
+  CasualCategory,
 } from "@/public/assets";
 import { ApiHandler } from "@/utils/ApiHandler";
 import SubmittingOverlay from "@/components/SubmittingOverlay";
@@ -45,6 +48,7 @@ export interface CasualFormData {
   hodApprover: string;
   location: string;
   sections: CasualSectionFormData[];
+  casualCategory?: CasualCategory;
 }
 
 const InitialFormState: CasualFormData = {
@@ -52,6 +56,7 @@ const InitialFormState: CasualFormData = {
   hodApprover: "",
   location: "",
   sections: [],
+  casualCategory: undefined,
 };
 
 const EmptySection = (sectionName: string): CasualSectionFormData => ({
@@ -82,6 +87,7 @@ interface FormSelectProps {
   value: string;
   loading?: boolean;
   onChange: (value: string) => void;
+  optionLabel?: (option: string) => string;
 }
 
 // ---- Main Page ----
@@ -111,13 +117,21 @@ export default function CasualRequisitionForm() {
   });
   const [submitting, setSubmitting] = useState(false);
 
+  const availableLocations = formData.department
+    ? getCasualLocationsForDepartment(formData.department)
+    : [];
+
   const availableSections = formData.location
-    ? getCasualSections(formData.location)
+    ? getCasualSections(formData.department, formData.location)
     : [];
   const hasSectionChoice = availableSections.length > 1;
 
   const ratePerDay = formData.location
-    ? getCasualRatePerDay(formData.location)
+    ? getCasualRatePerDay(
+        formData.location,
+        formData.department,
+        formData.casualCategory,
+      )
     : 0;
 
   // Per-section derived engagement days + total
@@ -179,13 +193,25 @@ export default function CasualRequisitionForm() {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handleDepartmentChange = (department: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      department,
+      // Available locations/sections depend on the department - reset both
+      location: "",
+      sections: [],
+      casualCategory:
+        department === ENGINEERING_HVAC_DEPARTMENT ? "Technician" : undefined,
+    }));
+  };
+
   const handleLocationChange = (location: string) => {
-    const sections = getCasualSections(location);
+    const sections = getCasualSections(formData.department, location);
 
     setFormData((prev) => ({
       ...prev,
       location,
-      // Single-section locations skip the picker and go straight to the fieldset
+      // Single-section departments skip the picker and go straight to the fieldset
       sections: sections.length === 1 ? [EmptySection(sections[0])] : [],
     }));
   };
@@ -331,7 +357,7 @@ export default function CasualRequisitionForm() {
                     options={DEPARTMENTS}
                     value={formData.department}
                     loading={departmentsLoading}
-                    onChange={(v) => updateField("department", v)}
+                    onChange={handleDepartmentChange}
                   />
                   <FormSelect
                     label="HOD Approver"
@@ -342,10 +368,20 @@ export default function CasualRequisitionForm() {
                   />
                   <FormSelect
                     label="Location"
-                    options={CASUAL_LOCATIONS}
+                    options={availableLocations}
                     value={formData.location}
                     onChange={handleLocationChange}
                   />
+                  {formData.department === ENGINEERING_HVAC_DEPARTMENT && (
+                    <FormSelect
+                      label="Casual Category"
+                      options={[...CASUAL_CATEGORIES]}
+                      value={formData.casualCategory ?? "Technician"}
+                      onChange={(v) =>
+                        updateField("casualCategory", v as CasualCategory)
+                      }
+                    />
+                  )}
                 </div>
               </div>
 
@@ -604,6 +640,7 @@ export function FormSelect({
   value,
   onChange,
   loading,
+  optionLabel,
 }: FormSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -631,7 +668,7 @@ export function FormSelect({
         disabled={loading}
       >
         <span className={value ? "text-[#1e1b1b]" : "text-[#a18080]"}>
-          {value || "Select..."}
+          {value ? (optionLabel ? optionLabel(value) : value) : "Select..."}
         </span>
         <ChevronDown
           size={14}
@@ -682,7 +719,7 @@ export function FormSelect({
                       setIsOpen(false);
                     }}
                   >
-                    {opt}
+                    {optionLabel ? optionLabel(opt) : opt}
                   </div>
                 ))
               ) : (

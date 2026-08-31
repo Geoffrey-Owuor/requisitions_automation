@@ -38,7 +38,7 @@ export default function RootLayout({
       <head>
         <meta name="apple-mobile-web-app-title" content="Requisition" />
       </head>
-      <body className="flex min-h-screen flex-col bg-[#fafafa]">
+      <body className="bg-canvas flex min-h-screen flex-col">
         <LoadingLine />
         <Alert />
         {/* Page Content */}

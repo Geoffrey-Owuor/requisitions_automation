@@ -2,7 +2,12 @@
 
 import { ArrowLeft, Send } from "lucide-react";
 import { EmployeeFormData } from "./EmployeeRequisitionForm";
-import { dateFormatter } from "@/public/assets";
+import {
+  dateFormatter,
+  getJobGradeNumber,
+  EMPLOYEE_ATTACHMENT_TYPES,
+  EMPLOYEE_ATTACHMENT_TYPE_LABELS,
+} from "@/public/assets";
 import { useUser } from "@/context/UserContext";
 import { initialsHelper } from "@/public/assets";
 
@@ -113,6 +118,28 @@ export default function EmployeeConfirmationModal({
                       : "—"}
                   </span>
                 </div>
+                <div className="flex flex-col gap-2">
+                  <span className="text-[#7c5a5a]">Replacement/New</span>
+                  <span className="font-medium text-[#1e1b1b]">
+                    {position.replacementOrNew || "—"}
+                  </span>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <span className="text-[#7c5a5a]">Job Grade</span>
+                  <span className="font-medium text-[#1e1b1b]">
+                    {position.jobGrade
+                      ? `${position.jobGrade} (Grade ${getJobGradeNumber(position.jobGrade)})`
+                      : "—"}
+                  </span>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <span className="text-[#7c5a5a]">Salary Range (KES)</span>
+                  <span className="font-medium text-[#1e1b1b]">
+                    {position.salaryMin && position.salaryMax
+                      ? `${position.salaryMin.toLocaleString()} – ${position.salaryMax.toLocaleString()}`
+                      : "—"}
+                  </span>
+                </div>
               </div>
 
               <div className="mb-3">
@@ -129,12 +156,12 @@ export default function EmployeeConfirmationModal({
                   Attachments
                 </p>
                 <div className="flex flex-col gap-1">
-                  {position.files.map((file, fileIndex) => (
-                    <span
-                      key={`${file.name}-${fileIndex}`}
-                      className="text-[13px] text-[#1e1b1b]"
-                    >
-                      {file.name}
+                  {EMPLOYEE_ATTACHMENT_TYPES.map((type) => (
+                    <span key={type} className="text-[13px] text-[#1e1b1b]">
+                      <span className="text-[#7c5a5a]">
+                        {EMPLOYEE_ATTACHMENT_TYPE_LABELS[type]}:
+                      </span>{" "}
+                      {position.files[type]?.name ?? "—"}
                     </span>
                   ))}
                 </div>

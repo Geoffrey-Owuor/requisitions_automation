@@ -28,20 +28,23 @@ An internal web application for Hotpoint Appliances Ltd that automates requisiti
 
 ### Casual Requisition
 
-- Request casual staff engagements for one or more sections/locations over a defined period
-- Approval workflow: HOD Approval → Finance Approval → HR Approval (HR can adjust the final approved headcount per section)
-- Daily rate is derived automatically from the selected location; total cost = casuals × rate/day × engagement days
+- Request casual staff engagements for one or more sections over a defined period; available locations and sections depend on the requesting department
+- Approval workflow: HOD Approval → HR Approval (HR can adjust the final approved headcount per section); on approval, a PDF summary is emailed to HR and to an external casual-labor provider for action
+- Daily rate is derived automatically from the selected location (Ruiru vs. other locations), except for the Engineering & HVAC department, which uses a Technician/Welder category rate instead; total cost = casuals × rate/day × engagement days
 
 ### Employee Requisition
 
 - Request one or more open positions to be filled, each with its own headcount, justification, reporting line, and target fill date
-- Requires at least one supporting document (Job Description/KPIs) per position — Word, Excel, or PDF, up to 5MB per position
+- Each position also records whether it's a Replacement or a New position, its Job Grade (Assistant Officer through Director), and a Salary Range in KES (minimum cannot be 0, maximum cannot be less than the minimum)
+- Requires a Job Description, KPIs, and Org Chart document per position — each is its own required upload (Word, Excel, or PDF), up to 2MB per file
 - Approval workflow: HOD Approval → CEO Approval → HR Approval
 
 ### Salary Advance
 
 - Staff salary advance requests with a monthly submission window
 - Requests automatically lock after the 10th of the month at 17:00 (also gated by an admin-controlled DB flag)
+- A new request is blocked while any active (non-declined) request's repayment installments haven't fully elapsed — a continuous request blocks indefinitely, a one-off request blocks until its `repayment_start_date + no_of_installments` has passed
+- Staff can self-service alter an eligible active request instead of submitting a new one — switch a continuous request to one-off, or reduce a one-off request's remaining installments — applied immediately with no HR approval or email, logged in `salary_advance_alterations` and surfaced only in the monthly report
 
 ### Embedded Internal Portals (SSO)
 

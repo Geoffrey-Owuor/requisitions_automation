@@ -89,7 +89,6 @@ export function CasualRequisitionTemplate({
           <p style="font-size: 11px; font-weight: 700; color: #a31d1d; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px;">Approval Workflow</p>
           <div style="border-radius: 16px; border: 1px solid #f0e6e6; overflow: hidden;">
              ${statusCard("Head of Department", emailData.hodapprovalstatus, emailData.hodapprover, emailData.hodemail, emailData.hodcomments)}
-             ${statusCard("Finance", emailData.financeapprovalstatus, emailData.financeapprover, emailData.financeemail, emailData.financecomments)}
              ${statusCard("Human Resources", emailData.hrapprovalstatus, emailData.hrapprover, emailData.hremail, emailData.hrcomments, true)}
           </div>
 
