@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -135,8 +136,8 @@ function QuickLinksCard() {
               href={href}
               className="rounded-control hover:bg-brand-50/60 focus-visible:outline-brand-600 group flex items-start gap-3 p-2 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
             >
-              <span className="group-hover:bg-brand-600 mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-colors group-hover:text-white">
-                <Icon size={16} />
+              <span className="group-hover:bg-brand-600 mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-colors group-hover:text-white">
+                <Icon size={18} />
               </span>
 
               <span className="min-w-0 flex-1">
@@ -219,11 +220,28 @@ function AppCard({ entry }: { entry: AppEntry }) {
       </p>
 
       {entry.chain.length > 0 && (
-        <p className="mt-4 text-sm text-slate-400">
-          <span className="font-semibold text-slate-500">Approval: </span>
-          {entry.chain.join(" → ")}
-          {entry.chainNote && ` (${entry.chainNote})`}
-        </p>
+        <div className="mt-4">
+          <span className="text-sm font-semibold text-slate-500">
+            Approval:
+          </span>
+          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+            {entry.chain.map((step, index) => (
+              <Fragment key={step}>
+                {index > 0 && (
+                  <ArrowRight className="h-3 w-3 shrink-0 text-slate-300" />
+                )}
+                <span className="bg-brand-50 text-brand-700 rounded-lg px-2 py-1 text-xs font-medium">
+                  {step}
+                </span>
+              </Fragment>
+            ))}
+            {entry.chainNote && (
+              <span className="text-sm text-slate-400">
+                ({entry.chainNote})
+              </span>
+            )}
+          </div>
+        </div>
       )}
 
       <div className="mt-3 flex items-center gap-3 pt-1">
@@ -235,7 +253,7 @@ function AppCard({ entry }: { entry: AppEntry }) {
         {entry.action && (
           <Link
             href={entry.action.href}
-            className="rounded-control hover:border-brand-200 hover:text-brand-700 relative z-10 border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-700 transition-colors"
+            className="hover:border-brand-200 hover:text-brand-700 relative z-10 rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-700 transition-colors"
           >
             {entry.action.label}
           </Link>

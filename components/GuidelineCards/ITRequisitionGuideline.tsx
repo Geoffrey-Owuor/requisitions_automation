@@ -27,7 +27,7 @@ export default function ITRequisitionGuideline() {
       <Callout
         icon={<Lightbulb size={18} />}
         title="Advance Notice Recommended"
-        tone="rose"
+        tone="amber"
       >
         IT recommends making a requisition at least 2 weeks prior to facilitate
         proper planning and preparation for the requested equipment.
