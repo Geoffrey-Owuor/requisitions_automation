@@ -9,14 +9,25 @@ import {
   isAllowedAttachmentType,
   writePositionAttachments,
   deleteRequisitionDirectory,
-  MAX_ATTACHMENT_BYTES_PER_POSITION,
-  MAX_ATTACHMENTS_PER_POSITION,
+  MAX_ATTACHMENT_BYTES_PER_FILE,
   StoredAttachment,
 } from "@/lib/attachmentStorage";
+import {
+  REPLACEMENT_OR_NEW_OPTIONS,
+  JOB_GRADES,
+  formatSalaryRange,
+  EMPLOYEE_ATTACHMENT_TYPES,
+  EMPLOYEE_ATTACHMENT_TYPE_LABELS,
+  EmployeeAttachmentType,
+} from "@/public/assets";
 
 type PositionInput = {
   title: string;
   numberRequired: number;
+  replacementOrNew: string;
+  jobGrade: string;
+  salaryMin: number;
+  salaryMax: number;
   justification: string;
   reportingTo: string;
   dateFilled: string;
@@ -83,7 +94,7 @@ export async function POST(request: NextRequest) {
     const today = todayIsoDate();
 
     // Validate every position and collect its files - never trust client state
-    const positionFiles: File[][] = [];
+    const positionFiles: Record<EmployeeAttachmentType, File>[] = [];
 
     for (let index = 0; index < positions.length; index++) {
       const position = positions[index];
@@ -132,49 +143,87 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      const files = formData.getAll(`positionFiles_${index}`) as File[];
-
-      if (files.length === 0) {
+      if (
+        !REPLACEMENT_OR_NEW_OPTIONS.includes(
+          position.replacementOrNew as (typeof REPLACEMENT_OR_NEW_OPTIONS)[number],
+        )
+      ) {
         return NextResponse.json(
           {
-            message: `Position ${index + 1} requires at least one attachment`,
+            message: `Position ${index + 1} has an invalid Replacement/New selection`,
           },
           { status: 400 },
         );
       }
 
-      if (files.length > MAX_ATTACHMENTS_PER_POSITION) {
+      if (!JOB_GRADES.includes(position.jobGrade as (typeof JOB_GRADES)[number])) {
+        return NextResponse.json(
+          { message: `Position ${index + 1} has an invalid Job Grade selection` },
+          { status: 400 },
+        );
+      }
+
+      if (
+        !Number.isFinite(Number(position.salaryMin)) ||
+        Number(position.salaryMin) <= 0
+      ) {
         return NextResponse.json(
           {
-            message: `Position ${index + 1} exceeds the maximum of ${MAX_ATTACHMENTS_PER_POSITION} attachments`,
+            message: `Position ${index + 1}'s minimum salary must be greater than 0`,
           },
           { status: 400 },
         );
       }
 
-      let totalSize = 0;
-      for (const file of files) {
-        if (!isAllowedAttachmentType(file.name, file.type)) {
+      if (
+        !Number.isFinite(Number(position.salaryMax)) ||
+        Number(position.salaryMax) < Number(position.salaryMin)
+      ) {
+        return NextResponse.json(
+          {
+            message: `Position ${index + 1}'s maximum salary cannot be less than the minimum salary`,
+          },
+          { status: 400 },
+        );
+      }
+
+      const typedFiles = {} as Record<EmployeeAttachmentType, File>;
+
+      for (const attachmentType of EMPLOYEE_ATTACHMENT_TYPES) {
+        const file = formData.get(`positionFiles_${index}_${attachmentType}`);
+        const label = EMPLOYEE_ATTACHMENT_TYPE_LABELS[attachmentType];
+
+        if (!(file instanceof File) || file.size === 0) {
           return NextResponse.json(
             {
-              message: `Position ${index + 1} has an attachment of an unsupported file type: ${file.name}`,
+              message: `Position ${index + 1} is missing its ${label} attachment`,
             },
             { status: 400 },
           );
         }
-        totalSize += file.size;
+
+        if (!isAllowedAttachmentType(file.name, file.type)) {
+          return NextResponse.json(
+            {
+              message: `Position ${index + 1}'s ${label} attachment is an unsupported file type: ${file.name}`,
+            },
+            { status: 400 },
+          );
+        }
+
+        if (file.size > MAX_ATTACHMENT_BYTES_PER_FILE) {
+          return NextResponse.json(
+            {
+              message: `Position ${index + 1}'s ${label} attachment exceeds the 2MB size limit`,
+            },
+            { status: 400 },
+          );
+        }
+
+        typedFiles[attachmentType] = file;
       }
 
-      if (totalSize > MAX_ATTACHMENT_BYTES_PER_POSITION) {
-        return NextResponse.json(
-          {
-            message: `Position ${index + 1}'s attachments exceed the 5MB total size limit`,
-          },
-          { status: 400 },
-        );
-      }
-
-      positionFiles.push(files);
+      positionFiles.push(typedFiles);
     }
 
     const hodApproverResult = await query(
@@ -255,11 +304,11 @@ export async function POST(request: NextRequest) {
         ],
       );
 
-      const positionColumns = 7;
+      const positionColumns = 10;
       const positionValuesClause = positions
         .map(
           (_, index) =>
-            `($${index * positionColumns + 1}, $${index * positionColumns + 2}, $${index * positionColumns + 3}, $${index * positionColumns + 4}, $${index * positionColumns + 5}, $${index * positionColumns + 6}, $${index * positionColumns + 7})`,
+            `($${index * positionColumns + 1}, $${index * positionColumns + 2}, $${index * positionColumns + 3}, $${index * positionColumns + 4}, $${index * positionColumns + 5}, $${index * positionColumns + 6}, $${index * positionColumns + 7}, $${index * positionColumns + 8}, $${index * positionColumns + 9}, $${index * positionColumns + 10})`,
         )
         .join(", ");
 
@@ -271,13 +320,17 @@ export async function POST(request: NextRequest) {
         position.justification,
         position.reportingTo,
         position.dateFilled,
+        position.replacementOrNew,
+        position.jobGrade,
+        formatSalaryRange(Number(position.salaryMin), Number(position.salaryMax)),
       ]);
 
       await client.query(
         `
         INSERT INTO employee_requisition_positions
         (position_id, request_id, position_title, number_required,
-        position_justification, position_reporting_to, date_position_filled)
+        position_justification, position_reporting_to, date_position_filled,
+        position_replacement_or_new, position_job_grade, position_salary_range)
         VALUES ${positionValuesClause}
         `,
         positionParams,
@@ -308,14 +361,14 @@ export async function POST(request: NextRequest) {
           attachment.filePath,
           attachment.mimeType,
           attachment.fileSizeBytes,
-          attachment.uploadIndex,
+          attachment.attachmentType,
         ]);
 
         await client.query(
           `
           INSERT INTO employee_requisition_attachments
           (position_id, request_id, original_filename, stored_filename,
-          file_path, mime_type, file_size_bytes, upload_index)
+          file_path, mime_type, file_size_bytes, attachment_type)
           VALUES ${attachmentValuesClause}
           `,
           attachmentParams,

@@ -2,17 +2,22 @@ import { cache } from "react";
 import { query } from "@/lib/db";
 import { EmployeeRequisitionTemplate } from "@/utils/templates/EmployeeRequisitionTemplate";
 import { sendEmail } from "./EmailService";
+import { EmployeeAttachmentType } from "@/public/assets";
 
 export interface EmployeeAttachmentValues {
   attachmentid: string;
   positionid: string;
   originalfilename: string;
+  attachmenttype: EmployeeAttachmentType;
 }
 
 export interface EmployeePositionValues {
   positionid: string;
   positiontitle: string;
   numberrequired: number;
+  replacementornew: string;
+  jobgrade: string;
+  salaryrange: string;
   justification: string;
   reportingto: string;
   datefilled: string;
@@ -65,6 +70,9 @@ export const employeePositionsQuery = `
        position_id AS positionid,
        position_title AS positiontitle,
        number_required AS numberrequired,
+       position_replacement_or_new AS replacementornew,
+       position_job_grade AS jobgrade,
+       position_salary_range AS salaryrange,
        position_justification AS justification,
        position_reporting_to AS reportingto,
        date_position_filled AS datefilled
@@ -75,8 +83,9 @@ export const employeeAttachmentsQuery = `
      SELECT
        attachment_id AS attachmentid,
        position_id AS positionid,
-       original_filename AS originalfilename
-       FROM employee_requisition_attachments WHERE request_id = $1 ORDER BY position_id, upload_index
+       original_filename AS originalfilename,
+       attachment_type AS attachmenttype
+       FROM employee_requisition_attachments WHERE request_id = $1 ORDER BY position_id, attachment_type
 `;
 
 export interface EmployeeEmailDataProps {

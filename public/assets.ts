@@ -54,7 +54,7 @@ export const initialsHelper = (userName: string) => {
 export const ALLOWED_TRAVEL_STAGES = ["hod", "hr", "director"] as const;
 export const ALLOWED_ACCESS_STAGES = ["hod", "security"] as const;
 export const ALLOWED_IT_STAGES = ["hod", "it"] as const;
-export const ALLOWED_CASUAL_STAGES = ["hod", "finance", "hr"] as const;
+export const ALLOWED_CASUAL_STAGES = ["hod", "hr"] as const;
 export const ALLOWED_EMPLOYEE_STAGES = ["hod", "director", "hr"] as const;
 
 // Create a TypeScript union type: "manager" | "director" | "hr" | "finance"
@@ -97,39 +97,125 @@ export function isValidEmployeeStage(stage: unknown): stage is EmployeeStage {
   );
 }
 
-export const CASUAL_LOCATION_SECTIONS: Record<string, string[]> = {
-  Ruiru: [
-    "Inbound",
-    "Outbound",
-    "Bond",
-    "DO2 Store",
-    "CKD Store",
-    "RHW2/RHW3",
-    "Other",
-  ],
-  Imaara: ["Imaara"],
-  Galleria: ["Galleria"],
-  "Garden City": ["Garden City"],
-  "Village Market": ["Village Market"],
-  Karen: ["Karen"],
-  Diani: ["Diani"],
-  Likoni: ["Likoni"],
-  Kisumu: ["Kisumu"],
-  Eldoret: ["Eldoret"],
-  CBD: ["CBD"],
-  Riara: ["Riara"],
-  Nyali: ["Nyali"],
-  Sarit: ["Sarit Showroom", "Sarit SVC"],
-  Yaya: ["Yaya"],
+export const ALL_CASUAL_LOCATIONS = [
+  "Ruiru",
+  "Imaara",
+  "Galleria",
+  "Garden City",
+  "Village Market",
+  "Karen",
+  "Diani",
+  "Likoni",
+  "Kisumu",
+  "Eldoret",
+  "CBD",
+  "Riara",
+  "Nyali",
+  "Sarit",
+  "Yaya",
+];
+
+export const OPERATIONS_DEPARTMENT = "Operations";
+export const OPERATIONS_SECTIONS = [
+  "Inbound",
+  "Outbound",
+  "Bond",
+  "DO2 Store",
+  "CKD Store",
+  "RHW2/RHW3",
+];
+
+export const ENGINEERING_HVAC_DEPARTMENT = "Engineering & HVAC";
+export const CASUAL_CATEGORIES = ["Technician", "Welder"] as const;
+export type CasualCategory = (typeof CASUAL_CATEGORIES)[number];
+export const CASUAL_CATEGORY_RATES: Record<CasualCategory, number> = {
+  Technician: 1000,
+  Welder: 1500,
 };
 
-export const CASUAL_LOCATIONS = Object.keys(CASUAL_LOCATION_SECTIONS);
+export const REPLACEMENT_OR_NEW_OPTIONS = ["Replacement", "New"] as const;
+export type ReplacementOrNew = (typeof REPLACEMENT_OR_NEW_OPTIONS)[number];
 
-export function getCasualSections(location: string): string[] {
-  return CASUAL_LOCATION_SECTIONS[location] ?? [];
+export const JOB_GRADES = [
+  "Assistant Officer",
+  "Officer",
+  "Supervisor",
+  "Executive",
+  "Senior Executive",
+  "Manager",
+  "Senior Manager",
+  "Head",
+  "Director",
+] as const;
+export type JobGrade = (typeof JOB_GRADES)[number];
+export function getJobGradeNumber(grade: string): number {
+  return JOB_GRADES.indexOf(grade as JobGrade) + 1;
 }
 
-export function getCasualRatePerDay(location: string) {
+export function formatSalaryRange(min: number, max: number): string {
+  return `${min} - ${max}`;
+}
+
+// Employee Requisition position attachments: exactly one file per type is
+// required. Slugs sort alphabetically into the desired display order
+// (job-description < kpis < org-chart), so `ORDER BY attachment_type` in SQL
+// needs no CASE expression to get Job Description, KPIs, Org Chart order.
+export const EMPLOYEE_ATTACHMENT_TYPES = [
+  "job-description",
+  "kpis",
+  "org-chart",
+] as const;
+export type EmployeeAttachmentType = (typeof EMPLOYEE_ATTACHMENT_TYPES)[number];
+export const EMPLOYEE_ATTACHMENT_TYPE_LABELS: Record<
+  EmployeeAttachmentType,
+  string
+> = {
+  "job-description": "Job Description",
+  kpis: "KPIs",
+  "org-chart": "Org Chart",
+};
+
+// Locations available per department. Departments not listed here fall back
+// to showing all locations rather than blocking the form.
+export const CASUAL_DEPARTMENT_LOCATIONS: Record<string, string[]> = {
+  "IT & Projects": ["Ruiru"],
+  Finance: ["Ruiru"],
+  Marketing: ["Ruiru"],
+  Operations: ["Ruiru"],
+  Commercial: ["Ruiru"],
+  "HR & Admin": ["Ruiru"],
+  "Modern Trade": ["Ruiru"],
+  Directorate: ["Ruiru"],
+  "Internal Audit": ["Ruiru"],
+  B2B: ["Ruiru"],
+  "Retail Projects": ALL_CASUAL_LOCATIONS,
+  Security: ALL_CASUAL_LOCATIONS,
+  Retail: ALL_CASUAL_LOCATIONS.filter((location) => location !== "Ruiru"),
+  "Engineering & HVAC": ["Ruiru", "Diani", "Likoni", "Nyali"],
+  "Service Center": ["Ruiru", "Sarit", "Diani", "Likoni", "Nyali"],
+};
+
+export function getCasualLocationsForDepartment(department: string): string[] {
+  return CASUAL_DEPARTMENT_LOCATIONS[department] ?? ALL_CASUAL_LOCATIONS;
+}
+
+export function getCasualSections(
+  department: string,
+  location: string,
+): string[] {
+  if (department === OPERATIONS_DEPARTMENT) return OPERATIONS_SECTIONS;
+  if (!department || !location) return [];
+  return [`${department}-${location}`];
+}
+
+export function getCasualRatePerDay(
+  location: string,
+  department?: string,
+  casualCategory?: CasualCategory,
+) {
+  if (department === ENGINEERING_HVAC_DEPARTMENT) {
+    return CASUAL_CATEGORY_RATES[casualCategory ?? "Technician"];
+  }
   return location === "Ruiru" ? 798 : 868;
 }
 

@@ -236,7 +236,7 @@ const DashboardSidebar = () => {
                   key: "guidelines",
                   label: "Guidelines",
                   Icon: CircleQuestionMark,
-                  href: "/guidelines",
+                  href: "/guidelines/travel",
                   external: true,
                 },
               ]}

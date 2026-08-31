@@ -9,15 +9,14 @@ import {
   GuidelineHeading,
   InfoCard,
   SectionTitle,
-} from "./GuidelinesPage";
+} from "./GuidelinePrimitives";
 
 export default function AccessRequisitionGuideline() {
   return (
-    <div className="mx-auto max-w-4xl space-y-10 pb-16">
+    <div className="max-w-4xl space-y-7 pb-10">
       <GuidelineHeading
         icon={<LockKeyhole size={13} />}
-        eyebrow="Access Requisition"
-        title="Access Requisition"
+        title="Key(s) & Access Code Issuance"
       >
         Procedures for requesting physical and logical access permissions, keys,
         and location clearances for staff members.
@@ -26,11 +25,11 @@ export default function AccessRequisitionGuideline() {
       <GeneralNote />
 
       {/* Required Fields Section */}
-      <section className="space-y-5">
+      <section className="space-y-4">
         <SectionTitle icon={<CheckCircle2 size={17} />}>
           Required Submission Fields
         </SectionTitle>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           <InfoCard
             icon={<UserCircle size={18} />}
             title="Employee Information"

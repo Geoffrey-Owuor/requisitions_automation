@@ -4,7 +4,6 @@ import { pool } from "@/lib/db";
 import { PoolClient } from "pg";
 import { AlertInfo } from "@/components/TravelRequisitionPage";
 import { hodApprovalStage } from "@/utils/CasualApprovalStages/hodApprovalStage";
-import { financeApprovalStage } from "@/utils/CasualApprovalStages/financeApprovalStage";
 import { hrApprovalStage } from "@/utils/CasualApprovalStages/hrApprovalStage";
 import { CasualEmailSender } from "@/services/CasualEmailSender";
 import { isValidCasualStage } from "@/public/assets";
@@ -86,7 +85,7 @@ export async function UpdateCasualStatus(
     const { rows: reviewedResult } = await client.query(
       `SELECT casual_${payload.stage}_approval_status AS approval_status,
        casual_${payload.stage}_approver AS approver,
-       submitter_email, casual_hod_email, casual_finance_email
+       submitter_email, casual_hod_email
         FROM casual_requisitions WHERE request_id = $1 FOR UPDATE`,
       [payload.uuid],
     );
@@ -121,7 +120,6 @@ export async function UpdateCasualStatus(
     // Required stages data
     const userEmail = reviewedResult[0].submitter_email;
     const hodEmail = reviewedResult[0].casual_hod_email;
-    const financeEmail = reviewedResult[0].casual_finance_email;
 
     if (isReviewed !== "pending") {
       await client.query("ROLLBACK");
@@ -183,22 +181,11 @@ export async function UpdateCasualStatus(
           approverName: payload.approverName,
         });
         break;
-      case "finance":
-        financeApprovalStage({
-          uuid: payload.uuid,
-          userEmail,
-          hodEmail,
-          status: payload.status,
-          approverEmail: payload.approverEmail,
-          approverName: payload.approverName,
-        });
-        break;
       case "hr":
         hrApprovalStage({
           uuid: payload.uuid,
           userEmail,
           hodEmail,
-          financeEmail,
           status: payload.status,
           approverEmail: payload.approverEmail,
           approverName: payload.approverName,

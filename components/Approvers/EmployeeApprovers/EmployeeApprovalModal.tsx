@@ -11,27 +11,34 @@ import {
   X,
   MessageSquareText,
   UserRound,
+  Repeat,
+  Layers,
+  Wallet,
 } from "lucide-react";
-import { assets, dateFormatter } from "@/public/assets";
+import { assets, dateFormatter, getJobGradeNumber } from "@/public/assets";
 import SubmittingOverlay from "@/components/SubmittingOverlay";
 import { AlertInfo } from "@/components/TravelRequisitionPage";
 import { UpdateEmployeeStatus } from "@/serverActions/UpdateEmployeeStatus";
 import ApprovalAlert from "@/components/Approvers/TravelApprovers/ApprovalAlert";
-import { initialsHelper } from "@/public/assets";
+import { initialsHelper, EmployeeAttachmentType } from "@/public/assets";
 import Image from "next/image";
-import AttachmentLink from "./AttachmentLink";
+import AttachmentTypeGroups from "./AttachmentTypeGroups";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface EmployeeApprovalAttachment {
   attachmentId: string;
   originalFilename: string;
+  attachmentType: EmployeeAttachmentType;
 }
 
 export interface EmployeeApprovalPosition {
   positionId: string;
   positionTitle: string;
   numberRequired: number;
+  replacementOrNew: string;
+  jobGrade: string;
+  salaryRange: string;
   justification: string;
   reportingTo: string;
   dateFilled: string;
@@ -301,6 +308,21 @@ const EmployeeApprovalModal = ({
                         label="Date To Be Filled"
                         value={dateFormatter(position.dateFilled)}
                       />
+                      <DetailRow
+                        icon={Repeat}
+                        label="Replacement/New"
+                        value={position.replacementOrNew}
+                      />
+                      <DetailRow
+                        icon={Layers}
+                        label="Job Grade"
+                        value={`${position.jobGrade} (Grade ${getJobGradeNumber(position.jobGrade)})`}
+                      />
+                      <DetailRow
+                        icon={Wallet}
+                        label="Salary Range (KES)"
+                        value={position.salaryRange}
+                      />
                     </div>
 
                     <div className="mb-4">
@@ -317,16 +339,10 @@ const EmployeeApprovalModal = ({
                       <p className="mb-2 text-[11px] font-semibold tracking-[0.4px] text-[#b0a0a0] uppercase">
                         Attachments
                       </p>
-                      <div className="flex flex-wrap gap-2">
-                        {position.attachments.map((attachment) => (
-                          <AttachmentLink
-                            key={attachment.attachmentId}
-                            attachmentId={attachment.attachmentId}
-                            label={attachment.originalFilename}
-                            queryString={`token=${token}&stage=${stage}`}
-                          />
-                        ))}
-                      </div>
+                      <AttachmentTypeGroups
+                        attachments={position.attachments}
+                        queryString={`token=${token}&stage=${stage}`}
+                      />
                     </div>
                   </div>
                 ))}

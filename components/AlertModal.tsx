@@ -7,12 +7,16 @@ interface AlertModalProps {
   alertInfo: AlertInfo;
   onBack: () => void;
   hideButton?: boolean;
+  heading?: { success: string; error: string };
+  buttonLabel?: { success: string; error: string };
 }
 
 export default function AlertModal({
   alertInfo,
   onBack,
   hideButton = false,
+  heading,
+  buttonLabel,
 }: AlertModalProps) {
   const triggerScroll = useToggleStore((state) => state.triggerScroll);
   const scrollTrigger = useToggleStore((state) => state.scrollTrigger);
@@ -27,8 +31,12 @@ export default function AlertModal({
     badgeColor: isSuccess
       ? "bg-emerald-100 text-emerald-700"
       : "bg-rose-100 text-rose-700",
-    heading: isSuccess ? "Requisition submitted!" : "Submission failed",
-    buttonLabel: isSuccess ? "Submit another" : "Try again",
+    heading:
+      (isSuccess ? heading?.success : heading?.error) ??
+      (isSuccess ? "Requisition submitted!" : "Submission failed"),
+    buttonLabel:
+      (isSuccess ? buttonLabel?.success : buttonLabel?.error) ??
+      (isSuccess ? "Submit another" : "Try again"),
     buttonStyle: isSuccess
       ? "bg-slate-900 text-white hover:shadow-[0_8px_20px_rgba(16,185,129,0.25)]"
       : "bg-slate-900 text-white hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)]",

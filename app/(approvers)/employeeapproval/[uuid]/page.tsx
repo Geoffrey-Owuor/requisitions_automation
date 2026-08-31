@@ -77,7 +77,8 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
     `
       SELECT
         position_id, position_title, number_required,
-        position_justification, position_reporting_to, date_position_filled
+        position_justification, position_reporting_to, date_position_filled,
+        position_replacement_or_new, position_job_grade, position_salary_range
         FROM employee_requisition_positions
         WHERE request_id = $1
         ORDER BY position_created_at
@@ -87,10 +88,10 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
 
   const attachmentsResult = await query(
     `
-      SELECT attachment_id, position_id, original_filename
+      SELECT attachment_id, position_id, original_filename, attachment_type
         FROM employee_requisition_attachments
         WHERE request_id = $1
-        ORDER BY position_id, upload_index
+        ORDER BY position_id, attachment_type
       `,
     [uuid],
   );
@@ -134,6 +135,9 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
                 positionId: position.position_id,
                 positionTitle: position.position_title,
                 numberRequired: position.number_required,
+                replacementOrNew: position.position_replacement_or_new,
+                jobGrade: position.position_job_grade,
+                salaryRange: position.position_salary_range,
                 justification: position.position_justification,
                 reportingTo: position.position_reporting_to,
                 dateFilled: position.date_position_filled,
@@ -145,6 +149,7 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
                   .map((attachment) => ({
                     attachmentId: attachment.attachment_id,
                     originalFilename: attachment.original_filename,
+                    attachmentType: attachment.attachment_type,
                   })),
               }))}
             />

@@ -53,7 +53,7 @@ export default function HardRedirect({
     <main className="flex min-h-screen flex-col bg-linear-to-b from-rose-50 via-white to-white">
       <div className="flex flex-1 items-center justify-center px-6">
         <div
-          className="w-full max-w-md rounded-3xl border border-rose-100 bg-white px-10 py-10 shadow-xl shadow-rose-100/30"
+          className="rounded-surface w-full max-w-md border border-rose-100 bg-white px-10 py-10 shadow-xl shadow-rose-100/30"
           role="status"
           aria-live="polite"
           aria-busy="true"

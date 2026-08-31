@@ -12,17 +12,13 @@ import {
   InfoCard,
   SectionTitle,
   TierCard,
-} from "./GuidelinesPage";
+} from "./GuidelinePrimitives";
 
 // Guidelines Content Components
 export default function TravelRequisitionGuideline() {
   return (
-    <div className="mx-auto max-w-4xl space-y-10 pb-16">
-      <GuidelineHeading
-        icon={<Plane size={13} />}
-        eyebrow="Travel Requisition"
-        title="Travel Requisition"
-      >
+    <div className="max-w-4xl space-y-7 pb-10">
+      <GuidelineHeading icon={<Plane size={13} />} title="Travel Requisition">
         Essential requirements and approval tiers for site visits, local
         flights, and international business travel.
       </GuidelineHeading>
@@ -30,11 +26,11 @@ export default function TravelRequisitionGuideline() {
       <GeneralNote />
 
       {/* Required Fields Section */}
-      <section className="space-y-5">
+      <section className="space-y-4">
         <SectionTitle icon={<CheckCircle2 size={17} />}>
           Required Submission Fields
         </SectionTitle>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           <InfoCard
             icon={<UserCircle size={18} />}
             title="Employee & Trip Details"
@@ -57,9 +53,9 @@ export default function TravelRequisitionGuideline() {
       </section>
 
       {/* Approval Tiers Section */}
-      <section className="space-y-5">
+      <section className="space-y-4">
         <SectionTitle icon={<Shield size={17} />}>Approval Tiers</SectionTitle>
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3">
           <TierCard
             tier="Tier 1"
             type="Local Road Travel"

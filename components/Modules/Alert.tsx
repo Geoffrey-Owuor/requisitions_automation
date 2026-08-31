@@ -75,7 +75,7 @@ const Alert = () => {
           </h3>
           {/* Message: Dimmed for contrast hierarchy */}
           <p
-            className="mt-0.5 line-clamp-2 text-[13px] wrap-break-word text-neutral-200"
+            className="mt-0.5 line-clamp-4 text-[13px] wrap-break-word text-neutral-200"
             title={alertMessage}
           >
             {alertMessage}

@@ -18,27 +18,48 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  // The base fetch query
+  // The base fetch query — everything not yet exported, plus continuous
+  // requests every run (they need to keep appearing as a standing deduction
+  // reminder regardless of the exported flag).
   const baseQuery = `
-    SELECT 
+    SELECT
+    request_id,
     TO_CHAR(request_created_at, 'YYYY-MM-DD HH24:MI:SS') AS request_created_at,
-    staff_number, staff_name, staff_email, staff_department, 
+    staff_number, staff_name, staff_email, staff_department,
     staff_location, request_amount, no_of_installments,
-    TO_CHAR(repayment_start_date, 'YYYY-MM-DD HH24:MI:SS') AS repayment_start_date, 
+    TO_CHAR(repayment_start_date, 'YYYY-MM-DD HH24:MI:SS') AS repayment_start_date,
     request_type, approval_status, approver_comments
     FROM salary_advances
-    WHERE DATE_TRUNC('month', request_created_at) = DATE_TRUNC('month', CURRENT_DATE)
-    OR request_type = 'continuous'
+    WHERE exported = false OR request_type = 'continuous'
     ORDER BY request_created_at ASC
     `;
 
-  try {
-    // Run the query
-    const rows = await query(baseQuery);
+  // Self-service alteration requests (continuous->oneoff switches, installment
+  // reductions) not yet exported — these don't trigger email, so the monthly
+  // report is the only place HR sees them.
+  const alterationsQuery = `
+    SELECT
+    a.alteration_id,
+    TO_CHAR(a.created_at, 'YYYY-MM-DD HH24:MI:SS') AS created_at,
+    s.staff_number, s.staff_name, s.staff_email,
+    a.alteration_type, a.previous_request_type, a.new_request_type,
+    a.previous_installments, a.new_installments
+    FROM salary_advance_alterations a
+    JOIN salary_advances s ON s.request_id = a.request_id
+    WHERE a.exported = false
+    ORDER BY a.created_at ASC
+    `;
 
-    // If the returned data length is zero - no advance submissions were made for the current month
+  try {
+    // Run the queries
+    const [rows, alterationRows] = await Promise.all([
+      query(baseQuery),
+      query(alterationsQuery),
+    ]);
+
+    // If both are empty - nothing unexported (and no continuous requests) to report
     // Only return a success message
-    if (rows.length === 0) {
+    if (rows.length === 0 && alterationRows.length === 0) {
       return NextResponse.json(
         {
           message: `0 rows returned, no salary advances data for date:${date}`,
@@ -47,13 +68,18 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Creating a workbook with exceljs and adding a new worksheet;
+    // Creating a workbook with exceljs and adding the worksheet(s);
     const workbook = new Workbook();
-    const worksheet = workbook.addWorksheet("Salary_Advances");
 
-    // Defining the columns for our worksheet
-    if (rows.length > 0) {
-      worksheet.columns = Object.keys(rows[0]).map((key) => ({
+    const addSheet = (
+      name: string,
+      sheetRows: Record<string, unknown>[],
+    ) => {
+      if (sheetRows.length === 0) return;
+
+      const worksheet = workbook.addWorksheet(name);
+
+      worksheet.columns = Object.keys(sheetRows[0]).map((key) => ({
         // Split by an underscore, capitalize first letter of each word and join with a space
         header: key
           .split("_")
@@ -70,8 +96,25 @@ export async function GET(request: NextRequest) {
       worksheet.getRow(1).font = { bold: true };
 
       // Add the data rows
-      worksheet.addRows(rows);
-    }
+      worksheet.addRows(sheetRows);
+    };
+
+    // Ids are needed to flip the exported flag after a successful send, but
+    // shouldn't appear as worksheet columns (columns are auto-derived from
+    // the row keys).
+    const sheetRows = rows.map((row) =>
+      Object.fromEntries(
+        Object.entries(row).filter(([key]) => key !== "request_id"),
+      ),
+    );
+    const alterationSheetRows = alterationRows.map((row) =>
+      Object.fromEntries(
+        Object.entries(row).filter(([key]) => key !== "alteration_id"),
+      ),
+    );
+
+    addSheet("Salary_Advances", sheetRows);
+    addSheet("Alterations", alterationSheetRows);
 
     // Generate a buffer from the workbook
     const arrayBuffer = await workbook.xlsx.writeBuffer();
@@ -80,6 +123,7 @@ export async function GET(request: NextRequest) {
     // The html template code
     const currentYear = new Date().getFullYear();
     const recordCount = rows.length;
+    const alterationCount = alterationRows.length;
 
     const emailHtml = `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
@@ -131,11 +175,15 @@ export async function GET(request: NextRequest) {
               <table width="100%">
                 <tr>
                   <td style="padding-bottom: 12px; font-size: 12px; color: #94a3b8;">Data Scope</td>
-                  <td style="padding-bottom: 12px; font-size: 12px; color: #ffffff; text-align: right; font-weight: 600;">Current Month &amp; Continuous</td>
+                  <td style="padding-bottom: 12px; font-size: 12px; color: #ffffff; text-align: right; font-weight: 600;">Not Yet Exported &amp; Continuous</td>
                 </tr>
                 <tr>
-                  <td style="padding-bottom: 12px; font-size: 12px; color: #94a3b8;">Total Records Included</td>
+                  <td style="padding-bottom: 12px; font-size: 12px; color: #94a3b8;">Advance Requests Included</td>
                   <td style="padding-bottom: 12px; font-size: 12px; color: #ffffff; text-align: right; font-weight: 600;">${recordCount} rows</td>
+                </tr>
+                <tr>
+                  <td style="padding-bottom: 12px; font-size: 12px; color: #94a3b8;">Alteration Requests Included</td>
+                  <td style="padding-bottom: 12px; font-size: 12px; color: #ffffff; text-align: right; font-weight: 600;">${alterationCount} rows</td>
                 </tr>
                 <tr>
                   <td style="padding-bottom: 0; font-size: 12px; color: #94a3b8;">Attachment Format</td>
@@ -158,7 +206,7 @@ export async function GET(request: NextRequest) {
     // Send the email with the generated buffer as an attachment
     const emailResult = await sendEmail({
       from: process.env.ADVANCE_EMAIL_SENDER!,
-      to: [process.env.FIRST_HR_EMAIL!, process.env.SECOND_HR_EMAIL!],
+      to: process.env.FIRST_HR_EMAIL!,
       subject: `Monthly Salary Advances Report - ${dateString}`,
       html: emailHtml,
       attachments: [
@@ -174,10 +222,30 @@ export async function GET(request: NextRequest) {
       throw new Error(emailResult.error || "Unknown email sending error");
     }
 
+    // Only flip the flags once the export has actually gone out — otherwise
+    // a failed send would silently drop these rows from every future export.
+    await Promise.all(
+      rows.map((row) =>
+        query(
+          `UPDATE salary_advances SET exported = true WHERE request_id = $1 AND exported = false`,
+          [row.request_id],
+        ),
+      ),
+    );
+
+    await Promise.all(
+      alterationRows.map((row) =>
+        query(
+          `UPDATE salary_advance_alterations SET exported = true WHERE alteration_id = $1`,
+          [row.alteration_id],
+        ),
+      ),
+    );
+
     // Return a success response
     return NextResponse.json(
       {
-        message: `Salary advance data for date: ${date} exported and emailed successfully, Rows: ${rows.length}`,
+        message: `Salary advance data for date: ${date} exported and emailed successfully, Advance rows: ${rows.length}, Alteration rows: ${alterationRows.length}`,
       },
       { status: 200 },
     );

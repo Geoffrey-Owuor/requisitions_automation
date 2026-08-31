@@ -11,16 +11,12 @@ import {
   GuidelineHeading,
   InfoCard,
   SectionTitle,
-} from "./GuidelinesPage";
+} from "./GuidelinePrimitives";
 
 export default function ITRequisitionGuideline() {
   return (
-    <div className="mx-auto max-w-4xl space-y-10 pb-16">
-      <GuidelineHeading
-        icon={<Monitor size={13} />}
-        eyebrow="IT Requisition"
-        title="IT Requisition"
-      >
+    <div className="max-w-4xl space-y-7 pb-10">
+      <GuidelineHeading icon={<Monitor size={13} />} title="IT Requisition">
         Procedures for requesting hardware, software, and technical peripherals
         for staff members.
       </GuidelineHeading>
@@ -31,18 +27,18 @@ export default function ITRequisitionGuideline() {
       <Callout
         icon={<Lightbulb size={18} />}
         title="Advance Notice Recommended"
-        tone="rose"
+        tone="amber"
       >
         IT recommends making a requisition at least 2 weeks prior to facilitate
         proper planning and preparation for the requested equipment.
       </Callout>
 
       {/* Required Fields Section */}
-      <section className="space-y-5">
+      <section className="space-y-4">
         <SectionTitle icon={<CheckCircle2 size={17} />}>
           Required Submission Fields
         </SectionTitle>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           <InfoCard
             icon={<UserCircle size={18} />}
             title="Employee Information"
