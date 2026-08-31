@@ -21,10 +21,10 @@ export default async function GuidelinesLayout({ children, params }: Props) {
   return (
     <PageShell>
       <div className="flex flex-1 flex-col gap-5 py-8 md:flex-row md:gap-8">
-        <aside className="w-full min-w-0 md:w-56 md:shrink-0">
+        <aside className="w-full min-w-0 md:w-58 md:shrink-0">
           <nav
             aria-label="Guidelines"
-            className="flex flex-col gap-1.5 md:sticky md:top-20"
+            className="flex flex-col gap-2 py-2 md:sticky md:top-20 md:rounded-2xl md:border md:border-slate-200/70 md:bg-white/70 md:p-2.5 md:shadow-sm md:backdrop-blur-xl"
           >
             <span className="hidden px-2 pb-1 text-[10px] font-bold tracking-[0.16em] text-slate-400 uppercase md:block">
               Guidelines

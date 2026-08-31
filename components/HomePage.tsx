@@ -175,7 +175,7 @@ function DirectorySection({
         <p className="text-sm text-slate-500">{caption}</p>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {entries.map((entry) => (
           <AppCard key={entry.slug} entry={entry} />
         ))}
@@ -195,11 +195,11 @@ function AppCard({ entry }: { entry: AppEntry }) {
   return (
     <div className="rounded-surface shadow-raised hover:border-brand-200 hover:shadow-floating group relative flex flex-col border border-slate-200 bg-white p-4 transition-[border-color,box-shadow]">
       <div className="mb-3 flex items-start justify-between gap-3">
-        <div className="group-hover:bg-brand-600 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-colors group-hover:text-white">
+        <div className="group-hover:bg-brand-600 flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600 transition-colors group-hover:text-white">
           <Icon size={17} />
         </div>
         <span
-          className={`rounded-full border px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase ${ownerTone[entry.owner]}`}
+          className={`rounded-lg border px-2 py-1 text-[10px] font-bold tracking-wider uppercase ${ownerTone[entry.owner]}`}
         >
           {entry.owner}
         </span>
