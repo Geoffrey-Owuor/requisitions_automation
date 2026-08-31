@@ -75,7 +75,7 @@ export async function writePositionAttachments(
     File,
   ][]) {
     const typeDir = path.join(
-      getUploadDirectory(),
+      /*turbopackIgnore: true*/ getUploadDirectory(),
       requestId,
       positionId,
       attachmentType,
@@ -106,7 +106,10 @@ export async function writePositionAttachments(
 export async function deleteRequisitionDirectory(
   requestId: string,
 ): Promise<void> {
-  const requestDir = path.join(getUploadDirectory(), requestId);
+  const requestDir = path.join(
+    /*turbopackIgnore: true*/ getUploadDirectory(),
+    requestId,
+  );
 
   await fs.rm(requestDir, { recursive: true, force: true });
 }
@@ -114,7 +117,10 @@ export async function deleteRequisitionDirectory(
 export async function readAttachmentFile(
   relativeFilePath: string,
 ): Promise<Buffer> {
-  const absolutePath = path.join(getUploadDirectory(), relativeFilePath);
+  const absolutePath = path.join(
+    /*turbopackIgnore: true*/ getUploadDirectory(),
+    relativeFilePath,
+  );
 
   return fs.readFile(absolutePath);
 }
