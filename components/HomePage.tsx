@@ -6,9 +6,12 @@ import {
   ChevronRight,
   CircleDollarSign,
   CircleGauge,
+  KeyRound,
   LaptopMinimalCheck,
+  MailCheck,
   ShieldAlert,
   ShoppingBag,
+  Workflow,
   type LucideIcon,
 } from "lucide-react";
 import PageShell from "./PageShell";
@@ -63,6 +66,10 @@ export default function HomePage() {
         <QuickLinksCard />
       </section>
 
+      <StatsBand />
+
+      <HowItWorksSection />
+
       <DirectorySection
         title="Requisition Forms"
         caption="Available Online Requisition Forms"
@@ -75,14 +82,198 @@ export default function HomePage() {
         entries={appsByGroup("portal")}
       />
 
-      <div className="rounded-surface mt-8 mb-10 flex items-center gap-2.5 border border-amber-200 bg-amber-50 px-4 py-3 text-amber-800">
-        <ShieldAlert className="h-4 w-4 shrink-0" />
-        <p className="text-sm">
-          Standard compliance and procedures for online form requisitions must
-          be adhered to.
+      <WhyHubSection />
+
+      <ComplianceSection />
+    </PageShell>
+  );
+}
+
+/** Counts derived from the app directory itself, so this never drifts from
+ *  what is actually listed further down the page. "Approval stages" is
+ *  computed over forms only - a portal's chain describes a downstream
+ *  process in a separate system, not a stage in this app's own workflow. */
+function StatsBand() {
+  const formsCount = appsByGroup("form").length;
+  const portalsCount = appsByGroup("portal").length;
+  const maxStages = Math.max(
+    ...appsByGroup("form").map((entry) => entry.chain.length),
+  );
+
+  const stats = [
+    { value: formsCount, label: "Requisition forms" },
+    { value: portalsCount, label: "Internal portals" },
+    { value: maxStages, label: "Approval stages, at most" },
+  ];
+
+  return (
+    <section className="rounded-surface shadow-raised mb-10 grid grid-cols-3 divide-x divide-slate-100 border border-slate-200 bg-white py-5">
+      {stats.map((stat) => (
+        <div key={stat.label} className="px-2 text-center sm:px-4">
+          <div className="text-brand-600 text-2xl font-bold tracking-tight sm:text-3xl">
+            {stat.value}
+          </div>
+          <div className="mt-1 text-xs leading-tight font-medium text-slate-500 sm:text-sm">
+            {stat.label}
+          </div>
+        </div>
+      ))}
+    </section>
+  );
+}
+
+type Step = { number: string; title: string; description: string };
+
+const howItWorksSteps: Step[] = [
+  {
+    number: "01",
+    title: "Sign in with Microsoft",
+    description:
+      "Use your work account to reach the dashboard. Salary Advance is the one form reachable without signing in at all.",
+  },
+  {
+    number: "02",
+    title: "Submit your request",
+    description:
+      "Pick the form for what you need and fill it in. Every requisition type has its own guidelines page covering what to expect.",
+  },
+  {
+    number: "03",
+    title: "Track it by email",
+    description:
+      "Your request moves through its approval chain automatically, and you're emailed as it progresses - nothing to chase up.",
+  },
+];
+
+function HowItWorksSection() {
+  return (
+    <section className="mt-2 mb-10">
+      <div className="mb-4">
+        <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+          How it works
+        </h2>
+        <p className="text-sm text-slate-500">
+          From sign-in to approval, in three steps.
         </p>
       </div>
-    </PageShell>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        {howItWorksSteps.map((step) => (
+          <div
+            key={step.number}
+            className="rounded-surface border border-slate-200 bg-white p-4"
+          >
+            <span className="text-brand-300 text-3xl font-black tracking-tight">
+              {step.number}
+            </span>
+            <h3 className="mt-1 text-base font-semibold tracking-tight text-slate-900">
+              {step.title}
+            </h3>
+            <p className="mt-1.5 text-sm leading-relaxed text-slate-500">
+              {step.description}
+            </p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+type ValueProp = {
+  title: string;
+  description: string;
+  icon: LucideIcon;
+};
+
+const valueProps: ValueProp[] = [
+  {
+    title: "One sign-in for everything",
+    description:
+      "A single Microsoft account gets you into every requisition form and internal portal listed here.",
+    icon: KeyRound,
+  },
+  {
+    title: "Routed automatically",
+    description:
+      "Each request finds its own approval chain - HOD, HR, IT, Security, or the Director - without anyone forwarding an email.",
+    icon: Workflow,
+  },
+  {
+    title: "Updates at every stage",
+    description:
+      "Submitters and approvers are emailed as a request moves, so status is never something you have to ask about.",
+    icon: MailCheck,
+  },
+  {
+    title: "No sign-in for Salary Advance",
+    description:
+      "It's the one form built to be reachable directly, for staff who need it without a dashboard login.",
+    icon: CircleDollarSign,
+  },
+];
+
+function WhyHubSection() {
+  return (
+    <section className="mt-2 mb-10">
+      <div className="mb-4">
+        <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+          Why use the Hub
+        </h2>
+        <p className="text-sm text-slate-500">
+          Built to remove the manual follow-up around requisitions.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {valueProps.map(({ title, description, icon: Icon }) => (
+          <div
+            key={title}
+            className="rounded-surface border border-slate-200 bg-white p-4"
+          >
+            <div className="bg-brand-50 text-brand-600 flex h-10 w-10 items-center justify-center rounded-full">
+              <Icon size={18} />
+            </div>
+            <h3 className="mt-3 text-sm font-semibold tracking-tight text-slate-900">
+              {title}
+            </h3>
+            <p className="mt-1.5 text-sm leading-relaxed text-slate-500">
+              {description}
+            </p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function ComplianceSection() {
+  return (
+    <section className="rounded-surface mt-2 mb-10 border border-amber-200 bg-amber-50 p-5 sm:p-6">
+      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+        <div className="flex items-start gap-3">
+          <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
+          <div>
+            <h2 className="text-base font-semibold tracking-tight text-amber-900">
+              Guidelines &amp; compliance
+            </h2>
+            <p className="mt-1 max-w-xl text-sm leading-relaxed text-amber-800">
+              Every requisition type has its own guidelines page covering who
+              approves it, what tiers or thresholds apply, and what to have
+              ready before you submit. Standard compliance and procedures for
+              online form requisitions must be adhered to.
+            </p>
+          </div>
+        </div>
+
+        <Link
+          href="/guidelines/travel"
+          className="rounded-control flex shrink-0 items-center gap-2 border border-amber-300 bg-white px-4 py-2.5 text-sm font-semibold text-amber-800 transition-colors hover:bg-amber-100"
+        >
+          <BookText className="h-4 w-4" />
+          Read the guidelines
+        </Link>
+      </div>
+    </section>
   );
 }
 
