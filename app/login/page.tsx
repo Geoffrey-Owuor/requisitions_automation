@@ -35,6 +35,14 @@ export default async function LoginPage({ searchParams }: Props) {
 
   return (
     <div className="layout-scrollbar bg-canvas relative h-screen w-full selection:bg-rose-100 selection:text-rose-900">
+      {/* ── AMBIENT BACKGROUND ── */}
+      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+        <div className="animate-aurora absolute top-[-20%] left-1/2 h-[70%] w-[80%] -translate-x-1/2 rounded-full bg-rose-200/50 blur-[120px]" />
+        <div className="animate-drift absolute bottom-[-15%] left-[-10%] h-[50%] w-[50%] rounded-full bg-orange-100/50 blur-[110px]" />
+        <div className="animate-drift absolute right-[-10%] bottom-[-5%] h-[45%] w-[45%] rounded-full bg-blue-100/40 blur-[110px]" />
+        <div className="hero-grid absolute inset-x-0 top-0 h-[80vh]" />
+      </div>
+
       {/* Structural Central Container */}
       <div className="relative z-10 mx-auto flex min-h-screen max-w-6xl flex-col px-4">
         {/* ── ENTERPRISE HEADER ── */}
@@ -42,7 +50,7 @@ export default async function LoginPage({ searchParams }: Props) {
           <Brand showText={true} />
 
           <Link
-            href="/guidelines"
+            href="/guidelines/travel"
             className="rounded-control bg-brand-600 hover:bg-brand-700 flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold text-white transition-colors"
           >
             <FileText
@@ -58,7 +66,7 @@ export default async function LoginPage({ searchParams }: Props) {
         <main className="flex flex-1 items-center justify-center py-6">
           <div className="animate-rise relative w-full max-w-sm">
             {/* Neomorphic Enterprise Card */}
-            <div className="relative overflow-hidden rounded-2xl border border-white/80 bg-white/90 p-8 shadow-[0_2px_4px_rgba(140,40,60,0.03),0_28px_56px_-24px_rgba(140,40,60,0.35),inset_0_1px_0_rgba(255,255,255,1)] backdrop-blur-xl sm:p-9">
+            <div className="relative overflow-hidden rounded-3xl border border-white/80 bg-white/90 p-8 shadow-[0_2px_4px_rgba(140,40,60,0.03),0_28px_56px_-24px_rgba(140,40,60,0.35),inset_0_1px_0_rgba(255,255,255,1)] backdrop-blur-xl sm:p-9">
               {/* Top gradient hairline */}
               <div className="absolute inset-x-10 top-0 h-px bg-linear-to-r from-transparent via-rose-400/60 to-transparent" />
 
