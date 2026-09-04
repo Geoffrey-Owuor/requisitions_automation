@@ -62,6 +62,7 @@ export interface EmployeeApprovalModalProps {
 
 const stageLabel: Record<string, string> = {
   hod: "Head of Department",
+  retail_director: "Retail Director",
   director: "CEO",
   hr: "Human Resources",
 };

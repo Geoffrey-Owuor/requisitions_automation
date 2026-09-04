@@ -9,7 +9,7 @@ import TravelApprovalSkeleton from "@/components/Skeletons/TravelApprovalSkeleto
 import AlreadyProcessed from "@/components/Approvers/TravelApprovers/AlreadyProcessed";
 import InvalidToken from "@/components/Approvers/TravelApprovers/InvalidToken";
 import NotFoundRequest from "@/components/Approvers/TravelApprovers/NotFoundRequest";
-import { isValidEmployeeStage } from "@/public/assets";
+import { isValidEmployeeStage, RETAIL_DEPARTMENT } from "@/public/assets";
 
 type ApprovalPageProps = {
   params: Promise<{ uuid: string }>;
@@ -73,6 +73,14 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
 
   const requestData = result[0];
 
+  // Retail Director is only part of the chain for Retail-department
+  // requisitions
+  if (
+    stage === "retail_director" &&
+    requestData.employee_department !== RETAIL_DEPARTMENT
+  )
+    return <NotFoundRequest />;
+
   const positionsResult = await query(
     `
       SELECT
@@ -100,7 +108,7 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
   const approvalStatus = requestData.approval_status;
   const approverName = requestData.approver_name;
 
-  if (approvalStatus !== "pending")
+  if (approvalStatus !== "pending" && approvalStatus !== "N/A")
     return (
       <AlreadyProcessed processedBy={approverName} status={approvalStatus} />
     );

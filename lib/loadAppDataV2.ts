@@ -101,6 +101,28 @@ export const loadDirectorArray = async (): Promise<ApproversObject[] | []> => {
   }
 };
 
+// Load the retail director array
+export const loadRetailDirectorArray = async (): Promise<
+  ApproversObject[] | []
+> => {
+  try {
+    const result = await query<ApproversObject>(`
+            SELECT retail_director_uuid AS uuid,
+            retail_director_name AS name,
+            retail_director_email AS email
+            FROM retail_director_array
+            `);
+
+    return result;
+  } catch (error) {
+    console.error(
+      "Error while trying to fetch retail director array data:",
+      error,
+    );
+    return [];
+  }
+};
+
 // Load the it array
 export const loadITArray = async (): Promise<ApproversObject[] | []> => {
   try {
