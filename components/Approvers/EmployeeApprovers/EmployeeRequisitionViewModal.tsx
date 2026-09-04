@@ -2,7 +2,11 @@
 
 import { EmployeeEmailDataValues } from "@/services/EmployeeEmailSender";
 import StatusFormatter from "@/components/Dashboard/StatusFormatter";
-import { dateFormatter, getJobGradeNumber } from "@/public/assets";
+import {
+  dateFormatter,
+  getJobGradeNumber,
+  RETAIL_DEPARTMENT,
+} from "@/public/assets";
 import AttachmentTypeGroups from "./AttachmentTypeGroups";
 
 const Field = ({ label, value }: { label: string; value: string | number }) => (
@@ -22,7 +26,7 @@ const SectionHeading = ({ title }: { title: string }) => (
   </h2>
 );
 
-const approvalStages = [
+const baseApprovalStages = [
   {
     role: "HOD Approval",
     approverKey: "hodapprover" as const,
@@ -30,6 +34,17 @@ const approvalStages = [
     statusKey: "hodapprovalstatus" as const,
     commentsKey: "hodcomments" as const,
   },
+];
+
+const retailDirectorApprovalStage = {
+  role: "Retail Director Approval",
+  approverKey: "retaildirectorapprover" as const,
+  emailKey: "retaildirectoremail" as const,
+  statusKey: "retaildirectorapprovalstatus" as const,
+  commentsKey: "retaildirectorcomments" as const,
+};
+
+const remainingApprovalStages = [
   {
     role: "CEO Approval",
     approverKey: "directorapprover" as const,
@@ -45,6 +60,16 @@ const approvalStages = [
     commentsKey: "hrcomments" as const,
   },
 ];
+
+function getApprovalStages(department: string) {
+  return department === RETAIL_DEPARTMENT
+    ? [
+        ...baseApprovalStages,
+        retailDirectorApprovalStage,
+        ...remainingApprovalStages,
+      ]
+    : [...baseApprovalStages, ...remainingApprovalStages];
+}
 
 const PositionCard = ({
   position,
@@ -172,8 +197,14 @@ const EmployeeRequisitionViewModal = ({
           {/* Section 4: Approval Chain */}
           <div className="mb-8 border-t border-[rgba(240,180,180,0.4)] pt-8">
             <SectionHeading title="Approval Chain" />
-            <div className="grid grid-cols-3 gap-4 max-sm:grid-cols-1">
-              {approvalStages.map(
+            <div
+              className={`grid gap-4 max-sm:grid-cols-1 ${
+                viewData.department === RETAIL_DEPARTMENT
+                  ? "grid-cols-2 lg:grid-cols-4"
+                  : "grid-cols-3"
+              }`}
+            >
+              {getApprovalStages(viewData.department).map(
                 ({ role, approverKey, emailKey, statusKey, commentsKey }) => (
                   <div
                     key={role}

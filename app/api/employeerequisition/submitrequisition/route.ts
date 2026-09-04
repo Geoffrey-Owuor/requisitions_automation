@@ -1,10 +1,15 @@
 import { NextResponse, NextRequest } from "next/server";
 import { randomUUID } from "crypto";
-import { loadDirectorArray, loadHrArray } from "@/lib/loadAppDataV2";
+import {
+  loadDirectorArray,
+  loadHrArray,
+  loadRetailDirectorArray,
+} from "@/lib/loadAppDataV2";
 import { query, pool } from "@/lib/db";
 import { EmployeeEmailSender } from "@/services/EmployeeEmailSender";
 import { getSession } from "@/lib/session";
 import { isDirectorEmail } from "@/utils/isDirectorEmail";
+import { isRetailDirectorEmail } from "@/utils/isRetailDirectorEmail";
 import {
   isAllowedAttachmentType,
   writePositionAttachments,
@@ -19,6 +24,7 @@ import {
   EMPLOYEE_ATTACHMENT_TYPES,
   EMPLOYEE_ATTACHMENT_TYPE_LABELS,
   EmployeeAttachmentType,
+  RETAIL_DEPARTMENT,
 } from "@/public/assets";
 
 type PositionInput = {
@@ -283,13 +289,17 @@ export async function POST(request: NextRequest) {
     try {
       await client.query("BEGIN");
 
+      const retailDirectorApprovalStatus =
+        department === RETAIL_DEPARTMENT ? "pending" : "N/A";
+
       await client.query(
         `
         INSERT INTO employee_requisitions
         (request_id, submitter_email, submitter_name, employee_department,
-        employee_hod_approval_status, employee_director_approval_status, employee_hr_approval_status,
+        employee_hod_approval_status, employee_retail_director_approval_status,
+        employee_director_approval_status, employee_hr_approval_status,
         employee_hod_approver, employee_hod_email)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
         `,
         [
           requestId,
@@ -297,6 +307,7 @@ export async function POST(request: NextRequest) {
           name,
           department,
           "pending",
+          retailDirectorApprovalStatus,
           "pending",
           "pending",
           hodApprover,
@@ -406,76 +417,137 @@ export async function POST(request: NextRequest) {
         [hodEmail, "approved", "Automatic HOD Approval", requestId],
       );
 
+      // Retail requisitions require a Retail Director approval before the
+      // CEO stage - if this self-approving HOD is also a Retail Director,
+      // auto-approve that stage too rather than asking the same person to
+      // approve their own requisition twice under two different roles.
+      // Otherwise, the requisition stops at the (still pending) Retail
+      // Director stage and CEO/HR routing happens once that stage is acted
+      // upon, so it's skipped here.
+      let stoppedAtRetailDirectorStage = false;
+
+      if (department === RETAIL_DEPARTMENT) {
+        const hodIsRetailDirector = await isRetailDirectorEmail(pool, hodEmail);
+
+        if (hodIsRetailDirector) {
+          await query(
+            `
+            UPDATE employee_requisitions
+            SET employee_retail_director_approval_date = CURRENT_TIMESTAMP,
+            employee_retail_director_approval_status = $1,
+            employee_retail_director_approver = $2,
+            employee_retail_director_email = $3,
+            employee_retail_director_comments = $4
+            WHERE request_id = $5
+            `,
+            [
+              "approved",
+              name,
+              hodEmail,
+              "Automatically approved - the HOD is also a Retail Director, so a separate Retail Director approval is not required",
+              requestId,
+            ],
+          );
+        } else {
+          stoppedAtRetailDirectorStage = true;
+
+          const RETAIL_DIRECTOR_ARRAY = await loadRetailDirectorArray();
+
+          RETAIL_DIRECTOR_ARRAY.forEach((retailDirectorApprover) => {
+            EmployeeEmailSender({
+              to: retailDirectorApprover.email,
+              requestId: requestId!,
+              message:
+                "A new employee requisition has been submitted and requires your approval",
+              title: "Action Required: New Employee Requisition",
+              role: "Retail Director",
+              reviewLink: `?token=${retailDirectorApprover.uuid}&stage=retail_director`,
+            });
+          });
+
+          EmployeeEmailSender({
+            to: email,
+            requestId,
+            message:
+              "Your employee requisition has been successfully submitted and forwarded to the Retail Director for approval",
+            title: "Update: Employee requisition submitted successfully",
+            role: "user",
+          });
+        }
+      }
+
       // If this self-approving HOD is also a Director/CEO, auto-approve the
       // CEO stage too and forward straight to HR, rather than asking the
       // same person to approve their own requisition twice.
-      const hodIsDirector = await isDirectorEmail(pool, hodEmail);
+      if (!stoppedAtRetailDirectorStage) {
+        const hodIsDirector = await isDirectorEmail(pool, hodEmail);
 
-      if (hodIsDirector) {
-        await query(
-          `
-          UPDATE employee_requisitions
-          SET employee_director_approval_date = CURRENT_TIMESTAMP,
-          employee_director_approval_status = $1,
-          employee_director_approver = $2,
-          employee_director_email = $3,
-          employee_director_comments = $4
-          WHERE request_id = $5
-          `,
-          [
-            "approved",
-            name,
-            hodEmail,
-            "Automatically approved - the HOD is also a Director/CEO, so a separate CEO approval is not required",
+        if (hodIsDirector) {
+          await query(
+            `
+            UPDATE employee_requisitions
+            SET employee_director_approval_date = CURRENT_TIMESTAMP,
+            employee_director_approval_status = $1,
+            employee_director_approver = $2,
+            employee_director_email = $3,
+            employee_director_comments = $4
+            WHERE request_id = $5
+            `,
+            [
+              "approved",
+              name,
+              hodEmail,
+              "Automatically approved - the HOD is also a Director/CEO, so a separate CEO approval is not required",
+              requestId,
+            ],
+          );
+
+          const HR_ARRAY = await loadHrArray();
+
+          HR_ARRAY.forEach((hrApprover) => {
+            EmployeeEmailSender({
+              to: hrApprover.email,
+              requestId: requestId!,
+              message:
+                "A new employee requisition has been submitted and requires your approval",
+              title: "Action Required: New Employee Requisition",
+              role: "HR",
+              reviewLink: `?token=${hrApprover.uuid}&stage=hr`,
+            });
+          });
+
+          EmployeeEmailSender({
+            to: email,
             requestId,
-          ],
-        );
-
-        const HR_ARRAY = await loadHrArray();
-
-        HR_ARRAY.forEach((hrApprover) => {
-          EmployeeEmailSender({
-            to: hrApprover.email,
-            requestId: requestId!,
             message:
-              "A new employee requisition has been submitted and requires your approval",
-            title: "Action Required: New Employee Requisition",
-            role: "HR",
-            reviewLink: `?token=${hrApprover.uuid}&stage=hr`,
+              "Your employee requisition has been successfully submitted. As you are also a Director/CEO, the CEO approval stage was automatically approved and this has been forwarded to HR for approval",
+            title: "Update: Employee requisition submitted successfully",
+            role: "user",
           });
-        });
+        } else {
+          const DIRECTOR_ARRAY = await loadDirectorArray();
 
-        EmployeeEmailSender({
-          to: email,
-          requestId,
-          message:
-            "Your employee requisition has been successfully submitted. As you are also a Director/CEO, the CEO approval stage was automatically approved and this has been forwarded to HR for approval",
-          title: "Update: Employee requisition submitted successfully",
-          role: "user",
-        });
-      } else {
-        const DIRECTOR_ARRAY = await loadDirectorArray();
+          DIRECTOR_ARRAY.forEach((directorApprover) => {
+            EmployeeEmailSender({
+              to: directorApprover.email,
+              requestId: requestId!,
+              message:
+                "A new employee requisition has been submitted and requires your approval",
+              title: "Action Required: New Employee Requisition",
+              role: "CEO",
+              reviewLink: `?token=${directorApprover.uuid}&stage=director`,
+            });
+          });
 
-        DIRECTOR_ARRAY.forEach((directorApprover) => {
           EmployeeEmailSender({
-            to: directorApprover.email,
-            requestId: requestId!,
+            to: email,
+            requestId,
             message:
-              "A new employee requisition has been submitted and requires your approval",
-            title: "Action Required: New Employee Requisition",
-            role: "CEO",
-            reviewLink: `?token=${directorApprover.uuid}&stage=director`,
+              "Your employee requisition has been successfully submitted and forwarded to the CEO for approval",
+            title: "Update: Employee requisition submitted successfully",
+            role: "user",
           });
-        });
-
-        EmployeeEmailSender({
-          to: email,
-          requestId,
-          message:
-            "Your employee requisition has been successfully submitted and forwarded to the CEO for approval",
-          title: "Update: Employee requisition submitted successfully",
-          role: "user",
-        });
+        }
       }
     } else {
       EmployeeEmailSender({

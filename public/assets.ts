@@ -55,7 +55,12 @@ export const ALLOWED_TRAVEL_STAGES = ["hod", "hr", "director"] as const;
 export const ALLOWED_ACCESS_STAGES = ["hod", "security"] as const;
 export const ALLOWED_IT_STAGES = ["hod", "it"] as const;
 export const ALLOWED_CASUAL_STAGES = ["hod", "hr"] as const;
-export const ALLOWED_EMPLOYEE_STAGES = ["hod", "director", "hr"] as const;
+export const ALLOWED_EMPLOYEE_STAGES = [
+  "hod",
+  "retail_director",
+  "director",
+  "hr",
+] as const;
 
 // Create a TypeScript union type: "manager" | "director" | "hr" | "finance"
 export type TravelStage = (typeof ALLOWED_TRAVEL_STAGES)[number];
@@ -114,6 +119,8 @@ export const ALL_CASUAL_LOCATIONS = [
   "Sarit",
   "Yaya",
 ];
+
+export const RETAIL_DEPARTMENT = "Retail";
 
 export const OPERATIONS_DEPARTMENT = "Operations";
 export const OPERATIONS_SECTIONS = [
