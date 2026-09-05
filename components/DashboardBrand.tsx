@@ -242,10 +242,10 @@ const AppMenu = ({ onClose }: { onClose: () => void }) => {
     filteredInternal.length > 0 || filteredMicrosoft.length > 0;
 
   return (
-    <div className="absolute top-11 left-0 z-50 w-88 overflow-hidden rounded-[28px] bg-white shadow-2xl transition-all">
+    <div className="absolute top-11 left-0 z-50 w-88 overflow-hidden rounded-3xl bg-white shadow-2xl transition-all">
       {/* Search */}
       <div className="border-b border-gray-100 p-3">
-        <div className="flex items-center gap-2 rounded-full bg-gray-100 px-3.5 py-2.5 focus-within:ring-1 focus-within:ring-rose-400">
+        <div className="flex items-center gap-2 rounded-2xl bg-gray-100 px-3.5 py-2.5 focus-within:ring-1 focus-within:ring-rose-400">
           <Search className="h-4 w-4 shrink-0 text-gray-400" />
           <input
             type="text"
@@ -269,7 +269,7 @@ const AppMenu = ({ onClose }: { onClose: () => void }) => {
       </div>
 
       {/* Scrollable app list - capped height so the drawer never grows too tall */}
-      <div className="small-scrollbar max-h-96 overflow-y-auto p-4 pt-3">
+      <div className="small-scrollbar mb-4 max-h-95 overflow-y-auto p-4 pt-3">
         {!hasResults && (
           <p className="py-8 text-center text-[12px] font-medium text-gray-400">
             No apps or forms match &ldquo;{query}&rdquo;
@@ -316,12 +316,12 @@ const AppTile = ({
 }) => {
   const Icon = app.icon;
   const className =
-    "group flex flex-col items-center justify-center rounded-2xl p-2.5 transition-all duration-200 hover:bg-red-50/60 focus-visible:ring-2 focus-visible:ring-red-500/40 focus-visible:outline-none active:scale-95";
+    "group flex flex-col items-center justify-center rounded-xl p-2.5 transition-all duration-200 hover:bg-red-50/60 focus-visible:ring-2 focus-visible:ring-red-500/40 focus-visible:outline-none active:scale-95";
 
   const tileContent = (
     <>
       {/* Icon Tile */}
-      <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-50/80 text-gray-600 shadow-sm ring-1 ring-black/5 transition-all duration-200 group-hover:bg-white group-hover:text-red-600 group-hover:shadow-md group-hover:ring-red-100">
+      <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-gray-50/80 text-gray-600 shadow-sm ring-1 ring-black/5 transition-all duration-200 group-hover:bg-white group-hover:text-red-600 group-hover:shadow-md group-hover:ring-red-100">
         <Icon
           className="h-6 w-6 transition-transform duration-200 group-hover:scale-105"
           strokeWidth={1.75}
