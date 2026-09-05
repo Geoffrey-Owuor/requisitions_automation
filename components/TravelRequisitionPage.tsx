@@ -21,7 +21,7 @@ import {
   BUDGET_STATUS,
 } from "@/public/assets";
 import { useQuery } from "@tanstack/react-query";
-import { loadBaseDepartments, loadHodApprovers } from "@/lib/loadAppDataV2";
+import { loadBaseDepartments, loadHodArray } from "@/lib/loadAppDataV2";
 import TravelConfirmationModal from "./TravelConfirmationModal";
 import { ApiHandler } from "@/utils/ApiHandler";
 import { calculateTravelApprovalTier } from "@/utils/calculateTravelApprovalTier";
@@ -29,7 +29,10 @@ import SubmittingOverlay from "./SubmittingOverlay";
 import AlertModal from "./AlertModal";
 import { useToggleStore } from "@/store/useToggleStore";
 import { EngineeringJobFields, EngineeringJob } from "./EngineeringJobFields";
-import { FormSelect } from "./Modules/Retail/CasualRequisitionForm";
+import {
+  FormSelect,
+  findHodForDepartment,
+} from "./Modules/Retail/CasualRequisitionForm";
 
 export interface TravelFormData {
   employeeName: string;
@@ -95,10 +98,11 @@ export default function TravelRequisitionPage() {
   });
 
   // Load HODS
-  const { data: HOD_APPROVERS = [], isLoading: hodsLoading } = useQuery({
-    queryKey: ["BaseHodApproversData"],
-    queryFn: loadHodApprovers,
+  const { data: hodArray = [], isLoading: hodsLoading } = useQuery({
+    queryKey: ["BaseHodArrayData"],
+    queryFn: loadHodArray,
   });
+  const HOD_APPROVERS = hodArray.map((hod) => hod.name);
 
   const [formData, setFormData] = useState<TravelFormData>(InitialFormState);
 
@@ -223,6 +227,16 @@ export default function TravelRequisitionPage() {
     value: TravelFormData[K],
   ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleDepartmentChange = (department: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      department,
+      // Auto-select the HOD mapped to this department; falls back to "" so
+      // the user can still pick manually when no HOD covers it
+      hodApprover: findHodForDepartment(hodArray, department),
+    }));
   };
 
   return (
@@ -398,7 +412,7 @@ export default function TravelRequisitionPage() {
                     options={DEPARTMENTS}
                     value={formData.department}
                     loading={departmentsLoading}
-                    onChange={(v) => updateField("department", v)}
+                    onChange={handleDepartmentChange}
                   />
                   <FormInput
                     label="Designation"

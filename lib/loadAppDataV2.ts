@@ -15,6 +15,12 @@ export interface ApproversObject {
   email: string;
 }
 
+// HOD approver, additionally carrying the department it should be
+// auto-selected for (null when a HOD isn't tied to a specific department)
+export interface HodApproversObject extends ApproversObject {
+  department: string | null;
+}
+
 // Loading base departments
 export const loadBaseDepartments = unstable_cache(
   async (): Promise<string[]> => {
@@ -37,33 +43,27 @@ export const loadBaseDepartments = unstable_cache(
 );
 
 // Load the hod array
-export const loadHodArray = async (): Promise<ApproversObject[] | []> => {
-  try {
-    const result = await query<ApproversObject>(`
+export const loadHodArray = unstable_cache(
+  async (): Promise<HodApproversObject[] | []> => {
+    try {
+      const result = await query<HodApproversObject>(`
             SELECT hod_uuid AS uuid,
             hod_name AS name,
-            hod_email AS email
+            hod_email AS email,
+            hod_department AS department
             FROM hod_array
             `);
 
-    return result;
-  } catch (error) {
-    console.error("Error while trying to fetch hod array data:", error);
-    return [];
-  }
-};
-
-// Load hod approvers - reuse the hod array function
-export const loadHodApprovers = unstable_cache(
-  async (): Promise<string[]> => {
-    const hodArray = await loadHodArray();
-
-    return hodArray.map((hod) => hod.name);
+      return result;
+    } catch (error) {
+      console.error("Error while trying to fetch hod array data:", error);
+      return [];
+    }
   },
-  ["hod_approvers"],
+  ["hod_array"],
   {
     revalidate: 3600,
-    tags: ["GetHODApprovers"],
+    tags: ["GetHodArray"],
   },
 );
 

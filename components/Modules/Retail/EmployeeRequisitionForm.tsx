@@ -12,7 +12,7 @@ import {
   X,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { loadHodApprovers, loadBaseDepartments } from "@/lib/loadAppDataV2";
+import { loadHodArray, loadBaseDepartments } from "@/lib/loadAppDataV2";
 import {
   assets,
   REPLACEMENT_OR_NEW_OPTIONS,
@@ -28,7 +28,7 @@ import AlertModal from "@/components/AlertModal";
 import { AlertInfo } from "@/components/TravelRequisitionPage";
 import EmployeeConfirmationModal from "./EmployeeConfirmationModal";
 import { useToggleStore } from "@/store/useToggleStore";
-import { FormSelect } from "./CasualRequisitionForm";
+import { FormSelect, findHodForDepartment } from "./CasualRequisitionForm";
 import Image from "next/image";
 
 // ---- Client-side attachment constraints (mirrors lib/attachmentStorage.ts) ----
@@ -103,10 +103,11 @@ export default function EmployeeRequisitionForm() {
     queryFn: loadBaseDepartments,
   });
 
-  const { data: HOD_APPROVERS = [], isLoading: hodsLoading } = useQuery({
-    queryKey: ["BaseHodApproversData"],
-    queryFn: loadHodApprovers,
+  const { data: hodArray = [], isLoading: hodsLoading } = useQuery({
+    queryKey: ["BaseHodArrayData"],
+    queryFn: loadHodArray,
   });
+  const HOD_APPROVERS = hodArray.map((hod) => hod.name);
 
   const [formData, setFormData] = useState<EmployeeFormData>(InitialFormState);
   const [step, setStep] = useState(1);
@@ -159,6 +160,16 @@ export default function EmployeeRequisitionForm() {
     value: EmployeeFormData[K],
   ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleDepartmentChange = (department: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      department,
+      // Auto-select the HOD mapped to this department; falls back to "" so
+      // the user can still pick manually when no HOD covers it
+      hodApprover: findHodForDepartment(hodArray, department),
+    }));
   };
 
   const updatePositionField = <K extends keyof EmployeePositionFormData>(
@@ -369,7 +380,7 @@ export default function EmployeeRequisitionForm() {
                     options={DEPARTMENTS}
                     value={formData.department}
                     loading={departmentsLoading}
-                    onChange={(v) => updateField("department", v)}
+                    onChange={handleDepartmentChange}
                   />
                   <FormSelect
                     label="HOD Approver"
