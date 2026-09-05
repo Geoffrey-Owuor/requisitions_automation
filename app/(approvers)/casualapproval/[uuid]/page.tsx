@@ -5,11 +5,12 @@ import RequisitionPagesWrapper from "@/components/Dashboard/RequisitionPagesWrap
 import { UserProvider } from "@/context/UserContext";
 import { query } from "@/lib/db";
 import CasualApprovalModal from "@/components/Approvers/CasualApprovers/CasualApprovalModal";
+import { PreviousApproval } from "@/components/Approvers/PreviousApprovalsSection";
 import TravelApprovalSkeleton from "@/components/Skeletons/TravelApprovalSkeleton";
 import AlreadyProcessed from "@/components/Approvers/TravelApprovers/AlreadyProcessed";
 import InvalidToken from "@/components/Approvers/TravelApprovers/InvalidToken";
 import NotFoundRequest from "@/components/Approvers/TravelApprovers/NotFoundRequest";
-import { isValidCasualStage } from "@/public/assets";
+import { isValidCasualStage, CASUAL_STAGE_LABELS } from "@/public/assets";
 
 type ApprovalPageProps = {
   params: Promise<{ uuid: string }>;
@@ -71,7 +72,8 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
         casual_${stage}_approval_status AS approval_status,
         casual_${stage}_approver AS approver_name,
         request_created_at, submitter_name, submitter_email, employee_department,
-        casual_location
+        casual_location,
+        casual_hod_approver, casual_hod_approval_status, casual_hod_comments
         FROM casual_requisitions
         WHERE request_id = $1
       `;
@@ -116,6 +118,20 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
     roles: [stage],
   };
 
+  // HR is the second and final stage - HOD is the only stage that can
+  // precede it.
+  const previousApprovals: PreviousApproval[] =
+    stage === "hr"
+      ? [
+          {
+            label: CASUAL_STAGE_LABELS.hod,
+            approverName: requestData.casual_hod_approver,
+            status: requestData.casual_hod_approval_status,
+            comments: requestData.casual_hod_comments,
+          },
+        ]
+      : [];
+
   return (
     <UserProvider user={contextObject}>
       <DashboardWrapper>
@@ -131,6 +147,7 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
               department={requestData.employee_department}
               location={requestData.casual_location}
               requestCreatedAt={requestData.request_created_at}
+              previousApprovals={previousApprovals}
               sections={sectionsResult.map((section) => ({
                 sectionId: section.section_id,
                 sectionName: section.section_name,

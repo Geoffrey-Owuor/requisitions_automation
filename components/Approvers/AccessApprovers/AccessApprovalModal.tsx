@@ -2,7 +2,12 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { assets, dateFormatter, initialsHelper } from "@/public/assets";
+import {
+  assets,
+  dateFormatter,
+  initialsHelper,
+  ACCESS_STAGE_LABELS,
+} from "@/public/assets";
 import {
   Building2,
   CalendarDays,
@@ -20,6 +25,9 @@ import SubmittingOverlay from "@/components/SubmittingOverlay";
 import { AlertInfo } from "@/components/TravelRequisitionPage";
 import ApprovalAlert from "../TravelApprovers/ApprovalAlert";
 import { UpdateAccessRequisitionStatus } from "@/serverActions/UpdateAccessRequisitionStatus";
+import PreviousApprovalsSection, {
+  PreviousApproval,
+} from "@/components/Approvers/PreviousApprovalsSection";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -37,14 +45,12 @@ export interface AccessRequisitionData {
   accessLocations: string;
   accessRequirements: string;
   requestCreatedAt: string;
+  previousApprovals: PreviousApproval[];
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const stageLabel: Record<string, string> = {
-  hod: "Head of Department",
-  security: "Security Department",
-};
+const stageLabel = ACCESS_STAGE_LABELS;
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -95,6 +101,7 @@ const AccessApprovalModal = ({ data }: { data: AccessRequisitionData }) => {
     accessLocations,
     accessRequirements,
     requestCreatedAt,
+    previousApprovals,
   } = data;
 
   const [comments, setComments] = useState("");
@@ -289,6 +296,9 @@ const AccessApprovalModal = ({ data }: { data: AccessRequisitionData }) => {
                 </span>
               </div>
             </div>
+
+            {/* ── Previous Approvals ── */}
+            <PreviousApprovalsSection approvals={previousApprovals} />
 
             {/* ── Approver Comments ── */}
             <div className="mb-6 border-t border-[rgba(240,180,180,0.4)] pt-6">
