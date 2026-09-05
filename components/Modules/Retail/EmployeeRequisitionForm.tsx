@@ -207,7 +207,10 @@ export default function EmployeeRequisitionForm() {
       }
     }
 
-    setFileErrors((prev) => ({ ...prev, [fileErrorKey(clientId, type)]: error }));
+    setFileErrors((prev) => ({
+      ...prev,
+      [fileErrorKey(clientId, type)]: error,
+    }));
 
     setFormData((prev) => ({
       ...prev,
@@ -387,7 +390,7 @@ export default function EmployeeRequisitionForm() {
                   <button
                     type="button"
                     onClick={addPosition}
-                    className="flex cursor-pointer items-center gap-1.5 rounded-full border border-rose-200 bg-white/80 px-3.5 py-1.5 text-[12px] font-semibold text-rose-700 transition-all duration-200 hover:border-rose-300 hover:bg-rose-50"
+                    className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-rose-200 bg-white/80 px-3.5 py-1.5 text-[12px] font-semibold text-rose-700 transition-all duration-200 hover:border-rose-300 hover:bg-rose-50"
                   >
                     <Plus className="h-3.5 w-3.5" />
                     Add Position
@@ -421,7 +424,7 @@ export default function EmployeeRequisitionForm() {
                 <button
                   type="button"
                   onClick={addPosition}
-                  className="mt-4 flex cursor-pointer items-center gap-1.5 rounded-full border border-rose-200 bg-white/80 px-3.5 py-1.5 text-[12px] font-semibold text-rose-700 transition-all duration-200 hover:border-rose-300 hover:bg-rose-50"
+                  className="mt-4 flex cursor-pointer items-center gap-1.5 rounded-lg border border-rose-200 bg-white/80 px-3.5 py-1.5 text-[12px] font-semibold text-rose-700 transition-all duration-200 hover:border-rose-300 hover:bg-rose-50"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   Add Position
@@ -439,9 +442,9 @@ export default function EmployeeRequisitionForm() {
                   <ArrowRight className="h-4 w-4" />
                 </button>
                 <p className="mt-3 text-center text-xs text-[#7c5a5a]">
-                  All fields are required to proceed. Each position needs a
-                  Job Description, KPIs, and Org Chart document (Word, Excel,
-                  or PDF, max 2MB each).
+                  All fields are required to proceed. Each position needs a Job
+                  Description, KPIs, and Org Chart document (Word, Excel, or
+                  PDF, max 2MB each).
                 </p>
               </div>
             </form>
@@ -475,10 +478,7 @@ function PositionFieldset({
     field: K,
     value: EmployeePositionFormData[K],
   ) => void;
-  onFileChange: (
-    type: EmployeeAttachmentType,
-    files: FileList | null,
-  ) => void;
+  onFileChange: (type: EmployeeAttachmentType, files: FileList | null) => void;
   onRemoveFile: (type: EmployeeAttachmentType) => void;
 }) {
   return (
