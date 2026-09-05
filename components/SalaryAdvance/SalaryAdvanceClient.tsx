@@ -14,6 +14,7 @@ import {
   CircleAlert,
   RotateCw,
   PencilLine,
+  UserX,
 } from "lucide-react";
 import SubmittingOverlay from "../SubmittingOverlay";
 import { useAlertStore } from "@/store/useAlertStore";
@@ -26,6 +27,7 @@ import CustomDropdown from "./CustomDropDown";
 import { RequestVerificationCode } from "@/serverActions/PublicServerActions/RequestVerificationCode";
 import { VerifyAdvanceCode } from "@/serverActions/PublicServerActions/VerifyAdvanceCode";
 import { GetAdvanceFormSession } from "@/serverActions/GetAdvanceFormSession";
+import { EndAdvanceFormSession } from "@/serverActions/EndAdvanceFormSession";
 import { SubmitAdvanceForm } from "@/serverActions/PublicServerActions/SubmitAdvanceForm";
 import SalaryAdvanceFormSkeleton from "../Skeletons/SalaryAdvanceFormSkeleton";
 import SalaryAdvanceAlterationSection from "./SalaryAdvanceAlterationSection";
@@ -144,6 +146,7 @@ export default function SalaryAdvanceClient() {
     useState<SalaryAdvanceFormData>(InitialFormState);
   const [submitting, setSubmitting] = useState(false);
   const [policyAccepted, setPolicyAccepted] = useState(false);
+  const [confirmingEndSession, setConfirmingEndSession] = useState(false);
   const triggerAlert = useAlertStore((state) => state.triggerAlert);
 
   const codeInputsRef = useRef<(HTMLInputElement | null)[]>([]);
@@ -436,6 +439,23 @@ export default function SalaryAdvanceClient() {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  // Ends the short-lived verification session (not the portal login) and
+  // returns to step 1, e.g. so a different staff member can verify on a
+  // shared device.
+  const handleEndSession = async () => {
+    await EndAdvanceFormSession();
+    setFormData(InitialFormState);
+    setMode("submit");
+    setEmail("");
+    updateCode("");
+    autoSubmittedCodeRef.current = "";
+    setVerifyStage("email");
+    setVerifyError("");
+    setPolicyAccepted(false);
+    setConfirmingEndSession(false);
+    setStep(1);
   };
 
   return (
@@ -778,9 +798,32 @@ export default function SalaryAdvanceClient() {
               >
                 {/* Employee Information */}
                 <div>
-                  <h2 className="mb-5 flex items-center gap-2 text-[13px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
-                    <UserRound size={16} /> Staff Information
-                  </h2>
+                  <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+                    <h2 className="flex items-center gap-2 text-[13px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
+                      <UserRound size={16} /> Staff Information
+                    </h2>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!confirmingEndSession) {
+                          setConfirmingEndSession(true);
+                          return;
+                        }
+                        handleEndSession();
+                      }}
+                      onBlur={() => setConfirmingEndSession(false)}
+                      className={`flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors ${
+                        confirmingEndSession
+                          ? "bg-rose-50 text-rose-700 hover:bg-rose-100"
+                          : "text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+                      }`}
+                    >
+                      <UserX size={13} />
+                      {confirmingEndSession
+                        ? "End session and start over?"
+                        : "Not you?"}
+                    </button>
+                  </div>
                   <p className="mb-4 text-xs text-slate-500">
                     These details were verified against your staff record and
                     can&apos;t be edited here. Contact HR if anything is

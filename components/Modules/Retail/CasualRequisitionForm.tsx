@@ -408,7 +408,7 @@ export default function CasualRequisitionForm() {
                             key={sectionName}
                             type="button"
                             onClick={() => toggleSection(sectionName)}
-                            className={`flex cursor-pointer items-center gap-1.5 rounded-full border px-4 py-2 text-[13px] font-medium transition-all duration-200 ${
+                            className={`flex cursor-pointer items-center gap-1.5 rounded-xl border px-4 py-2 text-[13px] font-medium transition-all duration-200 ${
                               active
                                 ? "border-rose-600 bg-rose-600 text-white"
                                 : "border-[rgba(240,180,180,0.6)] bg-white/80 text-[#7c5a5a] hover:border-rose-300"
