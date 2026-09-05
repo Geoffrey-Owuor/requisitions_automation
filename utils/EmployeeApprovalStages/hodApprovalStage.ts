@@ -93,7 +93,7 @@ export async function hodApprovalStage({
     // Director/CEO, in which case that stage was already auto-approved and
     // we forward straight to HR instead.
     if (skipDirectorStage) {
-      const HR_ARRAY = await loadHrArray();
+      const HR_ARRAY = await loadHrArray("employee");
 
       HR_ARRAY.forEach((hrApprover) => {
         EmployeeEmailSender({

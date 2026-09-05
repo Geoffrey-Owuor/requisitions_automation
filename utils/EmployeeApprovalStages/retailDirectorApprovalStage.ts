@@ -66,7 +66,7 @@ export async function retailDirectorApprovalStage({
   // stage too (HOD is also a Director/CEO), in which case forward to HR.
   if (status === "approved") {
     if (skipDirectorStage) {
-      const HR_ARRAY = await loadHrArray();
+      const HR_ARRAY = await loadHrArray("employee");
 
       HR_ARRAY.forEach((hrApprover) => {
         EmployeeEmailSender({

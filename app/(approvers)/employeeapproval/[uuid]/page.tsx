@@ -45,14 +45,24 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
   if (!uuid || !token || !isValidEmployeeStage(stage))
     return <NotFoundRequest />;
 
+  // HR approvers are additionally scoped to the forms in their hr_forms
+  // allow-list - an approver not permitted for this form is treated the
+  // same as an invalid token, so their permissions aren't leaked.
   const validApprover = await query(
-    `SELECT ${stage}_email AS email,
+    stage === "hr"
+      ? `SELECT hr_email AS email, hr_name AS name, hr_forms
+         FROM hr_array WHERE hr_uuid = $1`
+      : `SELECT ${stage}_email AS email,
        ${stage}_name AS name
        FROM ${stage}_array WHERE ${stage}_uuid = $1`,
     [token],
   );
 
   if (validApprover.length === 0) return <InvalidToken />;
+
+  if (stage === "hr" && !validApprover[0].hr_forms.includes("employee")) {
+    return <InvalidToken />;
+  }
 
   const approverDetails = validApprover[0];
 

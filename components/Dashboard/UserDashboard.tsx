@@ -24,7 +24,7 @@ const UserDashboard = () => {
   // Check user active roles
   const isITAdmin = roles.includes("it");
   const isHod = roles.includes("hod");
-  const isHr = roles.includes("hr");
+  const isHr = roles.includes("hr-travel");
   const isDirector = roles.includes("director");
 
   // --- TRACK WHETHER THE CURRENTLY RENDERED TABLES HAVE ANY DATA ---
