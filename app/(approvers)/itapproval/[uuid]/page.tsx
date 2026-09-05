@@ -11,7 +11,8 @@ import NotFoundRequest from "@/components/Approvers/TravelApprovers/NotFoundRequ
 import ITApprovalModal, {
   ITRequisitionData,
 } from "@/components/Approvers/ITApprovers/ITApprovalModal";
-import { isValidItStage } from "@/public/assets";
+import { PreviousApproval } from "@/components/Approvers/PreviousApprovalsSection";
+import { isValidItStage, IT_STAGE_LABELS } from "@/public/assets";
 
 type ApprovalPageProps = {
   params: Promise<{ uuid: string }>;
@@ -65,8 +66,9 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
           employee_name, employee_department, employee_staff_number, replacement_new,
           requirements, other_requirements, requisition_date, 
           date_joining, 
-          ${stage}_approver_name AS approver_name, 
-          ${stage}_approver_status AS approval_status
+          ${stage}_approver_name AS approver_name,
+          ${stage}_approver_status AS approval_status,
+          hod_approver_name, hod_approver_status, hod_approver_comments
           FROM it_requisitions WHERE request_id = $1
           `;
 
@@ -92,6 +94,20 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
     roles: [stage],
   };
 
+  // IT is the second and final stage - HOD is the only stage that can
+  // precede it.
+  const previousApprovals: PreviousApproval[] =
+    stage === "it"
+      ? [
+          {
+            label: IT_STAGE_LABELS.hod,
+            approverName: requestData.hod_approver_name,
+            status: requestData.hod_approver_status,
+            comments: requestData.hod_approver_comments,
+          },
+        ]
+      : [];
+
   // Build the single data object passed to the modal
   const modalData: ITRequisitionData = {
     uuid,
@@ -109,6 +125,7 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
     requisitionDate: requestData.requisition_date,
     dateJoining: requestData.date_joining,
     requestCreatedAt: requestData.request_created_at,
+    previousApprovals,
   };
 
   return (

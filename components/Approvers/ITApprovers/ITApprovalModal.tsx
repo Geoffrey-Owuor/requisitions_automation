@@ -18,12 +18,15 @@ import {
   Mail,
   UserRound,
 } from "lucide-react";
-import { dateFormatter } from "@/public/assets";
+import { dateFormatter, IT_STAGE_LABELS } from "@/public/assets";
 import SubmittingOverlay from "@/components/SubmittingOverlay";
 import { AlertInfo } from "@/components/TravelRequisitionPage";
 import { UpdateITRequisitionStatus } from "@/serverActions/UpdateITRequisitionStatus";
 import ApprovalAlert from "../TravelApprovers/ApprovalAlert";
 import { initialsHelper } from "@/public/assets";
+import PreviousApprovalsSection, {
+  PreviousApproval,
+} from "@/components/Approvers/PreviousApprovalsSection";
 
 interface StageStatuses {
   acceptLoading: string;
@@ -52,14 +55,12 @@ export interface ITRequisitionData {
   requisitionDate: string;
   dateJoining: string;
   requestCreatedAt: string;
+  previousApprovals: PreviousApproval[];
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const stageLabel: Record<string, string> = {
-  hod: "Head of Department",
-  it: "IT Department",
-};
+const stageLabel = IT_STAGE_LABELS;
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -112,6 +113,7 @@ const ITApprovalModal = ({ data }: { data: ITRequisitionData }) => {
     requisitionDate,
     dateJoining,
     requestCreatedAt,
+    previousApprovals,
   } = data;
 
   const [comments, setComments] = useState("");
@@ -349,6 +351,9 @@ const ITApprovalModal = ({ data }: { data: ITRequisitionData }) => {
                 </p>
               </div>
             )}
+
+            {/* ── Previous Approvals ── */}
+            <PreviousApprovalsSection approvals={previousApprovals} />
 
             {/* ── Approver Comments ── */}
             <div className="mb-6 border-t border-[rgba(240,180,180,0.4)] pt-6">

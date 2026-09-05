@@ -5,11 +5,16 @@ import RequisitionPagesWrapper from "@/components/Dashboard/RequisitionPagesWrap
 import { UserProvider } from "@/context/UserContext";
 import { query } from "@/lib/db";
 import EmployeeApprovalModal from "@/components/Approvers/EmployeeApprovers/EmployeeApprovalModal";
+import { PreviousApproval } from "@/components/Approvers/PreviousApprovalsSection";
 import TravelApprovalSkeleton from "@/components/Skeletons/TravelApprovalSkeleton";
 import AlreadyProcessed from "@/components/Approvers/TravelApprovers/AlreadyProcessed";
 import InvalidToken from "@/components/Approvers/TravelApprovers/InvalidToken";
 import NotFoundRequest from "@/components/Approvers/TravelApprovers/NotFoundRequest";
-import { isValidEmployeeStage, RETAIL_DEPARTMENT } from "@/public/assets";
+import {
+  isValidEmployeeStage,
+  RETAIL_DEPARTMENT,
+  EMPLOYEE_STAGE_LABELS,
+} from "@/public/assets";
 
 type ApprovalPageProps = {
   params: Promise<{ uuid: string }>;
@@ -71,7 +76,12 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
       SELECT
         employee_${stage}_approval_status AS approval_status,
         employee_${stage}_approver AS approver_name,
-        request_created_at, submitter_name, submitter_email, employee_department
+        request_created_at, submitter_name, submitter_email, employee_department,
+        employee_hod_approver, employee_hod_approval_status, employee_hod_comments,
+        employee_retail_director_approver, employee_retail_director_approval_status,
+        employee_retail_director_comments,
+        employee_director_approver, employee_director_approval_status,
+        employee_director_comments
         FROM employee_requisitions
         WHERE request_id = $1
       `;
@@ -90,6 +100,38 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
     requestData.employee_department !== RETAIL_DEPARTMENT
   )
     return <NotFoundRequest />;
+
+  const isRetailRequisition =
+    requestData.employee_department === RETAIL_DEPARTMENT;
+
+  // Build the list of stages that precede the current one. Retail Director
+  // only ever sits between HOD and CEO, and only for Retail-department
+  // requisitions.
+  const previousApprovals: PreviousApproval[] = [];
+  if (stage !== "hod") {
+    previousApprovals.push({
+      label: EMPLOYEE_STAGE_LABELS.hod,
+      approverName: requestData.employee_hod_approver,
+      status: requestData.employee_hod_approval_status,
+      comments: requestData.employee_hod_comments,
+    });
+  }
+  if (isRetailRequisition && (stage === "director" || stage === "hr")) {
+    previousApprovals.push({
+      label: EMPLOYEE_STAGE_LABELS.retail_director,
+      approverName: requestData.employee_retail_director_approver,
+      status: requestData.employee_retail_director_approval_status,
+      comments: requestData.employee_retail_director_comments,
+    });
+  }
+  if (stage === "hr") {
+    previousApprovals.push({
+      label: EMPLOYEE_STAGE_LABELS.director,
+      approverName: requestData.employee_director_approver,
+      status: requestData.employee_director_approval_status,
+      comments: requestData.employee_director_comments,
+    });
+  }
 
   const positionsResult = await query(
     `
@@ -149,6 +191,7 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
               submitterEmail={requestData.submitter_email}
               department={requestData.employee_department}
               requestCreatedAt={requestData.request_created_at}
+              previousApprovals={previousApprovals}
               positions={positionsResult.map((position) => ({
                 positionId: position.position_id,
                 positionTitle: position.position_title,

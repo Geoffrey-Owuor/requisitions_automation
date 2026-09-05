@@ -15,7 +15,7 @@ import {
   MessageSquareText,
   Pencil,
 } from "lucide-react";
-import { assets, dateFormatter } from "@/public/assets";
+import { assets, dateFormatter, CASUAL_STAGE_LABELS } from "@/public/assets";
 import SubmittingOverlay from "@/components/SubmittingOverlay";
 import { AlertInfo } from "@/components/TravelRequisitionPage";
 import {
@@ -25,6 +25,9 @@ import {
 import ApprovalAlert from "@/components/Approvers/TravelApprovers/ApprovalAlert";
 import { initialsHelper } from "@/public/assets";
 import Image from "next/image";
+import PreviousApprovalsSection, {
+  PreviousApproval,
+} from "@/components/Approvers/PreviousApprovalsSection";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -52,14 +55,12 @@ export interface CasualApprovalModalProps {
   location: string;
   requestCreatedAt: string;
   sections: CasualApprovalSection[];
+  previousApprovals: PreviousApproval[];
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const stageLabel: Record<string, string> = {
-  hod: "Head of Department",
-  hr: "Human Resources",
-};
+const stageLabel = CASUAL_STAGE_LABELS;
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -115,6 +116,7 @@ const CasualApprovalModal = ({
   location,
   requestCreatedAt,
   sections,
+  previousApprovals,
 }: CasualApprovalModalProps) => {
   const [comments, setComments] = useState("");
   const [hrApprovedCasuals, setHrApprovedCasuals] = useState<
@@ -516,6 +518,9 @@ const CasualApprovalModal = ({
                 </p>
               )}
             </div>
+
+            {/* ── Previous Approvals ── */}
+            <PreviousApprovalsSection approvals={previousApprovals} />
 
             {/* ── Approver Comments ── */}
             <div className="mb-6 border-t border-[rgba(240,180,180,0.4)] pt-6">

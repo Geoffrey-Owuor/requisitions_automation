@@ -10,8 +10,9 @@ import AccessApprovalSkeleton from "@/components/Skeletons/AccessApprovalSkeleto
 import AccessApprovalModal, {
   AccessRequisitionData,
 } from "@/components/Approvers/AccessApprovers/AccessApprovalModal";
+import { PreviousApproval } from "@/components/Approvers/PreviousApprovalsSection";
 import NotFoundRequest from "@/components/Approvers/TravelApprovers/NotFoundRequest";
-import { isValidAccessStage } from "@/public/assets";
+import { isValidAccessStage, ACCESS_STAGE_LABELS } from "@/public/assets";
 
 type ApprovalPageProps = {
   params: Promise<{ uuid: string }>;
@@ -64,8 +65,9 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
           request_created_at, submitter_email, submitter_name,
           employee_name, employee_department, employee_staff_number, 
           issuance_date, access_locations, access_requirements,
-          ${stage}_approver_name AS approver_name, 
-          ${stage}_approver_status AS approval_status
+          ${stage}_approver_name AS approver_name,
+          ${stage}_approver_status AS approval_status,
+          hod_approver_name, hod_approver_status, hod_approver_comments
           FROM access_requisitions WHERE request_id = $1
           `;
 
@@ -91,6 +93,20 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
     roles: [stage],
   };
 
+  // Security is the second and final stage - HOD is the only stage that can
+  // precede it.
+  const previousApprovals: PreviousApproval[] =
+    stage === "security"
+      ? [
+          {
+            label: ACCESS_STAGE_LABELS.hod,
+            approverName: requestData.hod_approver_name,
+            status: requestData.hod_approver_status,
+            comments: requestData.hod_approver_comments,
+          },
+        ]
+      : [];
+
   // Build the single data object passed to the modal
   const modalData: AccessRequisitionData = {
     uuid,
@@ -106,6 +122,7 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
     issuanceDate: requestData.issuance_date,
     accessLocations: requestData.access_locations,
     accessRequirements: requestData.access_requirements,
+    previousApprovals,
   };
 
   return (

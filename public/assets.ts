@@ -107,6 +107,37 @@ export function isValidEmployeeStage(stage: unknown): stage is EmployeeStage {
   );
 }
 
+// Human-readable labels for each approval stage, per requisition type. Kept
+// here (rather than in the client-only approval modal components) so server
+// components - e.g. the approver pages, which build the "previous approvals"
+// list - can read them too: a "use client" module's exports are opaque client
+// references when imported into a Server Component, not the real values.
+// Typed as Record<string, string> (rather than Record<TravelStage, string>
+// etc.) since callers look these up with an untyped `stage: string` prop.
+export const TRAVEL_STAGE_LABELS: Record<string, string> = {
+  hod: "Head of Department",
+  hr: "Human Resources",
+  director: "Director",
+} satisfies Record<TravelStage, string>;
+export const ACCESS_STAGE_LABELS: Record<string, string> = {
+  hod: "Head of Department",
+  security: "Security Department",
+} satisfies Record<AccessStage, string>;
+export const IT_STAGE_LABELS: Record<string, string> = {
+  hod: "Head of Department",
+  it: "IT Department",
+} satisfies Record<itStage, string>;
+export const CASUAL_STAGE_LABELS: Record<string, string> = {
+  hod: "Head of Department",
+  hr: "Human Resources",
+} satisfies Record<CasualStage, string>;
+export const EMPLOYEE_STAGE_LABELS: Record<string, string> = {
+  hod: "Head of Department",
+  retail_director: "Retail Director",
+  director: "CEO",
+  hr: "Human Resources",
+} satisfies Record<EmployeeStage, string>;
+
 export const ALL_CASUAL_LOCATIONS = [
   "Ruiru",
   "Imaara",
