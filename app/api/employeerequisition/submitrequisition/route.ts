@@ -502,7 +502,7 @@ export async function POST(request: NextRequest) {
             ],
           );
 
-          const HR_ARRAY = await loadHrArray();
+          const HR_ARRAY = await loadHrArray("employee");
 
           HR_ARRAY.forEach((hrApprover) => {
             EmployeeEmailSender({

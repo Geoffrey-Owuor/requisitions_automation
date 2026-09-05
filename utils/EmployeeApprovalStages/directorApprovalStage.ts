@@ -17,7 +17,7 @@ export async function directorApprovalStage({
   approverEmail,
   approverName,
 }: DirectorApprovalStageProps) {
-  const HR_ARRAY = await loadHrArray();
+  const HR_ARRAY = await loadHrArray("employee");
 
   if (status === "declined") {
     // Director (CEO)

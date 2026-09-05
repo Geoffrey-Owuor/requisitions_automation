@@ -2,6 +2,7 @@
 "use server";
 import { unstable_cache } from "next/cache";
 import { query } from "./db";
+import { HrForm } from "@/public/assets";
 
 // Global Interfaces
 interface BaseDepartments {
@@ -67,15 +68,23 @@ export const loadHodArray = unstable_cache(
   },
 );
 
-// Load the hr array
-export const loadHrArray = async (): Promise<ApproversObject[] | []> => {
+// Load the hr array, scoped to approvers permitted to act on `form`
+// (hr_array.hr_forms) - salary advance never calls this, it has its own
+// dedicated approver email from the environment.
+export const loadHrArray = async (
+  form: HrForm,
+): Promise<ApproversObject[] | []> => {
   try {
-    const result = await query<ApproversObject>(`
+    const result = await query<ApproversObject>(
+      `
             SELECT hr_uuid AS uuid,
             hr_name AS name,
             hr_email AS email
             FROM hr_array
-            `);
+            WHERE $1 = ANY(hr_forms)
+            `,
+      [form],
+    );
 
     return result;
   } catch (error) {

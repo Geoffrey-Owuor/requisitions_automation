@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const HR_ARRAY = await loadHrArray();
+  const HR_ARRAY = await loadHrArray("travel");
   try {
     const { formData, submittedBy } = await request.json();
 

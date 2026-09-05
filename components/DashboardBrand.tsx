@@ -316,12 +316,12 @@ const AppTile = ({
 }) => {
   const Icon = app.icon;
   const className =
-    "group flex flex-col items-center justify-center rounded-xl p-2.5 transition-all duration-200 hover:bg-red-50/60 focus-visible:ring-2 focus-visible:ring-red-500/40 focus-visible:outline-none active:scale-95";
+    "group flex flex-col items-center justify-center rounded-2xl p-2.5 transition-all duration-200 hover:bg-red-50/60 focus-visible:ring-2 focus-visible:ring-red-500/40 focus-visible:outline-none active:scale-95";
 
   const tileContent = (
     <>
       {/* Icon Tile */}
-      <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-gray-50/80 text-gray-600 shadow-sm ring-1 ring-black/5 transition-all duration-200 group-hover:bg-white group-hover:text-red-600 group-hover:shadow-md group-hover:ring-red-100">
+      <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-50/80 text-gray-600 shadow-sm ring-1 ring-black/5 transition-all duration-200 group-hover:bg-white group-hover:text-red-600 group-hover:shadow-md group-hover:ring-red-100">
         <Icon
           className="h-6 w-6 transition-transform duration-200 group-hover:scale-105"
           strokeWidth={1.75}
