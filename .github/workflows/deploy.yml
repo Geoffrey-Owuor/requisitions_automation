@@ -1,0 +1,267 @@
+name: Production CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  # Runner-local cache root. This is a self-hosted box, so a plain directory on
+  # the same disk beats actions/cache: that action tars the cache and ships it to
+  # GitHub-hosted storage over the internet, which for a ~500 MB node_modules and
+  # a Turbopack cache costs more than it saves.
+  CACHE_ROOT: C:\ci-cache\requisitions_automation
+  # A Turbopack cache this old has usually drifted far enough from the tree that
+  # a cold build is the safer bet.
+  CACHE_MAX_AGE_DAYS: 14
+
+jobs:
+  build-and-deploy:
+    # This ensures the job only runs in the organization fork, preventing hanging workflows in your personal repo
+    if: github.repository == 'Hotpoint-Appliances/hotpoint-apps-hub'
+    runs-on: [self-hosted, windows, x64]
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+        with:
+          # checkout defaults to clean:true, which runs `git clean -ffdx` and would
+          # delete node_modules before we ever get a chance to reuse it. The
+          # post-deployment cleanup step below already scrubs the workspace on every
+          # run so the tree still starts each build in a known state.
+          clean: false
+
+      - name: Setup Node.js Context
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      # Decides, before anything expensive happens, whether node_modules and the
+      # Turbopack build cache can be reused. Both are keyed on package-lock.json:
+      # a dependency change invalidates most of the compiler cache anyway, so one
+      # key covers both.
+      - name: Resolve Cache State
+        id: cache
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Stop"
+          $CacheRoot = "${{ env.CACHE_ROOT }}"
+          $LockHashFile = "$CacheRoot\package-lock.sha256"
+          $TurbopackCache = "$CacheRoot\turbopack"
+          $TurbopackStamp = "$CacheRoot\turbopack.stamp"
+
+          if (-not (Test-Path $CacheRoot)) {
+            New-Item -ItemType Directory -Path $CacheRoot -Force | Out-Null
+          }
+
+          $CurrentHash = (Get-FileHash "package-lock.json" -Algorithm SHA256).Hash
+          $CachedHash = if (Test-Path $LockHashFile) { (Get-Content $LockHashFile -Raw).Trim() } else { "" }
+          $LockMatches = $CurrentHash -eq $CachedHash
+
+          # .package-lock.json is written by npm at the end of a successful install,
+          # so its presence proves a complete tree rather than a half-copied one.
+          $NodeModulesIntact = Test-Path "node_modules\.package-lock.json"
+          $InstallNeeded = -not ($LockMatches -and $NodeModulesIntact)
+
+          # The stamp records when the cache was last built from scratch, not when it
+          # was last written - refreshing it on every save would mean the age cap
+          # never fires.
+          $CacheExpired = $false
+          if (Test-Path $TurbopackStamp) {
+            $AgeDays = ((Get-Date) - (Get-Item $TurbopackStamp).LastWriteTime).TotalDays
+            $CacheExpired = $AgeDays -gt [double]"${{ env.CACHE_MAX_AGE_DAYS }}"
+            if ($CacheExpired) {
+              Write-Host "Turbopack cache is $([math]::Round($AgeDays, 1)) days old (cap ${{ env.CACHE_MAX_AGE_DAYS }}); discarding."
+            }
+          }
+
+          $TurbopackUsable = (Test-Path $TurbopackCache) -and $LockMatches -and (-not $CacheExpired)
+
+          if ((Test-Path $TurbopackCache) -and (-not $TurbopackUsable)) {
+            if (-not $LockMatches) { Write-Host "package-lock.json changed; discarding Turbopack cache." }
+            Remove-Item $TurbopackCache -Recurse -Force
+            if (Test-Path $TurbopackStamp) { Remove-Item $TurbopackStamp -Force }
+          }
+
+          Write-Host "package-lock.json SHA256: $CurrentHash"
+          Write-Host "npm ci needed:            $InstallNeeded"
+          Write-Host "Turbopack cache reusable: $TurbopackUsable"
+
+          # Add-Content -Encoding ascii, not ">>": under Windows PowerShell 5.1 the
+          # redirection operators write UTF-16LE, which the runner cannot parse.
+          Add-Content -Path $env:GITHUB_OUTPUT -Encoding ascii -Value "lock_hash=$CurrentHash"
+          Add-Content -Path $env:GITHUB_OUTPUT -Encoding ascii -Value "install_needed=$($InstallNeeded.ToString().ToLower())"
+          Add-Content -Path $env:GITHUB_OUTPUT -Encoding ascii -Value "turbopack_usable=$($TurbopackUsable.ToString().ToLower())"
+
+      # Next.js shares .next/cache between builds, and Turbopack's filesystem cache
+      # (on by default since 16.3) lives at .next/cache/turbopack. The workspace copy
+      # is destroyed by the cleanup step at the end of every run, so it is staged
+      # outside the workspace and restored here.
+      - name: Restore Turbopack Build Cache
+        if: steps.cache.outputs.turbopack_usable == 'true'
+        shell: powershell
+        run: |
+          robocopy "${{ env.CACHE_ROOT }}\turbopack" ".next\cache\turbopack" /E /MT:16 /NFL /NDL /NJH /NJS /NP | Out-Null
+
+          # A missing or corrupt cache is not worth failing a deploy over - the build
+          # just runs cold.
+          if ($LASTEXITCODE -ge 8) {
+            Write-Warning "Could not restore the Turbopack cache (robocopy $LASTEXITCODE); building cold."
+            if (Test-Path ".next\cache\turbopack") { Remove-Item ".next\cache\turbopack" -Recurse -Force }
+          } else {
+            $Size = "{0:N0}" -f ((Get-ChildItem ".next\cache\turbopack" -Recurse -File -ErrorAction SilentlyContinue | Measure-Object Length -Sum).Sum / 1MB)
+            Write-Host "Restored Turbopack build cache: $Size MB"
+          }
+
+          $global:LASTEXITCODE = 0
+          exit 0
+
+      # npm ci deletes node_modules and reinstalls from scratch by design, so the only
+      # way to skip that ~500 MB of work is to not run it. The lockfile hash above is
+      # what makes skipping safe.
+      - name: Install All Dependencies
+        if: steps.cache.outputs.install_needed == 'true'
+        run: npm ci --prefer-offline --no-audit --no-fund
+
+      # Written only after npm ci succeeds, so a failed install leaves the old key in
+      # place and the next run reinstalls rather than trusting a partial tree.
+      - name: Record Dependency Cache Key
+        if: steps.cache.outputs.install_needed == 'true'
+        shell: powershell
+        run: |
+          "${{ steps.cache.outputs.lock_hash }}" | Set-Content -Path "${{ env.CACHE_ROOT }}\package-lock.sha256" -Encoding ascii -NoNewline
+
+      - name: Reuse Existing Dependencies
+        if: steps.cache.outputs.install_needed != 'true'
+        shell: powershell
+        run: Write-Host "package-lock.json unchanged and node_modules intact; skipping npm ci."
+
+      # COPY SERVER-LOCAL ENV FILE FOR BUILD TIME
+      - name: Inject Test Environment Variables
+        shell: powershell
+        run: |
+          if (Test-Path "C:\requisitions_automation\.env.production") {
+            Write-Host "Copying .env.production from requisitions_automation into build workspace..."
+            Copy-Item "C:\requisitions_automation\.env.production" -Destination ".env.production" -Force
+          } else {
+            Write-Warning "C:\requisitions_automation\.env.production not found! NEXT_PUBLIC_ variables may be missing."
+          }
+
+      - name: Build Next.js Application (Standalone Output)
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+          NEXT_OUTPUT_STANDALONE: 1
+
+      # Saved immediately after the build rather than at the end: the cache reflects
+      # compiler work, so it stays valid even if the deploy or smoke test later fails.
+      - name: Save Turbopack Build Cache
+        if: success()
+        shell: powershell
+        run: |
+          if (-not (Test-Path ".next\cache\turbopack")) {
+            Write-Warning "No Turbopack cache was produced; nothing to save."
+            exit 0
+          }
+
+          # /MIR so entries Turbopack dropped are purged from the cache too, which is
+          # what keeps this directory from growing without bound.
+          robocopy ".next\cache\turbopack" "${{ env.CACHE_ROOT }}\turbopack" /MIR /MT:16 /NFL /NDL /NJH /NJS /NP | Out-Null
+
+          if ($LASTEXITCODE -ge 8) {
+            Write-Warning "Could not save the Turbopack cache (robocopy $LASTEXITCODE); the next build will run cold."
+          } else {
+            # Only stamped on genesis, so the age cap measures cache lifetime rather
+            # than time since the last write.
+            $Stamp = "${{ env.CACHE_ROOT }}\turbopack.stamp"
+            if (-not (Test-Path $Stamp)) { New-Item -ItemType File -Path $Stamp -Force | Out-Null }
+
+            $Size = "{0:N0}" -f ((Get-ChildItem "${{ env.CACHE_ROOT }}\turbopack" -Recurse -File -ErrorAction SilentlyContinue | Measure-Object Length -Sum).Sum / 1MB)
+            Write-Host "Saved Turbopack build cache: $Size MB"
+          }
+
+          $global:LASTEXITCODE = 0
+          exit 0
+
+      # Next.js deliberately leaves public/ and .next/static out of the standalone
+      # folder, on the assumption a CDN serves them. Without this step the app boots
+      # and then 404s on every asset, which looks like a broken build.
+      - name: Assemble Standalone Bundle
+        shell: powershell
+        run: |
+          if (-not (Test-Path ".next\standalone\server.js")) {
+            throw "No standalone output produced. Check that next.config.ts honours NEXT_OUTPUT_STANDALONE."
+          }
+
+          robocopy "public" ".next\standalone\public" /E /MT:16 /NFL /NDL /NJH /NJS /NP | Out-Null
+          if ($LASTEXITCODE -ge 8) { throw "Failed to copy public into the standalone bundle ($LASTEXITCODE)" }
+
+          robocopy ".next\static" ".next\standalone\.next\static" /E /MT:16 /NFL /NDL /NJH /NJS /NP | Out-Null
+          if ($LASTEXITCODE -ge 8) { throw "Failed to copy .next\static into the standalone bundle ($LASTEXITCODE)" }
+
+          $global:LASTEXITCODE = 0
+
+          # Build scratch must never reach a release: it is compiler state, never read
+          # at runtime, and it is already preserved in CACHE_ROOT. Next does not emit
+          # it inside standalone today, so this is a guard against a future version
+          # quietly shipping hundreds of MB of cache to the server.
+          $StrayCache = ".next\standalone\.next\cache"
+          if (Test-Path $StrayCache) {
+            Write-Host "Dropping build cache from the standalone bundle: $StrayCache"
+            Remove-Item $StrayCache -Recurse -Force
+          }
+
+          # Fail here rather than after a half-broken deploy reaches the server
+          foreach ($Required in @(".next\standalone\server.js", ".next\standalone\.next\static", ".next\standalone\public")) {
+            if (-not (Test-Path $Required)) { throw "Standalone bundle is missing '$Required'" }
+          }
+
+          $Size = "{0:N0}" -f ((Get-ChildItem ".next\standalone" -Recurse -File | Measure-Object Length -Sum).Sum / 1MB)
+          Write-Host "Standalone bundle assembled: $Size MB"
+          exit 0
+
+      - name: Execute Deployment Script
+        shell: powershell
+        run: |
+          $ReleaseId = Get-Date -Format "yyyyMMdd-HHmmss"
+          powershell -ExecutionPolicy Bypass -File .\.github\scripts\deploy.ps1 -ReleaseId $ReleaseId -SourceDir "${{ github.workspace }}" -AppName "requisitions_automation" -AppRootDir "C:\requisitions_automation" -Standalone
+
+      # A standalone tracing gap surfaces as MODULE_NOT_FOUND on first request, not
+      # at boot, so confirm the process actually answers before calling this a pass.
+      - name: Smoke Test
+        shell: powershell
+        run: |
+          $Deadline = (Get-Date).AddSeconds(60)
+          $Status = $null
+
+          while ((Get-Date) -lt $Deadline -and -not $Status) {
+            try {
+              $Response = Invoke-WebRequest -Uri "http://localhost:4000" -UseBasicParsing -TimeoutSec 10
+              $Status = $Response.StatusCode
+            } catch [System.Net.WebException] {
+              # An HTTP error response still proves the server is listening
+              if ($_.Exception.Response) {
+                $Status = [int]$_.Exception.Response.StatusCode
+              } else {
+                Start-Sleep -Seconds 3
+              }
+            }
+          }
+
+          if (-not $Status) {
+            throw "requisitions_automation did not respond on port 4000 within 60s. Check: pm2 logs requisitions_automation"
+          }
+
+          Write-Host "requisitions_automation responded on port 4000 with HTTP $Status"
+
+      # WORKSPACE CLEANUP STEP: Runs whether deployment succeeded or failed
+      - name: Post-Deployment Workspace Cleanup
+        if: always()
+        shell: powershell
+        run: |
+          Write-Host "Cleaning up runner workspace build artifacts..."
+          # -x already removes gitignored build output (.next, .env.production copy).
+          # .next\cache\turbopack goes with it; the copy under CACHE_ROOT is the one
+          # that survives. node_modules is kept so the next run can skip npm ci -
+          # checkout no longer wipes it, so this step is what guarantees a clean tree.
+          git clean -ffdx -e node_modules
