@@ -10,13 +10,13 @@ type ViewState = "dashboard" | "page";
 const DashboardAdvanceWrapper = () => {
   const { roles } = useUser();
   const [activeView, setActiveView] = useState<ViewState>(
-    roles.includes("hr") ? "dashboard" : "page",
+    roles.includes("hr-advance") ? "dashboard" : "page",
   );
 
   return (
     <div className="relative h-full w-full">
       {/* HR Action toggle button */}
-      {roles.includes("hr") && (
+      {roles.includes("hr-advance") && (
         <div className="fixed right-6 bottom-4 z-50 flex flex-col items-end">
           {/* Make a Request Button */}
           <button

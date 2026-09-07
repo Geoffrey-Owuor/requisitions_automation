@@ -5,11 +5,16 @@ import RequisitionPagesWrapper from "@/components/Dashboard/RequisitionPagesWrap
 import { UserProvider } from "@/context/UserContext";
 import { query } from "@/lib/db";
 import EmployeeApprovalModal from "@/components/Approvers/EmployeeApprovers/EmployeeApprovalModal";
+import { PreviousApproval } from "@/components/Approvers/PreviousApprovalsSection";
 import TravelApprovalSkeleton from "@/components/Skeletons/TravelApprovalSkeleton";
 import AlreadyProcessed from "@/components/Approvers/TravelApprovers/AlreadyProcessed";
 import InvalidToken from "@/components/Approvers/TravelApprovers/InvalidToken";
 import NotFoundRequest from "@/components/Approvers/TravelApprovers/NotFoundRequest";
-import { isValidEmployeeStage } from "@/public/assets";
+import {
+  isValidEmployeeStage,
+  RETAIL_DEPARTMENT,
+  EMPLOYEE_STAGE_LABELS,
+} from "@/public/assets";
 
 type ApprovalPageProps = {
   params: Promise<{ uuid: string }>;
@@ -45,14 +50,24 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
   if (!uuid || !token || !isValidEmployeeStage(stage))
     return <NotFoundRequest />;
 
+  // HR approvers are additionally scoped to the forms in their hr_forms
+  // allow-list - an approver not permitted for this form is treated the
+  // same as an invalid token, so their permissions aren't leaked.
   const validApprover = await query(
-    `SELECT ${stage}_email AS email,
+    stage === "hr"
+      ? `SELECT hr_email AS email, hr_name AS name, hr_forms
+         FROM hr_array WHERE hr_uuid = $1`
+      : `SELECT ${stage}_email AS email,
        ${stage}_name AS name
        FROM ${stage}_array WHERE ${stage}_uuid = $1`,
     [token],
   );
 
   if (validApprover.length === 0) return <InvalidToken />;
+
+  if (stage === "hr" && !validApprover[0].hr_forms.includes("employee")) {
+    return <InvalidToken />;
+  }
 
   const approverDetails = validApprover[0];
 
@@ -61,7 +76,12 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
       SELECT
         employee_${stage}_approval_status AS approval_status,
         employee_${stage}_approver AS approver_name,
-        request_created_at, submitter_name, submitter_email, employee_department
+        request_created_at, submitter_name, submitter_email, employee_department,
+        employee_hod_approver, employee_hod_approval_status, employee_hod_comments,
+        employee_retail_director_approver, employee_retail_director_approval_status,
+        employee_retail_director_comments,
+        employee_director_approver, employee_director_approval_status,
+        employee_director_comments
         FROM employee_requisitions
         WHERE request_id = $1
       `;
@@ -72,6 +92,46 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
   if (result.length === 0) return <NotFoundRequest />;
 
   const requestData = result[0];
+
+  // Retail Director is only part of the chain for Retail-department
+  // requisitions
+  if (
+    stage === "retail_director" &&
+    requestData.employee_department !== RETAIL_DEPARTMENT
+  )
+    return <NotFoundRequest />;
+
+  const isRetailRequisition =
+    requestData.employee_department === RETAIL_DEPARTMENT;
+
+  // Build the list of stages that precede the current one. Retail Director
+  // only ever sits between HOD and CEO, and only for Retail-department
+  // requisitions.
+  const previousApprovals: PreviousApproval[] = [];
+  if (stage !== "hod") {
+    previousApprovals.push({
+      label: EMPLOYEE_STAGE_LABELS.hod,
+      approverName: requestData.employee_hod_approver,
+      status: requestData.employee_hod_approval_status,
+      comments: requestData.employee_hod_comments,
+    });
+  }
+  if (isRetailRequisition && (stage === "director" || stage === "hr")) {
+    previousApprovals.push({
+      label: EMPLOYEE_STAGE_LABELS.retail_director,
+      approverName: requestData.employee_retail_director_approver,
+      status: requestData.employee_retail_director_approval_status,
+      comments: requestData.employee_retail_director_comments,
+    });
+  }
+  if (stage === "hr") {
+    previousApprovals.push({
+      label: EMPLOYEE_STAGE_LABELS.director,
+      approverName: requestData.employee_director_approver,
+      status: requestData.employee_director_approval_status,
+      comments: requestData.employee_director_comments,
+    });
+  }
 
   const positionsResult = await query(
     `
@@ -100,7 +160,7 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
   const approvalStatus = requestData.approval_status;
   const approverName = requestData.approver_name;
 
-  if (approvalStatus !== "pending")
+  if (approvalStatus !== "pending" && approvalStatus !== "N/A")
     return (
       <AlreadyProcessed processedBy={approverName} status={approvalStatus} />
     );
@@ -131,6 +191,7 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
               submitterEmail={requestData.submitter_email}
               department={requestData.employee_department}
               requestCreatedAt={requestData.request_created_at}
+              previousApprovals={previousApprovals}
               positions={positionsResult.map((position) => ({
                 positionId: position.position_id,
                 positionTitle: position.position_title,

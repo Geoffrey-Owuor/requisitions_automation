@@ -5,7 +5,7 @@ import { ShieldAlert, Circle, Home } from "lucide-react";
 
 export default function InvalidToken() {
   return (
-    <div className="relative flex min-h-screen items-center justify-center p-5">
+    <div className="layout-scrollbar relative flex h-screen items-center justify-center overflow-y-auto p-5">
       <div className="mx-auto max-w-md rounded-3xl border border-gray-100 bg-white/65 p-10 text-center shadow-[0_24px_48px_rgba(160,60,60,0.10)] backdrop-blur-2xl">
         {/* Icon */}
         <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100">
@@ -18,12 +18,12 @@ export default function InvalidToken() {
         </p>
 
         <h2 className="mb-2 text-[22px] font-semibold tracking-[-0.3px] text-[#1e1b1b]">
-          Link no longer valid
+          Link No Longer Valid
         </h2>
 
         <p className="mb-7 text-[13px] leading-relaxed text-[#7c5a5a]">
           For security purposes, this approval link has either expired, been
-          modified, or was already used. You&apos;ll need a fresh token to
+          modified, or was already used. You&apos;ll need a valid token to
           proceed.
         </p>
 
@@ -37,6 +37,7 @@ export default function InvalidToken() {
               "Ask the requester to generate a new link",
               "Check your inbox for a more recent email",
               "Ensure the URL was not truncated in your browser",
+              "Contact your administrator",
             ].map((tip) => (
               <li
                 key={tip}

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { assets } from "@/public/assets";
+import { assets, TRAVEL_STAGE_LABELS } from "@/public/assets";
 import {
   Building2,
   MapPin,
@@ -27,6 +27,9 @@ import { UpdateTravelStatus } from "@/serverActions/UpdateTravelStatus";
 import ApprovalAlert from "./ApprovalAlert";
 import { initialsHelper } from "@/public/assets";
 import EngineeringJobSummaryCard from "./EngineeringJobSummaryCard";
+import PreviousApprovalsSection, {
+  PreviousApproval,
+} from "@/components/Approvers/PreviousApprovalsSection";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -53,15 +56,12 @@ export interface TravelApprovalModalProps {
   travelApprovalTier: string;
   requestCreatedAt: string;
   engineeringJobs: string;
+  previousApprovals: PreviousApproval[];
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const stageLabel: Record<string, string> = {
-  hod: "Head of Department",
-  hr: "Human Resources",
-  director: "Director",
-};
+const stageLabel = TRAVEL_STAGE_LABELS;
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -120,6 +120,7 @@ const TravelApprovalModal = ({
   travelApprovalTier,
   requestCreatedAt,
   engineeringJobs,
+  previousApprovals,
 }: TravelApprovalModalProps) => {
   const [comments, setComments] = useState("");
   const [approving, setApproving] = useState(false);
@@ -376,6 +377,9 @@ const TravelApprovalModal = ({
                 </div>
               </div>
             </div>
+
+            {/* ── Previous Approvals ── */}
+            <PreviousApprovalsSection approvals={previousApprovals} />
 
             {/* ── Approver Comments ── */}
             <div className="mb-6 border-t border-[rgba(240,180,180,0.4)] pt-6">

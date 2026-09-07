@@ -2,6 +2,7 @@
 "use server";
 import { unstable_cache } from "next/cache";
 import { query } from "./db";
+import { HrForm } from "@/public/assets";
 
 // Global Interfaces
 interface BaseDepartments {
@@ -13,6 +14,12 @@ export interface ApproversObject {
   uuid: string;
   name: string;
   email: string;
+}
+
+// HOD approver, additionally carrying the department it should be
+// auto-selected for (null when a HOD isn't tied to a specific department)
+export interface HodApproversObject extends ApproversObject {
+  department: string | null;
 }
 
 // Loading base departments
@@ -37,45 +44,47 @@ export const loadBaseDepartments = unstable_cache(
 );
 
 // Load the hod array
-export const loadHodArray = async (): Promise<ApproversObject[] | []> => {
-  try {
-    const result = await query<ApproversObject>(`
+export const loadHodArray = unstable_cache(
+  async (): Promise<HodApproversObject[] | []> => {
+    try {
+      const result = await query<HodApproversObject>(`
             SELECT hod_uuid AS uuid,
             hod_name AS name,
-            hod_email AS email
+            hod_email AS email,
+            hod_department AS department
             FROM hod_array
             `);
 
-    return result;
-  } catch (error) {
-    console.error("Error while trying to fetch hod array data:", error);
-    return [];
-  }
-};
-
-// Load hod approvers - reuse the hod array function
-export const loadHodApprovers = unstable_cache(
-  async (): Promise<string[]> => {
-    const hodArray = await loadHodArray();
-
-    return hodArray.map((hod) => hod.name);
+      return result;
+    } catch (error) {
+      console.error("Error while trying to fetch hod array data:", error);
+      return [];
+    }
   },
-  ["hod_approvers"],
+  ["hod_array"],
   {
     revalidate: 3600,
-    tags: ["GetHODApprovers"],
+    tags: ["GetHodArray"],
   },
 );
 
-// Load the hr array
-export const loadHrArray = async (): Promise<ApproversObject[] | []> => {
+// Load the hr array, scoped to approvers permitted to act on `form`
+// (hr_array.hr_forms) - salary advance never calls this, it has its own
+// dedicated approver email from the environment.
+export const loadHrArray = async (
+  form: HrForm,
+): Promise<ApproversObject[] | []> => {
   try {
-    const result = await query<ApproversObject>(`
+    const result = await query<ApproversObject>(
+      `
             SELECT hr_uuid AS uuid,
             hr_name AS name,
             hr_email AS email
             FROM hr_array
-            `);
+            WHERE $1 = ANY(hr_forms)
+            `,
+      [form],
+    );
 
     return result;
   } catch (error) {
@@ -97,6 +106,28 @@ export const loadDirectorArray = async (): Promise<ApproversObject[] | []> => {
     return result;
   } catch (error) {
     console.error("Error while trying to fetch director array data:", error);
+    return [];
+  }
+};
+
+// Load the retail director array
+export const loadRetailDirectorArray = async (): Promise<
+  ApproversObject[] | []
+> => {
+  try {
+    const result = await query<ApproversObject>(`
+            SELECT retail_director_uuid AS uuid,
+            retail_director_name AS name,
+            retail_director_email AS email
+            FROM retail_director_array
+            `);
+
+    return result;
+  } catch (error) {
+    console.error(
+      "Error while trying to fetch retail director array data:",
+      error,
+    );
     return [];
   }
 };

@@ -74,9 +74,14 @@ export async function UpdateTravelStatus(
       };
     }
 
-    // Check if the approver exists in our table array data set
+    // Check if the approver exists in our table array data set. HR approvers
+    // are additionally scoped to the forms in their hr_forms allow-list -
+    // salary advance never reaches this check, it has its own approver.
+    const isHrStage = payload.stage === "hr";
     const { rows: approverResult } = await client.query(
-      `SELECT id FROM ${payload.stage}_array WHERE ${payload.stage}_email = $1 FOR UPDATE`,
+      isHrStage
+        ? `SELECT id, hr_forms FROM hr_array WHERE hr_email = $1 FOR UPDATE`
+        : `SELECT id FROM ${payload.stage}_array WHERE ${payload.stage}_email = $1 FOR UPDATE`,
       [payload.approverEmail],
     );
 
@@ -86,6 +91,15 @@ export async function UpdateTravelStatus(
         alertType: "error",
         alertMessage:
           "Could not verify the current approver, please contact your admin for support",
+      };
+    }
+
+    if (isHrStage && !approverResult[0].hr_forms.includes("travel")) {
+      await client.query("ROLLBACK");
+      return {
+        alertType: "error",
+        alertMessage:
+          "You are not authorized to approve travel requisitions, please contact your admin for support",
       };
     }
 

@@ -5,11 +5,12 @@ import RequisitionPagesWrapper from "@/components/Dashboard/RequisitionPagesWrap
 import { UserProvider } from "@/context/UserContext";
 import { query } from "@/lib/db";
 import CasualApprovalModal from "@/components/Approvers/CasualApprovers/CasualApprovalModal";
+import { PreviousApproval } from "@/components/Approvers/PreviousApprovalsSection";
 import TravelApprovalSkeleton from "@/components/Skeletons/TravelApprovalSkeleton";
 import AlreadyProcessed from "@/components/Approvers/TravelApprovers/AlreadyProcessed";
 import InvalidToken from "@/components/Approvers/TravelApprovers/InvalidToken";
 import NotFoundRequest from "@/components/Approvers/TravelApprovers/NotFoundRequest";
-import { isValidCasualStage } from "@/public/assets";
+import { isValidCasualStage, CASUAL_STAGE_LABELS } from "@/public/assets";
 
 type ApprovalPageProps = {
   params: Promise<{ uuid: string }>;
@@ -44,14 +45,24 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
   // First fallback - one of our props is missing/falsy
   if (!uuid || !token || !isValidCasualStage(stage)) return <NotFoundRequest />;
 
+  // HR approvers are additionally scoped to the forms in their hr_forms
+  // allow-list - an approver not permitted for this form is treated the
+  // same as an invalid token, so their permissions aren't leaked.
   const validApprover = await query(
-    `SELECT ${stage}_email AS email,
+    stage === "hr"
+      ? `SELECT hr_email AS email, hr_name AS name, hr_forms
+         FROM hr_array WHERE hr_uuid = $1`
+      : `SELECT ${stage}_email AS email,
        ${stage}_name AS name
        FROM ${stage}_array WHERE ${stage}_uuid = $1`,
     [token],
   );
 
   if (validApprover.length === 0) return <InvalidToken />;
+
+  if (stage === "hr" && !validApprover[0].hr_forms.includes("casual")) {
+    return <InvalidToken />;
+  }
 
   const approverDetails = validApprover[0];
 
@@ -61,7 +72,8 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
         casual_${stage}_approval_status AS approval_status,
         casual_${stage}_approver AS approver_name,
         request_created_at, submitter_name, submitter_email, employee_department,
-        casual_location
+        casual_location,
+        casual_hod_approver, casual_hod_approval_status, casual_hod_comments
         FROM casual_requisitions
         WHERE request_id = $1
       `;
@@ -106,6 +118,20 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
     roles: [stage],
   };
 
+  // HR is the second and final stage - HOD is the only stage that can
+  // precede it.
+  const previousApprovals: PreviousApproval[] =
+    stage === "hr"
+      ? [
+          {
+            label: CASUAL_STAGE_LABELS.hod,
+            approverName: requestData.casual_hod_approver,
+            status: requestData.casual_hod_approval_status,
+            comments: requestData.casual_hod_comments,
+          },
+        ]
+      : [];
+
   return (
     <UserProvider user={contextObject}>
       <DashboardWrapper>
@@ -121,6 +147,7 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
               department={requestData.employee_department}
               location={requestData.casual_location}
               requestCreatedAt={requestData.request_created_at}
+              previousApprovals={previousApprovals}
               sections={sectionsResult.map((section) => ({
                 sectionId: section.section_id,
                 sectionName: section.section_name,
