@@ -1,23 +1,35 @@
 "use client";
-import { useState, useEffect } from "react";
-import { SkeletonTable } from "@/components/Skeletons/SkeletonTable";
 import {
   getITRequisitionData,
   ITRequisitionDataProps,
 } from "@/serverActions/GetITRequisitionData";
-import { Search, Monitor, Plus, Info, RotateCcw, X } from "lucide-react";
-import { TablePagination } from "../TablePagination";
+import { Monitor, Info } from "lucide-react";
+import RequisitionTable, { NEUTRAL_THEME } from "../RequisitionTable";
 import { ITRequisitionModal } from "./ITRequisitionsModal";
 import StatusFormatter from "../StatusFormatter";
-import { QueryResultRow } from "pg";
 import ITDataExport from "./ITDataExport";
 import { useToggleStore } from "@/store/useToggleStore";
-import { useServerPagination } from "@/hooks/useServerPagination";
+
+const dynamicTitles: Record<ITRequisitionDataProps["dataFlag"], string> = {
+  userData: "Your Submitted IT Requisitions",
+  hodPending: "IT Requisitions Pending Your Approval (HOD)",
+  itPending: "IT Requisitions Pending IT Approval",
+  itAll: "All Submitted IT Requisitions",
+};
+
+const COLUMNS = [
+  { key: "employee", label: "Employee" },
+  { key: "department", label: "Department" },
+  { key: "type", label: "Type" },
+  { key: "hod", label: "HOD" },
+  { key: "date", label: "Requisition Date" },
+  { key: "hodStatus", label: "HOD Status" },
+  { key: "itStatus", label: "IT Status" },
+  { key: "completion", label: "Completion" },
+];
 
 export default function ITRequisitionsTable({
-  userEmail,
   dataFlag,
-  hodEmail,
   onStatusChange,
 }: ITRequisitionDataProps & {
   onStatusChange?: (hasData: boolean) => void;
@@ -26,276 +38,108 @@ export default function ITRequisitionsTable({
   const setShowITRequisition = useToggleStore(
     (state) => state.setShowITRequisition,
   );
-  const [selectedRequest, setSelectedRequest] = useState<QueryResultRow | null>(
-    null,
-  );
-  // Sticky "does this dataFlag have any data at all" signal — distinct from
-  // totalCount, which reflects the current (possibly search-filtered) count.
-  const [hasData, setHasData] = useState(false);
-  const [committedTotalCount, setCommittedTotalCount] = useState<number | null>(
-    null,
-  );
-
-  const {
-    data: paginatedData,
-    totalCount,
-    isLoading: loading,
-    isFetching,
-    refetch,
-    searchTerm,
-    setSearchTerm,
-    clearSearch,
-    isSearchActive,
-    currentPage,
-    setCurrentPage,
-    itemsPerPage,
-    setItemsPerPage,
-  } = useServerPagination({
-    queryKey: ["ITRequisitionsData"],
-    params: { userEmail, dataFlag, hodEmail },
-    queryFn: ({ params, page, pageSize, searchTerm }) =>
-      getITRequisitionData({ ...params, page, pageSize, searchTerm }),
-  });
-
-  // Commit the sticky "has any data" signal during render (not in an effect)
-  // whenever an unfiltered totalCount becomes available — only trust
-  // totalCount while no search filter is active, since a search can
-  // legitimately drop totalCount to 0 without the table being truly empty.
-  const canCommit = !loading && !isSearchActive;
-  if (canCommit && totalCount !== committedTotalCount) {
-    setCommittedTotalCount(totalCount);
-    setHasData(totalCount > 0);
-  }
-
-  // Notifying the parent is a side effect on an external system, so it
-  // belongs in an effect rather than during render.
-  useEffect(() => {
-    if (canCommit) onStatusChange?.(totalCount > 0);
-  }, [canCommit, totalCount, onStatusChange]);
-
-  // Render different titles based on the data flag
-  const baseTitle = "IT Requisitions";
-
-  const dynamicTitles: Record<typeof dataFlag, string> = {
-    userData: `Your Submitted ${baseTitle}`,
-    hodPending: `${baseTitle} Pending Your Approval (HOD)`,
-    itPending: `${baseTitle} Pending IT Approval`,
-    itAll: `All Submitted ${baseTitle}`,
-  };
-
-  if (loading) return <SkeletonTable />;
 
   return (
-    <>
-      {hasData && (
-        <div>
-          <span className="mb-4 flex items-center gap-2 font-medium text-neutral-600">
-            <Monitor className="h-5 w-5" />
-            {dynamicTitles[dataFlag]}
-          </span>
-          <div className="mt-2">
-            {/* Search Input And Refresh */}
-            <div className="mb-6 flex flex-wrap items-center gap-2">
-              <div className="relative w-full max-w-xs">
-                <Search
-                  className="absolute top-1/2 left-4 z-10 -translate-y-1/2 text-gray-400"
-                  size={20}
-                />
-                <input
-                  type="text"
-                  placeholder="Search employee, department or status..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full rounded-xl border border-gray-300 bg-white/60 py-2.5 pr-4 pl-12 text-sm shadow-[0_8px_16px_rgba(60,100,160,0.02)] outline-hidden backdrop-blur-xl transition-all focus:border-red-400 focus:ring-4 focus:ring-red-500/5"
-                />
-                {searchTerm && (
-                  <button
-                    onClick={clearSearch}
-                    className="absolute top-1/2 right-4 z-10 -translate-y-1/2 rounded-full p-1 hover:bg-gray-200"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                )}
-              </div>
-              <button
-                onClick={() => refetch()}
-                className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-3 py-2.5 text-sm text-white hover:bg-slate-800"
-              >
-                <RotateCcw className="h-4 w-4" />
-                Refresh
-              </button>
-              {dataFlag === "itAll" && <ITDataExport />}
+    <RequisitionTable
+      tableKey={`it-${dataFlag}`}
+      title={dynamicTitles[dataFlag]}
+      Icon={Monitor}
+      theme={NEUTRAL_THEME}
+      searchPlaceholder="Search employee, department or status..."
+      columns={COLUMNS}
+      queryKey={["ITRequisitionsData"]}
+      params={{ dataFlag }}
+      queryFn={({ params, page, pageSize, searchTerm }) =>
+        getITRequisitionData({ ...params, page, pageSize, searchTerm })
+      }
+      onStatusChange={onStatusChange}
+      toolbarSlot={dataFlag === "itAll" ? <ITDataExport /> : undefined}
+      emptyState={{
+        Icon: Monitor,
+        body: "Your IT requisition history is currently empty.",
+        onNewRequisition:
+          dataFlag === "userData"
+            ? () => setShowITRequisition(true)
+            : undefined,
+      }}
+      renderRow={(req) => (
+        <>
+          {/* Employee */}
+          <td className="px-6 py-5">
+            <div className="flex flex-col">
+              <span className="text-sm font-medium text-[#1e1b1b]">
+                {req.employee_name}
+              </span>
+              <span className="text-[11px] text-gray-400">
+                #{req.employee_staff_number}
+              </span>
             </div>
+          </td>
 
-            {/* Table Container */}
-            <div
-              className={`overflow-x-auto rounded-2xl border border-gray-200 bg-white/50 shadow-[0_24px_48px_rgba(160,60,60,0.08)] backdrop-blur-2xl transition-opacity ${isFetching ? "animate-pulse opacity-60" : ""}`}
+          {/* Department */}
+          <td className="px-6 py-5">
+            <span className="text-sm text-[#1e1b1b]">
+              {req.employee_department}
+            </span>
+          </td>
+
+          {/* Replacement / New */}
+          <td className="px-6 py-5">
+            <span
+              className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
+                req.replacement_new === "New"
+                  ? "bg-emerald-50 text-emerald-600"
+                  : "bg-amber-50 text-amber-600"
+              }`}
             >
-              <table className="w-full border-collapse text-left">
-                <thead>
-                  <tr className="border-b border-neutral-200/50 bg-neutral-100/30">
-                    {[
-                      "Employee",
-                      "Department",
-                      "Type",
-                      "HOD",
-                      "Requisition Date",
-                      "HOD Status",
-                      "IT Status",
-                      "Completion",
-                    ].map((col) => (
-                      <th
-                        key={col}
-                        className="px-6 py-4 text-[11px] font-bold tracking-widest text-neutral-500 uppercase"
-                      >
-                        {col}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-red-50">
-                  {totalCount > 0 ? (
-                    paginatedData.map((req) => (
-                      <tr
-                        key={req.request_id}
-                        onClick={() => setSelectedRequest(req)}
-                        className="group cursor-pointer transition-colors hover:bg-gray-200/30"
-                      >
-                        {/* Employee */}
-                        <td className="px-6 py-5">
-                          <div className="flex flex-col">
-                            <span className="text-sm font-medium text-[#1e1b1b]">
-                              {req.employee_name}
-                            </span>
-                            <span className="text-[11px] text-gray-400">
-                              #{req.employee_staff_number}
-                            </span>
-                          </div>
-                        </td>
+              {req.replacement_new}
+            </span>
+          </td>
 
-                        {/* Department */}
-                        <td className="px-6 py-5">
-                          <span className="text-sm text-[#1e1b1b]">
-                            {req.employee_department}
-                          </span>
-                        </td>
+          {/* HOD */}
+          <td className="max-w-50 px-6 py-5">
+            <span className="text-sm text-[#1e1b1b]">
+              {req.hod_approver_name}
+            </span>
+          </td>
 
-                        {/* Replacement / New */}
-                        <td className="px-6 py-5">
-                          <span
-                            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
-                              req.replacement_new === "New"
-                                ? "bg-emerald-50 text-emerald-600"
-                                : "bg-amber-50 text-amber-600"
-                            }`}
-                          >
-                            {req.replacement_new}
-                          </span>
-                        </td>
+          {/* Requisition Date */}
+          <td className="px-6 py-5">
+            <span className="text-sm text-[#a18080]">
+              {new Date(req.requisition_date).toLocaleDateString()}
+            </span>
+          </td>
 
-                        {/* Requirements */}
-                        <td className="max-w-50 px-6 py-5">
-                          <span className="text-sm text-[#1e1b1b]">
-                            {req.hod_approver_name}
-                          </span>
-                        </td>
+          {/* HOD Status */}
+          <td className="px-6 py-5">
+            <StatusFormatter status={req.hod_approver_status} />
+          </td>
 
-                        {/* Requisition Date */}
-                        <td className="px-6 py-5">
-                          <span className="text-sm text-[#a18080]">
-                            {new Date(
-                              req.requisition_date,
-                            ).toLocaleDateString()}
-                          </span>
-                        </td>
+          {/* IT Status */}
+          <td className="px-6 py-5">
+            <StatusFormatter status={req.it_approver_status} />
+          </td>
 
-                        {/* HOD Status */}
-                        <td className="px-6 py-5">
-                          <StatusFormatter status={req.hod_approver_status} />
-                        </td>
-
-                        {/* IT Status */}
-                        <td className="px-6 py-5">
-                          <StatusFormatter status={req.it_approver_status} />
-                        </td>
-
-                        {/* Completion */}
-                        <td className="px-6 py-5">
-                          <div className="flex items-center justify-between gap-4">
-                            <StatusFormatter status={req.completion_status} />
-                            <Info
-                              size={14}
-                              className={` ${req.completion_status === "completed" ? "text-blue-200 group-hover:text-blue-400" : "text-red-200 group-hover:text-red-400"} transition-colors`}
-                            />
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    /* Fallback UI */
-                    <tr>
-                      <td colSpan={8} className="px-6 py-20">
-                        <div className="flex flex-col items-center justify-center text-center">
-                          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/80 bg-white/40 text-red-300 shadow-[0_8px_16px_rgba(60,100,160,0.05)] backdrop-blur-md">
-                            <Monitor size={32} strokeWidth={1.5} />
-                          </div>
-                          <h3 className="text-base font-semibold text-[#1e1b1b]">
-                            {searchTerm
-                              ? "No matches found"
-                              : "No requisitions yet"}
-                          </h3>
-                          <p className="mt-1 max-w-60 text-[13px] leading-relaxed text-[#a18080]">
-                            {searchTerm
-                              ? `We couldn't find anything matching "${searchTerm}". Try a different term.`
-                              : "Your IT requisition history is currently empty."}
-                          </p>
-
-                          {/* Only show new requisition link when email prop is available and no search term */}
-                          {!searchTerm && userEmail && (
-                            <button
-                              onClick={() => setShowITRequisition(true)}
-                              className="my-2 flex items-center gap-2 rounded-xl bg-slate-900 px-3 py-2 text-sm text-white hover:bg-slate-800"
-                            >
-                              <Plus className="h-4 w-4" />
-                              <span>New Requisition</span>
-                            </button>
-                          )}
-
-                          {searchTerm && (
-                            <button
-                              onClick={clearSearch}
-                              className="mt-5 text-[12px] font-bold tracking-wider text-red-600 uppercase transition-colors hover:text-red-700"
-                            >
-                              Clear search
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+          {/* Completion */}
+          <td className="px-6 py-5">
+            <div className="flex items-center justify-between gap-4">
+              <StatusFormatter status={req.completion_status} />
+              <Info
+                size={14}
+                className={`${req.completion_status === "completed" ? "text-blue-200 group-hover:text-blue-400" : "text-red-200 group-hover:text-red-400"} transition-colors`}
+              />
             </div>
-
-            {/* Pagination */}
-            <TablePagination
-              totalItems={totalCount}
-              itemsPerPage={itemsPerPage}
-              currentPage={currentPage}
-              onPageChange={setCurrentPage}
-              onItemsPerPageChange={setItemsPerPage}
-            />
-
-            {/* Details Modal */}
-            <ITRequisitionModal
-              isOpen={!!selectedRequest}
-              data={selectedRequest}
-              dataFlag={dataFlag}
-              onClose={() => setSelectedRequest(null)}
-            />
-          </div>
-        </div>
+          </td>
+        </>
       )}
-    </>
+      renderModal={(data, close) => (
+        <ITRequisitionModal
+          isOpen={!!data}
+          data={data}
+          dataFlag={dataFlag}
+          onClose={close}
+        />
+      )}
+    />
   );
 }

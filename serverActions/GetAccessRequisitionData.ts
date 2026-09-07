@@ -9,44 +9,48 @@ import {
 } from "@/lib/pagination";
 import { QueryResultRow } from "pg";
 
-export interface ITRequisitionDataProps {
-  dataFlag: "userData" | "hodPending" | "itPending" | "itAll";
+export interface AccessRequisitionDataProps {
+  dataFlag: "userData" | "hodPending" | "securityPending";
   page?: number;
   pageSize?: number;
   searchTerm?: string;
 }
 
 // Columns matched against when a search term is supplied — mirrors what's
-// visible in the table UI (employee, department, HOD/IT status, etc).
+// visible in the table UI (employee, department, locations, statuses, etc).
 const SEARCHABLE_COLUMNS = [
   "employee_name",
   "employee_department",
   "employee_staff_number",
-  "submitter_name",
-  "hod_approver_name",
-  "it_approver_name",
+  "access_locations",
   "hod_approver_status",
-  "it_approver_status",
-  "completion_status",
-  "replacement_new",
+  "security_approver_status",
 ];
 
-export const getITRequisitionData = async ({
+export const getAccessRequisitionData = async ({
   dataFlag,
   page = 1,
   pageSize = 6,
   searchTerm,
-}: ITRequisitionDataProps): Promise<PaginatedResult<QueryResultRow>> => {
+}: AccessRequisitionDataProps): Promise<PaginatedResult<QueryResultRow>> => {
   const user = await getSession();
   if (!user) return emptyPaginatedResult(page, pageSize);
+
+  // Security is array-based (any member of security_array can act) — verify
+  // membership server-side rather than trusting the dashboard's role gate.
+  if (dataFlag === "securityPending") {
+    const membership = await query(
+      "SELECT 1 FROM security_array WHERE security_email = $1 LIMIT 1",
+      [user.email],
+    );
+    if (membership.length === 0) return emptyPaginatedResult(page, pageSize);
+  }
 
   const baseParams: (string | number)[] = [];
   const conditions: string[] = [];
 
   switch (dataFlag) {
     case "userData":
-      // Identity is always the session's own email — never client-supplied,
-      // so this can't be used to view another user's submissions.
       conditions.push(`submitter_email = $${baseParams.length + 1}`);
       baseParams.push(user.email);
       break;
@@ -56,11 +60,11 @@ export const getITRequisitionData = async ({
       );
       baseParams.push(user.email, "pending");
       break;
-    case "itPending":
+    case "securityPending":
       conditions.push(
-        `it_approver_status = $${baseParams.length + 1} AND hod_approver_status = $${baseParams.length + 2}`,
+        `hod_approver_status = $${baseParams.length + 1} AND security_approver_status = $${baseParams.length + 2}`,
       );
-      baseParams.push("pending", "approved");
+      baseParams.push("approved", "pending");
       break;
   }
 
@@ -78,16 +82,17 @@ export const getITRequisitionData = async ({
   const { limit, offset } = toSafeOffsetLimit({ page, pageSize });
 
   const baseQuery = `
-    SELECT request_id, request_created_at, submitter_email, submitter_name,
-    employee_name, employee_department, employee_staff_number, replacement_new,
-    requirements, other_requirements, requisition_date, date_joining, hod_approver_name,
-    hod_approver_status, hod_approver_comments, hod_approval_date, it_approver_name,
-    it_approver_status, it_approver_comments, it_approval_date, completion_status,
-    COUNT(*) OVER() AS total_count
-    FROM it_requisitions
-    ${whereClause}
-    ORDER BY request_created_at DESC
-    LIMIT $${baseParams.length + 1} OFFSET $${baseParams.length + 2}
+    SELECT
+        request_id, request_created_at, submitter_email,
+        employee_name, employee_department, employee_staff_number,
+        issuance_date, access_locations, access_requirements,
+        hod_approver_name, hod_approver_status, hod_approver_comments,
+        security_approver_name, security_approver_status, security_approver_comments,
+        COUNT(*) OVER() AS total_count
+        FROM access_requisitions
+        ${whereClause}
+        ORDER BY request_created_at DESC
+        LIMIT $${baseParams.length + 1} OFFSET $${baseParams.length + 2}
     `;
 
   try {
@@ -95,7 +100,7 @@ export const getITRequisitionData = async ({
     return toPaginatedResult(result, page, pageSize);
   } catch (error) {
     console.error(
-      "Error while trying to fetch IT requisition data:",
+      "Error while trying to fetch access requisition data:",
       error,
     );
     return emptyPaginatedResult(page, pageSize);

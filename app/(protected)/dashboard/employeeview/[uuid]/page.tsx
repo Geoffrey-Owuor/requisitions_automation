@@ -5,6 +5,8 @@ import NotFoundRequest from "@/components/Approvers/TravelApprovers/NotFoundRequ
 import EmployeeRequisitionViewModal from "@/components/Approvers/EmployeeApprovers/EmployeeRequisitionViewModal";
 import RequisitionPdfSkeleton from "@/components/Skeletons/RequisitionPdfSkeleton";
 import RequisitionPagesWrapper from "@/components/Dashboard/RequisitionPagesWrapper";
+import { getSession } from "@/lib/session";
+import { isEmployeeRequisitionApprover } from "@/lib/employeeApproverAccess";
 
 export type ViewRequisitionProps = {
   params: Promise<{ uuid: string }>;
@@ -23,6 +25,23 @@ const page = async ({ params }: ViewRequisitionProps) => {
   const viewData = await getEmployeeEmailData(uuid);
 
   if (!viewData?.emailaddress) return <NotFoundRequest />;
+
+  // Session is guaranteed by the (protected)/dashboard layout, but ownership
+  // is not — restrict to the submitter or an approver this requisition has
+  // actually reached (mirrors dashboard queue visibility).
+  const session = await getSession();
+  const isOwner = session?.email === viewData.emailaddress;
+  const isApprover =
+    !isOwner &&
+    !!session &&
+    (await isEmployeeRequisitionApprover(session.email, {
+      hodEmail: viewData.hodemail,
+      hodApprovalStatus: viewData.hodapprovalstatus,
+      retailDirectorApprovalStatus: viewData.retaildirectorapprovalstatus,
+      directorApprovalStatus: viewData.directorapprovalstatus,
+    }));
+
+  if (!isOwner && !isApprover) return <NotFoundRequest />;
 
   return (
     <RequisitionPagesWrapper>

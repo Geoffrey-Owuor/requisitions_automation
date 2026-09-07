@@ -13,9 +13,18 @@ export interface ActiveAdvanceRow {
   approval_status: string;
 }
 
-// Months elapsed and remaining are computed in SQL (AGE against
+// Months elapsed and remaining, computed in SQL (AGE against
 // repayment_start_date) so the same definition is used everywhere a
-// request's installment period needs to be evaluated.
+// request's installment period needs to be evaluated — including the
+// self-service history view (serverActions/PublicServerActions/GetMyAdvanceRequests.ts),
+// which is not restricted to active (non-declined) requests like the query
+// below and so can't reuse ACTIVE_ADVANCES_QUERY wholesale.
+export const INSTALLMENT_PROGRESS_SQL = `
+    (EXTRACT(YEAR FROM AGE(CURRENT_DATE, repayment_start_date)) * 12
+      + EXTRACT(MONTH FROM AGE(CURRENT_DATE, repayment_start_date)))::int AS elapsed_installments,
+    (no_of_installments - (EXTRACT(YEAR FROM AGE(CURRENT_DATE, repayment_start_date)) * 12
+      + EXTRACT(MONTH FROM AGE(CURRENT_DATE, repayment_start_date))))::int AS remaining_installments`;
+
 const ACTIVE_ADVANCES_QUERY = `
   SELECT
     request_id,
@@ -23,10 +32,7 @@ const ACTIVE_ADVANCES_QUERY = `
     request_amount,
     no_of_installments,
     repayment_start_date,
-    (EXTRACT(YEAR FROM AGE(CURRENT_DATE, repayment_start_date)) * 12
-      + EXTRACT(MONTH FROM AGE(CURRENT_DATE, repayment_start_date)))::int AS elapsed_installments,
-    (no_of_installments - (EXTRACT(YEAR FROM AGE(CURRENT_DATE, repayment_start_date)) * 12
-      + EXTRACT(MONTH FROM AGE(CURRENT_DATE, repayment_start_date))))::int AS remaining_installments,
+    ${INSTALLMENT_PROGRESS_SQL},
     exported,
     approval_status
   FROM salary_advances
