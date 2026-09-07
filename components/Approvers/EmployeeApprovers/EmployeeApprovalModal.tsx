@@ -15,7 +15,12 @@ import {
   Layers,
   Wallet,
 } from "lucide-react";
-import { assets, dateFormatter, getJobGradeNumber } from "@/public/assets";
+import {
+  assets,
+  dateFormatter,
+  getJobGradeNumber,
+  EMPLOYEE_STAGE_LABELS,
+} from "@/public/assets";
 import SubmittingOverlay from "@/components/SubmittingOverlay";
 import { AlertInfo } from "@/components/TravelRequisitionPage";
 import { UpdateEmployeeStatus } from "@/serverActions/UpdateEmployeeStatus";
@@ -23,6 +28,9 @@ import ApprovalAlert from "@/components/Approvers/TravelApprovers/ApprovalAlert"
 import { initialsHelper, EmployeeAttachmentType } from "@/public/assets";
 import Image from "next/image";
 import AttachmentTypeGroups from "./AttachmentTypeGroups";
+import PreviousApprovalsSection, {
+  PreviousApproval,
+} from "@/components/Approvers/PreviousApprovalsSection";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -56,15 +64,12 @@ export interface EmployeeApprovalModalProps {
   department: string;
   requestCreatedAt: string;
   positions: EmployeeApprovalPosition[];
+  previousApprovals: PreviousApproval[];
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const stageLabel: Record<string, string> = {
-  hod: "Head of Department",
-  director: "CEO",
-  hr: "Human Resources",
-};
+const stageLabel = EMPLOYEE_STAGE_LABELS;
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -111,6 +116,7 @@ const EmployeeApprovalModal = ({
   department,
   requestCreatedAt,
   positions,
+  previousApprovals,
 }: EmployeeApprovalModalProps) => {
   const [comments, setComments] = useState("");
   const [approving, setApproving] = useState(false);
@@ -348,6 +354,9 @@ const EmployeeApprovalModal = ({
                 ))}
               </div>
             </div>
+
+            {/* ── Previous Approvals ── */}
+            <PreviousApprovalsSection approvals={previousApprovals} />
 
             {/* ── Approver Comments ── */}
             <div className="mb-6 border-t border-[rgba(240,180,180,0.4)] pt-6">

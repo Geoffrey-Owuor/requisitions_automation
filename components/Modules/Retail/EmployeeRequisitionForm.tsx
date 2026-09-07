@@ -12,7 +12,7 @@ import {
   X,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { loadHodApprovers, loadBaseDepartments } from "@/lib/loadAppDataV2";
+import { loadHodArray, loadBaseDepartments } from "@/lib/loadAppDataV2";
 import {
   assets,
   REPLACEMENT_OR_NEW_OPTIONS,
@@ -28,7 +28,7 @@ import AlertModal from "@/components/AlertModal";
 import { AlertInfo } from "@/components/TravelRequisitionPage";
 import EmployeeConfirmationModal from "./EmployeeConfirmationModal";
 import { useToggleStore } from "@/store/useToggleStore";
-import { FormSelect } from "./CasualRequisitionForm";
+import { FormSelect, findHodForDepartment } from "./CasualRequisitionForm";
 import Image from "next/image";
 
 // ---- Client-side attachment constraints (mirrors lib/attachmentStorage.ts) ----
@@ -103,10 +103,11 @@ export default function EmployeeRequisitionForm() {
     queryFn: loadBaseDepartments,
   });
 
-  const { data: HOD_APPROVERS = [], isLoading: hodsLoading } = useQuery({
-    queryKey: ["BaseHodApproversData"],
-    queryFn: loadHodApprovers,
+  const { data: hodArray = [], isLoading: hodsLoading } = useQuery({
+    queryKey: ["BaseHodArrayData"],
+    queryFn: loadHodArray,
   });
+  const HOD_APPROVERS = hodArray.map((hod) => hod.name);
 
   const [formData, setFormData] = useState<EmployeeFormData>(InitialFormState);
   const [step, setStep] = useState(1);
@@ -161,6 +162,16 @@ export default function EmployeeRequisitionForm() {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handleDepartmentChange = (department: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      department,
+      // Auto-select the HOD mapped to this department; falls back to "" so
+      // the user can still pick manually when no HOD covers it
+      hodApprover: findHodForDepartment(hodArray, department),
+    }));
+  };
+
   const updatePositionField = <K extends keyof EmployeePositionFormData>(
     clientId: string,
     field: K,
@@ -207,7 +218,10 @@ export default function EmployeeRequisitionForm() {
       }
     }
 
-    setFileErrors((prev) => ({ ...prev, [fileErrorKey(clientId, type)]: error }));
+    setFileErrors((prev) => ({
+      ...prev,
+      [fileErrorKey(clientId, type)]: error,
+    }));
 
     setFormData((prev) => ({
       ...prev,
@@ -366,7 +380,7 @@ export default function EmployeeRequisitionForm() {
                     options={DEPARTMENTS}
                     value={formData.department}
                     loading={departmentsLoading}
-                    onChange={(v) => updateField("department", v)}
+                    onChange={handleDepartmentChange}
                   />
                   <FormSelect
                     label="HOD Approver"
@@ -387,7 +401,7 @@ export default function EmployeeRequisitionForm() {
                   <button
                     type="button"
                     onClick={addPosition}
-                    className="flex cursor-pointer items-center gap-1.5 rounded-full border border-rose-200 bg-white/80 px-3.5 py-1.5 text-[12px] font-semibold text-rose-700 transition-all duration-200 hover:border-rose-300 hover:bg-rose-50"
+                    className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-rose-200 bg-white/80 px-3.5 py-1.5 text-[12px] font-semibold text-rose-700 transition-all duration-200 hover:border-rose-300 hover:bg-rose-50"
                   >
                     <Plus className="h-3.5 w-3.5" />
                     Add Position
@@ -421,7 +435,7 @@ export default function EmployeeRequisitionForm() {
                 <button
                   type="button"
                   onClick={addPosition}
-                  className="mt-4 flex cursor-pointer items-center gap-1.5 rounded-full border border-rose-200 bg-white/80 px-3.5 py-1.5 text-[12px] font-semibold text-rose-700 transition-all duration-200 hover:border-rose-300 hover:bg-rose-50"
+                  className="mt-4 flex cursor-pointer items-center gap-1.5 rounded-lg border border-rose-200 bg-white/80 px-3.5 py-1.5 text-[12px] font-semibold text-rose-700 transition-all duration-200 hover:border-rose-300 hover:bg-rose-50"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   Add Position
@@ -439,9 +453,9 @@ export default function EmployeeRequisitionForm() {
                   <ArrowRight className="h-4 w-4" />
                 </button>
                 <p className="mt-3 text-center text-xs text-[#7c5a5a]">
-                  All fields are required to proceed. Each position needs a
-                  Job Description, KPIs, and Org Chart document (Word, Excel,
-                  or PDF, max 2MB each).
+                  All fields are required to proceed. Each position needs a Job
+                  Description, KPIs, and Org Chart document (Word, Excel, or
+                  PDF, max 2MB each).
                 </p>
               </div>
             </form>
@@ -475,10 +489,7 @@ function PositionFieldset({
     field: K,
     value: EmployeePositionFormData[K],
   ) => void;
-  onFileChange: (
-    type: EmployeeAttachmentType,
-    files: FileList | null,
-  ) => void;
+  onFileChange: (type: EmployeeAttachmentType, files: FileList | null) => void;
   onRemoveFile: (type: EmployeeAttachmentType) => void;
 }) {
   return (

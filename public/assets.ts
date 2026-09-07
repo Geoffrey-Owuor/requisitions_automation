@@ -51,11 +51,21 @@ export const initialsHelper = (userName: string) => {
   return initials;
 };
 
+// Forms an hr_array approver can be permitted to act on (hr_array.hr_forms).
+// Salary advance is intentionally excluded - see hrApprovalStage docs.
+export const ALLOWED_HR_FORMS = ["casual", "employee", "travel"] as const;
+export type HrForm = (typeof ALLOWED_HR_FORMS)[number];
+
 export const ALLOWED_TRAVEL_STAGES = ["hod", "hr", "director"] as const;
 export const ALLOWED_ACCESS_STAGES = ["hod", "security"] as const;
 export const ALLOWED_IT_STAGES = ["hod", "it"] as const;
 export const ALLOWED_CASUAL_STAGES = ["hod", "hr"] as const;
-export const ALLOWED_EMPLOYEE_STAGES = ["hod", "director", "hr"] as const;
+export const ALLOWED_EMPLOYEE_STAGES = [
+  "hod",
+  "retail_director",
+  "director",
+  "hr",
+] as const;
 
 // Create a TypeScript union type: "manager" | "director" | "hr" | "finance"
 export type TravelStage = (typeof ALLOWED_TRAVEL_STAGES)[number];
@@ -97,6 +107,37 @@ export function isValidEmployeeStage(stage: unknown): stage is EmployeeStage {
   );
 }
 
+// Human-readable labels for each approval stage, per requisition type. Kept
+// here (rather than in the client-only approval modal components) so server
+// components - e.g. the approver pages, which build the "previous approvals"
+// list - can read them too: a "use client" module's exports are opaque client
+// references when imported into a Server Component, not the real values.
+// Typed as Record<string, string> (rather than Record<TravelStage, string>
+// etc.) since callers look these up with an untyped `stage: string` prop.
+export const TRAVEL_STAGE_LABELS: Record<string, string> = {
+  hod: "Head of Department",
+  hr: "Human Resources",
+  director: "Director",
+} satisfies Record<TravelStage, string>;
+export const ACCESS_STAGE_LABELS: Record<string, string> = {
+  hod: "Head of Department",
+  security: "Security Department",
+} satisfies Record<AccessStage, string>;
+export const IT_STAGE_LABELS: Record<string, string> = {
+  hod: "Head of Department",
+  it: "IT Department",
+} satisfies Record<itStage, string>;
+export const CASUAL_STAGE_LABELS: Record<string, string> = {
+  hod: "Head of Department",
+  hr: "Human Resources",
+} satisfies Record<CasualStage, string>;
+export const EMPLOYEE_STAGE_LABELS: Record<string, string> = {
+  hod: "Head of Department",
+  retail_director: "Retail Director",
+  director: "CEO",
+  hr: "Human Resources",
+} satisfies Record<EmployeeStage, string>;
+
 export const ALL_CASUAL_LOCATIONS = [
   "Ruiru",
   "Imaara",
@@ -114,6 +155,8 @@ export const ALL_CASUAL_LOCATIONS = [
   "Sarit",
   "Yaya",
 ];
+
+export const RETAIL_DEPARTMENT = "Retail";
 
 export const OPERATIONS_DEPARTMENT = "Operations";
 export const OPERATIONS_SECTIONS = [
@@ -223,30 +266,47 @@ export function getDailyGreeting(date: Date = new Date()): string {
   const dayOfWeek = date.getDay(); // 0 (Sunday) to 6 (Saturday)
 
   const greetings: Record<number, string[]> = {
-    0: ["Easy like Sunday morning! ☀️", "Happy Sunday! Time to recharge 🔋"],
+    0: [
+      "Wishing you a restful Sunday.",
+      "Hope you're taking time to recharge today.",
+      "A calm Sunday to start the week ahead.",
+      "Enjoy the quiet before a busy week.",
+    ],
     1: [
-      "May your coffee be strong and your Monday be short! ☕",
-      "Happy Monday! Let's crush this week 🚀",
+      "Welcome back - let's make this week a great one.",
+      "A fresh week, a fresh start. Welcome back.",
+      "Here's to a productive Monday.",
+      "Wishing you a smooth start to the week.",
     ],
     2: [
-      "Terrific Tuesday! You're already crushing it 💪",
-      "Happy Tuesday! Keep up the great momentum ✨",
+      "Keep up the great momentum today.",
+      "Wishing you a productive Tuesday.",
+      "Great things are built one day at a time.",
+      "Here's to another day of progress.",
     ],
     3: [
-      "Happy Hump Day! We're officially halfway there 🐪",
-      "Wonderful Wednesday! Keep shining 🌟",
+      "We're halfway through the week - keep going.",
+      "Wishing you a productive Wednesday.",
+      "Halfway there, and doing great.",
+      "Keep the momentum going this Wednesday.",
     ],
     4: [
-      "Thrilling Thursday! The weekend is officially in sight 👀",
-      "Happy Thursday! Let's finish strong 🏁",
+      "Almost there - have a great Thursday.",
+      "The weekend is in sight. Keep it up.",
+      "Wishing you a productive Thursday.",
+      "One more day to go. You've got this.",
     ],
     5: [
-      "Fri-nally! Time to wrap up and celebrate 🥳",
-      "TGIF! Have a fantastic Friday 🎉",
+      "Happy Friday! Wishing you a great weekend ahead.",
+      "Wishing you a productive end to the week.",
+      "Almost the weekend - finish strong.",
+      "Here's to wrapping up the week well.",
     ],
     6: [
-      "Super Saturday! Time to relax and unwind 🌴",
-      "Happy Saturday! Enjoy those weekend vibes 🛋️",
+      "Wishing you a relaxing Saturday.",
+      "Enjoy your weekend.",
+      "Hope you're having a great Saturday.",
+      "Take some time to unwind today.",
     ],
   };
 

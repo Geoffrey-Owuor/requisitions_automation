@@ -71,10 +71,7 @@ export async function GET(request: NextRequest) {
     // Creating a workbook with exceljs and adding the worksheet(s);
     const workbook = new Workbook();
 
-    const addSheet = (
-      name: string,
-      sheetRows: Record<string, unknown>[],
-    ) => {
+    const addSheet = (name: string, sheetRows: Record<string, unknown>[]) => {
       if (sheetRows.length === 0) return;
 
       const worksheet = workbook.addWorksheet(name);
@@ -206,7 +203,7 @@ export async function GET(request: NextRequest) {
     // Send the email with the generated buffer as an attachment
     const emailResult = await sendEmail({
       from: process.env.ADVANCE_EMAIL_SENDER!,
-      to: process.env.FIRST_HR_EMAIL!,
+      to: [process.env.FIRST_HR_EMAIL!, process.env.SECOND_HR_EMAIL!],
       subject: `Monthly Salary Advances Report - ${dateString}`,
       html: emailHtml,
       attachments: [

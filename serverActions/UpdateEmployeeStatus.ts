@@ -4,11 +4,13 @@ import { pool } from "@/lib/db";
 import { PoolClient } from "pg";
 import { AlertInfo } from "@/components/TravelRequisitionPage";
 import { hodApprovalStage } from "@/utils/EmployeeApprovalStages/hodApprovalStage";
+import { retailDirectorApprovalStage } from "@/utils/EmployeeApprovalStages/retailDirectorApprovalStage";
 import { directorApprovalStage } from "@/utils/EmployeeApprovalStages/directorApprovalStage";
 import { hrApprovalStage } from "@/utils/EmployeeApprovalStages/hrApprovalStage";
 import { EmployeeEmailSender } from "@/services/EmployeeEmailSender";
-import { isValidEmployeeStage } from "@/public/assets";
+import { isValidEmployeeStage, RETAIL_DEPARTMENT } from "@/public/assets";
 import { isDirectorEmail } from "@/utils/isDirectorEmail";
+import { isRetailDirectorEmail } from "@/utils/isRetailDirectorEmail";
 
 export type UpdateRequestStatusProps = {
   uuid: string;
@@ -60,7 +62,9 @@ export async function UpdateEmployeeStatus(
     const { rows: reviewedResult } = await client.query(
       `SELECT employee_${payload.stage}_approval_status AS approval_status,
        employee_${payload.stage}_approver AS approver,
-       submitter_email, employee_hod_email, employee_director_email
+       submitter_email, employee_department, employee_hod_email,
+       employee_retail_director_email, employee_director_email,
+       employee_director_approval_status AS director_approval_status
         FROM employee_requisitions WHERE request_id = $1 FOR UPDATE`,
       [payload.uuid],
     );
@@ -74,9 +78,14 @@ export async function UpdateEmployeeStatus(
       };
     }
 
-    // Check if the approver exists in our table array data set
+    // Check if the approver exists in our table array data set. HR approvers
+    // are additionally scoped to the forms in their hr_forms allow-list -
+    // salary advance never reaches this check, it has its own approver.
+    const isHrStage = payload.stage === "hr";
     const { rows: approverResult } = await client.query(
-      `SELECT id FROM ${payload.stage}_array WHERE ${payload.stage}_email = $1 FOR UPDATE`,
+      isHrStage
+        ? `SELECT id, hr_forms FROM hr_array WHERE hr_email = $1 FOR UPDATE`
+        : `SELECT id FROM ${payload.stage}_array WHERE ${payload.stage}_email = $1 FOR UPDATE`,
       [payload.approverEmail],
     );
 
@@ -89,15 +98,38 @@ export async function UpdateEmployeeStatus(
       };
     }
 
+    if (isHrStage && !approverResult[0].hr_forms.includes("employee")) {
+      await client.query("ROLLBACK");
+      return {
+        alertType: "error",
+        alertMessage:
+          "You are not authorized to approve employee requisitions, please contact your admin for support",
+      };
+    }
+
     const isReviewed = reviewedResult[0].approval_status;
     const previousApprover = reviewedResult[0].approver;
 
     // Required stages data
     const userEmail = reviewedResult[0].submitter_email;
+    const department = reviewedResult[0].employee_department;
     const hodEmail = reviewedResult[0].employee_hod_email;
+    const retailDirectorEmail = reviewedResult[0].employee_retail_director_email;
     const directorEmail = reviewedResult[0].employee_director_email;
 
-    if (isReviewed !== "pending") {
+    // Retail Director is only part of the chain for Retail-department
+    // requisitions - reject action on that stage otherwise, even if a valid
+    // retail director approval token is used.
+    if (payload.stage === "retail_director" && department !== RETAIL_DEPARTMENT) {
+      await client.query("ROLLBACK");
+      return {
+        alertType: "error",
+        alertMessage:
+          "This approval stage does not apply to this requisition, no action is required",
+      };
+    }
+
+    if (isReviewed !== "pending" && isReviewed !== "N/A") {
       await client.query("ROLLBACK");
       return {
         alertType: "error",
@@ -107,11 +139,35 @@ export async function UpdateEmployeeStatus(
 
     await client.query(baseUpdateQuery, baseParams);
 
-    // If the approving HOD is also a Director/CEO, auto-approve the CEO
-    // stage in the same transaction so the same person is never asked to
-    // approve twice under two different roles.
+    // If the approving HOD is also a Retail Director and/or a Director/CEO,
+    // auto-approve those stages in the same transaction so the same person
+    // is never asked to approve twice under two different roles. Both checks
+    // are independent - a person can hold both roles at once.
+    let skipRetailDirectorStage = false;
     let skipDirectorStage = false;
     if (payload.stage === "hod" && payload.status === "approved") {
+      if (department === RETAIL_DEPARTMENT) {
+        skipRetailDirectorStage = await isRetailDirectorEmail(
+          client,
+          payload.approverEmail,
+        );
+
+        if (skipRetailDirectorStage) {
+          await client.query(
+            `
+            UPDATE employee_requisitions
+            SET employee_retail_director_approval_date = CURRENT_TIMESTAMP,
+            employee_retail_director_approval_status = 'approved',
+            employee_retail_director_approver = $1,
+            employee_retail_director_email = $2,
+            employee_retail_director_comments = 'Automatically approved - the HOD is also a Retail Director, so a separate Retail Director approval is not required'
+            WHERE request_id = $3
+            `,
+            [payload.approverName, payload.approverEmail, payload.uuid],
+          );
+        }
+      }
+
       skipDirectorStage = await isDirectorEmail(client, payload.approverEmail);
 
       if (skipDirectorStage) {
@@ -140,7 +196,24 @@ export async function UpdateEmployeeStatus(
           status: payload.status,
           approverEmail: payload.approverEmail,
           approverName: payload.approverName,
+          department,
+          skipRetailDirectorStage,
           skipDirectorStage,
+        });
+        break;
+      case "retail_director":
+        // The Director/CEO stage may have already been auto-approved when
+        // the HOD approved (if the HOD is also a Director/CEO) - forward
+        // straight to HR in that case instead of the Director array.
+        retailDirectorApprovalStage({
+          uuid: payload.uuid,
+          userEmail,
+          hodEmail,
+          status: payload.status,
+          approverEmail: payload.approverEmail,
+          approverName: payload.approverName,
+          skipDirectorStage:
+            reviewedResult[0].director_approval_status === "approved",
         });
         break;
       case "director":
@@ -158,6 +231,7 @@ export async function UpdateEmployeeStatus(
           uuid: payload.uuid,
           userEmail,
           hodEmail,
+          retailDirectorEmail,
           directorEmail,
           status: payload.status,
           approverEmail: payload.approverEmail,

@@ -83,7 +83,10 @@ export async function writePositionAttachments(
     await fs.mkdir(typeDir, { recursive: true });
 
     const storedFilename = sanitizeFilename(file.name);
-    const absolutePath = path.join(typeDir, storedFilename);
+    const absolutePath = path.join(
+      /*turbopackIgnore: true*/ typeDir,
+      storedFilename,
+    );
 
     const buffer = Buffer.from(await file.arrayBuffer());
     await fs.writeFile(absolutePath, buffer);
@@ -91,7 +94,12 @@ export async function writePositionAttachments(
     stored.push({
       originalFilename: file.name,
       storedFilename,
-      filePath: path.join(requestId, positionId, attachmentType, storedFilename),
+      filePath: path.join(
+        /*turbopackIgnore: true*/ requestId,
+        positionId,
+        attachmentType,
+        storedFilename,
+      ),
       mimeType: file.type,
       fileSizeBytes: file.size,
       attachmentType,

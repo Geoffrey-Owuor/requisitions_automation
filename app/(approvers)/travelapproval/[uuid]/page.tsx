@@ -5,11 +5,12 @@ import RequisitionPagesWrapper from "@/components/Dashboard/RequisitionPagesWrap
 import { UserProvider } from "@/context/UserContext";
 import { query } from "@/lib/db";
 import TravelApprovalModal from "@/components/Approvers/TravelApprovers/TravelApprovalModal";
+import { PreviousApproval } from "@/components/Approvers/PreviousApprovalsSection";
 import TravelApprovalSkeleton from "@/components/Skeletons/TravelApprovalSkeleton";
 import AlreadyProcessed from "@/components/Approvers/TravelApprovers/AlreadyProcessed";
 import InvalidToken from "@/components/Approvers/TravelApprovers/InvalidToken";
 import NotFoundRequest from "@/components/Approvers/TravelApprovers/NotFoundRequest";
-import { isValidTravelStage } from "@/public/assets";
+import { isValidTravelStage, TRAVEL_STAGE_LABELS } from "@/public/assets";
 
 type ApprovalPageProps = {
   params: Promise<{ uuid: string }>;
@@ -44,14 +45,24 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
   // First fallback - one of our props is missing/falsy
   if (!uuid || !token || !isValidTravelStage(stage)) return <NotFoundRequest />;
 
+  // HR approvers are additionally scoped to the forms in their hr_forms
+  // allow-list - an approver not permitted for this form is treated the
+  // same as an invalid token, so their permissions aren't leaked.
   const validApprover = await query(
-    `SELECT ${stage}_email AS email, 
-       ${stage}_name AS name 
+    stage === "hr"
+      ? `SELECT hr_email AS email, hr_name AS name, hr_forms
+         FROM hr_array WHERE hr_uuid = $1`
+      : `SELECT ${stage}_email AS email,
+       ${stage}_name AS name
        FROM ${stage}_array WHERE ${stage}_uuid = $1`,
     [token],
   );
 
   if (validApprover.length === 0) return <InvalidToken />;
+
+  if (stage === "hr" && !validApprover[0].hr_forms.includes("travel")) {
+    return <InvalidToken />;
+  }
 
   const approverDetails = validApprover[0];
 
@@ -66,7 +77,9 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
         travel_mode, travel_transport_cost, travel_other_costs, 
         travel_per_diem, travel_total_cost, travel_cost_center, 
         travel_within_budget, travel_approval_tier,
-        engineering_jobs 
+        engineering_jobs,
+        travel_hod_approver, travel_hod_approval_status, travel_hod_comments,
+        travel_hr_approver, travel_hr_approval_status, travel_hr_comments
         FROM travel_requisitions
         WHERE request_id = $1
       `;
@@ -103,6 +116,27 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
     roles: [stage],
   };
 
+  // Director only sits in the chain for Tier 3 requisitions, after HOD and
+  // HR. Tier 1/2 requisitions finalize at HR, so HOD is the only stage that
+  // can precede it there.
+  const previousApprovals: PreviousApproval[] = [];
+  if (stage === "hr" || stage === "director") {
+    previousApprovals.push({
+      label: TRAVEL_STAGE_LABELS.hod,
+      approverName: requestData.travel_hod_approver,
+      status: requestData.travel_hod_approval_status,
+      comments: requestData.travel_hod_comments,
+    });
+  }
+  if (stage === "director") {
+    previousApprovals.push({
+      label: TRAVEL_STAGE_LABELS.hr,
+      approverName: requestData.travel_hr_approver,
+      status: requestData.travel_hr_approval_status,
+      comments: requestData.travel_hr_comments,
+    });
+  }
+
   return (
     <UserProvider user={contextObject}>
       <DashboardWrapper>
@@ -133,6 +167,7 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
               travelApprovalTier={requestData.travel_approval_tier}
               requestCreatedAt={requestData.request_created_at}
               engineeringJobs={requestData.engineering_jobs}
+              previousApprovals={previousApprovals}
             />
           </Suspense>
         </RequisitionPagesWrapper>

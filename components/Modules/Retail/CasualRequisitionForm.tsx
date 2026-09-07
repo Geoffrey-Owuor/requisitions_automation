@@ -15,7 +15,11 @@ import {
   X,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { loadHodApprovers, loadBaseDepartments } from "@/lib/loadAppDataV2";
+import {
+  loadHodArray,
+  loadBaseDepartments,
+  HodApproversObject,
+} from "@/lib/loadAppDataV2";
 import {
   assets,
   getCasualLocationsForDepartment,
@@ -80,6 +84,17 @@ export function computeEngagementDays(periodFrom: string, periodTo: string) {
   return diffDays > 0 ? diffDays : 0;
 }
 
+// Looks up the HOD whose hod_department matches the selected department, so
+// forms can auto-select a HOD instead of requiring a manual dropdown pick.
+// Returns "" (not undefined) when there's no match, so it drops straight
+// into a form field's string value.
+export function findHodForDepartment(
+  hodArray: HodApproversObject[],
+  department: string,
+): string {
+  return hodArray.find((hod) => hod.department === department)?.name ?? "";
+}
+
 // ---- Sub-component prop types ----
 interface FormSelectProps {
   label: string;
@@ -104,10 +119,11 @@ export default function CasualRequisitionForm() {
   });
 
   // Load HODS
-  const { data: HOD_APPROVERS = [], isLoading: hodsLoading } = useQuery({
-    queryKey: ["BaseHodApproversData"],
-    queryFn: loadHodApprovers,
+  const { data: hodArray = [], isLoading: hodsLoading } = useQuery({
+    queryKey: ["BaseHodArrayData"],
+    queryFn: loadHodArray,
   });
+  const HOD_APPROVERS = hodArray.map((hod) => hod.name);
 
   const [formData, setFormData] = useState<CasualFormData>(InitialFormState);
   const [step, setStep] = useState(1);
@@ -197,6 +213,9 @@ export default function CasualRequisitionForm() {
     setFormData((prev) => ({
       ...prev,
       department,
+      // Auto-select the HOD mapped to this department; falls back to "" so
+      // the user can still pick manually when no HOD covers it
+      hodApprover: findHodForDepartment(hodArray, department),
       // Available locations/sections depend on the department - reset both
       location: "",
       sections: [],
@@ -408,7 +427,7 @@ export default function CasualRequisitionForm() {
                             key={sectionName}
                             type="button"
                             onClick={() => toggleSection(sectionName)}
-                            className={`flex cursor-pointer items-center gap-1.5 rounded-full border px-4 py-2 text-[13px] font-medium transition-all duration-200 ${
+                            className={`flex cursor-pointer items-center gap-1.5 rounded-xl border px-4 py-2 text-[13px] font-medium transition-all duration-200 ${
                               active
                                 ? "border-rose-600 bg-rose-600 text-white"
                                 : "border-[rgba(240,180,180,0.6)] bg-white/80 text-[#7c5a5a] hover:border-rose-300"

@@ -29,11 +29,15 @@ export interface EmployeeEmailDataValues {
   submittername: string;
   department: string;
   hodapprovalstatus: string;
+  retaildirectorapprovalstatus: string;
   directorapprovalstatus: string;
   hrapprovalstatus: string;
   hodapprover: string;
   hodemail: string;
   hodcomments: string;
+  retaildirectorapprover: string;
+  retaildirectoremail: string;
+  retaildirectorcomments: string;
   directorapprover: string;
   directoremail: string;
   directorcomments: string;
@@ -51,11 +55,15 @@ export const employeeDataQuery = `
        submitter_name AS submittername,
        employee_department AS department,
        employee_hod_approval_status AS hodapprovalstatus,
+       employee_retail_director_approval_status AS retaildirectorapprovalstatus,
        employee_director_approval_status AS directorapprovalstatus,
        employee_hr_approval_status AS hrapprovalstatus,
        employee_hod_approver AS hodapprover,
        employee_hod_email AS hodemail,
        employee_hod_comments AS hodcomments,
+       employee_retail_director_approver AS retaildirectorapprover,
+       employee_retail_director_email AS retaildirectoremail,
+       employee_retail_director_comments AS retaildirectorcomments,
        employee_director_approver AS directorapprover,
        employee_director_email AS directoremail,
        employee_director_comments AS directorcomments,

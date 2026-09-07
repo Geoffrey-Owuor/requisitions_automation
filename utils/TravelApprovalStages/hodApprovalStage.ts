@@ -15,7 +15,7 @@ export async function hodApprovalStage({
   approverEmail,
   approverName,
 }: HodApprovalStageProps) {
-  const HR_ARRAY = await loadHrArray();
+  const HR_ARRAY = await loadHrArray("travel");
 
   // HOD declined the request - Notify the HOD and submitter
   if (status === "declined") {

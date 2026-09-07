@@ -12,7 +12,11 @@ export interface ApproversObject {
 
 // Base Departments
 export async function loadBaseDepartments(): Promise<string[]> {
-  const filePath = path.join(process.cwd(), "data", "base-departments.json");
+  const filePath = path.join(
+    /*turbopackIgnore: true*/ process.cwd(),
+    "data",
+    "base-departments.json",
+  );
 
   const fileContents = await fs.readFile(filePath, "utf8");
 
@@ -21,7 +25,11 @@ export async function loadBaseDepartments(): Promise<string[]> {
 
 // Hod Approvers
 export async function loadHodApprovers(): Promise<string[]> {
-  const filePath = path.join(process.cwd(), "data", "hod-approvers.json");
+  const filePath = path.join(
+    /*turbopackIgnore: true*/ process.cwd(),
+    "data",
+    "hod-approvers.json",
+  );
 
   const fileContents = await fs.readFile(filePath, "utf8");
 
@@ -30,7 +38,11 @@ export async function loadHodApprovers(): Promise<string[]> {
 
 // Hod Array
 export async function loadHodArray(): Promise<ApproversObject[]> {
-  const filePath = path.join(process.cwd(), "data", "hod-array.json");
+  const filePath = path.join(
+    /*turbopackIgnore: true*/ process.cwd(),
+    "data",
+    "hod-array.json",
+  );
 
   const fileContents = await fs.readFile(filePath, "utf8");
 
@@ -39,7 +51,11 @@ export async function loadHodArray(): Promise<ApproversObject[]> {
 
 // Hr Array
 export async function loadHrArray(): Promise<ApproversObject[]> {
-  const filePath = path.join(process.cwd(), "data", "hr-array.json");
+  const filePath = path.join(
+    /*turbopackIgnore: true*/ process.cwd(),
+    "data",
+    "hr-array.json",
+  );
 
   const fileContents = await fs.readFile(filePath, "utf8");
 
@@ -48,7 +64,11 @@ export async function loadHrArray(): Promise<ApproversObject[]> {
 
 // IT Array
 export async function loadITArray(): Promise<ApproversObject[]> {
-  const filePath = path.join(process.cwd(), "data", "it-array.json");
+  const filePath = path.join(
+    /*turbopackIgnore: true*/ process.cwd(),
+    "data",
+    "it-array.json",
+  );
 
   const fileContents = await fs.readFile(filePath, "utf8");
 
@@ -57,7 +77,11 @@ export async function loadITArray(): Promise<ApproversObject[]> {
 
 // Director Array
 export async function loadDirectorArray(): Promise<ApproversObject[]> {
-  const filePath = path.join(process.cwd(), "data", "director-array.json");
+  const filePath = path.join(
+    /*turbopackIgnore: true*/ process.cwd(),
+    "data",
+    "director-array.json",
+  );
 
   const fileContents = await fs.readFile(filePath, "utf8");
 
