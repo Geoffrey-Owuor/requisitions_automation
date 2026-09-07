@@ -7,6 +7,9 @@ const nextConfig: NextConfig = {
   // standalone bundle is proven on the test server.
   output: process.env.NEXT_OUTPUT_STANDALONE === "1" ? "standalone" : undefined,
   allowedDevOrigins: ["192.0.2.34", "192.0.2.12"],
+  experimental: {
+    turbopackFileSystemCacheForBuild: true,
+  },
 };
 
 export default nextConfig;
