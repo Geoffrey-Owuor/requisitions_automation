@@ -23,7 +23,11 @@ import AlertModal from "@/components/AlertModal";
 import { AlertInfo } from "@/components/TravelRequisitionPage";
 import KeyConfirmationModal from "./KeyConfirmationModal";
 import { useToggleStore } from "@/store/useToggleStore";
-import { FormSelect, findHodForDepartment } from "./CasualRequisitionForm";
+import {
+  FormSelect,
+  findHodForDepartment,
+  excludeSubmitterFromHodArray,
+} from "./CasualRequisitionForm";
 
 // ---- Types ----
 export interface KeyAccessFormData {
@@ -68,10 +72,11 @@ export default function KeyAccessRequisitionForm() {
   });
 
   // Load HODS
-  const { data: hodArray = [], isLoading: hodsLoading } = useQuery({
+  const { data: rawHodArray = [], isLoading: hodsLoading } = useQuery({
     queryKey: ["BaseHodArrayData"],
     queryFn: loadHodArray,
   });
+  const hodArray = excludeSubmitterFromHodArray(rawHodArray, email);
   const HOD_APPROVERS = hodArray.map((hod) => hod.name);
 
   const [formData, setFormData] = useState<KeyAccessFormData>(InitialFormState);

@@ -14,10 +14,9 @@ An internal web application for Hotpoint Appliances Ltd that automates requisiti
 ### Travel Requisitions
 
 - Submit requests for site visits, local flights, road travel, and international travel
-- Multi-tier approval based on travel cost:
-  - **Local Travel** (< 30K): HOD Approval
-  - **Air Travel** (30K–100K): HOD → HR Approval
-  - **Global Travel** (> 100K): HOD → HR → Director Approval
+- Multi-tier approval based on travel cost — HOD and HR approval are mandatory for every tier; only Director approval is conditional:
+  - **Tier 1** (≤ 30K) and **Tier 2** (30K–100K): HOD → HR Approval
+  - **Tier 3** (≥ 100K): HOD → HR → Director Approval
 - Detailed cost breakdown (transport, accommodation, per diem, other expenses)
 - Engineering job summary fields for HVAC/engineering site visits
 
@@ -29,7 +28,7 @@ An internal web application for Hotpoint Appliances Ltd that automates requisiti
 ### Casual Requisition
 
 - Request casual staff engagements for one or more sections over a defined period; available locations and sections depend on the requesting department
-- Approval workflow: HOD Approval → HR Approval (HR can adjust the final approved headcount per section); on approval, a PDF summary is emailed to HR and to an external casual-labor provider for action
+- Approval workflow: HOD Approval → HR Approval (HR can adjust the final approved headcount per section); on approval, a PDF summary is emailed to HR and to an external casual-labor provider for action. Both stages are array-based — any member of the HOD or HR approver group can act, first click wins
 - Daily rate is derived automatically from the selected location (Ruiru vs. other locations), except for the Engineering & HVAC department, which uses a Technician/Welder category rate instead; total cost = casuals × rate/day × engagement days
 
 ### Employee Requisition
@@ -37,14 +36,13 @@ An internal web application for Hotpoint Appliances Ltd that automates requisiti
 - Request one or more open positions to be filled, each with its own headcount, justification, reporting line, and target fill date
 - Each position also records whether it's a Replacement or a New position, its Job Grade (Assistant Officer through Director), and a Salary Range in KES (minimum cannot be 0, maximum cannot be less than the minimum)
 - Requires a Job Description, KPIs, and Org Chart document per position — each is its own required upload (Word, Excel, or PDF), up to 2MB per file
-- Approval workflow: HOD Approval → CEO Approval → HR Approval
+- Approval workflow: HOD Approval → Retail Director Approval (retail departments only, and skipped if the HOD is themself a Retail Director) → CEO Approval → HR Approval. Retail Director, CEO, and HR stages are array-based — any group member can act, first click wins
 
 ### Salary Advance
 
-- Staff salary advance requests with a monthly submission window
-- Requests automatically lock after the 10th of the month at 17:00 (also gated by an admin-controlled DB flag)
+- Staff salary advance requests — no submission deadline; HR batches processing once a month using a per-request `exported` flag rather than a calendar cutoff
 - A new request is blocked while any active (non-declined) request's repayment installments haven't fully elapsed — a continuous request blocks indefinitely, a one-off request blocks until its `repayment_start_date + no_of_installments` has passed
-- Staff can self-service alter an eligible active request instead of submitting a new one — switch a continuous request to one-off, or reduce a one-off request's remaining installments — applied immediately with no HR approval or email, logged in `salary_advance_alterations` and surfaced only in the monthly report
+- Staff can self-service alter an eligible active request instead of submitting a new one — switch a continuous request to one-off, reduce a one-off request's remaining installments, or delete a still-pending, not-yet-exported request outright — applied immediately with no HR approval or email; switch/reduce alterations are logged in `salary_advance_alterations` only once the underlying request has already been exported
 
 ### Embedded Internal Portals (SSO)
 
@@ -52,7 +50,7 @@ An internal web application for Hotpoint Appliances Ltd that automates requisiti
 
 ### Dashboard & Management
 
-- User dashboard for submitting and tracking requisitions
+- User dashboard with a dedicated table per requisition type and approval stage you're eligible to see (your own submissions, plus any pending-approval queues you're an approver for) across Travel, IT, Access, Casual, and Employee requisitions, with a jump-nav for finding a specific table once several are visible
 - Approver dashboards/links (emailed, token-based) for reviewing and approving requests without needing to log in
 - PDF generation for requisitions (`@react-pdf/renderer`)
 - Export requisitions and salary advance data to Excel (`exceljs`)
@@ -65,6 +63,7 @@ An internal web application for Hotpoint Appliances Ltd that automates requisiti
 - Route protection via a `proxy.ts` request proxy (Next.js 16's replacement for `middleware.ts`)
 - Role-based access control backed by Postgres (`users` → `user_roles` → `roles`)
 - Token-gated public approval links for approvers who aren't logged-in staff
+- HOD-aware requisition forms — department selection still auto-fills the matching HOD approver, but a submitter who is themself that department's HOD won't see their own name in the approver list or have it auto-selected
 
 ## Tech Stack
 
@@ -74,6 +73,6 @@ An internal web application for Hotpoint Appliances Ltd that automates requisiti
 - **Client UI state**: Zustand
 - **Auth**: `arctic` (Microsoft Entra ID OAuth/PKCE) + `jose` (signed JWT session cookie)
 - **Database**: PostgreSQL (`pg`)
-- **Email**: Nodemailer and Microsoft Graph `Mail.Send`
-- **PDF/Export**: `@react-pdf/renderer`, `react-pdf-tailwind`, `exceljs`
+- **Email**: Nodemailer and Microsoft Graph `Mail.Send` (`@azure/msal-node` for the Graph auth token)
+- **PDF/Export/Preview**: `@react-pdf/renderer`, `react-pdf-tailwind`, `exceljs` (also renders Excel attachment previews), `mammoth` (Word attachment previews)
 - **Icons**: Lucide React

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, ChangeEvent } from "react";
+import { useUser } from "@/context/UserContext";
 import { DatePicker } from "@/components/DatePicker";
 import {
   UserRound,
@@ -28,7 +29,11 @@ import AlertModal from "@/components/AlertModal";
 import { AlertInfo } from "@/components/TravelRequisitionPage";
 import EmployeeConfirmationModal from "./EmployeeConfirmationModal";
 import { useToggleStore } from "@/store/useToggleStore";
-import { FormSelect, findHodForDepartment } from "./CasualRequisitionForm";
+import {
+  FormSelect,
+  findHodForDepartment,
+  excludeSubmitterFromHodArray,
+} from "./CasualRequisitionForm";
 import Image from "next/image";
 
 // ---- Client-side attachment constraints (mirrors lib/attachmentStorage.ts) ----
@@ -95,6 +100,8 @@ function hasDisallowedExtension(fileName: string) {
 
 // ---- Main Page ----
 export default function EmployeeRequisitionForm() {
+  const { email } = useUser();
+
   const scrollTrigger = useToggleStore((state) => state.scrollTrigger);
   const triggerScroll = useToggleStore((state) => state.triggerScroll);
 
@@ -103,10 +110,11 @@ export default function EmployeeRequisitionForm() {
     queryFn: loadBaseDepartments,
   });
 
-  const { data: hodArray = [], isLoading: hodsLoading } = useQuery({
+  const { data: rawHodArray = [], isLoading: hodsLoading } = useQuery({
     queryKey: ["BaseHodArrayData"],
     queryFn: loadHodArray,
   });
+  const hodArray = excludeSubmitterFromHodArray(rawHodArray, email);
   const HOD_APPROVERS = hodArray.map((hod) => hod.name);
 
   const [formData, setFormData] = useState<EmployeeFormData>(InitialFormState);
