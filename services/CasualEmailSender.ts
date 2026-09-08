@@ -75,6 +75,7 @@ export interface CasualEmailDataProps {
   reviewLink?: string;
   showPdfDownload?: boolean;
   attachments?: { filename: string; content: Buffer }[];
+  isExternal?: boolean;
 }
 
 // Cached query — repeated calls with the same requestId hit the DB only once
@@ -122,6 +123,7 @@ export async function CasualEmailSender({
   reviewLink,
   showPdfDownload = false,
   attachments,
+  isExternal = false,
 }: CasualEmailDataProps) {
   const emailData = await getCasualEmailData(requestId);
 
@@ -133,6 +135,7 @@ export async function CasualEmailSender({
     emailData,
     reviewLink,
     showPdfDownload,
+    isExternal,
   });
 
   await sendEmail({

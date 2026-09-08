@@ -95,7 +95,13 @@ const RequisitionSectionCard = ({
   </div>
 );
 
-const RequisitionPdfModal = ({ pdfData }: { pdfData: CasualPdfValues }) => {
+const RequisitionPdfModal = ({
+  pdfData,
+  requestId,
+}: {
+  pdfData: CasualPdfValues;
+  requestId: string;
+}) => {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -114,7 +120,9 @@ const RequisitionPdfModal = ({ pdfData }: { pdfData: CasualPdfValues }) => {
           </span>
           {mounted ? (
             <PDFDownloadLink
-              document={<CasualRequisitionPdf pdfData={pdfData} />}
+              document={
+                <CasualRequisitionPdf pdfData={pdfData} requestId={requestId} />
+              }
               fileName={`Casual_Requisition_${pdfData.submittername.replace(/\s+/g, "_")}_${new Date().toLocaleDateString("en-GB")}.pdf`}
               className="flex cursor-pointer items-center gap-2 rounded-[14px] border-none bg-slate-900 px-5 py-2.5 text-[13px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)]"
             >

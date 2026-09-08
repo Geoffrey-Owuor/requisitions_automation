@@ -64,13 +64,26 @@ export async function hrApprovalStage({
   if (status === "approved") {
     const externalProvider = process.env.EXTERNAL_CASUAL_PROVIDER!;
 
-    // Generate the PDF summary once - attached only to the HR and external provider emails
+    // Generate the PDF summaries - attached only to the HR and external provider emails.
+    // The external provider gets a generalized version with submitter and approver details removed.
     const emailData = await getCasualEmailData(uuid);
-    const pdfBuffer = await renderToBuffer(
-      <CasualRequisitionPdf pdfData={emailData} />,
-    );
+    const [pdfBuffer, externalPdfBuffer] = await Promise.all([
+      renderToBuffer(
+        <CasualRequisitionPdf pdfData={emailData} requestId={uuid} />,
+      ),
+      renderToBuffer(
+        <CasualRequisitionPdf
+          pdfData={emailData}
+          requestId={uuid}
+          isExternal
+        />,
+      ),
+    ]);
     const pdfAttachment = [
       { filename: `Casual_Requisition_${uuid}.pdf`, content: pdfBuffer },
+    ];
+    const externalPdfAttachment = [
+      { filename: `Casual_Requisition_${uuid}.pdf`, content: externalPdfBuffer },
     ];
 
     // Hr - the approver's own confirmation, with the pdf attached
@@ -115,7 +128,8 @@ export async function hrApprovalStage({
       });
     }
 
-    // External casual labor provider - informed for action, with the pdf attached
+    // External casual labor provider - informed for action, with a generalized pdf attached
+    // (submitter and internal approver details are omitted; see CHANGES.md)
     CasualEmailSender({
       to: externalProvider,
       requestId: uuid,
@@ -123,7 +137,8 @@ export async function hrApprovalStage({
         "A new casual requisition has been approved and requires your attention for action",
       title: "Action Required: New Casual Requisition",
       role: "user",
-      attachments: pdfAttachment,
+      attachments: externalPdfAttachment,
+      isExternal: true,
     });
   }
 }
