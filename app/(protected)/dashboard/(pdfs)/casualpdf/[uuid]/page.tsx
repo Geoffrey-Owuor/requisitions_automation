@@ -64,7 +64,7 @@ const page = async ({ params }: PdfDownloadProps) => {
   return (
     <RequisitionPagesWrapper>
       <Suspense fallback={<RequisitionPdfSkeleton />}>
-        <RequisitionPdfModal pdfData={pdfData} />
+        <RequisitionPdfModal pdfData={pdfData} requestId={uuid} />
       </Suspense>
     </RequisitionPagesWrapper>
   );
