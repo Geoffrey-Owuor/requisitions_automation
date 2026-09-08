@@ -23,6 +23,7 @@ import { useToggleStore } from "@/store/useToggleStore";
 import {
   FormSelect,
   findHodForDepartment,
+  excludeSubmitterFromHodArray,
 } from "../Modules/Retail/CasualRequisitionForm";
 
 // ---- Constants ----
@@ -93,10 +94,11 @@ export default function ITRequisitionPage() {
   });
 
   // Load HODS
-  const { data: hodArray = [], isLoading: hodsLoading } = useQuery({
+  const { data: rawHodArray = [], isLoading: hodsLoading } = useQuery({
     queryKey: ["BaseHodArrayData"],
     queryFn: loadHodArray,
   });
+  const hodArray = excludeSubmitterFromHodArray(rawHodArray, email);
   const HOD_APPROVERS = hodArray.map((hod) => hod.name);
 
   const [formData, setFormData] = useState<ITFormData>(InitialFormState);
