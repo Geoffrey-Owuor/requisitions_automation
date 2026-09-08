@@ -125,8 +125,12 @@ const PdfSectionBlock = ({ section }: { section: CasualSectionValues }) => {
 
 export const CasualRequisitionPdf = ({
   pdfData,
+  requestId,
+  isExternal = false,
 }: {
   pdfData: CasualPdfValues;
+  requestId: string;
+  isExternal?: boolean;
 }) => {
   const formatCost = (val: string | number) =>
     `KES ${Number(val).toLocaleString()}`;
@@ -140,19 +144,35 @@ export const CasualRequisitionPdf = ({
             Casual Requisition Form
           </Text>
           <Text style={tw("mt-1 text-[10px] text-[#7c5a5a]")}>
-            Reference: {pdfData.emailaddress} - {pdfData.location}
+            Reference: {isExternal ? requestId : pdfData.emailaddress} -{" "}
+            {pdfData.location}
           </Text>
         </View>
 
         {/* Submitter Details */}
         <View style={tw("mb-5")}>
-          <PdfSectionHeading title="Submitter Details" />
+          <PdfSectionHeading
+            title={isExternal ? "Requisition Details" : "Submitter Details"}
+          />
           <View style={tw("flex flex-row flex-wrap gap-y-3 gap-x-2")}>
-            <PdfField label="Submitter" value={pdfData.submittername} />
-            <PdfField label="Submitter Email" value={pdfData.emailaddress} />
-            <PdfField label="Department" value={pdfData.department} />
-            <PdfField label="Location" value={pdfData.location} />
-            <PdfField label="HOD Approver" value={pdfData.hodapprover} />
+            {isExternal ? (
+              <>
+                <PdfField label="Reference" value={requestId} />
+                <PdfField label="Department" value={pdfData.department} />
+                <PdfField label="Location" value={pdfData.location} />
+              </>
+            ) : (
+              <>
+                <PdfField label="Submitter" value={pdfData.submittername} />
+                <PdfField
+                  label="Submitter Email"
+                  value={pdfData.emailaddress}
+                />
+                <PdfField label="Department" value={pdfData.department} />
+                <PdfField label="Location" value={pdfData.location} />
+                <PdfField label="HOD Approver" value={pdfData.hodapprover} />
+              </>
+            )}
           </View>
         </View>
 
@@ -196,53 +216,55 @@ export const CasualRequisitionPdf = ({
         </View>
 
         {/* Approval Chain */}
-        <View style={tw("mb-4 border-t border-[#f0b4b4] pt-4")}>
-          <PdfSectionHeading title="Approval Chain" />
-          <View style={tw("flex flex-row flex-wrap gap-3")}>
-            {approvalStages.map(
-              ({ role, approverKey, emailKey, statusKey, commentsKey }) => (
-                <View
-                  key={role}
-                  style={tw(
-                    "w-[31%] rounded-lg border border-[#f0b4b4] p-3 bg-[#fafafa]",
-                  )}
-                >
-                  <Text
+        {!isExternal && (
+          <View style={tw("mb-4 border-t border-[#f0b4b4] pt-4")}>
+            <PdfSectionHeading title="Approval Chain" />
+            <View style={tw("flex flex-row flex-wrap gap-3")}>
+              {approvalStages.map(
+                ({ role, approverKey, emailKey, statusKey, commentsKey }) => (
+                  <View
+                    key={role}
                     style={tw(
-                      "mb-1.5 text-[8px] font-semibold text-[#b0a0a0] uppercase",
+                      "w-[31%] rounded-lg border border-[#f0b4b4] p-3 bg-[#fafafa]",
                     )}
                   >
-                    {role}
-                  </Text>
-                  <Text
-                    style={tw(
-                      "text-[10px] font-semibold text-[#1e1b1b] mb-0.5",
-                    )}
-                  >
-                    {pdfData[approverKey] || "—"}
-                  </Text>
-                  <Text style={tw("text-[8px] text-[#7c5a5a] mb-1.5")}>
-                    {pdfData[emailKey] || "—"}
-                  </Text>
-
-                  <Text style={tw("text-[9px] font-bold uppercase")}>
-                    {pdfData[statusKey] || "Pending"}
-                  </Text>
-
-                  {pdfData[commentsKey] && (
                     <Text
                       style={tw(
-                        "mt-1.5 text-[9px] leading-relaxed text-[#7c5a5a]",
+                        "mb-1.5 text-[8px] font-semibold text-[#b0a0a0] uppercase",
                       )}
                     >
-                      &quot;{pdfData[commentsKey]}&quot;
+                      {role}
                     </Text>
-                  )}
-                </View>
-              ),
-            )}
+                    <Text
+                      style={tw(
+                        "text-[10px] font-semibold text-[#1e1b1b] mb-0.5",
+                      )}
+                    >
+                      {pdfData[approverKey] || "—"}
+                    </Text>
+                    <Text style={tw("text-[8px] text-[#7c5a5a] mb-1.5")}>
+                      {pdfData[emailKey] || "—"}
+                    </Text>
+
+                    <Text style={tw("text-[9px] font-bold uppercase")}>
+                      {pdfData[statusKey] || "Pending"}
+                    </Text>
+
+                    {pdfData[commentsKey] && (
+                      <Text
+                        style={tw(
+                          "mt-1.5 text-[9px] leading-relaxed text-[#7c5a5a]",
+                        )}
+                      >
+                        &quot;{pdfData[commentsKey]}&quot;
+                      </Text>
+                    )}
+                  </View>
+                ),
+              )}
+            </View>
           </View>
-        </View>
+        )}
 
         {/* Footer Note */}
         <View style={tw("border-t border-[#f0b4b4] pt-4 mt-auto text-center")}>

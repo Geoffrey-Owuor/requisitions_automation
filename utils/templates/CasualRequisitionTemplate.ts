@@ -18,6 +18,7 @@ export function CasualRequisitionTemplate({
   emailData,
   reviewLink,
   showPdfDownload,
+  isExternal = false,
 }: CasualRequisitionProps) {
   const buttonStyle =
     role !== "user" ? "display: inline-block;" : "display: none;";
@@ -52,12 +53,18 @@ export function CasualRequisitionTemplate({
           </div>
 
           <div style="margin-bottom: 24px;">
-            <p style="font-size: 11px; font-weight: 700; color: #a31d1d; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px;">Primary Information</p>
+            <p style="font-size: 11px; font-weight: 700; color: #a31d1d; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px;">${isExternal ? "Requisition Details" : "Primary Information"}</p>
             <table width="100%" style="border-collapse: collapse;">
-              ${modernRow("Submitter", emailData.submittername)}
+              ${
+                isExternal
+                  ? `${modernRow("Reference", requestId)}
+              ${modernRow("Department", emailData.department)}
+              ${modernRow("Location", emailData.location)}`
+                  : `${modernRow("Submitter", emailData.submittername)}
               ${modernRow("Email", emailData.emailaddress)}
               ${modernRow("Department", emailData.department)}
-              ${modernRow("Location", emailData.location)}
+              ${modernRow("Location", emailData.location)}`
+              }
             </table>
           </div>
 
@@ -86,11 +93,15 @@ export function CasualRequisitionTemplate({
             </table>
           </div>
 
-          <p style="font-size: 11px; font-weight: 700; color: #a31d1d; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px;">Approval Workflow</p>
+          ${
+            isExternal
+              ? ""
+              : `<p style="font-size: 11px; font-weight: 700; color: #a31d1d; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px;">Approval Workflow</p>
           <div style="border-radius: 16px; border: 1px solid #f0e6e6; overflow: hidden;">
              ${statusCard("Head of Department", emailData.hodapprovalstatus, emailData.hodapprover, emailData.hodemail, emailData.hodcomments)}
              ${statusCard("Human Resources", emailData.hrapprovalstatus, emailData.hrapprover, emailData.hremail, emailData.hrcomments, true)}
-          </div>
+          </div>`
+          }
 
           <div style="margin-top: 32px; text-align: center;">
             <div style="${buttonStyle}">
