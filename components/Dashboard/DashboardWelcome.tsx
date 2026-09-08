@@ -11,6 +11,8 @@ import {
   ArrowRight,
   LucideIcon,
   HousePlug,
+  HardHat,
+  UserRoundPlus,
 } from "lucide-react";
 import { useToggleStore } from "@/store/useToggleStore";
 import { useUser } from "@/context/UserContext";
@@ -35,6 +37,12 @@ const DashboardWelcome = () => {
   const setShowAccessRequisition = useToggleStore(
     (state) => state.setShowAccessRequisition,
   );
+  const setShowCasualRequisition = useToggleStore(
+    (state) => state.setShowCasualRequisition,
+  );
+  const setShowEmployeeRequisition = useToggleStore(
+    (state) => state.setShowEmployeeRequisition,
+  );
 
   const actions: WelcomeAction[] = [
     {
@@ -54,6 +62,18 @@ const DashboardWelcome = () => {
       description: "Request physical access or keys",
       Icon: LockKeyhole,
       onClick: () => setShowAccessRequisition(true),
+    },
+    {
+      label: "Casual Requisition",
+      description: "Request casual labor",
+      Icon: HardHat,
+      onClick: () => setShowCasualRequisition(true),
+    },
+    {
+      label: "Employee Requisition",
+      description: "Request new or replacement headcount",
+      Icon: UserRoundPlus,
+      onClick: () => setShowEmployeeRequisition(true),
     },
     {
       label: "Salary Advance",

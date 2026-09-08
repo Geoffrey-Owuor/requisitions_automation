@@ -11,8 +11,6 @@ import { QueryResultRow } from "pg";
 
 export interface ITRequisitionDataProps {
   dataFlag: "userData" | "hodPending" | "itPending" | "itAll";
-  userEmail?: string;
-  hodEmail?: string;
   page?: number;
   pageSize?: number;
   searchTerm?: string;
@@ -35,8 +33,6 @@ const SEARCHABLE_COLUMNS = [
 
 export const getITRequisitionData = async ({
   dataFlag,
-  userEmail,
-  hodEmail,
   page = 1,
   pageSize = 6,
   searchTerm,
@@ -49,14 +45,16 @@ export const getITRequisitionData = async ({
 
   switch (dataFlag) {
     case "userData":
+      // Identity is always the session's own email — never client-supplied,
+      // so this can't be used to view another user's submissions.
       conditions.push(`submitter_email = $${baseParams.length + 1}`);
-      baseParams.push(userEmail ?? "");
+      baseParams.push(user.email);
       break;
     case "hodPending":
       conditions.push(
         `hod_approver_email = $${baseParams.length + 1} AND hod_approver_status = $${baseParams.length + 2}`,
       );
-      baseParams.push(hodEmail ?? "", "pending");
+      baseParams.push(user.email, "pending");
       break;
     case "itPending":
       conditions.push(

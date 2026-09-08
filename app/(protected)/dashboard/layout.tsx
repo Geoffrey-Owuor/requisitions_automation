@@ -3,6 +3,7 @@ import { getSession } from "@/lib/session"; // Updated import
 import { UserProvider } from "@/context/UserContext";
 import DashboardWrapper from "@/components/Dashboard/DashboardWrapper";
 import { getUserRoles } from "@/serverActions/GetUserRoles";
+import { getApproverMemberships } from "@/serverActions/GetApproverMemberships";
 import HardRedirect from "@/components/HardRedirect";
 import UserSessionWrapper from "@/components/Dashboard/UserSessionWrapper";
 
@@ -19,14 +20,19 @@ export default async function ProtectedLayout({
     return <HardRedirect url="/api/auth/login" />;
   }
 
-  // Get the possible user roles assigned to the user
-  const roles = await getUserRoles(session.email);
+  // Get the possible user roles assigned to the user, and which array-based
+  // approval stages (Security/IT/Director/Retail Director/HR) they belong to
+  const [roles, memberships] = await Promise.all([
+    getUserRoles(session.email),
+    getApproverMemberships(),
+  ]);
 
   // Construct user object properties mapped directly out of our session schema
   const userObject = {
     roles: roles,
     username: session.name,
     email: session.email,
+    memberships,
   };
 
   // User object for running auth sync

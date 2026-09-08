@@ -31,6 +31,7 @@ import { EndAdvanceFormSession } from "@/serverActions/EndAdvanceFormSession";
 import { SubmitAdvanceForm } from "@/serverActions/PublicServerActions/SubmitAdvanceForm";
 import SalaryAdvanceFormSkeleton from "../Skeletons/SalaryAdvanceFormSkeleton";
 import SalaryAdvanceAlterationSection from "./SalaryAdvanceAlterationSection";
+import SalaryAdvanceHistorySection from "./SalaryAdvanceHistorySection";
 
 export interface SalaryAdvanceFormData {
   staffNumber: string;
@@ -88,9 +89,10 @@ const VERIFICATION_STEPS = [
   },
 ];
 
-const MODE_OPTIONS: { value: "submit" | "alter"; label: string }[] = [
+const MODE_OPTIONS: { value: "submit" | "alter" | "history"; label: string }[] = [
   { value: "submit", label: "Submit New Request" },
   { value: "alter", label: "Modify Existing Request" },
+  { value: "history", label: "My Request History" },
 ];
 
 function toISODate(date: Date): string {
@@ -135,7 +137,7 @@ export default function SalaryAdvanceClient() {
   const scrollTrigger = useToggleStore((state) => state.scrollTrigger);
 
   const [step, setStep] = useState(1);
-  const [mode, setMode] = useState<"submit" | "alter">("submit");
+  const [mode, setMode] = useState<"submit" | "alter" | "history">("submit");
   const [checkingSession, setCheckingSession] = useState(true);
   const [verifyStage, setVerifyStage] = useState<"email" | "code">("email");
   const [email, setEmail] = useState("");
@@ -755,9 +757,12 @@ export default function SalaryAdvanceClient() {
               Salary Advance Request
             </h1>
             <p className="mt-1 text-[14px] text-[#7c5a5a]">
-              {mode === "submit"
-                ? "Enter your salary advance details below."
-                : "Adjust an eligible, active salary advance request."}
+              {mode === "submit" &&
+                "Enter your salary advance details below."}
+              {mode === "alter" &&
+                "Adjust an eligible, active salary advance request."}
+              {mode === "history" &&
+                "Review your past and current salary advance requests."}
             </p>
           </header>
 
@@ -785,6 +790,8 @@ export default function SalaryAdvanceClient() {
           </div>
 
           {mode === "alter" && <SalaryAdvanceAlterationSection />}
+
+          {mode === "history" && <SalaryAdvanceHistorySection />}
 
           {mode === "submit" && (
             <div className="rounded-3xl border border-white/85 bg-white/65 px-6 py-8 shadow-[0_24px_48px_rgba(160,60,60,0.10)] backdrop-blur-2xl sm:px-8">
