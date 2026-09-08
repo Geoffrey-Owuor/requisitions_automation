@@ -32,6 +32,7 @@ import { EngineeringJobFields, EngineeringJob } from "./EngineeringJobFields";
 import {
   FormSelect,
   findHodForDepartment,
+  excludeSubmitterFromHodArray,
 } from "./Modules/Retail/CasualRequisitionForm";
 
 export interface TravelFormData {
@@ -98,10 +99,11 @@ export default function TravelRequisitionPage() {
   });
 
   // Load HODS
-  const { data: hodArray = [], isLoading: hodsLoading } = useQuery({
+  const { data: rawHodArray = [], isLoading: hodsLoading } = useQuery({
     queryKey: ["BaseHodArrayData"],
     queryFn: loadHodArray,
   });
+  const hodArray = excludeSubmitterFromHodArray(rawHodArray, email);
   const HOD_APPROVERS = hodArray.map((hod) => hod.name);
 
   const [formData, setFormData] = useState<TravelFormData>(InitialFormState);

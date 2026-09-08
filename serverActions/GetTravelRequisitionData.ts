@@ -11,8 +11,6 @@ import { QueryResultRow } from "pg";
 
 export interface TravelRequisitionDataProps {
   dataFlag: "userData" | "hodPending" | "hrPending" | "directorPending";
-  userEmail?: string;
-  hodEmail?: string;
   page?: number;
   pageSize?: number;
   searchTerm?: string;
@@ -31,8 +29,6 @@ const SEARCHABLE_COLUMNS = [
 
 export const getTravelRequisitionData = async ({
   dataFlag,
-  userEmail,
-  hodEmail,
   page = 1,
   pageSize = 6,
   searchTerm,
@@ -45,14 +41,16 @@ export const getTravelRequisitionData = async ({
 
   switch (dataFlag) {
     case "userData":
+      // Identity is always the session's own email — never client-supplied,
+      // so this can't be used to view another user's submissions.
       conditions.push(`submitter_email = $${baseParams.length + 1}`);
-      baseParams.push(userEmail ?? "");
+      baseParams.push(user.email);
       break;
     case "hodPending":
       conditions.push(
         `travel_hod_email = $${baseParams.length + 1} AND travel_hod_approval_status = $${baseParams.length + 2}`,
       );
-      baseParams.push(hodEmail ?? "", "pending");
+      baseParams.push(user.email, "pending");
       break;
     case "hrPending":
       conditions.push(

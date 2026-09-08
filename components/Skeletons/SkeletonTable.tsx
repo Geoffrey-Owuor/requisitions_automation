@@ -1,27 +1,29 @@
 export const SkeletonTable = () => {
   return (
-    <div className="z-10 mb-4 w-full animate-pulse space-y-4">
-      {/* Table Title Placeholder */}
-      <div className="mb-4 h-6 w-64 rounded-xl bg-neutral-200" />
-      <div className="mb-6 h-10 w-100 rounded-xl bg-neutral-200" />
+    <div className="z-10 mb-4 w-full rounded-xl border border-neutral-300 p-3">
+      <div className="animate-pulse space-y-4">
+        {/* Table Title Placeholder */}
+        <div className="mb-4 h-6 w-64 rounded-xl bg-neutral-200" />
+        <div className="mb-6 h-10 w-100 rounded-xl bg-neutral-200" />
 
-      {/* Table Container */}
-      <div className="h-96 w-full rounded-2xl border border-gray-200 bg-white px-4 py-2 backdrop-blur-2xl">
-        {/* Table Header Row */}
-        <div className="flex space-x-4 border-b border-neutral-200/50 py-4">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="h-4 w-full rounded-lg bg-neutral-200" />
-          ))}
-        </div>
-
-        {/* Table Body Rows */}
-        {[...Array(6)].map((_, i) => (
-          <div key={i} className="flex space-x-4 py-4">
-            {[...Array(5)].map((_, j) => (
-              <div key={j} className="h-8 w-full rounded-lg bg-neutral-100" />
+        {/* Table Container */}
+        <div className="h-full w-full rounded-2xl border border-gray-200 bg-white px-4 py-2 backdrop-blur-2xl">
+          {/* Table Header Row */}
+          <div className="flex space-x-4 border-b border-neutral-200/50 py-4">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="h-4 w-full rounded-lg bg-neutral-200" />
             ))}
           </div>
-        ))}
+
+          {/* Table Body Rows */}
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="flex space-x-4 py-4">
+              {[...Array(5)].map((_, j) => (
+                <div key={j} className="h-8 w-full rounded-lg bg-neutral-100" />
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

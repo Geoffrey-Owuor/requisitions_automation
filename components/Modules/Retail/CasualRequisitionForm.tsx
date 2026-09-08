@@ -95,6 +95,15 @@ export function findHodForDepartment(
   return hodArray.find((hod) => hod.department === department)?.name ?? "";
 }
 
+// Removes the current submitter from the HOD list so an HOD submitting their
+// own requisition can't auto-select or manually pick themselves as approver.
+export function excludeSubmitterFromHodArray(
+  hodArray: HodApproversObject[],
+  submitterEmail: string,
+): HodApproversObject[] {
+  return hodArray.filter((hod) => hod.email !== submitterEmail);
+}
+
 // ---- Sub-component prop types ----
 interface FormSelectProps {
   label: string;
@@ -119,10 +128,11 @@ export default function CasualRequisitionForm() {
   });
 
   // Load HODS
-  const { data: hodArray = [], isLoading: hodsLoading } = useQuery({
+  const { data: rawHodArray = [], isLoading: hodsLoading } = useQuery({
     queryKey: ["BaseHodArrayData"],
     queryFn: loadHodArray,
   });
+  const hodArray = excludeSubmitterFromHodArray(rawHodArray, email);
   const HOD_APPROVERS = hodArray.map((hod) => hod.name);
 
   const [formData, setFormData] = useState<CasualFormData>(InitialFormState);
