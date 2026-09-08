@@ -198,7 +198,10 @@ export default function RequisitionTable<TParams>({
 
   return (
     <>
-      <div className="rounded-xl border border-neutral-300 p-3">
+      <div
+        id={`table-${tableKey}`}
+        className="scroll-mt-4 rounded-xl border border-neutral-300 p-3"
+      >
         <button
           type="button"
           onClick={() => toggleCollapsed(tableKey)}

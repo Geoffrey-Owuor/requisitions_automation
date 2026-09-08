@@ -10,6 +10,8 @@ import DashboardWatermark from "../Modules/DashboardWaterMark";
 import DashboardWelcome from "./DashboardWelcome";
 import { useEffect, useMemo, useState } from "react";
 import DashboardAlert from "./DashboardAlert";
+import DashboardTableNav from "./DashboardTableNav";
+import { DASHBOARD_TABLES } from "@/lib/dashboardTables";
 
 const UserDashboard = () => {
   const { username, email: userEmail, roles, memberships } = useUser();
@@ -48,27 +50,7 @@ const UserDashboard = () => {
   // One stable callback per tableKey. The full set of possible keys is
   // static regardless of role/membership (only which ones get *rendered*
   // varies), so they can all be built once up front rather than lazily.
-  const ALL_TABLE_KEYS = [
-    "travel-userData",
-    "travel-hodPending",
-    "travel-hrPending",
-    "travel-directorPending",
-    "it-userData",
-    "it-hodPending",
-    "it-itPending",
-    "it-itAll",
-    "access-userData",
-    "access-hodPending",
-    "access-securityPending",
-    "casual-userData",
-    "casual-hodPending",
-    "casual-hrPending",
-    "employee-userData",
-    "employee-hodPending",
-    "employee-retailDirectorPending",
-    "employee-directorPending",
-    "employee-hrPending",
-  ];
+  const ALL_TABLE_KEYS = DASHBOARD_TABLES.map((table) => table.key);
   const statusSetters = useMemo(() => {
     const build = (key: string) => (hasData: boolean) =>
       setTableStatus((prev) =>
@@ -119,6 +101,18 @@ const UserDashboard = () => {
   const hasAnyData = visibleTableKeys.some((key) => tableStatus[key]);
   const showWelcome = allTablesReported && !hasAnyData;
 
+  // Tables to list in the jump nav: role/membership-visible AND actually
+  // rendering data (RequisitionTable returns null otherwise), kept in DOM
+  // order via DASHBOARD_TABLES rather than visibleTableKeys' grouping order.
+  const navItems = useMemo(
+    () =>
+      DASHBOARD_TABLES.filter(
+        (table) =>
+          visibleTableKeys.includes(table.key) && tableStatus[table.key],
+      ),
+    [visibleTableKeys, tableStatus],
+  );
+
   return (
     <div className="relative h-full p-2">
       {/* The dashboard alert */}
@@ -131,6 +125,9 @@ const UserDashboard = () => {
       {/* 3. THE CONTENT LAYER */}
 
       <div className="relative z-10 space-y-4">
+        {/* ----------JUMP NAV (shown once enough tables render)------------ */}
+        <DashboardTableNav items={navItems} />
+
         {/* ----------WELCOME STATE (shown when no tables have data)------------ */}
         {showWelcome && <DashboardWelcome />}
 
