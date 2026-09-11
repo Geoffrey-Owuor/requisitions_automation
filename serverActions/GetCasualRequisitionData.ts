@@ -95,7 +95,8 @@ export const getCasualRequisitionData = async ({
         c.employee_department, c.casual_location,
         c.casual_hod_approval_status, c.casual_hr_approval_status,
         c.casual_hod_approver, c.casual_hr_approver,
-        agg.section_count, agg.total_casuals, agg.approved_casuals,
+        c.amendment_count, c.last_amended_at,
+        agg.section_count, agg.total_casuals,
         agg.total_amount, agg.period_from, agg.period_to,
         COUNT(*) OVER() AS total_count
         FROM casual_requisitions c
@@ -103,14 +104,13 @@ export const getCasualRequisitionData = async ({
           SELECT
             COUNT(*) AS section_count,
             SUM(number_of_casuals) AS total_casuals,
-            SUM(COALESCE(hr_approved_casuals, number_of_casuals)) AS approved_casuals,
             SUM(casual_total_amount) AS total_amount,
             MIN(engagement_period_from) AS period_from,
             MAX(engagement_period_to) AS period_to
           FROM casual_requisition_sections s WHERE s.request_id = c.request_id
         ) agg ON TRUE
         ${whereClause}
-        ORDER BY c.request_created_at DESC
+        ORDER BY GREATEST(c.request_created_at, c.last_amended_at) DESC
         LIMIT $${baseParams.length + 1} OFFSET $${baseParams.length + 2}
     `;
 

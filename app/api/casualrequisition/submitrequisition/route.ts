@@ -4,33 +4,10 @@ import { query } from "@/lib/db";
 import { CasualEmailSender } from "@/services/CasualEmailSender";
 import { getSession } from "@/lib/session";
 import {
-  getCasualRatePerDay,
-  getCasualSections,
-  ENGINEERING_HVAC_DEPARTMENT,
-  CASUAL_CATEGORIES,
-  CasualCategory,
-} from "@/public/assets";
-
-// Inclusive day-count between two ISO (YYYY-MM-DD) date strings
-function engagementDaysBetween(from: string, to: string) {
-  const fromDate = new Date(from + "T00:00:00");
-  const toDate = new Date(to + "T00:00:00");
-  const diffDays =
-    Math.round(
-      (toDate.getTime() - fromDate.getTime()) / (1000 * 60 * 60 * 24),
-    ) + 1;
-
-  return diffDays;
-}
-
-type CasualSectionInput = {
-  sectionName: string;
-  justification: string;
-  numberOfCasuals: number;
-  ppesRequired: string;
-  periodFrom: string;
-  periodTo: string;
-};
+  validateCasualFormData,
+  resolveHod,
+  CasualFormDataInput,
+} from "@/lib/casualRequisitionRules";
 
 export async function POST(request: NextRequest) {
   // Check if we have a valid session
@@ -59,121 +36,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Destructure form data
-    const { department, hodApprover, location, sections, casualCategory } =
-      formData;
+    const validation = validateCasualFormData(formData as CasualFormDataInput);
 
-    // More robust validation logic
-    // Returns true only if the value is genuinely missing (Allowing 0 values)
-    const isEmpty = (val: unknown) =>
-      val === null || val === undefined || val === "";
-
-    if (isEmpty(department) || isEmpty(hodApprover) || isEmpty(location)) {
-      return NextResponse.json(
-        { message: "Your requisition is missing some required form fields" },
-        { status: 400 },
-      );
+    if (!validation.ok) {
+      return NextResponse.json({ message: validation.message }, { status: 400 });
     }
 
-    if (
-      department === ENGINEERING_HVAC_DEPARTMENT &&
-      !CASUAL_CATEGORIES.includes(casualCategory)
-    ) {
-      return NextResponse.json(
-        {
-          message:
-            "A valid casual category (Technician or Welder) is required for the Engineering & HVAC department",
-        },
-        { status: 400 },
-      );
-    }
+    const { ratePerDay, computedSections } = validation;
+    const { department, hodApprover, location, casualCategory } = formData;
 
-    if (!Array.isArray(sections) || sections.length === 0) {
-      return NextResponse.json(
-        {
-          message:
-            "At least one section is required to submit this requisition",
-        },
-        { status: 400 },
-      );
-    }
+    const resolvedHod = await resolveHod(hodApprover);
 
-    // The set of sections valid for this department/location - guards against tampering
-    const allowedSections = getCasualSections(department, location);
-
-    for (const section of sections as CasualSectionInput[]) {
-      if (!allowedSections.includes(section.sectionName)) {
-        return NextResponse.json(
-          {
-            message: `"${section.sectionName}" is not a valid section for the selected location`,
-          },
-          { status: 400 },
-        );
-      }
-
-      if (
-        isEmpty(section.justification) ||
-        isEmpty(section.ppesRequired) ||
-        isEmpty(section.periodFrom) ||
-        isEmpty(section.periodTo)
-      ) {
-        return NextResponse.json(
-          {
-            message: `Section "${section.sectionName}" is missing some required fields`,
-          },
-          { status: 400 },
-        );
-      }
-
-      if (Number(section.numberOfCasuals) <= 0) {
-        return NextResponse.json(
-          {
-            message: `Section "${section.sectionName}" must request at least 1 casual`,
-          },
-          { status: 400 },
-        );
-      }
-
-      if (section.periodTo < section.periodFrom) {
-        return NextResponse.json(
-          {
-            message: `Section "${section.sectionName}"'s engagement period end date cannot be earlier than its start date`,
-          },
-          { status: 400 },
-        );
-      }
-    }
-
-    const ratePerDay = getCasualRatePerDay(
-      location,
-      department,
-      casualCategory as CasualCategory | undefined,
-    );
-
-    // Recompute the derived values server-side rather than trusting the client
-    const computedSections = (sections as CasualSectionInput[]).map(
-      (section) => {
-        const engagementDays = engagementDaysBetween(
-          section.periodFrom,
-          section.periodTo,
-        );
-        const totalAmount =
-          Number(section.numberOfCasuals) * ratePerDay * engagementDays;
-
-        return { ...section, engagementDays, totalAmount };
-      },
-    );
-
-    const hodApproverResult = await query(
-      `
-      SELECT hod_uuid AS uuid,
-      hod_email AS email
-      FROM hod_array WHERE hod_name = $1 LIMIT 1
-      `,
-      [hodApprover],
-    );
-
-    if (hodApproverResult.length === 0) {
+    if (!resolvedHod) {
       return NextResponse.json(
         {
           message:
@@ -183,18 +57,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // get the hod uuid and email - or fall back to an invalid string
-    const hodUuid = hodApproverResult[0].uuid;
-    const hodEmail = hodApproverResult[0].email;
+    const { uuid: hodUuid, email: hodEmail } = resolvedHod;
 
     // Create the header insert query - both stages are always active (no tiering)
     const insertQuery = `
     INSERT INTO casual_requisitions
     (submitter_email, submitter_name, employee_department, casual_location,
-    casual_hod_approval_status, casual_hr_approval_status,
+    casual_category, casual_hod_approval_status, casual_hr_approval_status,
     casual_hod_approver, casual_hod_email)
     VALUES
-    ($1, $2, $3, $4, $5, $6, $7, $8)
+    ($1, $2, $3, $4, $5, $6, $7, $8, $9)
     RETURNING request_id
     `;
 
@@ -203,6 +75,7 @@ export async function POST(request: NextRequest) {
       name,
       department,
       location,
+      casualCategory ?? null,
       "pending",
       "pending",
       hodApprover,

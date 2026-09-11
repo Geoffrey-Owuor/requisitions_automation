@@ -17,6 +17,8 @@ interface CasualConfirmationModalProps {
   sectionDerived: SectionDerived[];
   overallTotalAmount: number;
   overallTotalCasuals: number;
+  isAmendment?: boolean;
+  reason?: string;
   onBack: () => void;
   onSubmit: () => Promise<void>;
   submitting: boolean;
@@ -28,6 +30,8 @@ export default function CasualConfirmationModal({
   sectionDerived,
   overallTotalAmount,
   overallTotalCasuals,
+  isAmendment = false,
+  reason,
   onBack,
   onSubmit,
   submitting,
@@ -53,12 +57,25 @@ export default function CasualConfirmationModal({
           Step 2 of 2
         </p>
         <h2 className="mt-1 text-[22px] font-semibold tracking-[-0.3px] text-[#1e1b1b]">
-          Review & confirm
+          {isAmendment ? "Review amendment" : "Review & confirm"}
         </h2>
         <p className="mt-1 text-[13px] text-[#7c5a5a]">
-          Please review your Casual requisition before submitting.
+          {isAmendment
+            ? "Please review your amendment before submitting. The approval workflow will restart from HOD."
+            : "Please review your Casual requisition before submitting."}
         </p>
       </div>
+
+      {isAmendment && reason && (
+        <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3.5">
+          <p className="mb-1 text-[11px] font-semibold tracking-[0.4px] text-amber-700 uppercase">
+            Reason for Amendment
+          </p>
+          <p className="text-[13px] leading-relaxed text-amber-900">
+            {reason}
+          </p>
+        </div>
+      )}
 
       {/* User account card */}
       <div className="mb-6 flex items-center gap-3 rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white/80 px-4 py-3">
@@ -194,7 +211,11 @@ export default function CasualConfirmationModal({
           disabled={submitting}
           className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-[14px] border-none bg-slate-900 py-4 text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)] disabled:opacity-50"
         >
-          {submitting ? "Submitting..." : "Submit request"}
+          {submitting
+            ? "Submitting..."
+            : isAmendment
+              ? "Submit amendment"
+              : "Submit request"}
           <Send className="h-4 w-4" />
         </button>
       </div>
