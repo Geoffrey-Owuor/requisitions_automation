@@ -8,11 +8,6 @@ import { hrApprovalStage } from "@/utils/CasualApprovalStages/hrApprovalStage";
 import { CasualEmailSender } from "@/services/CasualEmailSender";
 import { isValidCasualStage } from "@/public/assets";
 
-export type HrSectionApproval = {
-  sectionId: string;
-  approvedCasuals: number;
-};
-
 export type UpdateRequestStatusProps = {
   uuid: string;
   stage: string;
@@ -20,7 +15,10 @@ export type UpdateRequestStatusProps = {
   comments: string;
   approverName: string;
   approverEmail: string;
-  hrApprovedCasuals?: HrSectionApproval[];
+  // The amendment_count the approver's screen was rendered from - guards
+  // against approving content that was superseded by an amendment while
+  // this approver had the page open.
+  expectedAmendmentCount: number;
 };
 
 export async function UpdateCasualStatus(
@@ -30,27 +28,6 @@ export async function UpdateCasualStatus(
     return {
       alertType: "error",
       alertMessage: "Invalid approval stage provided",
-    };
-  }
-
-  // HR stage requires the finalized number of approved casuals, per section, on approval
-  const isHrApproval = payload.stage === "hr" && payload.status === "approved";
-
-  if (
-    isHrApproval &&
-    (!payload.hrApprovedCasuals ||
-      payload.hrApprovedCasuals.length === 0 ||
-      payload.hrApprovedCasuals.some(
-        (section) =>
-          section.approvedCasuals === undefined ||
-          section.approvedCasuals === null ||
-          section.approvedCasuals < 0,
-      ))
-  ) {
-    return {
-      alertType: "error",
-      alertMessage:
-        "The approved number of casuals is required for every section to approve this requisition",
     };
   }
 
@@ -85,7 +62,7 @@ export async function UpdateCasualStatus(
     const { rows: reviewedResult } = await client.query(
       `SELECT casual_${payload.stage}_approval_status AS approval_status,
        casual_${payload.stage}_approver AS approver,
-       submitter_email, casual_hod_email
+       submitter_email, casual_hod_email, amendment_count
         FROM casual_requisitions WHERE request_id = $1 FOR UPDATE`,
       [payload.uuid],
     );
@@ -135,50 +112,21 @@ export async function UpdateCasualStatus(
     const userEmail = reviewedResult[0].submitter_email;
     const hodEmail = reviewedResult[0].casual_hod_email;
 
+    if (reviewedResult[0].amendment_count !== payload.expectedAmendmentCount) {
+      await client.query("ROLLBACK");
+      return {
+        alertType: "error",
+        alertMessage:
+          "This requisition was amended while you were reviewing it - please reload and try again",
+      };
+    }
+
     if (isReviewed !== "pending") {
       await client.query("ROLLBACK");
       return {
         alertType: "error",
         alertMessage: `This requisition has already been acted upon by ${previousApprover}, no further action is required`,
       };
-    }
-
-    // HR approval recalculates each section's total using the approved headcount for that section
-    if (isHrApproval && payload.hrApprovedCasuals) {
-      const { rows: sectionRows } = await client.query(
-        `SELECT section_id FROM casual_requisition_sections WHERE request_id = $1 FOR UPDATE`,
-        [payload.uuid],
-      );
-
-      const existingSectionIds = new Set(
-        sectionRows.map((row) => row.section_id),
-      );
-      const submittedSectionIds = new Set(
-        payload.hrApprovedCasuals.map((section) => section.sectionId),
-      );
-
-      const coversAllSections =
-        existingSectionIds.size === submittedSectionIds.size &&
-        [...existingSectionIds].every((id) => submittedSectionIds.has(id));
-
-      if (!coversAllSections) {
-        await client.query("ROLLBACK");
-        return {
-          alertType: "error",
-          alertMessage:
-            "The approved casuals submitted do not match the sections on this requisition, please contact your admin for support",
-        };
-      }
-
-      for (const section of payload.hrApprovedCasuals) {
-        await client.query(
-          `UPDATE casual_requisition_sections
-           SET hr_approved_casuals = $1,
-               casual_total_amount = $1 * casual_rate_per_day * engagement_days
-           WHERE section_id = $2 AND request_id = $3`,
-          [section.approvedCasuals, section.sectionId, payload.uuid],
-        );
-      }
     }
 
     await client.query(baseUpdateQuery, baseParams);

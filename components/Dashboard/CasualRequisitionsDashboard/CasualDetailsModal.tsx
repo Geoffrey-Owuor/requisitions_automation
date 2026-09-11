@@ -8,6 +8,7 @@ import {
   HardHat,
   ShieldUser,
   Loader2,
+  Pencil,
 } from "lucide-react";
 import { QueryResultRow } from "pg";
 import StatusFormatter from "../StatusFormatter";
@@ -21,6 +22,8 @@ import {
 } from "@/serverActions/GetCasualRequisitionDetails";
 import { CasualEmailDataValues } from "@/services/CasualEmailSender";
 import { useLoadingStore } from "@/store/useLoadingStore";
+import { useToggleStore } from "@/store/useToggleStore";
+import CasualAmendmentHistory from "../../Approvers/CasualApprovers/CasualAmendmentHistory";
 import { useEffect, useState } from "react";
 
 interface ModalProps {
@@ -39,6 +42,9 @@ export const CasualDetailsModal = ({
   dataFlag,
 }: ModalProps) => {
   const setLoadingLine = useLoadingStore((state) => state.setLoadingLine);
+  const setCasualAmendmentRequestId = useToggleStore(
+    (state) => state.setCasualAmendmentRequestId,
+  );
   const { email } = useUser();
   const [linkLoading, setLinkLoading] = useState(false);
   const [link, setLink] = useState("#");
@@ -137,6 +143,20 @@ export const CasualDetailsModal = ({
               </div>
             </div>
             <div className="flex items-center gap-4">
+              {dataFlag === "userData" &&
+                data.submitter_email === email &&
+                data.casual_hr_approval_status === "pending" && (
+                  <button
+                    onClick={() => {
+                      setCasualAmendmentRequestId(data.request_id);
+                      onClose();
+                    }}
+                    className="flex items-center gap-1 rounded-full bg-amber-500 px-3 py-1 text-xs font-semibold text-white transition-colors duration-200 hover:bg-amber-600"
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                    Amend
+                  </button>
+                )}
               {stage !== "user" &&
                 data[`casual_${stage}_approval_status`] === "pending" && (
                   <>
@@ -228,15 +248,9 @@ export const CasualDetailsModal = ({
                       </p>
                       <div className="mt-2 flex flex-wrap gap-4 text-[12px] text-neutral-500">
                         <span>
-                          Requested:{" "}
+                          Casuals:{" "}
                           <strong className="text-[#1e1b1b]">
                             {section.numberofcasuals}
-                          </strong>
-                        </span>
-                        <span>
-                          HR Approved:{" "}
-                          <strong className="text-[#1e1b1b]">
-                            {section.hrapprovedcasuals ?? "Pending"}
                           </strong>
                         </span>
                         <span>
@@ -285,6 +299,11 @@ export const CasualDetailsModal = ({
                 ))}
               </div>
             </div>
+
+            {/* Amendment History */}
+            {details && details.amendments.length > 0 && (
+              <CasualAmendmentHistory amendments={details.amendments} />
+            )}
           </div>
         </div>
       </div>
