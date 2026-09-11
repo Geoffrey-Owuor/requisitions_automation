@@ -13,21 +13,19 @@ import {
   Check,
   X,
   MessageSquareText,
-  Pencil,
 } from "lucide-react";
 import { assets, dateFormatter, CASUAL_STAGE_LABELS } from "@/public/assets";
 import SubmittingOverlay from "@/components/SubmittingOverlay";
 import { AlertInfo } from "@/components/TravelRequisitionPage";
-import {
-  UpdateCasualStatus,
-  HrSectionApproval,
-} from "@/serverActions/UpdateCasualStatus";
+import { UpdateCasualStatus } from "@/serverActions/UpdateCasualStatus";
 import ApprovalAlert from "@/components/Approvers/TravelApprovers/ApprovalAlert";
 import { initialsHelper } from "@/public/assets";
 import Image from "next/image";
 import PreviousApprovalsSection, {
   PreviousApproval,
 } from "@/components/Approvers/PreviousApprovalsSection";
+import CasualAmendmentHistory from "./CasualAmendmentHistory";
+import { CasualAmendmentValues } from "@/services/CasualEmailSender";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -56,6 +54,8 @@ export interface CasualApprovalModalProps {
   requestCreatedAt: string;
   sections: CasualApprovalSection[];
   previousApprovals: PreviousApproval[];
+  amendments: CasualAmendmentValues[];
+  amendmentCount: number;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -94,15 +94,6 @@ function DetailRow({
   );
 }
 
-function EditedValuePill({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-amber-400 px-2.5 py-1 text-[11px] font-semibold whitespace-nowrap text-amber-950 shadow-sm">
-      <Pencil className="h-3 w-3" />
-      {children}
-    </span>
-  );
-}
-
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 const CasualApprovalModal = ({
@@ -117,15 +108,10 @@ const CasualApprovalModal = ({
   requestCreatedAt,
   sections,
   previousApprovals,
+  amendments,
+  amendmentCount,
 }: CasualApprovalModalProps) => {
   const [comments, setComments] = useState("");
-  const [hrApprovedCasuals, setHrApprovedCasuals] = useState<
-    Record<string, number | "">
-  >(
-    Object.fromEntries(
-      sections.map((section) => [section.sectionId, section.numberOfCasuals]),
-    ),
-  );
   const [approving, setApproving] = useState(false);
   const [declining, setDeclining] = useState(false);
   const [alertInfo, setAlertInfo] = useState<AlertInfo>({
@@ -135,13 +121,6 @@ const CasualApprovalModal = ({
   const [step, setStep] = useState(1);
 
   const roleLabel = stageLabel[stage] ?? "Approver";
-  const isHrStage = stage === "hr";
-  const hrApprovalInvalid =
-    isHrStage &&
-    sections.some((section) => {
-      const value = hrApprovedCasuals[section.sectionId];
-      return value === "" || value < 0;
-    });
 
   const overallTotalAmount = sections.reduce(
     (sum, s) => sum + s.totalAmount,
@@ -152,26 +131,6 @@ const CasualApprovalModal = ({
     0,
   );
 
-  // Effective (HR-edited) casual count for a section, falling back to the original value
-  const getEditedCasuals = (section: CasualApprovalSection) => {
-    const raw = hrApprovedCasuals[section.sectionId];
-    return raw === "" ? section.numberOfCasuals : Number(raw);
-  };
-  const isSectionEdited = (section: CasualApprovalSection) =>
-    isHrStage && getEditedCasuals(section) !== section.numberOfCasuals;
-  const getDerivedSectionTotal = (section: CasualApprovalSection) =>
-    getEditedCasuals(section) * section.ratePerDay * section.engagementDays;
-
-  const overallDerivedTotalCasuals = sections.reduce(
-    (sum, s) => sum + getEditedCasuals(s),
-    0,
-  );
-  const overallDerivedTotalAmount = sections.reduce(
-    (sum, s) => sum + getDerivedSectionTotal(s),
-    0,
-  );
-  const anySectionEdited = isHrStage && sections.some(isSectionEdited);
-
   // Approval/ decline function
   const handleApproval = async (status: string) => {
     const setSubmitting = status === "approved" ? setApproving : setDeclining;
@@ -180,14 +139,6 @@ const CasualApprovalModal = ({
 
     const commentsPayload =
       comments.trim() === "" ? "No comments" : comments.trim();
-
-    const hrPayload: HrSectionApproval[] | undefined =
-      isHrStage && status === "approved"
-        ? sections.map((section) => ({
-            sectionId: section.sectionId,
-            approvedCasuals: Number(hrApprovedCasuals[section.sectionId]),
-          }))
-        : undefined;
 
     try {
       // Call our approval server action
@@ -198,7 +149,7 @@ const CasualApprovalModal = ({
         comments: commentsPayload,
         approverName,
         approverEmail,
-        hrApprovedCasuals: hrPayload,
+        expectedAmendmentCount: amendmentCount,
       });
 
       // Set the alert info
@@ -337,12 +288,7 @@ const CasualApprovalModal = ({
             <div className="mb-6 border-t border-[rgba(240,180,180,0.4)] pt-6">
               <SectionLabel>Sections</SectionLabel>
               <div className="flex flex-col gap-4">
-                {sections.map((section) => {
-                  const sectionEdited = isSectionEdited(section);
-                  const derivedSectionTotal = getDerivedSectionTotal(section);
-                  const editedCasuals = getEditedCasuals(section);
-
-                  return (
+                {sections.map((section) => (
                   <div
                     key={section.sectionId}
                     className="rounded-2xl border border-[rgba(240,180,180,0.4)] bg-white/60 p-5"
@@ -405,31 +351,18 @@ const CasualApprovalModal = ({
                           value: section.numberOfCasuals,
                           Icon: Users,
                         },
-                      ].map(({ label, value, Icon }) => {
-                        const isCasualsStat = label === "Casuals";
-                        const showPill = isCasualsStat && sectionEdited;
-                        return (
-                          <div
-                            key={label}
-                            className="rounded-xl border border-gray-100 bg-gray-50 px-3 py-3 text-center"
-                          >
-                            <Icon className="mx-auto mb-1 h-4 w-4 text-rose-400" />
-                            <p className="text-[11px] text-[#7c5a5a]">
-                              {label}
-                            </p>
-                            <div className="mt-0.5 flex items-center justify-center gap-1.5">
-                              {showPill && (
-                                <EditedValuePill>
-                                  {editedCasuals.toLocaleString()}
-                                </EditedValuePill>
-                              )}
-                              <p className="text-[15px] font-semibold text-[#1e1b1b]">
-                                {value.toLocaleString()}
-                              </p>
-                            </div>
-                          </div>
-                        );
-                      })}
+                      ].map(({ label, value, Icon }) => (
+                        <div
+                          key={label}
+                          className="rounded-xl border border-gray-100 bg-gray-50 px-3 py-3 text-center"
+                        >
+                          <Icon className="mx-auto mb-1 h-4 w-4 text-rose-400" />
+                          <p className="text-[11px] text-[#7c5a5a]">{label}</p>
+                          <p className="mt-0.5 text-[15px] font-semibold text-[#1e1b1b]">
+                            {value.toLocaleString()}
+                          </p>
+                        </div>
+                      ))}
                     </div>
 
                     <div className="flex flex-wrap items-center justify-between rounded-2xl bg-linear-to-r from-slate-800 to-rose-900 px-5 py-4 text-white">
@@ -439,45 +372,12 @@ const CasualApprovalModal = ({
                           Section Total
                         </span>
                       </div>
-                      <div className="flex items-center gap-1.5">
-                        {sectionEdited && (
-                          <EditedValuePill>
-                            KES {derivedSectionTotal.toLocaleString()}
-                          </EditedValuePill>
-                        )}
-                        <span className="text-[16px] font-semibold">
-                          KES {section.totalAmount.toLocaleString()}
-                        </span>
-                      </div>
+                      <span className="text-[16px] font-semibold">
+                        KES {section.totalAmount.toLocaleString()}
+                      </span>
                     </div>
-
-                    {/* ── HR: Approved Number of Casuals (per section) ── */}
-                    {isHrStage && (
-                      <div className="mt-4 border-t border-[rgba(240,180,180,0.4)] pt-4">
-                        <label className="mb-1.5 block text-[11px] font-semibold tracking-[0.4px] text-[#b0a0a0] uppercase">
-                          Approved Number of Casuals *
-                        </label>
-                        <input
-                          type="number"
-                          min={0}
-                          value={hrApprovedCasuals[section.sectionId]}
-                          onChange={(e) =>
-                            setHrApprovedCasuals((prev) => ({
-                              ...prev,
-                              [section.sectionId]:
-                                e.target.value === ""
-                                  ? ""
-                                  : Number(e.target.value),
-                            }))
-                          }
-                          className="h-10 w-full rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
-                          required
-                        />
-                      </div>
-                    )}
                   </div>
-                  );
-                })}
+                ))}
               </div>
             </div>
 
@@ -487,37 +387,19 @@ const CasualApprovalModal = ({
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 <div className="flex items-center justify-between rounded-2xl border border-rose-700/30 bg-linear-to-r from-rose-900/80 to-rose-800/80 px-5 py-5 font-semibold text-rose-50">
                   <span>Total Casuals</span>
-                  <div className="flex items-center gap-1.5">
-                    {anySectionEdited && (
-                      <EditedValuePill>
-                        {overallDerivedTotalCasuals.toLocaleString()}
-                      </EditedValuePill>
-                    )}
-                    <span className="text-xl">{overallTotalCasuals}</span>
-                  </div>
+                  <span className="text-xl">{overallTotalCasuals}</span>
                 </div>
                 <div className="flex items-center justify-between rounded-2xl bg-linear-to-r from-slate-800 to-rose-900 px-5 py-5 font-semibold text-white shadow-lg">
                   <span>Total Amount</span>
-                  <div className="flex items-center gap-1.5">
-                    {anySectionEdited && (
-                      <EditedValuePill>
-                        KES {overallDerivedTotalAmount.toLocaleString()}
-                      </EditedValuePill>
-                    )}
-                    <span className="text-xl">
-                      KES {overallTotalAmount.toLocaleString()}
-                    </span>
-                  </div>
+                  <span className="text-xl">
+                    KES {overallTotalAmount.toLocaleString()}
+                  </span>
                 </div>
               </div>
-              {isHrStage && (
-                <p className="mt-2 text-[11px] text-slate-500">
-                  Final total casual headcount per section can be changed in the
-                  HR stage. Each section&apos;s total amount will be
-                  recalculated using its approved headcount.
-                </p>
-              )}
             </div>
+
+            {/* ── Amendment History ── */}
+            <CasualAmendmentHistory amendments={amendments} />
 
             {/* ── Previous Approvals ── */}
             <PreviousApprovalsSection approvals={previousApprovals} />
@@ -558,7 +440,7 @@ const CasualApprovalModal = ({
               {/* Approve */}
               <button
                 type="button"
-                disabled={approving || hrApprovalInvalid}
+                disabled={approving}
                 onClick={() => handleApproval("approved")}
                 className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-[14px] border-none bg-slate-900 py-4 text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
               >

@@ -79,13 +79,6 @@ const PdfSectionBlock = ({ section }: { section: CasualSectionValues }) => {
         <PdfField label="Period To" value={dateFormatter(section.periodto)} />
         <PdfField label="Engagement Days" value={section.engagementdays} />
         <PdfField label="Number of Casuals" value={section.numberofcasuals} />
-        {section.hrapprovedcasuals !== null &&
-          section.hrapprovedcasuals !== undefined && (
-            <PdfField
-              label="HR Approved Casuals"
-              value={section.hrapprovedcasuals}
-            />
-          )}
         <PdfField label="Rate / Day" value={formatCost(section.rateperday)} />
       </View>
 
@@ -148,6 +141,20 @@ export const CasualRequisitionPdf = ({
             {pdfData.location}
           </Text>
         </View>
+
+        {pdfData.amendmentcount > 0 && (
+          <View
+            style={tw(
+              "mb-5 rounded-xl border border-[#856404] bg-[#fff3cd] p-3",
+            )}
+          >
+            <Text style={tw("text-[9px] font-bold text-[#856404] uppercase")}>
+              {isExternal
+                ? "Revised - amended since first submitted"
+                : `Amended - Version ${pdfData.amendmentcount + 1}`}
+            </Text>
+          </View>
+        )}
 
         {/* Submitter Details */}
         <View style={tw("mb-5")}>
@@ -214,6 +221,29 @@ export const CasualRequisitionPdf = ({
             </View>
           </View>
         </View>
+
+        {/* Amendment History */}
+        {!isExternal && pdfData.amendments.length > 0 && (
+          <View style={tw("mb-5 border-t border-[#f0b4b4] pt-4")}>
+            <PdfSectionHeading title="Amendment History" />
+            {pdfData.amendments.map((amendment) => (
+              <View
+                key={amendment.amendmentid}
+                style={tw(
+                  "mb-2 rounded-lg border border-[#f0b4b4] bg-[#fafafa] p-3",
+                )}
+              >
+                <Text style={tw("mb-1 text-[9px] font-bold text-[#1e1b1b]")}>
+                  #{amendment.amendmentnumber} by {amendment.amendedbyname} -{" "}
+                  {dateFormatter(amendment.createdat)}
+                </Text>
+                <Text style={tw("text-[8px] leading-relaxed text-[#7c5a5a]")}>
+                  {amendment.amendmentreason}
+                </Text>
+              </View>
+            ))}
+          </View>
+        )}
 
         {/* Approval Chain */}
         {!isExternal && (

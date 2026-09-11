@@ -5,6 +5,7 @@ import {
   UserCircle,
   Wallet,
   ShieldCheck,
+  Pencil,
 } from "lucide-react";
 import {
   GeneralNote,
@@ -81,6 +82,31 @@ export default function CasualRequisitionGuideline() {
             cost="Applies to every casual requisition, regardless of cost"
             approvers={["HOD Approval", "HR Approval"]}
             icon={<HardHat size={22} />}
+          />
+        </div>
+      </section>
+
+      {/* Amendments Section */}
+      <section className="space-y-4">
+        <SectionTitle icon={<Pencil size={17} />}>Amendments</SectionTitle>
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+          <InfoCard
+            icon={<Pencil size={18} />}
+            title="Who & When"
+            items={[
+              "Only the original submitter can amend their own requisition.",
+              "Allowed any time before HR gives final approval - a HOD decline can still be amended.",
+              "Once HR has approved, the requisition is locked and can no longer be changed.",
+            ]}
+          />
+          <InfoCard
+            icon={<ShieldCheck size={18} />}
+            title="What Happens on Submission"
+            items={[
+              "Any header field or section can be changed - department, location, HOD approver, headcount, dates, PPEs, justification.",
+              "The approval workflow restarts from HOD, even if HOD had already approved.",
+              "A record of every amendment - what changed and why - is kept and visible to approvers and on the requisition PDF/emails.",
+            ]}
           />
         </div>
       </section>

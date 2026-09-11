@@ -6,6 +6,10 @@ import { UserProvider } from "@/context/UserContext";
 import { query } from "@/lib/db";
 import CasualApprovalModal from "@/components/Approvers/CasualApprovers/CasualApprovalModal";
 import { PreviousApproval } from "@/components/Approvers/PreviousApprovalsSection";
+import {
+  casualAmendmentsQuery,
+  CasualAmendmentValues,
+} from "@/services/CasualEmailSender";
 import TravelApprovalSkeleton from "@/components/Skeletons/TravelApprovalSkeleton";
 import AlreadyProcessed from "@/components/Approvers/TravelApprovers/AlreadyProcessed";
 import InvalidToken from "@/components/Approvers/TravelApprovers/InvalidToken";
@@ -72,7 +76,7 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
         casual_${stage}_approval_status AS approval_status,
         casual_${stage}_approver AS approver_name,
         request_created_at, submitter_name, submitter_email, employee_department,
-        casual_location,
+        casual_location, amendment_count,
         casual_hod_approver, casual_hod_approval_status, casual_hod_comments
         FROM casual_requisitions
         WHERE request_id = $1
@@ -85,8 +89,9 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
 
   const requestData = result[0];
 
-  const sectionsResult = await query(
-    `
+  const [sectionsResult, amendmentsResult] = await Promise.all([
+    query(
+      `
       SELECT
         section_id, section_name, casual_justification, number_of_casuals,
         ppes_required, engagement_period_from, engagement_period_to,
@@ -95,8 +100,10 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
         WHERE request_id = $1
         ORDER BY section_name
       `,
-    [uuid],
-  );
+      [uuid],
+    ),
+    query<CasualAmendmentValues>(casualAmendmentsQuery, [uuid]),
+  ]);
 
   // Check if request is already processed
   const approvalStatus = requestData.approval_status;
@@ -148,6 +155,8 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
               location={requestData.casual_location}
               requestCreatedAt={requestData.request_created_at}
               previousApprovals={previousApprovals}
+              amendments={amendmentsResult}
+              amendmentCount={requestData.amendment_count}
               sections={sectionsResult.map((section) => ({
                 sectionId: section.section_id,
                 sectionName: section.section_name,

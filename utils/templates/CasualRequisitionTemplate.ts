@@ -52,6 +52,19 @@ export function CasualRequisitionTemplate({
             <p style="margin: 0; font-size: 15px; color: #4a3a3a; line-height: 1.6;">${message}</p>
           </div>
 
+          ${
+            emailData.amendmentcount > 0
+              ? isExternal
+                ? `<div style="background-color: #fff3cd; border: 1px solid #856404; border-radius: 12px; padding: 12px 16px; margin-bottom: 24px;">
+                   <p style="margin: 0; font-size: 12px; font-weight: 700; color: #856404;">REVISED &mdash; this requisition has been amended since it was first submitted.</p>
+                 </div>`
+                : `<div style="background-color: #fff3cd; border: 1px solid #856404; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+                   <p style="margin: 0 0 10px; font-size: 12px; font-weight: 800; color: #856404; text-transform: uppercase; letter-spacing: 1px;">Amended &mdash; Version ${emailData.amendmentcount + 1}</p>
+                   ${emailData.amendments.map((a) => `<p style="margin: 0 0 4px; font-size: 12px; color: #6d5602;">#${a.amendmentnumber} by ${a.amendedbyname} (${dateFormatter(a.createdat)}): "${a.amendmentreason}"</p>`).join("")}
+                 </div>`
+              : ""
+          }
+
           <div style="margin-bottom: 24px;">
             <p style="font-size: 11px; font-weight: 700; color: #a31d1d; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px;">${isExternal ? "Requisition Details" : "Primary Information"}</p>
             <table width="100%" style="border-collapse: collapse;">
@@ -147,7 +160,6 @@ function sectionCard(section: CasualSectionValues) {
       <table width="100%" style="border-collapse: collapse;">
         ${modernRow("Engagement Period", `${formattedPeriodFrom} - ${formattedPeriodTo} (${section.engagementdays} day(s))`)}
         ${modernRow("Number of Casuals", String(section.numberofcasuals))}
-        ${section.hrapprovedcasuals !== null && section.hrapprovedcasuals !== undefined ? modernRow("HR Approved Casuals", String(section.hrapprovedcasuals)) : ""}
         ${modernRow("PPEs Required", section.ppesrequired)}
         ${modernRow("Justification", section.justification)}
         ${modernRow("Rate / Day", `KES ${Number(section.rateperday).toLocaleString()}`)}

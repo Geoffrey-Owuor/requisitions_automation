@@ -77,6 +77,12 @@ const DashboardSidebar = () => {
   const showCasualRequisition = useToggleStore(
     (state) => state.showCasualRequisition,
   );
+  const casualAmendmentRequestId = useToggleStore(
+    (state) => state.casualAmendmentRequestId,
+  );
+  const setCasualAmendmentRequestId = useToggleStore(
+    (state) => state.setCasualAmendmentRequestId,
+  );
   const setShowCasualRequisition = useToggleStore(
     (state) => state.setShowCasualRequisition,
   );
@@ -116,10 +122,13 @@ const DashboardSidebar = () => {
 
       {/* Casual Requisition Modal */}
       <ModalWrapper
-        isOpen={showCasualRequisition}
-        onClose={() => setShowCasualRequisition(false)}
+        isOpen={showCasualRequisition || !!casualAmendmentRequestId}
+        onClose={() => {
+          setShowCasualRequisition(false);
+          setCasualAmendmentRequestId(null);
+        }}
       >
-        <CasualRequisitionForm />
+        <CasualRequisitionForm amendRequestId={casualAmendmentRequestId} />
       </ModalWrapper>
 
       {/* Employee Requisition Modal */}

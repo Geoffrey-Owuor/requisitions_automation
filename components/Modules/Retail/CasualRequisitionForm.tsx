@@ -13,8 +13,11 @@ import {
   Trash2,
   Search,
   X,
+  Loader2,
+  Info,
+  History,
 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   loadHodArray,
   loadBaseDepartments,
@@ -36,6 +39,8 @@ import { AlertInfo } from "@/components/TravelRequisitionPage";
 import CasualConfirmationModal from "./CasualConfirmationModal";
 import { useToggleStore } from "@/store/useToggleStore";
 import Image from "next/image";
+import { getCasualAmendmentContext } from "@/serverActions/GetCasualAmendmentContext";
+import CasualAmendmentHistory from "@/components/Approvers/CasualApprovers/CasualAmendmentHistory";
 
 // ---- Types ----
 export interface CasualSectionFormData {
@@ -115,8 +120,16 @@ interface FormSelectProps {
 }
 
 // ---- Main Page ----
-export default function CasualRequisitionForm() {
+export default function CasualRequisitionForm({
+  amendRequestId,
+}: {
+  amendRequestId?: string | null;
+}) {
   const { username, email } = useUser();
+  const queryClient = useQueryClient();
+  const setCasualAmendmentRequestId = useToggleStore(
+    (state) => state.setCasualAmendmentRequestId,
+  );
 
   const scrollTrigger = useToggleStore((state) => state.scrollTrigger);
   const triggerScroll = useToggleStore((state) => state.triggerScroll);
@@ -135,13 +148,53 @@ export default function CasualRequisitionForm() {
   const hodArray = excludeSubmitterFromHodArray(rawHodArray, email);
   const HOD_APPROVERS = hodArray.map((hod) => hod.name);
 
+  // Amend mode: fetch the eligibility check + pre-fill data for this
+  // requisition. Re-checked server-side every time the modal opens.
+  const {
+    data: amendmentContext,
+    isLoading: amendmentLoading,
+  } = useQuery({
+    queryKey: ["CasualAmendmentContext", amendRequestId],
+    queryFn: () => getCasualAmendmentContext(amendRequestId!),
+    enabled: !!amendRequestId,
+  });
+  const amendmentNotEligible =
+    !!amendRequestId && !amendmentLoading && !amendmentContext;
+
   const [formData, setFormData] = useState<CasualFormData>(InitialFormState);
+  const [reason, setReason] = useState("");
   const [step, setStep] = useState(1);
   const [alertInfo, setAlertInfo] = useState<AlertInfo>({
     alertType: "",
     alertMessage: "",
   });
   const [submitting, setSubmitting] = useState(false);
+
+  // Seed the form once the amendment context loads (runs at most once per
+  // mount - the modal remounts this component fresh each time it opens, so
+  // there's no risk of clobbering later user edits).
+  const [seededFromAmendment, setSeededFromAmendment] = useState(false);
+  if (!seededFromAmendment && amendmentContext?.initialData) {
+    setSeededFromAmendment(true);
+    setFormData(amendmentContext.initialData);
+  }
+
+  // Once seeded, if the pre-filled HOD approver has since left hod_array, or
+  // the submitter has since become that HOD (and is now filtered out by
+  // excludeSubmitterFromHodArray), force a re-pick rather than silently
+  // submitting a stale/self-defeating approver. Runs at most once per mount.
+  const [hodValidityChecked, setHodValidityChecked] = useState(false);
+  if (
+    amendRequestId &&
+    seededFromAmendment &&
+    !hodValidityChecked &&
+    !hodsLoading
+  ) {
+    setHodValidityChecked(true);
+    if (formData.hodApprover && !HOD_APPROVERS.includes(formData.hodApprover)) {
+      setFormData((prev) => ({ ...prev, hodApprover: "" }));
+    }
+  }
 
   const availableLocations = formData.department
     ? getCasualLocationsForDepartment(formData.department)
@@ -210,7 +263,8 @@ export default function CasualRequisitionForm() {
     isEmpty(formData.department) ||
     isEmpty(formData.hodApprover) ||
     isEmpty(formData.location) ||
-    sectionsInvalid;
+    sectionsInvalid ||
+    (!!amendRequestId && isEmpty(reason));
 
   const updateField = <K extends keyof CasualFormData>(
     field: K,
@@ -271,20 +325,31 @@ export default function CasualRequisitionForm() {
     }));
   };
 
+  const isAmendment = !!amendRequestId;
+
   const handleSubmit = async () => {
-    const payload = {
-      formData,
-      submittedBy: {
-        name: username,
-        email: email,
-      },
-    };
+    const payload = isAmendment
+      ? {
+          requestId: amendRequestId,
+          expectedAmendmentCount: amendmentContext?.expectedAmendmentCount,
+          reason,
+          formData,
+        }
+      : {
+          formData,
+          submittedBy: {
+            name: username,
+            email: email,
+          },
+        };
 
     setSubmitting(true);
 
     try {
       const response = await ApiHandler(
-        "/api/casualrequisition/submitrequisition",
+        isAmendment
+          ? "/api/casualrequisition/submitamendment"
+          : "/api/casualrequisition/submitrequisition",
         "POST",
         payload,
       );
@@ -304,7 +369,11 @@ export default function CasualRequisitionForm() {
           "Your Casual requisition has been submitted successfully, you will receive a confirmation email shortly",
       });
 
-      setFormData(InitialFormState);
+      if (isAmendment) {
+        queryClient.invalidateQueries({ queryKey: ["CasualRequisitionsData"] });
+      } else {
+        setFormData(InitialFormState);
+      }
       setStep(3);
     } catch (error) {
       if (error instanceof Error) {
@@ -317,12 +386,49 @@ export default function CasualRequisitionForm() {
     }
   };
 
+  if (amendRequestId && amendmentLoading) {
+    return (
+      <div className="flex items-center justify-center py-24">
+        <Loader2 className="h-6 w-6 animate-spin text-rose-500" />
+      </div>
+    );
+  }
+
+  if (amendmentNotEligible) {
+    return (
+      <div className="mx-auto max-w-md rounded-2xl border border-rose-200 bg-rose-50 p-6 text-center text-sm text-rose-700">
+        This requisition can no longer be amended. It may have already
+        received HR&apos;s final approval, or you may not be its original
+        submitter.
+      </div>
+    );
+  }
+
   return (
     <div className="relative p-2">
       {submitting && <SubmittingOverlay />}
 
       {step === 3 && (
-        <AlertModal alertInfo={alertInfo} onBack={() => setStep(1)} />
+        <AlertModal
+          alertInfo={alertInfo}
+          heading={
+            isAmendment
+              ? { success: "Amendment submitted!", error: "Amendment failed" }
+              : undefined
+          }
+          buttonLabel={
+            isAmendment
+              ? { success: "Close", error: "Try again" }
+              : undefined
+          }
+          onBack={() => {
+            if (isAmendment && alertInfo.alertType === "success") {
+              setCasualAmendmentRequestId(null);
+            } else {
+              setStep(1);
+            }
+          }}
+        />
       )}
 
       {step === 2 && (
@@ -332,6 +438,8 @@ export default function CasualRequisitionForm() {
           sectionDerived={sectionDerived}
           overallTotalAmount={overallTotalAmount}
           overallTotalCasuals={overallTotalCasuals}
+          isAmendment={isAmendment}
+          reason={reason}
           onBack={() => {
             setStep(1);
             triggerScroll(!scrollTrigger);
@@ -357,13 +465,39 @@ export default function CasualRequisitionForm() {
           <header className="mb-8 flex items-end justify-between max-sm:flex-col max-sm:items-start max-sm:gap-5">
             <div>
               <h1 className="m-0 text-2xl font-semibold tracking-[-0.5px] text-[#1e1b1b]">
-                Casual Requisition
+                {isAmendment ? "Amend Casual Requisition" : "Casual Requisition"}
               </h1>
               <p className="mt-1 text-[14px] text-[#7c5a5a]">
-                Submit your request for casual staff engagement.
+                {isAmendment
+                  ? "Update this requisition - the approval workflow will restart from HOD."
+                  : "Submit your request for casual staff engagement."}
               </p>
             </div>
           </header>
+
+          {isAmendment && (
+            <div className="mb-6 flex items-start gap-2.5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3.5 text-[13px] text-amber-800">
+              <Info className="mt-0.5 h-4 w-4 shrink-0" />
+              <p>
+                Amendments are only possible before HR gives final approval.
+                Submitting this amendment resets both the HOD and HR approval
+                stages, so this requisition will need to be re-approved from
+                the HOD stage onward.
+              </p>
+            </div>
+          )}
+
+          {isAmendment &&
+            !!amendmentContext?.history.length && (
+              <div className="mb-6 rounded-3xl border border-white/85 bg-white/65 px-6 py-6 shadow-[0_24px_48px_rgba(160,60,60,0.10)] backdrop-blur-2xl sm:px-8">
+                <h2 className="mb-2 flex items-center gap-2 text-[13px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
+                  <History size={16} /> Previous Amendments
+                </h2>
+                <CasualAmendmentHistory
+                  amendments={amendmentContext.history}
+                />
+              </div>
+            )}
 
           {/* Form Card */}
           <div className="rounded-3xl border border-white/85 bg-white/65 px-6 py-8 shadow-[0_24px_48px_rgba(160,60,60,0.10)] backdrop-blur-2xl sm:px-8">
@@ -496,6 +630,24 @@ export default function CasualRequisitionForm() {
                       </span>
                     </div>
                   </div>
+                </div>
+              )}
+
+              {/* Reason for Amendment */}
+              {isAmendment && (
+                <div>
+                  <h2 className="mb-4 flex items-center gap-2 text-[13px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
+                    <History size={16} /> Reason for Amendment
+                  </h2>
+                  <textarea
+                    className="h-20 w-full resize-none rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 py-3 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
+                    placeholder="Explain what changed and why..."
+                    value={reason}
+                    required
+                    onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+                      setReason(e.target.value)
+                    }
+                  />
                 </div>
               )}
 
