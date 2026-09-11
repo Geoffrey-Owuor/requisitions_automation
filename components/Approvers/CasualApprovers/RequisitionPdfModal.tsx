@@ -9,6 +9,7 @@ import { dateFormatter } from "@/public/assets";
 
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { CasualRequisitionPdf } from "./pdf/CasualRequisitionPdf";
+import CasualAmendmentHistory from "./CasualAmendmentHistory";
 import { useEffect, useState } from "react";
 
 const Field = ({ label, value }: { label: string; value: string | number }) => (
@@ -61,10 +62,6 @@ const RequisitionSectionCard = ({
       <Field label="Period To" value={dateFormatter(section.periodto)} />
       <Field label="Engagement Days" value={section.engagementdays} />
       <Field label="Number of Casuals" value={section.numberofcasuals} />
-      {section.hrapprovedcasuals !== null &&
-        section.hrapprovedcasuals !== undefined && (
-          <Field label="HR Approved Casuals" value={section.hrapprovedcasuals} />
-        )}
       <Field label="Rate / Day" value={formatCost(section.rateperday)} />
     </div>
 
@@ -153,6 +150,11 @@ const RequisitionPdfModal = ({
             <p className="mt-1 text-[13px] text-[#7c5a5a]">
               Reference: {pdfData.emailaddress} - {pdfData.location}
             </p>
+            {pdfData.amendmentcount > 0 && (
+              <span className="mt-3 inline-block rounded-full bg-amber-100 px-3 py-1 text-[11px] font-semibold text-amber-700">
+                Amended &middot; Version {pdfData.amendmentcount + 1}
+              </span>
+            )}
           </div>
 
           {/* Section 1: Submitter */}
@@ -204,6 +206,14 @@ const RequisitionPdfModal = ({
               </div>
             </div>
           </div>
+
+          {/* Amendment History */}
+          {pdfData.amendments.length > 0 && (
+            <div className="mb-8 border-t border-[rgba(240,180,180,0.4)] pt-8">
+              <SectionHeading title="Amendment History" />
+              <CasualAmendmentHistory amendments={pdfData.amendments} />
+            </div>
+          )}
 
           {/* Section 4: Approval Chain */}
           <div className="mb-8 border-t border-[rgba(240,180,180,0.4)] pt-8">

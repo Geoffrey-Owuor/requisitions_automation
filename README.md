@@ -28,7 +28,8 @@ An internal web application for Hotpoint Appliances Ltd that automates requisiti
 ### Casual Requisition
 
 - Request casual staff engagements for one or more sections over a defined period; available locations and sections depend on the requesting department
-- Approval workflow: HOD Approval → HR Approval (HR can adjust the final approved headcount per section); on approval, a PDF summary is emailed to HR and to an external casual-labor provider for action. Both stages are array-based — any member of the HOD or HR approver group can act, first click wins
+- Approval workflow: HOD Approval → HR Approval; on approval, a PDF summary is emailed to HR and to an external casual-labor provider for action. Both stages are array-based — any member of the HOD or HR approver group can act, first click wins
+- The original submitter can amend their own requisition (any field, any section) any time before HR gives final approval — this restarts the HOD → HR approval chain against the amended content and is recorded in a full amendment history. There is no mechanism to change a requisition once HR has approved it
 - Daily rate is derived automatically from the selected location (Ruiru vs. other locations), except for the Engineering & HVAC department, which uses a Technician/Welder category rate instead; total cost = casuals × rate/day × engagement days
 
 ### Employee Requisition

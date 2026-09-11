@@ -4,8 +4,10 @@ import { query } from "@/lib/db";
 import {
   CasualEmailDataValues as PdfDataValues,
   CasualSectionValues,
+  CasualAmendmentValues,
   casualDataQuery,
   casualSectionsQuery,
+  casualAmendmentsQuery,
 } from "@/services/CasualEmailSender";
 import NotFoundRequest from "@/components/Approvers/TravelApprovers/NotFoundRequest";
 import RequisitionPdfModal from "@/components/Approvers/CasualApprovers/RequisitionPdfModal";
@@ -28,37 +30,22 @@ const page = async ({ params }: PdfDownloadProps) => {
 
   // Our query
   const result = await query<
-    Omit<PdfDataValues, "sections" | "totalamount" | "totalcasuals">
+    Omit<PdfDataValues, "sections" | "amendments" | "totalamount" | "totalcasuals">
   >(casualDataQuery, [uuid]);
 
   if (result.length === 0) return <NotFoundRequest />;
 
-  const sections = await query<CasualSectionValues>(casualSectionsQuery, [
-    uuid,
+  const [sections, amendments] = await Promise.all([
+    query<CasualSectionValues>(casualSectionsQuery, [uuid]),
+    query<CasualAmendmentValues>(casualAmendmentsQuery, [uuid]),
   ]);
-
-  // Get the HR Approved casuals
-  const totalHrApprovedCasuals = sections.reduce(
-    (sum, s) => sum + (s.hrapprovedcasuals ?? 0),
-    0,
-  );
-
-  // Get the initial number of casuals
-  const totalInitialCasuals = sections.reduce(
-    (sum, s) => sum + s.numberofcasuals,
-    0,
-  );
-  const totalcasuals =
-    totalHrApprovedCasuals === totalInitialCasuals ||
-    totalHrApprovedCasuals === 0
-      ? totalInitialCasuals
-      : totalHrApprovedCasuals;
 
   const pdfData: PdfDataValues = {
     ...result[0],
     sections,
+    amendments,
     totalamount: sections.reduce((sum, s) => sum + s.totalamount, 0),
-    totalcasuals: totalcasuals,
+    totalcasuals: sections.reduce((sum, s) => sum + s.numberofcasuals, 0),
   };
 
   return (
