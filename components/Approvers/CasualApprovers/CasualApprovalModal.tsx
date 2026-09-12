@@ -26,6 +26,7 @@ import PreviousApprovalsSection, {
 } from "@/components/Approvers/PreviousApprovalsSection";
 import CasualAmendmentHistory from "./CasualAmendmentHistory";
 import { CasualAmendmentValues } from "@/services/CasualEmailSender";
+import CasualBudgetEstimate from "@/components/Modules/Retail/CasualBudgetEstimate";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -397,6 +398,17 @@ const CasualApprovalModal = ({
                 </div>
               </div>
             </div>
+
+            {/* ── Budget Impact ── */}
+            <CasualBudgetEstimate
+              department={department}
+              sections={sections.map((section) => ({
+                sectionName: section.sectionName,
+                numberOfCasuals: section.numberOfCasuals,
+                totalAmount: section.totalAmount,
+                periodFrom: section.periodFrom,
+              }))}
+            />
 
             {/* ── Amendment History ── */}
             <CasualAmendmentHistory amendments={amendments} />
