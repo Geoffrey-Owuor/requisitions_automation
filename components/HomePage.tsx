@@ -70,12 +70,14 @@ export default function HomePage() {
       <HowItWorksSection />
 
       <DirectorySection
+        id="forms"
         title="Requisition Forms"
         caption="Available Online Requisition Forms"
         entries={appsByGroup("form")}
       />
 
       <DirectorySection
+        id="portals"
         title="Internal Portals"
         caption="Separate systems you sign into from the dashboard."
         entries={appsByGroup("portal")}
@@ -115,7 +117,7 @@ const howItWorksSteps: Step[] = [
 
 function HowItWorksSection() {
   return (
-    <section className="mt-2 mb-10">
+    <section id="how-it-works" className="mt-2 mb-10 scroll-mt-20">
       <div className="mb-4">
         <h2 className="text-xl font-semibold tracking-tight text-slate-900">
           How it works
@@ -131,7 +133,7 @@ function HowItWorksSection() {
             key={step.number}
             className="rounded-surface border border-slate-200 bg-white p-4"
           >
-            <span className="text-brand-300 text-3xl font-black tracking-tight">
+            <span className="text-brand-400 text-3xl font-black tracking-tight">
               {step.number}
             </span>
             <h3 className="mt-1 text-base font-semibold tracking-tight text-slate-900">
@@ -182,7 +184,7 @@ const valueProps: ValueProp[] = [
 
 function WhyHubSection() {
   return (
-    <section className="mt-2 mb-10">
+    <section id="why-hub" className="mt-2 mb-10 scroll-mt-20">
       <div className="mb-4">
         <h2 className="text-xl font-semibold tracking-tight text-slate-900">
           Why use the Hub
@@ -248,7 +250,7 @@ const faqItems: FAQItem[] = [
  *  component - each item manages its own open state in the DOM. */
 function FAQSection() {
   return (
-    <section className="mt-2 mb-10">
+    <section id="faq" className="mt-2 mb-10 scroll-mt-20">
       <div className="mb-4">
         <h2 className="text-xl font-semibold tracking-tight text-slate-900">
           Frequently asked questions
@@ -382,16 +384,18 @@ function QuickLinksCard() {
 }
 
 function DirectorySection({
+  id,
   title,
   caption,
   entries,
 }: {
+  id: string;
   title: string;
   caption: string;
   entries: AppEntry[];
 }) {
   return (
-    <section className="mt-2 mb-6">
+    <section id={id} className="mt-2 mb-6 scroll-mt-20">
       <div className="mb-3">
         <h2 className="text-xl font-semibold tracking-tight text-slate-900">
           {title}
