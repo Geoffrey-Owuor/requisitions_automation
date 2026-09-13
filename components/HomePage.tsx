@@ -3,6 +3,7 @@ import Link from "next/link";
 import {
   ArrowRight,
   BookText,
+  ChevronDown,
   ChevronRight,
   CircleDollarSign,
   CircleGauge,
@@ -66,8 +67,6 @@ export default function HomePage() {
         <QuickLinksCard />
       </section>
 
-      <StatsBand />
-
       <HowItWorksSection />
 
       <DirectorySection
@@ -84,41 +83,10 @@ export default function HomePage() {
 
       <WhyHubSection />
 
+      <FAQSection />
+
       <ComplianceSection />
     </PageShell>
-  );
-}
-
-/** Counts derived from the app directory itself, so this never drifts from
- *  what is actually listed further down the page. "Approval stages" is
- *  computed over forms only - a portal's chain describes a downstream
- *  process in a separate system, not a stage in this app's own workflow. */
-function StatsBand() {
-  const formsCount = appsByGroup("form").length;
-  const portalsCount = appsByGroup("portal").length;
-  const maxStages = Math.max(
-    ...appsByGroup("form").map((entry) => entry.chain.length),
-  );
-
-  const stats = [
-    { value: formsCount, label: "Requisition forms" },
-    { value: portalsCount, label: "Internal portals" },
-    { value: maxStages, label: "Approval stages, at most" },
-  ];
-
-  return (
-    <section className="rounded-surface shadow-raised mb-10 grid grid-cols-3 divide-x divide-slate-100 border border-slate-200 bg-white py-5">
-      {stats.map((stat) => (
-        <div key={stat.label} className="px-2 text-center sm:px-4">
-          <div className="text-brand-600 text-2xl font-bold tracking-tight sm:text-3xl">
-            {stat.value}
-          </div>
-          <div className="mt-1 text-xs leading-tight font-medium text-slate-500 sm:text-sm">
-            {stat.label}
-          </div>
-        </div>
-      ))}
-    </section>
   );
 }
 
@@ -240,6 +208,70 @@ function WhyHubSection() {
               {description}
             </p>
           </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+type FAQItem = { question: string; answer: string };
+
+const faqItems: FAQItem[] = [
+  {
+    question: "Do I need to sign in for every request?",
+    answer:
+      "No. Salary Advance is built to be submitted without signing in - every other form and portal needs a Microsoft sign-in to reach the dashboard.",
+  },
+  {
+    question: "How do I find out what happened to my request?",
+    answer:
+      "You don't have to check up on it - you're emailed automatically at every stage of its approval chain, from submission through to the final decision.",
+  },
+  {
+    question: "Who approves my request?",
+    answer:
+      "Every request starts with your HOD, then follows a chain specific to its type - HR, IT, Security, or the Director. Each form's guidelines page spells out its exact chain and any thresholds that apply.",
+  },
+  {
+    question: "Can I fix a mistake after submitting?",
+    answer:
+      "For Casual Requisitions, yes - any field can be amended any time before HR's final approval, which restarts the chain from your HOD. Other forms don't yet support this, so it's worth double-checking before you submit.",
+  },
+  {
+    question: "What if I'm the HOD for my own department?",
+    answer:
+      "You won't be able to select yourself as an approver - the form filters you out of the approver list automatically and routes to another approver in your department instead.",
+  },
+];
+
+/** Native <details>/<summary> keeps this interactive without a client
+ *  component - each item manages its own open state in the DOM. */
+function FAQSection() {
+  return (
+    <section className="mt-2 mb-10">
+      <div className="mb-4">
+        <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+          Frequently asked questions
+        </h2>
+        <p className="text-sm text-slate-500">
+          The things people usually ask before their first submission.
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-2.5">
+        {faqItems.map((item) => (
+          <details
+            key={item.question}
+            className="rounded-surface group open:shadow-raised border border-slate-200 bg-white px-4 py-3.5"
+          >
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-semibold text-slate-900 [&::-webkit-details-marker]:hidden">
+              {item.question}
+              <ChevronDown className="h-4 w-4 shrink-0 text-slate-400 transition-transform group-open:rotate-180" />
+            </summary>
+            <p className="mt-2.5 text-sm leading-relaxed text-slate-500">
+              {item.answer}
+            </p>
+          </details>
         ))}
       </div>
     </section>
