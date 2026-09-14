@@ -5,6 +5,7 @@ import { CasualFormData } from "./CasualRequisitionForm";
 import { dateFormatter } from "@/public/assets";
 import { useUser } from "@/context/UserContext";
 import { initialsHelper } from "@/public/assets";
+import CasualBudgetEstimate from "./CasualBudgetEstimate";
 
 interface SectionDerived {
   engagementDays: number;
@@ -90,6 +91,17 @@ export default function CasualConfirmationModal({
           Requestor
         </span>
       </div>
+
+      {/* Budget Impact */}
+      <CasualBudgetEstimate
+        department={formData.department}
+        sections={formData.sections.map((section, index) => ({
+          sectionName: section.sectionName,
+          numberOfCasuals: Number(section.numberOfCasuals) || 0,
+          totalAmount: sectionDerived[index]?.totalAmount ?? 0,
+          periodFrom: section.periodFrom,
+        }))}
+      />
 
       {/* Requisition Details */}
       <div className="mb-6">
