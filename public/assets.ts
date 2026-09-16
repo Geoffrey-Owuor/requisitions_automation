@@ -138,6 +138,15 @@ export const EMPLOYEE_STAGE_LABELS: Record<string, string> = {
   hr: "Human Resources",
 } satisfies Record<EmployeeStage, string>;
 
+// Human-readable labels for salary advance self-service alteration types
+// (lib/salaryAdvanceRules.ts's AlterationType) — shared between the
+// staff-facing and HR-facing alteration history views.
+export const ALTERATION_TYPE_LABELS: Record<string, string> = {
+  switch_to_oneoff: "Switched to one-off",
+  reduce_installments: "Installments reduced",
+  delete_request: "Deleted",
+};
+
 export const ALL_CASUAL_LOCATIONS = [
   "Ruiru",
   "Imaara",

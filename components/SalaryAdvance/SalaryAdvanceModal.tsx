@@ -7,12 +7,14 @@ import {
   Check,
   Banknote,
   CircleDollarSign,
+  History,
 } from "lucide-react";
 import { useAlertStore } from "@/store/useAlertStore";
 import StatusFormatter from "../Dashboard/StatusFormatter";
-import { dateFormatter } from "@/public/assets";
+import { ALTERATION_TYPE_LABELS, dateFormatter } from "@/public/assets";
 import ClientPortal from "@/components/ClientPortal";
 import { SalaryAdvanceData } from "@/serverActions/GetSalaryAdvanceData";
+import { FlagBadge } from "./FlagBadge";
 import { ReviewSalaryAdvance } from "@/serverActions/ReviewSalaryAdvance";
 import { useQueryClient } from "@tanstack/react-query";
 import SubmittingOverlay from "../SubmittingOverlay";
@@ -162,8 +164,69 @@ export function SalaryAdvanceModal({
                     <span className="capitalize">{data.request_type}</span>
                   }
                 />
+                <Field
+                  label="Exported"
+                  value={
+                    <FlagBadge
+                      value={data.exported}
+                      trueLabel="Exported"
+                      falseLabel="Pending"
+                    />
+                  }
+                />
+                <Field
+                  label="Altered"
+                  value={
+                    <FlagBadge
+                      value={data.altered}
+                      trueLabel="Altered"
+                      falseLabel="—"
+                      tone="violet"
+                    />
+                  }
+                />
               </div>
+              {!data.exported && (
+                <p className="mt-3 text-[11px] text-gray-400">
+                  Not yet included in an HR/Finance export — the staff member
+                  can still delete or alter this request without an audit
+                  trail.
+                </p>
+              )}
             </section>
+
+            {/* — Alteration History — */}
+            {data.alterations.length > 0 && (
+              <section>
+                <SectionHeader icon={History} title="Alteration History" />
+                <div className="space-y-2 rounded-2xl border border-gray-100 bg-white/60 p-4">
+                  {data.alterations.map((alteration, idx) => (
+                    <div
+                      key={idx}
+                      className="rounded-xl bg-slate-50 p-3 text-[13px] text-slate-700"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="font-medium text-[#1e1b1b]">
+                          {ALTERATION_TYPE_LABELS[alteration.alterationType] ??
+                            alteration.alterationType}
+                        </p>
+                        <FlagBadge
+                          value={alteration.exported}
+                          trueLabel="Exported"
+                          falseLabel="Pending"
+                        />
+                      </div>
+                      <p className="mt-0.5 text-[11px] text-slate-500">
+                        {dateFormatter(alteration.createdAt)}
+                        {alteration.previousInstallments != null &&
+                          alteration.newInstallments != null &&
+                          ` · ${alteration.previousInstallments} → ${alteration.newInstallments} installments`}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
 
             {/* — Approval Workflow / Review Area — */}
             <section>

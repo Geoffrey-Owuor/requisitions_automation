@@ -14,13 +14,63 @@ import { TablePagination } from "../Dashboard/TablePagination";
 import { SalaryAdvanceModal } from "./SalaryAdvanceModal";
 import { SalaryAdvanceBatchModal } from "./SalaryAdvanceBatchModal";
 import StatusFormatter from "../Dashboard/StatusFormatter";
+import { FlagBadge } from "./FlagBadge";
 import {
+  AlteredFilter,
+  ExportedFilter,
   GetSalaryAdvanceData,
   SalaryAdvanceData,
 } from "@/serverActions/GetSalaryAdvanceData";
 import { SalaryAdvanceExportModal } from "./SalaryAdvanceExportModal";
 import { Checkbox } from "./Checkbox";
 import { useServerPagination } from "@/hooks/useServerPagination";
+
+const EXPORTED_FILTER_OPTIONS: { value: ExportedFilter; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "not_exported", label: "Not exported" },
+  { value: "exported", label: "Exported" },
+];
+
+const ALTERED_FILTER_OPTIONS: { value: AlteredFilter; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "altered", label: "Altered" },
+  { value: "not_altered", label: "Not altered" },
+];
+
+function FilterChipGroup<T extends string>({
+  label,
+  options,
+  value,
+  onChange,
+}: {
+  label: string;
+  options: { value: T; label: string }[];
+  value: T;
+  onChange: (value: T) => void;
+}) {
+  return (
+    <div className="flex items-center gap-1.5">
+      <span className="text-[11px] font-semibold tracking-wide text-gray-400 uppercase">
+        {label}
+      </span>
+      <div className="flex items-center gap-1 rounded-xl border border-gray-200 bg-white/60 p-1">
+        {options.map((option) => (
+          <button
+            key={option.value}
+            onClick={() => onChange(option.value)}
+            className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-colors ${
+              value === option.value
+                ? "bg-slate-900 text-white"
+                : "text-gray-600 hover:bg-gray-100"
+            }`}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function SalaryAdvanceTable() {
   const [selectedRequest, setSelectedRequest] =
@@ -30,6 +80,8 @@ export default function SalaryAdvanceTable() {
   const [batchStatus, setBatchStatus] = useState<
     "approved" | "declined" | null
   >(null);
+  const [exportedFilter, setExportedFilter] = useState<ExportedFilter>("all");
+  const [alteredFilter, setAlteredFilter] = useState<AlteredFilter>("all");
 
   const {
     data: paginatedData,
@@ -46,9 +98,9 @@ export default function SalaryAdvanceTable() {
     setItemsPerPage,
   } = useServerPagination({
     queryKey: ["SalaryAdvancesData"],
-    params: {},
-    queryFn: ({ page, pageSize, searchTerm }) =>
-      GetSalaryAdvanceData({ page, pageSize, searchTerm }),
+    params: { exportedFilter, alteredFilter },
+    queryFn: ({ page, pageSize, searchTerm, params }) =>
+      GetSalaryAdvanceData({ page, pageSize, searchTerm, ...params }),
   });
 
   // Only pending requests are eligible for batch review
@@ -71,6 +123,16 @@ export default function SalaryAdvanceTable() {
       else next.add(requestId);
       return next;
     });
+  };
+
+  const handleExportedFilterChange = (value: ExportedFilter) => {
+    setExportedFilter(value);
+    setCurrentPage(1);
+  };
+
+  const handleAlteredFilterChange = (value: AlteredFilter) => {
+    setAlteredFilter(value);
+    setCurrentPage(1);
   };
 
   const togglePageSelection = () => {
@@ -133,6 +195,19 @@ export default function SalaryAdvanceTable() {
             <FileSpreadsheet className="h-4.5 w-4.5" />
           </button>
 
+          <FilterChipGroup
+            label="Export"
+            options={EXPORTED_FILTER_OPTIONS}
+            value={exportedFilter}
+            onChange={handleExportedFilterChange}
+          />
+          <FilterChipGroup
+            label="Altered"
+            options={ALTERED_FILTER_OPTIONS}
+            value={alteredFilter}
+            onChange={handleAlteredFilterChange}
+          />
+
           {selectedIds.size > 0 && (
             <div className="ml-4 flex flex-wrap items-center gap-4">
               <span className="text-xs font-medium text-gray-500">
@@ -176,6 +251,8 @@ export default function SalaryAdvanceTable() {
                   "Amount",
                   "Installments",
                   "Type",
+                  "Exported",
+                  "Altered",
                   "Date Submitted",
                   "Status",
                 ].map((col) => (
@@ -254,6 +331,25 @@ export default function SalaryAdvanceTable() {
                         </span>
                       </td>
 
+                      {/* Exported */}
+                      <td className="px-6 py-5">
+                        <FlagBadge
+                          value={req.exported}
+                          trueLabel="Exported"
+                          falseLabel="Pending"
+                        />
+                      </td>
+
+                      {/* Altered */}
+                      <td className="px-6 py-5">
+                        <FlagBadge
+                          value={req.altered}
+                          trueLabel="Altered"
+                          falseLabel="—"
+                          tone="violet"
+                        />
+                      </td>
+
                       {/* Requisition Date */}
                       <td className="px-6 py-5">
                         <span className="text-sm text-[#a18080]">
@@ -285,7 +381,7 @@ export default function SalaryAdvanceTable() {
               ) : (
                 /* Fallback UI */
                 <tr>
-                  <td colSpan={8} className="px-6 py-20">
+                  <td colSpan={10} className="px-6 py-20">
                     <div className="flex flex-col items-center justify-center text-center">
                       <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/80 bg-white/40 text-red-300 shadow-[0_8px_16px_rgba(60,100,160,0.05)] backdrop-blur-md">
                         <CircleDollarSign size={32} strokeWidth={1.5} />
