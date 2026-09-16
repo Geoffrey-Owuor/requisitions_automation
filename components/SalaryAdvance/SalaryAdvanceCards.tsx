@@ -12,6 +12,8 @@ import {
   Layers,
   BadgeCent,
   RotateCcw,
+  SendHorizontal,
+  History,
 } from "lucide-react";
 import {
   GetSalaryAdvanceCounts,
@@ -25,6 +27,8 @@ const DefaultCardCounts: SalaryAdvanceCounts = {
   declined: 0,
   oneoff: 0,
   continuous: 0,
+  pendingExport: 0,
+  altered: 0,
 };
 
 const maxCount = (count: number) => {
@@ -74,7 +78,7 @@ export default function SalaryAdvanceCards() {
           <RotateCcw className="h-4 w-4" />
         </button>
       </div>
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {/* 1. Total Overview Card */}
         <div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-5 shadow-[0_8px_16px_rgba(60,100,160,0.04)]">
           <div className="mb-4 flex items-center gap-3">
@@ -153,7 +157,7 @@ export default function SalaryAdvanceCards() {
         </div>
 
         {/* 3. Request Types Card */}
-        <div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-5 shadow-[0_8px_16px_rgba(60,100,160,0.04)] sm:col-span-2 lg:col-span-1">
+        <div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-5 shadow-[0_8px_16px_rgba(60,100,160,0.04)]">
           <div className="mb-4 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50 text-purple-600">
               <Layers size={20} strokeWidth={2} />
@@ -190,6 +194,49 @@ export default function SalaryAdvanceCards() {
               </div>
               <span className="text-xl font-bold text-gray-800">
                 {maxCount(counts.continuous)}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* 4. Export & Alterations Card */}
+        <div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-5 shadow-[0_8px_16px_rgba(60,100,160,0.04)]">
+          <div className="mb-4 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 text-red-500">
+              <SendHorizontal size={20} strokeWidth={2} />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-gray-900">
+                Export & Alterations
+              </h3>
+              <p className="text-[11px] font-bold tracking-widest text-gray-400 uppercase">
+                Reporting State
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-1 rounded-xl border border-gray-100 bg-gray-50 p-2.5">
+              <div className="flex items-center gap-1.5 text-gray-500">
+                <SendHorizontal size={14} strokeWidth={2} />
+                <span className="text-xs font-bold tracking-wide text-gray-600">
+                  Not Exported
+                </span>
+              </div>
+              <span className="text-xl font-bold text-gray-800">
+                {maxCount(counts.pendingExport)}
+              </span>
+            </div>
+
+            <div className="flex flex-col gap-1 rounded-xl border border-violet-100/50 bg-violet-50/50 p-2.5">
+              <div className="flex items-center gap-1.5 text-violet-600">
+                <History size={14} strokeWidth={2} />
+                <span className="text-xs font-bold tracking-wide">
+                  Altered
+                </span>
+              </div>
+              <span className="text-xl font-bold text-violet-700">
+                {maxCount(counts.altered)}
               </span>
             </div>
           </div>

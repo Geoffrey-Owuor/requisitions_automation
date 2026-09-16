@@ -2,6 +2,7 @@ import { NextResponse, NextRequest } from "next/server";
 import { Workbook } from "exceljs";
 import { query } from "@/lib/db";
 import { sendEmail } from "@/services/EmailService";
+import { addSheet, stripKeys } from "@/lib/excelExport";
 
 export async function GET(request: NextRequest) {
   // Get current date
@@ -71,47 +72,14 @@ export async function GET(request: NextRequest) {
     // Creating a workbook with exceljs and adding the worksheet(s);
     const workbook = new Workbook();
 
-    const addSheet = (name: string, sheetRows: Record<string, unknown>[]) => {
-      if (sheetRows.length === 0) return;
-
-      const worksheet = workbook.addWorksheet(name);
-
-      worksheet.columns = Object.keys(sheetRows[0]).map((key) => ({
-        // Split by an underscore, capitalize first letter of each word and join with a space
-        header: key
-          .split("_")
-          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(" "),
-        key: key,
-        width: 20,
-        numFmt: ["ated_at", "date"].some((str) => key.includes(str))
-          ? "yyyy-mm-dd hh:mm:ss"
-          : undefined,
-      }));
-
-      // Make the entire header row bold
-      worksheet.getRow(1).font = { bold: true };
-
-      // Add the data rows
-      worksheet.addRows(sheetRows);
-    };
-
     // Ids are needed to flip the exported flag after a successful send, but
     // shouldn't appear as worksheet columns (columns are auto-derived from
     // the row keys).
-    const sheetRows = rows.map((row) =>
-      Object.fromEntries(
-        Object.entries(row).filter(([key]) => key !== "request_id"),
-      ),
-    );
-    const alterationSheetRows = alterationRows.map((row) =>
-      Object.fromEntries(
-        Object.entries(row).filter(([key]) => key !== "alteration_id"),
-      ),
-    );
+    const sheetRows = stripKeys(rows, ["request_id"]);
+    const alterationSheetRows = stripKeys(alterationRows, ["alteration_id"]);
 
-    addSheet("Salary_Advances", sheetRows);
-    addSheet("Alterations", alterationSheetRows);
+    addSheet(workbook, "Salary_Advances", sheetRows);
+    addSheet(workbook, "Alterations", alterationSheetRows);
 
     // Generate a buffer from the workbook
     const arrayBuffer = await workbook.xlsx.writeBuffer();

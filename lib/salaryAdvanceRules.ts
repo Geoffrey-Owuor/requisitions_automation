@@ -25,6 +25,29 @@ export const INSTALLMENT_PROGRESS_SQL = `
     (no_of_installments - (EXTRACT(YEAR FROM AGE(CURRENT_DATE, repayment_start_date)) * 12
       + EXTRACT(MONTH FROM AGE(CURRENT_DATE, repayment_start_date))))::int AS remaining_installments`;
 
+// LEFT JOIN LATERAL block aggregating a request's self-service alterations
+// into a JSON array, keyed to the outer query's salary_advances alias so it
+// can be reused across queries that join the table under different aliases.
+// alt.alterations is NULL (via json_agg over zero rows) when the request has
+// none — callers should COALESCE it to '[]'::json for display, and treat
+// `alt.alterations IS NOT NULL` as the "has this request ever been altered"
+// signal (see GetSalaryAdvanceData.ts).
+export function alterationsJsonLateral(alias: string): string {
+  return `
+    LEFT JOIN LATERAL (
+      SELECT json_agg(json_build_object(
+        'alterationType', a.alteration_type,
+        'previousRequestType', a.previous_request_type,
+        'newRequestType', a.new_request_type,
+        'previousInstallments', a.previous_installments,
+        'newInstallments', a.new_installments,
+        'exported', a.exported,
+        'createdAt', a.created_at
+      ) ORDER BY a.created_at) AS alterations
+      FROM salary_advance_alterations a WHERE a.request_id = ${alias}.request_id
+    ) alt ON TRUE`;
+}
+
 const ACTIVE_ADVANCES_QUERY = `
   SELECT
     request_id,
