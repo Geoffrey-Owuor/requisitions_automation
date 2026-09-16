@@ -3,6 +3,7 @@ import { X, CalendarClock, History } from "lucide-react";
 import StatusFormatter from "@/components/Dashboard/StatusFormatter";
 import ClientPortal from "../ClientPortal";
 import { MyAdvanceRequest } from "@/serverActions/PublicServerActions/GetMyAdvanceRequests";
+import { ALTERATION_TYPE_LABELS } from "@/public/assets";
 
 function formatDate(value: string) {
   return new Date(value).toLocaleDateString("en-GB", {
@@ -11,12 +12,6 @@ function formatDate(value: string) {
     day: "numeric",
   });
 }
-
-const ALTERATION_LABELS: Record<string, string> = {
-  switch_to_oneoff: "Switched to one-off",
-  reduce_installments: "Installments reduced",
-  delete_request: "Deleted",
-};
 
 export default function SalaryAdvanceRequestModal({
   request,
@@ -124,7 +119,7 @@ export default function SalaryAdvanceRequestModal({
                       className="rounded-xl bg-slate-50 p-3 text-[13px] text-slate-700"
                     >
                       <p className="font-medium text-[#1e1b1b]">
-                        {ALTERATION_LABELS[alteration.alterationType] ??
+                        {ALTERATION_TYPE_LABELS[alteration.alterationType] ??
                           alteration.alterationType}
                       </p>
                       <p className="mt-0.5 text-[11px] text-slate-500">
