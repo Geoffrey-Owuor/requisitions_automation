@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Wallet, TrendingUp } from "lucide-react";
+import { Wallet, TrendingUp, Info } from "lucide-react";
 import {
   getCasualBudgetEstimate,
   CasualBudgetSectionInput,
@@ -65,6 +65,17 @@ export default function CasualBudgetEstimate({
         <Wallet className="h-3.5 w-3.5 text-rose-400" />
         Budget Impact
       </p>
+
+      <div className="mb-3 flex items-start gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-slate-600">
+        <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+        <p className="text-[11.5px] leading-relaxed">
+          These are projected figures, not actual recorded spend - only
+          fully-approved requisitions are counted, and post-approval changes
+          (e.g. sickness, absences, or emergencies affecting headcount)
+          aren&apos;t reflected here. Finance&apos;s records remain the source
+          of truth for actual spend.
+        </p>
+      </div>
 
       {isFetching && estimates.length === 0 && (
         <p className="text-[13px] text-[#7c5a5a]">Loading budget estimate…</p>

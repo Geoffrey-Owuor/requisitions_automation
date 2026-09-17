@@ -27,6 +27,7 @@ export interface SalaryAdvanceData {
   staff_email: string;
   staff_department: string;
   staff_location: string;
+  staff_phone_number: string;
   request_amount: number;
   no_of_installments: string;
   repayment_start_date: string;
@@ -61,6 +62,7 @@ const SEARCHABLE_COLUMNS = [
   "sa.staff_department",
   "sa.request_type",
   "sa.approval_status",
+  "sa.staff_phone_number",
 ];
 
 export async function GetSalaryAdvanceData({
@@ -98,7 +100,7 @@ export async function GetSalaryAdvanceData({
   const baseQuery = `
     SELECT
     sa.request_id, sa.request_created_at, sa.staff_number, sa.staff_name, sa.staff_email, sa.staff_department,
-    sa.staff_location, sa.request_amount, sa.no_of_installments, sa.repayment_start_date,
+    sa.staff_location, sa.staff_phone_number, sa.request_amount, sa.no_of_installments, sa.repayment_start_date,
     sa.request_type, sa.approval_status, sa.approver_comments, sa.exported,
     (alt.alterations IS NOT NULL) AS altered,
     COALESCE(alt.alterations, '[]'::json) AS alterations,

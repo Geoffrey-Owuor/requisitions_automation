@@ -15,6 +15,7 @@ const SALARY_ADVANCE_COLUMNS = [
   "staff_email",
   "staff_department",
   "staff_location",
+  "staff_phone_number",
   "request_amount",
   "no_of_installments",
   "repayment_start_date",
@@ -30,6 +31,7 @@ const ALTERATION_COLUMNS = [
   "staff_number",
   "staff_name",
   "staff_email",
+  "staff_phone_number",
   "alteration_type",
   "previous_request_type",
   "new_request_type",
@@ -49,10 +51,15 @@ export async function GET(request: NextRequest) {
 
   const fromDate = searchParams.get("fromDate");
   const toDate = searchParams.get("toDate");
-  // "Everything not yet exported" reproduces the cron trigger's exact scope
-  // on demand — same WHERE predicates, but read-only (see the comment below
-  // the queries) — so HR can preview that report without waiting for the
-  // scheduled run or touching the exported flags.
+  // "Everything not yet exported" is a plain `exported = false` filter (plus
+  // continuous requests, which never stop needing to be seen) — read-only,
+  // no export flags touched. This route is a reporting/analysis tool, so it
+  // deliberately does NOT also apply the cron's `hr_reviewed_at` exclusion:
+  // that exclusion exists purely to stop the *automated* monthly send from
+  // re-notifying HR/Finance about rows they've already acted on, which has
+  // nothing to do with what HR wants to see when pulling an ad-hoc report.
+  // The only gates on this route are the ones the caller explicitly picks
+  // (this scope toggle, or the date range below).
   const isUnexportedScope = searchParams.get("scope") === "unexported";
 
   if (!isUnexportedScope && (!fromDate || !toDate)) {
@@ -69,9 +76,10 @@ export async function GET(request: NextRequest) {
       SELECT
       TO_CHAR(request_created_at, 'YYYY-MM-DD HH24:MI:SS') AS request_created_at,
       staff_number, staff_name, staff_email, staff_department,
-      staff_location, request_amount, no_of_installments,
+      staff_location, staff_phone_number, request_amount, no_of_installments,
       TO_CHAR(repayment_start_date, 'YYYY-MM-DD HH24:MI:SS') AS repayment_start_date,
       request_type, approval_status, approver_comments, exported,
+      TO_CHAR(hr_reviewed_at, 'YYYY-MM-DD HH24:MI:SS') AS hr_reviewed_at,
       EXISTS (SELECT 1 FROM salary_advance_alterations a WHERE a.request_id = sa.request_id) AS altered
       FROM salary_advances sa
       WHERE exported = false OR request_type = 'continuous'
@@ -81,9 +89,10 @@ export async function GET(request: NextRequest) {
       SELECT
       TO_CHAR(request_created_at, 'YYYY-MM-DD HH24:MI:SS') AS request_created_at,
       staff_number, staff_name, staff_email, staff_department,
-      staff_location, request_amount, no_of_installments,
+      staff_location, staff_phone_number, request_amount, no_of_installments,
       TO_CHAR(repayment_start_date, 'YYYY-MM-DD HH24:MI:SS') AS repayment_start_date,
       request_type, approval_status, approver_comments, exported,
+      TO_CHAR(hr_reviewed_at, 'YYYY-MM-DD HH24:MI:SS') AS hr_reviewed_at,
       EXISTS (SELECT 1 FROM salary_advance_alterations a WHERE a.request_id = sa.request_id) AS altered
       FROM salary_advances sa
       WHERE request_created_at::date BETWEEN $1 AND $2
@@ -98,7 +107,7 @@ export async function GET(request: NextRequest) {
     ? `
       SELECT
       TO_CHAR(a.created_at, 'YYYY-MM-DD HH24:MI:SS') AS created_at,
-      s.staff_number, s.staff_name, s.staff_email,
+      s.staff_number, s.staff_name, s.staff_email, s.staff_phone_number,
       a.alteration_type, a.previous_request_type, a.new_request_type,
       a.previous_installments, a.new_installments, a.exported
       FROM salary_advance_alterations a
@@ -109,7 +118,7 @@ export async function GET(request: NextRequest) {
     : `
       SELECT
       TO_CHAR(a.created_at, 'YYYY-MM-DD HH24:MI:SS') AS created_at,
-      s.staff_number, s.staff_name, s.staff_email,
+      s.staff_number, s.staff_name, s.staff_email, s.staff_phone_number,
       a.alteration_type, a.previous_request_type, a.new_request_type,
       a.previous_installments, a.new_installments, a.exported
       FROM salary_advance_alterations a

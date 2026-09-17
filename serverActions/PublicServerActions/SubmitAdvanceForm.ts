@@ -7,6 +7,7 @@ import {
   getBlockingActiveAdvance,
   getInstallmentCompletionDate,
 } from "@/lib/salaryAdvanceRules";
+import { normalizeKenyanPhone } from "@/public/assets";
 
 export interface MessageResponse {
   type: "error" | "success";
@@ -29,12 +30,22 @@ export async function SubmitAdvanceForm(
 
     const { staffNumber, staffName, staffEmail, department, location } =
       verifiedStaff;
-    const { requestAmount, repaymentStartDate, requestType } = formData;
+    const { requestAmount, repaymentStartDate, requestType, phoneNumber } =
+      formData;
 
     // Continuous requests are always repaid in a single installment —
     // enforced here too, not just on the client.
     const installments =
       requestType === "continuous" ? "1" : formData.installments;
+
+    // Re-validate the phone number here too, not just on the client.
+    const normalizedPhone = normalizeKenyanPhone(phoneNumber);
+    if (!normalizedPhone) {
+      return {
+        type: "error",
+        message: "Enter a valid Kenyan phone number, e.g. 07XXXXXXXX.",
+      };
+    }
 
     // RULE 2: Block submission while the staff has an active continuous
     // request (never completes), or an active one-off request whose
@@ -63,15 +74,17 @@ export async function SubmitAdvanceForm(
     // Insert new request if all checks pass
     const result = await query(
       `INSERT INTO salary_advances (
-            staff_number, staff_name, staff_email, staff_department, staff_location, 
-            request_amount, no_of_installments, repayment_start_date, request_type
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING request_id`,
+            staff_number, staff_name, staff_email, staff_department, staff_location,
+            staff_phone_number, request_amount, no_of_installments,
+            repayment_start_date, request_type
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING request_id`,
       [
         staffNumber,
         staffName,
         staffEmail,
         department,
         location,
+        normalizedPhone,
         Number(requestAmount),
         Number(installments),
         repaymentStartDate,
