@@ -78,6 +78,7 @@ export function AdvanceRequisitionTemplate({
               ${advanceRow("Email Address", emailData.staffemail)}
               ${advanceRow("Department", emailData.staffdepartment)}
               ${advanceRow("Location", emailData.stafflocation)}
+              ${advanceRow("Phone Number", emailData.staffphonenumber)}
             </table>
           </div>
 

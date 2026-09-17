@@ -3,7 +3,7 @@ import { X, CalendarClock, History } from "lucide-react";
 import StatusFormatter from "@/components/Dashboard/StatusFormatter";
 import ClientPortal from "../ClientPortal";
 import { MyAdvanceRequest } from "@/serverActions/PublicServerActions/GetMyAdvanceRequests";
-import { ALTERATION_TYPE_LABELS } from "@/public/assets";
+import { ALTERATION_TYPE_LABELS, formatPhoneForDisplay } from "@/public/assets";
 
 function formatDate(value: string) {
   return new Date(value).toLocaleDateString("en-GB", {
@@ -87,6 +87,14 @@ export default function SalaryAdvanceRequestModal({
                   {formatDate(request.repaymentStartDate)}
                 </p>
               </div>
+              <div className="rounded-xl bg-slate-50 p-3">
+                <p className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
+                  Phone Number
+                </p>
+                <p className="text-sm font-semibold text-[#1e1b1b]">
+                  {formatPhoneForDisplay(request.phoneNumber)}
+                </p>
+              </div>
             </div>
 
             {request.approverComments && (
@@ -101,9 +109,11 @@ export default function SalaryAdvanceRequestModal({
             )}
 
             <p className="text-[11px] text-slate-400">
-              {request.exported
-                ? "Included in a monthly HR/Finance export."
-                : "Not yet included in a monthly HR/Finance export."}
+              {request.approvalStatus !== "pending"
+                ? "Reviewed by HR - no further export needed."
+                : request.exported
+                  ? "Included in a monthly HR/Finance export."
+                  : "Not yet included in a monthly HR/Finance export."}
             </p>
 
             {request.alterations.length > 0 && (

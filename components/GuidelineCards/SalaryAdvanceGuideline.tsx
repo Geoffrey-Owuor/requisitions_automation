@@ -66,6 +66,7 @@ export default function SalaryAdvanceGuideline() {
             items={[
               "Staff Number (automatically retrieves your associated Name and Email).",
               "Current Department and specific Location are also retrieved automatically from the staff number.",
+              "Phone Number: entered and confirmed by you — HR and Finance use it to reach you and, where applicable, to disburse funds, so it must be correct and belong to you.",
             ]}
           />
           <InfoCard

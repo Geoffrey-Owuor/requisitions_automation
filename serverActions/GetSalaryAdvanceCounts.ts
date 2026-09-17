@@ -36,7 +36,10 @@ export async function GetSalaryAdvanceCounts(): Promise<SalaryAdvanceCounts> {
         COUNT(*) FILTER (WHERE LOWER(approval_status) = 'declined') as declined,
         COUNT(*) FILTER (WHERE LOWER(request_type) = 'oneoff') as oneoff,
         COUNT(*) FILTER (WHERE LOWER(request_type) = 'continuous') as continuous,
-        COUNT(*) FILTER (WHERE exported = false) as pending_export,
+        COUNT(*) FILTER (
+          WHERE (exported = false AND hr_reviewed_at IS NULL)
+             OR (LOWER(request_type) = 'continuous' AND LOWER(approval_status) != 'declined')
+        ) as pending_export,
         COUNT(*) FILTER (
           WHERE EXISTS (
             SELECT 1 FROM salary_advance_alterations a
