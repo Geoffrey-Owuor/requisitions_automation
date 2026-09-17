@@ -20,17 +20,17 @@ export default async function GuidelinesLayout({ children, params }: Props) {
 
   return (
     <PageShell>
-      <div className="flex flex-1 flex-col gap-5 py-8 md:flex-row md:gap-8">
-        <aside className="w-full min-w-0 md:w-58 md:shrink-0">
+      <div className="flex flex-1 flex-col gap-5 py-8 lg:flex-row lg:gap-8">
+        <aside className="w-full min-w-0 lg:w-58 lg:shrink-0">
           <nav
             aria-label="Guidelines"
-            className="flex flex-col gap-2 py-2 md:sticky md:top-20 md:rounded-2xl md:border md:border-slate-200/70 md:bg-white/70 md:p-2.5 md:shadow-sm md:backdrop-blur-xl"
+            className="flex flex-col gap-2 py-2 lg:sticky lg:top-20 lg:rounded-2xl lg:border lg:border-slate-200/70 lg:bg-white/70 lg:p-2.5 lg:shadow-sm lg:backdrop-blur-xl"
           >
-            <span className="hidden px-2 pb-1 text-[10px] font-bold tracking-[0.16em] text-slate-400 uppercase md:block">
+            <span className="hidden px-2 pb-1 text-[10px] font-bold tracking-[0.16em] text-slate-400 uppercase lg:block">
               Guidelines
             </span>
 
-            <div className="small-scrollbar flex flex-row gap-1.5 overflow-x-auto pb-1 md:flex-col md:gap-0.5 md:overflow-visible md:pb-0">
+            <div className="small-scrollbar flex flex-row gap-1.5 overflow-x-auto pb-1 lg:flex-col lg:gap-0.5 lg:overflow-visible lg:pb-0">
               {appDirectory.map((entry) => {
                 const isActive = entry.slug === slug;
                 const Icon = entry.icon;
@@ -40,14 +40,14 @@ export default async function GuidelinesLayout({ children, params }: Props) {
                     key={entry.slug}
                     href={`/guidelines/${entry.slug}`}
                     aria-current={isActive ? "page" : undefined}
-                    className={`rounded-control flex shrink-0 items-center gap-2 px-2.5 py-2 text-sm font-medium transition-colors md:w-full ${
+                    className={`rounded-control flex shrink-0 items-center gap-2 px-2.5 py-2 text-sm font-medium transition-colors lg:w-full ${
                       isActive
                         ? "bg-brand-600 text-white"
-                        : "hover:bg-brand-50 hover:text-brand-700 border border-slate-200 bg-white text-slate-600 md:border-transparent md:bg-transparent"
+                        : "hover:bg-brand-50 hover:text-brand-700 border border-slate-200 bg-white text-slate-600 lg:border-transparent lg:bg-transparent"
                     }`}
                   >
                     <Icon size={15} className="shrink-0" />
-                    <span className="whitespace-nowrap md:whitespace-normal">
+                    <span className="whitespace-nowrap lg:whitespace-normal">
                       {entry.label}
                     </span>
                   </Link>
