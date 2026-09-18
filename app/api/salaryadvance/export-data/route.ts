@@ -20,6 +20,7 @@ const SALARY_ADVANCE_COLUMNS = [
   "no_of_installments",
   "repayment_start_date",
   "request_type",
+  "hr_reviewed_at",
   "approval_status",
   "approver_comments",
   "exported",
