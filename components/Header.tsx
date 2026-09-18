@@ -77,7 +77,7 @@ const Header = () => {
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-2.5">
         <Brand showText={true} />
 
-        <nav className="hidden items-center gap-1 md:flex">
+        <nav className="hidden items-center gap-1 lg:flex">
           {homeNavItems.map((item) => (
             <a
               key={item.href}
@@ -89,7 +89,7 @@ const Header = () => {
           ))}
         </nav>
 
-        <div className="hidden items-center gap-1.5 md:flex">
+        <div className="hidden items-center gap-1.5 lg:flex">
           <form
             action="/api/auth/login"
             method="GET"
@@ -119,7 +119,7 @@ const Header = () => {
           onClick={() => setIsMenuOpen((open) => !open)}
           aria-expanded={isMenuOpen}
           aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-          className="rounded-control hover:bg-brand-50 hover:text-brand-700 flex items-center justify-center p-2 text-slate-600 transition-colors md:hidden"
+          className="rounded-control hover:bg-brand-50 hover:text-brand-700 flex items-center justify-center p-2 text-slate-600 transition-colors lg:hidden"
         >
           {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
@@ -127,7 +127,7 @@ const Header = () => {
 
       {/* Drawer opens downward as an overlay, below the header, mobile-only. */}
       {isMenuOpen && (
-        <div className="absolute inset-x-0 top-full border-b border-slate-200 bg-white shadow-lg md:hidden">
+        <div className="absolute inset-x-0 top-full border-b border-slate-200 bg-white shadow-lg lg:hidden">
           <nav className="mx-auto flex max-w-6xl flex-col px-4 py-3">
             {homeNavItems.map((item) => (
               <a

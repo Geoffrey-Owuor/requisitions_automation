@@ -2,9 +2,6 @@
 import { useQuery } from "@tanstack/react-query";
 import {
   Banknote,
-  Clock,
-  CheckCircle2,
-  XCircle,
   Repeat,
   FileDigit,
   BarChart3,
@@ -122,7 +119,6 @@ export default function SalaryAdvanceCards() {
           <div className="grid grid-cols-3 gap-2">
             <div className="flex flex-col gap-1 rounded-xl border border-amber-100/50 bg-amber-50/50 p-2">
               <div className="flex items-center gap-1.5 text-amber-600">
-                <Clock size={12} strokeWidth={2.5} />
                 <span className="text-xs font-bold tracking-wide">Pending</span>
               </div>
               <span className="text-lg font-bold text-amber-700">
@@ -132,7 +128,6 @@ export default function SalaryAdvanceCards() {
 
             <div className="flex flex-col gap-1 rounded-xl border border-emerald-100/50 bg-emerald-50/50 p-2">
               <div className="flex items-center gap-1.5 text-emerald-600">
-                <CheckCircle2 size={12} strokeWidth={2.5} />
                 <span className="text-xs font-bold tracking-wide">
                   Approved
                 </span>
@@ -144,7 +139,6 @@ export default function SalaryAdvanceCards() {
 
             <div className="flex flex-col gap-1 rounded-xl border border-red-100/50 bg-red-50/50 p-2">
               <div className="flex items-center gap-1.5 text-red-600">
-                <XCircle size={12} strokeWidth={2.5} />
                 <span className="text-xs font-bold tracking-wide">
                   Declined
                 </span>
@@ -231,9 +225,7 @@ export default function SalaryAdvanceCards() {
             <div className="flex flex-col gap-1 rounded-xl border border-violet-100/50 bg-violet-50/50 p-2.5">
               <div className="flex items-center gap-1.5 text-violet-600">
                 <History size={14} strokeWidth={2} />
-                <span className="text-xs font-bold tracking-wide">
-                  Altered
-                </span>
+                <span className="text-xs font-bold tracking-wide">Altered</span>
               </div>
               <span className="text-xl font-bold text-violet-700">
                 {maxCount(counts.altered)}

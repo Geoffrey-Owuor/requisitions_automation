@@ -66,7 +66,7 @@ export async function BatchReviewSalaryAdvance(
       const { rows } = await client.query(
         `
         UPDATE salary_advances
-        SET approval_status = $1, approver_comments = $2
+        SET approval_status = $1, approver_comments = $2, hr_reviewed_at = NOW(), exported = TRUE
         WHERE request_id = $3 AND approval_status = 'pending'
         RETURNING staff_email
         `,

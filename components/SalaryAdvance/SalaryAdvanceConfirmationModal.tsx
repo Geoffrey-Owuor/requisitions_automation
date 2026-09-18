@@ -24,6 +24,7 @@ export default function SalaryAdvanceConfirmationModal({
     { label: "Staff Email", value: formData.staffEmail },
     { label: "Department", value: formData.department },
     { label: "Location", value: formData.location || "N/A" },
+    { label: "Phone Number", value: formData.phoneNumber },
   ];
 
   const advanceDetails: { label: string; value: string }[] = [

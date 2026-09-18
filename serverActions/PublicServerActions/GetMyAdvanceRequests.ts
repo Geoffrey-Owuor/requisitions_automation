@@ -23,6 +23,7 @@ export interface MyAdvanceRequest {
   approvalStatus: string;
   approverComments: string;
   exported: boolean;
+  phoneNumber: string;
   elapsedInstallments: number;
   remainingInstallments: number;
   alterations: AdvanceAlterationSummary[];
@@ -42,6 +43,7 @@ interface MyAdvanceRequestRow {
   approval_status: string;
   approver_comments: string;
   exported: boolean;
+  staff_phone_number: string;
   elapsed_installments: number;
   remaining_installments: number;
   alterations: AdvanceAlterationSummary[];
@@ -68,7 +70,7 @@ export async function GetMyAdvanceRequests(): Promise<MyAdvanceRequestsResponse>
       SELECT
         sa.request_id, sa.request_created_at, sa.request_type, sa.request_amount,
         sa.no_of_installments, sa.repayment_start_date, sa.approval_status,
-        sa.approver_comments, sa.exported,
+        sa.approver_comments, sa.exported, sa.staff_phone_number,
         ${INSTALLMENT_PROGRESS_SQL},
         COALESCE(alt.alterations, '[]'::json) AS alterations
       FROM salary_advances sa
@@ -99,6 +101,7 @@ export async function GetMyAdvanceRequests(): Promise<MyAdvanceRequestsResponse>
       approvalStatus: row.approval_status,
       approverComments: row.approver_comments,
       exported: row.exported,
+      phoneNumber: row.staff_phone_number,
       elapsedInstallments: row.elapsed_installments,
       remainingInstallments: row.remaining_installments,
       alterations: row.alterations,

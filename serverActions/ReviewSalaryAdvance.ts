@@ -52,10 +52,12 @@ export async function ReviewSalaryAdvance(
     // Default to "No comments" if left blank
     const finalComments = comments.trim() === "" ? "No comments" : comments;
 
-    // Using parameterization to prevent SQL injection
+    // hr_reviewed_at excludes this row from future export sweeps (it's been
+    // acted on) without touching `exported`, which keeps meaning "actually
+    // appeared in a sent export" for the dashboard's badges/filters.
     const updateQuery = `
-      UPDATE salary_advances 
-      SET approval_status = $1, approver_comments = $2
+      UPDATE salary_advances
+      SET approval_status = $1, approver_comments = $2, hr_reviewed_at = NOW(), exported = TRUE
       WHERE request_id = $3
     `;
 

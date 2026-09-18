@@ -155,10 +155,9 @@ export function SalaryAdvanceExportModal({
               </div>
             ) : (
               <p className="rounded-xl bg-gray-50 p-3 text-xs text-gray-600">
-                Reproduces the same scope as the monthly automated report
-                (rows not yet exported, plus every continuous request) —
-                without touching the exported flags, so the scheduled report
-                still picks these rows up normally.
+                Rows not yet exported, plus every continuous request — without
+                touching the exported flags, so the scheduled report still
+                picks these rows up normally.
               </p>
             )}
           </div>
