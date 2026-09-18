@@ -10,6 +10,7 @@ export interface AdvanceMailTemplateValues {
   staffemail: string;
   staffdepartment: string;
   stafflocation: string;
+  staffphonenumber: string;
   requestamount: number;
   installments: string;
   repaymentstartdate: string;
@@ -25,6 +26,7 @@ export const AdvanceDataQuery = `
     staff_email AS staffemail,
     staff_department AS staffdepartment,
     staff_location AS stafflocation,
+    staff_phone_number AS staffphonenumber,
     request_amount AS requestamount,
     no_of_installments AS installments,
     repayment_start_date AS repaymentstartdate,

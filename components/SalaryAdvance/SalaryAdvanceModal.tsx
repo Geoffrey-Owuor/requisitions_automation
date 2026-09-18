@@ -11,7 +11,11 @@ import {
 } from "lucide-react";
 import { useAlertStore } from "@/store/useAlertStore";
 import StatusFormatter from "../Dashboard/StatusFormatter";
-import { ALTERATION_TYPE_LABELS, dateFormatter } from "@/public/assets";
+import {
+  ALTERATION_TYPE_LABELS,
+  dateFormatter,
+  formatPhoneForDisplay,
+} from "@/public/assets";
 import ClientPortal from "@/components/ClientPortal";
 import { SalaryAdvanceData } from "@/serverActions/GetSalaryAdvanceData";
 import { FlagBadge } from "./FlagBadge";
@@ -142,6 +146,10 @@ export function SalaryAdvanceModal({
                 <Field label="Email" value={data.staff_email} />
                 <Field label="Department" value={data.staff_department} />
                 <Field label="Location" value={data.staff_location} />
+                <Field
+                  label="Phone Number"
+                  value={formatPhoneForDisplay(data.staff_phone_number)}
+                />
               </div>
             </section>
 

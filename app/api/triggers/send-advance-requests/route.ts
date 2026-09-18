@@ -19,19 +19,22 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  // The base fetch query — everything not yet exported, plus continuous
-  // requests every run (they need to keep appearing as a standing deduction
-  // reminder regardless of the exported flag).
+  // The base fetch query — everything not yet exported and not yet reviewed
+  // by HR (once HR has approved/declined, it doesn't need to be swept up
+  // here again), plus continuous requests every run as a standing deduction
+  // reminder — unless a continuous request was declined, in which case there's
+  // nothing left to remind anyone about.
   const baseQuery = `
     SELECT
     request_id,
     TO_CHAR(request_created_at, 'YYYY-MM-DD HH24:MI:SS') AS request_created_at,
     staff_number, staff_name, staff_email, staff_department,
-    staff_location, request_amount, no_of_installments,
+    staff_location, staff_phone_number, request_amount, no_of_installments,
     TO_CHAR(repayment_start_date, 'YYYY-MM-DD HH24:MI:SS') AS repayment_start_date,
     request_type, approval_status, approver_comments
     FROM salary_advances
-    WHERE exported = false OR request_type = 'continuous'
+    WHERE (exported = false AND hr_reviewed_at IS NULL)
+       OR (request_type = 'continuous' AND approval_status != 'declined')
     ORDER BY request_created_at ASC
     `;
 
@@ -42,7 +45,7 @@ export async function GET(request: NextRequest) {
     SELECT
     a.alteration_id,
     TO_CHAR(a.created_at, 'YYYY-MM-DD HH24:MI:SS') AS created_at,
-    s.staff_number, s.staff_name, s.staff_email,
+    s.staff_number, s.staff_name, s.staff_email, s.staff_phone_number,
     a.alteration_type, a.previous_request_type, a.new_request_type,
     a.previous_installments, a.new_installments
     FROM salary_advance_alterations a

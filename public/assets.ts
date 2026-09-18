@@ -147,6 +147,38 @@ export const ALTERATION_TYPE_LABELS: Record<string, string> = {
   delete_request: "Deleted",
 };
 
+// Sentinel written by migration 013 for rows submitted before the salary
+// advance phone number field existed.
+export const PHONE_NOT_PROVIDED = "not provided";
+
+// Accepts common Kenyan mobile formats (07xx…, 01xx…, 254xx…, +254xx…, with
+// or without spaces/dashes) and normalizes to a canonical +254xxxxxxxxx
+// form. Returns null when the input doesn't match any of them.
+export function normalizeKenyanPhone(raw: string): string | null {
+  const digits = raw.replace(/[\s\-()]/g, "");
+
+  let national: string | null = null;
+  if (/^0[17]\d{8}$/.test(digits)) {
+    national = digits.slice(1);
+  } else if (/^\+254[17]\d{8}$/.test(digits)) {
+    national = digits.slice(4);
+  } else if (/^254[17]\d{8}$/.test(digits)) {
+    national = digits.slice(3);
+  }
+
+  return national ? `+254${national}` : null;
+}
+
+export function isValidKenyanPhone(raw: string): boolean {
+  return normalizeKenyanPhone(raw) !== null;
+}
+
+// Renders the pre-migration sentinel value in a friendlier form wherever
+// legacy salary advance rows are displayed.
+export function formatPhoneForDisplay(value: string): string {
+  return value === PHONE_NOT_PROVIDED ? "Not provided" : value;
+}
+
 export const ALL_CASUAL_LOCATIONS = [
   "Ruiru",
   "Imaara",
