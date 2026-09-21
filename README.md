@@ -44,6 +44,7 @@ An internal web application for Hotpoint Appliances Ltd that automates requisiti
 - Staff salary advance requests — no submission deadline; HR batches processing once a month using a per-request `exported` flag rather than a calendar cutoff
 - A new request is blocked while any active (non-declined) request's repayment installments haven't fully elapsed — a continuous request blocks indefinitely, a one-off request blocks until its `repayment_start_date + no_of_installments` has passed
 - Staff can self-service alter an eligible active request instead of submitting a new one — switch a continuous request to one-off, reduce a one-off request's remaining installments, or delete a still-pending, not-yet-exported request outright — applied immediately with no HR approval or email; switch/reduce alterations are logged in `salary_advance_alterations` only once the underlying request has already been exported
+- Staff can request a change to the email address on their staff record from a modal on the advance page (signed in or not). It is an unverified request: the requester enters their staff number, name, department, a reason and the new address twice, and confirms they own it. It is saved to `email_change_requests` (audit log and rate-limit source) and HR/admin are emailed; nothing in `company_staff_data` is changed automatically
 
 ### Embedded Internal Portals (SSO)
 
