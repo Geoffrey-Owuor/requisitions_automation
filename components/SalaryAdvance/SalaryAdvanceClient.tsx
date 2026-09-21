@@ -32,6 +32,7 @@ import { SubmitAdvanceForm } from "@/serverActions/PublicServerActions/SubmitAdv
 import SalaryAdvanceFormSkeleton from "../Skeletons/SalaryAdvanceFormSkeleton";
 import SalaryAdvanceAlterationSection from "./SalaryAdvanceAlterationSection";
 import SalaryAdvanceHistorySection from "./SalaryAdvanceHistorySection";
+import EmailChangeRequestModal from "./EmailChangeRequestModal";
 import { isValidKenyanPhone } from "@/public/assets";
 
 export interface SalaryAdvanceFormData {
@@ -154,6 +155,7 @@ export default function SalaryAdvanceClient() {
   const [phoneNumberConfirm, setPhoneNumberConfirm] = useState("");
   const [policyAccepted, setPolicyAccepted] = useState(false);
   const [confirmingEndSession, setConfirmingEndSession] = useState(false);
+  const [emailChangeOpen, setEmailChangeOpen] = useState(false);
   const triggerAlert = useAlertStore((state) => state.triggerAlert);
 
   const codeInputsRef = useRef<(HTMLInputElement | null)[]>([]);
@@ -477,6 +479,18 @@ export default function SalaryAdvanceClient() {
     <div className="relative flex-1 p-4">
       {submitting && <SubmittingOverlay />}
 
+      {emailChangeOpen && (
+        <EmailChangeRequestModal
+          isOpen={emailChangeOpen}
+          onClose={() => setEmailChangeOpen(false)}
+          defaults={{
+            staffNumber: formData.staffNumber,
+            staffName: formData.staffName,
+            department: formData.department,
+          }}
+        />
+      )}
+
       {step === 3 && (
         <SalaryAdvanceConfirmationModal
           formData={formData}
@@ -545,6 +559,15 @@ export default function SalaryAdvanceClient() {
                     before requesting a salary advance.
                   </p>
                 </div>
+
+                <button
+                  type="button"
+                  onClick={() => setEmailChangeOpen(true)}
+                  className="mt-4 flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-rose-600 transition-colors hover:bg-rose-50"
+                >
+                  <Mail size={13} />
+                  Need to change your email on record?
+                </button>
               </div>
 
               {/* ── Verification card ── */}
@@ -777,6 +800,15 @@ export default function SalaryAdvanceClient() {
                 "Review your past and current salary advance requests."}
             </p>
           </header>
+
+          <button
+            type="button"
+            onClick={() => setEmailChangeOpen(true)}
+            className="mb-4 flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800"
+          >
+            <Mail size={13} />
+            Request an email change
+          </button>
 
           <div
             role="tablist"
