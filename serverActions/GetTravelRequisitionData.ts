@@ -1,6 +1,7 @@
 "use server";
 import { query } from "@/lib/db";
 import { getSession } from "@/lib/session";
+import { getUserRoles } from "@/serverActions/GetUserRoles";
 import {
   PaginatedResult,
   emptyPaginatedResult,
@@ -10,7 +11,12 @@ import {
 import { QueryResultRow } from "pg";
 
 export interface TravelRequisitionDataProps {
-  dataFlag: "userData" | "hodPending" | "hrPending" | "directorPending";
+  dataFlag:
+    | "userData"
+    | "hodPending"
+    | "hrPending"
+    | "directorPending"
+    | "history";
   page?: number;
   pageSize?: number;
   searchTerm?: string;
@@ -35,6 +41,18 @@ export const getTravelRequisitionData = async ({
 }: TravelRequisitionDataProps): Promise<PaginatedResult<QueryResultRow>> => {
   const user = await getSession();
   if (!user) return emptyPaginatedResult(page, pageSize);
+
+  // Travel HR/Director dashboard access is role-based — verify the role
+  // server-side rather than trusting the dashboard's role gate.
+  const roles = await getUserRoles(user.email);
+  const isHr = roles.includes("hr-travel");
+  const isDirector = roles.includes("director");
+  if (dataFlag === "hrPending" && !isHr) {
+    return emptyPaginatedResult(page, pageSize);
+  }
+  if (dataFlag === "directorPending" && !isDirector) {
+    return emptyPaginatedResult(page, pageSize);
+  }
 
   const baseParams: (string | number)[] = [];
   const conditions: string[] = [];
@@ -64,6 +82,25 @@ export const getTravelRequisitionData = async ({
       );
       baseParams.push("approved", "approved", "pending");
       break;
+    case "history": {
+      // Union of every stage this user is involved in: their own HOD rows,
+      // plus (HR) everything the HOD approved and (Director) every Tier 3
+      // request that has reached the Director stage.
+      const scopes = [`travel_hod_email = $${baseParams.length + 1}`];
+      baseParams.push(user.email);
+      if (isHr) {
+        scopes.push(`travel_hod_approval_status = $${baseParams.length + 1}`);
+        baseParams.push("approved");
+      }
+      if (isDirector) {
+        scopes.push(
+          `(travel_hod_approval_status = $${baseParams.length + 1} AND travel_hr_approval_status = $${baseParams.length + 2} AND travel_director_approval_status <> $${baseParams.length + 3})`,
+        );
+        baseParams.push("approved", "approved", "N/A");
+      }
+      conditions.push(`(${scopes.join(" OR ")})`);
+      break;
+    }
   }
 
   if (searchTerm?.trim()) {

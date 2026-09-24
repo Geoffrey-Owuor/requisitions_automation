@@ -30,7 +30,8 @@ interface ModalProps {
     | "hodPending"
     | "retailDirectorPending"
     | "directorPending"
-    | "hrPending";
+    | "hrPending"
+    | "history";
   onClose: () => void;
 }
 
@@ -65,6 +66,7 @@ export const EmployeeDetailsModal = ({
     directorPending: "director",
     hrPending: "hr",
     userData: "user", // We have to make sure this is never used as it is not yet available in our data
+    history: "user", // Read-only — approvals happen from the pending tables
   };
 
   const stage = STAGE_LEVELS[dataFlag];

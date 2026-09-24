@@ -14,6 +14,7 @@ const dynamicTitles: Record<TravelRequisitionDataProps["dataFlag"], string> = {
   hodPending: "Travel Requisitions Pending Your Approval (HOD)",
   hrPending: "Travel Requisitions Pending Your Approval (HR)",
   directorPending: "Travel Requisitions Pending Your Approval (Director)",
+  history: "Travel Requisitions Approval History",
 };
 
 const COLUMNS = [

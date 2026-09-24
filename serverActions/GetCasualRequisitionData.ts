@@ -10,7 +10,7 @@ import {
 import { QueryResultRow } from "pg";
 
 export interface CasualRequisitionDataProps {
-  dataFlag: "userData" | "hodPending" | "hrPending";
+  dataFlag: "userData" | "hodPending" | "hrPending" | "history";
   page?: number;
   pageSize?: number;
   searchTerm?: string;
@@ -37,12 +37,16 @@ export const getCasualRequisitionData = async ({
 
   // HR is array-based and form-scoped — verify this approver is actually
   // permitted to act on casual requisitions rather than trusting a role.
-  if (dataFlag === "hrPending") {
+  let isHr = false;
+  if (dataFlag === "hrPending" || dataFlag === "history") {
     const membership = await query(
       "SELECT 1 FROM hr_array WHERE hr_email = $1 AND 'casual' = ANY(hr_forms) LIMIT 1",
       [user.email],
     );
-    if (membership.length === 0) return emptyPaginatedResult(page, pageSize);
+    isHr = membership.length > 0;
+    if (dataFlag === "hrPending" && !isHr) {
+      return emptyPaginatedResult(page, pageSize);
+    }
   }
 
   const baseParams: (string | number)[] = [];
@@ -65,6 +69,18 @@ export const getCasualRequisitionData = async ({
       );
       baseParams.push("approved", "pending");
       break;
+    case "history": {
+      // Their own (current stored) HOD rows, plus (HR) everything the HOD
+      // approved.
+      const scopes = [`c.casual_hod_email = $${baseParams.length + 1}`];
+      baseParams.push(user.email);
+      if (isHr) {
+        scopes.push(`c.casual_hod_approval_status = $${baseParams.length + 1}`);
+        baseParams.push("approved");
+      }
+      conditions.push(`(${scopes.join(" OR ")})`);
+      break;
+    }
   }
 
   if (searchTerm?.trim()) {

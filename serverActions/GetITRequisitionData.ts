@@ -1,6 +1,7 @@
 "use server";
 import { query } from "@/lib/db";
 import { getSession } from "@/lib/session";
+import { getUserRoles } from "@/serverActions/GetUserRoles";
 import {
   PaginatedResult,
   emptyPaginatedResult,
@@ -10,7 +11,7 @@ import {
 import { QueryResultRow } from "pg";
 
 export interface ITRequisitionDataProps {
-  dataFlag: "userData" | "hodPending" | "itPending" | "itAll";
+  dataFlag: "userData" | "hodPending" | "itPending" | "itAll" | "history";
   page?: number;
   pageSize?: number;
   searchTerm?: string;
@@ -40,6 +41,13 @@ export const getITRequisitionData = async ({
   const user = await getSession();
   if (!user) return emptyPaginatedResult(page, pageSize);
 
+  // The IT queues expose every requisition, so verify the "it" role
+  // server-side rather than trusting the dashboard's role gate.
+  if (dataFlag === "itPending" || dataFlag === "itAll") {
+    const roles = await getUserRoles(user.email);
+    if (!roles.includes("it")) return emptyPaginatedResult(page, pageSize);
+  }
+
   const baseParams: (string | number)[] = [];
   const conditions: string[] = [];
 
@@ -61,6 +69,12 @@ export const getITRequisitionData = async ({
         `it_approver_status = $${baseParams.length + 1} AND hod_approver_status = $${baseParams.length + 2}`,
       );
       baseParams.push("pending", "approved");
+      break;
+    case "history":
+      // HOD history — every requisition this user is the stored HOD for.
+      // IT admins get the full history from itAll instead.
+      conditions.push(`hod_approver_email = $${baseParams.length + 1}`);
+      baseParams.push(user.email);
       break;
   }
 

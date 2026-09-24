@@ -2,6 +2,7 @@
 
 import { pool } from "@/lib/db";
 import { PoolClient } from "pg";
+import { isAssignedHod, NOT_ASSIGNED_HOD_MESSAGE } from "@/lib/hodAssignment";
 import { AlertInfo } from "@/components/TravelRequisitionPage";
 import { hodApprovalStage } from "@/utils/TravelApprovalStages/hodApprovalStage";
 import { hrApprovalStage } from "@/utils/TravelApprovalStages/hrApprovalStage";
@@ -112,6 +113,16 @@ export async function UpdateTravelStatus(
     const hodApprover = reviewedResult[0].travel_hod_approver;
     const hrEmail = reviewedResult[0].travel_hr_email;
     const approvalTier = reviewedResult[0].travel_approval_tier;
+
+    // Only the HOD selected at submission may act on the HOD stage - being
+    // in hod_array alone is not enough (see lib/hodAssignment.ts).
+    if (
+      payload.stage === "hod" &&
+      !isAssignedHod(payload.approverEmail, hodEmail)
+    ) {
+      await client.query("ROLLBACK");
+      return { alertType: "error", alertMessage: NOT_ASSIGNED_HOD_MESSAGE };
+    }
 
     // Director is only part of the chain for Tier 3 - reject action on that
     // stage for lower tiers even if a valid director approval token is used.
