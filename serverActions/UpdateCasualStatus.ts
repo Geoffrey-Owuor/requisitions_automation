@@ -2,6 +2,7 @@
 
 import { pool } from "@/lib/db";
 import { PoolClient } from "pg";
+import { isAssignedHod, NOT_ASSIGNED_HOD_MESSAGE } from "@/lib/hodAssignment";
 import { AlertInfo } from "@/components/TravelRequisitionPage";
 import { hodApprovalStage } from "@/utils/CasualApprovalStages/hodApprovalStage";
 import { hrApprovalStage } from "@/utils/CasualApprovalStages/hrApprovalStage";
@@ -111,6 +112,16 @@ export async function UpdateCasualStatus(
     // Required stages data
     const userEmail = reviewedResult[0].submitter_email;
     const hodEmail = reviewedResult[0].casual_hod_email;
+
+    // Only the HOD selected at submission may act on the HOD stage - being
+    // in hod_array alone is not enough (see lib/hodAssignment.ts).
+    if (
+      payload.stage === "hod" &&
+      !isAssignedHod(payload.approverEmail, hodEmail)
+    ) {
+      await client.query("ROLLBACK");
+      return { alertType: "error", alertMessage: NOT_ASSIGNED_HOD_MESSAGE };
+    }
 
     if (reviewedResult[0].amendment_count !== payload.expectedAmendmentCount) {
       await client.query("ROLLBACK");

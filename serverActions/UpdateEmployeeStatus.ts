@@ -2,6 +2,7 @@
 
 import { pool } from "@/lib/db";
 import { PoolClient } from "pg";
+import { isAssignedHod, NOT_ASSIGNED_HOD_MESSAGE } from "@/lib/hodAssignment";
 import { AlertInfo } from "@/components/TravelRequisitionPage";
 import { hodApprovalStage } from "@/utils/EmployeeApprovalStages/hodApprovalStage";
 import { retailDirectorApprovalStage } from "@/utils/EmployeeApprovalStages/retailDirectorApprovalStage";
@@ -116,6 +117,16 @@ export async function UpdateEmployeeStatus(
     const hodEmail = reviewedResult[0].employee_hod_email;
     const retailDirectorEmail = reviewedResult[0].employee_retail_director_email;
     const directorEmail = reviewedResult[0].employee_director_email;
+
+    // Only the HOD selected at submission may act on the HOD stage - being
+    // in hod_array alone is not enough (see lib/hodAssignment.ts).
+    if (
+      payload.stage === "hod" &&
+      !isAssignedHod(payload.approverEmail, hodEmail)
+    ) {
+      await client.query("ROLLBACK");
+      return { alertType: "error", alertMessage: NOT_ASSIGNED_HOD_MESSAGE };
+    }
 
     // Retail Director is only part of the chain for Retail-department
     // requisitions - reject action on that stage otherwise, even if a valid

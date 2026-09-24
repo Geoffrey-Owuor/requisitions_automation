@@ -2,6 +2,7 @@
 import { UpdateRequestStatusProps } from "./UpdateTravelStatus";
 import { pool } from "@/lib/db";
 import { PoolClient } from "pg";
+import { isAssignedHod, NOT_ASSIGNED_HOD_MESSAGE } from "@/lib/hodAssignment";
 import { AlertInfo } from "@/components/TravelRequisitionPage";
 import { ITEmailSender } from "@/services/ITEmailSender";
 import { itApprovalStage } from "@/utils/ITApprovalStages/itApprovalStage";
@@ -87,6 +88,16 @@ export async function UpdateITRequisitionStatus(
     // Required stages data
     const userEmail = reviewedResult[0].submitter_email;
     const hodEmail = reviewedResult[0].hod_approver_email;
+
+    // Only the HOD selected at submission may act on the HOD stage - being
+    // in hod_array alone is not enough (see lib/hodAssignment.ts).
+    if (
+      payload.stage === "hod" &&
+      !isAssignedHod(payload.approverEmail, hodEmail)
+    ) {
+      await client.query("ROLLBACK");
+      return { alertType: "error", alertMessage: NOT_ASSIGNED_HOD_MESSAGE };
+    }
 
     if (isReviewed !== "pending") {
       await client.query("ROLLBACK");

@@ -41,6 +41,19 @@ const UserDashboard = () => {
   const isEmployeeDirectorApprover = memberships.isDirector;
   const isEmployeeHrApprover = memberships.hrForms.includes("employee");
 
+  // Approval-history tables — one per requisition type, covering every
+  // stage the user is involved in (scoped server-side). IT admins already
+  // see the full IT history via "IT · All", so IT history is HOD-only.
+  const showTravelHistory = isHod || isHr || isDirector;
+  const showITHistory = isHod && !isITAdmin;
+  const showAccessHistory = isHod || isSecurityApprover;
+  const showCasualHistory = isHod || isCasualHrApprover;
+  const showEmployeeHistory =
+    isHod ||
+    isRetailDirectorApprover ||
+    isEmployeeDirectorApprover ||
+    isEmployeeHrApprover;
+
   // --- TRACK WHETHER THE CURRENTLY RENDERED TABLES HAVE ANY DATA ---
   // Each table reports its own load state once fetched; once every table
   // relevant to this user's roles has reported and none has data, we know
@@ -84,6 +97,11 @@ const UserDashboard = () => {
     if (isRetailDirectorApprover) keys.push("employee-retailDirectorPending");
     if (isEmployeeDirectorApprover) keys.push("employee-directorPending");
     if (isEmployeeHrApprover) keys.push("employee-hrPending");
+    if (showTravelHistory) keys.push("travel-history");
+    if (showITHistory) keys.push("it-history");
+    if (showAccessHistory) keys.push("access-history");
+    if (showCasualHistory) keys.push("casual-history");
+    if (showEmployeeHistory) keys.push("employee-history");
     return keys;
   }, [
     isHod,
@@ -95,6 +113,11 @@ const UserDashboard = () => {
     isRetailDirectorApprover,
     isEmployeeDirectorApprover,
     isEmployeeHrApprover,
+    showTravelHistory,
+    showITHistory,
+    showAccessHistory,
+    showCasualHistory,
+    showEmployeeHistory,
   ]);
 
   const allTablesReported = visibleTableKeys.every((key) => key in tableStatus);
@@ -165,6 +188,14 @@ const UserDashboard = () => {
           />
         )}
 
+        {/* Travel Requisitions Approval History */}
+        {showTravelHistory && (
+          <TravelRequisitionsTable
+            dataFlag="history"
+            onStatusChange={statusSetters["travel-history"]}
+          />
+        )}
+
         {/* IT REQUISITIONS */}
 
         {/* User IT Requisitions */}
@@ -197,6 +228,14 @@ const UserDashboard = () => {
           />
         )}
 
+        {/* IT Requisitions Approval History */}
+        {showITHistory && (
+          <ITRequisitionsTable
+            dataFlag="history"
+            onStatusChange={statusSetters["it-history"]}
+          />
+        )}
+
         {/* KEY & ACCESS REQUISITIONS */}
 
         {/* User Access Requisitions */}
@@ -221,6 +260,14 @@ const UserDashboard = () => {
           />
         )}
 
+        {/* Access Requisitions Approval History */}
+        {showAccessHistory && (
+          <AccessRequisitionsTable
+            dataFlag="history"
+            onStatusChange={statusSetters["access-history"]}
+          />
+        )}
+
         {/* CASUAL REQUISITIONS */}
 
         {/* User Casual Requisitions */}
@@ -242,6 +289,14 @@ const UserDashboard = () => {
           <CasualRequisitionsTable
             dataFlag="hrPending"
             onStatusChange={statusSetters["casual-hrPending"]}
+          />
+        )}
+
+        {/* Casual Requisitions Approval History */}
+        {showCasualHistory && (
+          <CasualRequisitionsTable
+            dataFlag="history"
+            onStatusChange={statusSetters["casual-history"]}
           />
         )}
 
@@ -282,6 +337,14 @@ const UserDashboard = () => {
           <EmployeeRequisitionsTable
             dataFlag="hrPending"
             onStatusChange={statusSetters["employee-hrPending"]}
+          />
+        )}
+
+        {/* Employee Requisitions Approval History */}
+        {showEmployeeHistory && (
+          <EmployeeRequisitionsTable
+            dataFlag="history"
+            onStatusChange={statusSetters["employee-history"]}
           />
         )}
       </div>

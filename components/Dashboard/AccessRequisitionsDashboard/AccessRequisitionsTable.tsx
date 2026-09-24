@@ -14,6 +14,7 @@ const dynamicTitles: Record<AccessRequisitionDataProps["dataFlag"], string> = {
   hodPending: "Key & Access Requisitions Pending Your Approval (HOD)",
   securityPending:
     "Key & Access Requisitions Pending Your Approval (Security)",
+  history: "Key & Access Requisitions Approval History",
 };
 
 const COLUMNS = [

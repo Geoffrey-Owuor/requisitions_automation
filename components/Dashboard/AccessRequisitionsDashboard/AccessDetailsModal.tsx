@@ -25,7 +25,7 @@ import { useEffect, useState } from "react";
 interface ModalProps {
   data: QueryResultRow | null;
   isOpen: boolean;
-  dataFlag: "userData" | "hodPending" | "securityPending";
+  dataFlag: "userData" | "hodPending" | "securityPending" | "history";
   onClose: () => void;
 }
 
@@ -51,6 +51,7 @@ export const AccessDetailsModal = ({
     hodPending: "hod",
     securityPending: "security",
     userData: "user", // We have to make sure this is never used as it is not yet available in our data
+    history: "user", // Read-only — approvals happen from the pending tables
   };
 
   const stage = STAGE_LEVELS[dataFlag];

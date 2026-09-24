@@ -32,7 +32,13 @@ export async function isEmployeeRequisitionApprover(
     ),
   ]);
 
-  if (retailDirector.length > 0) return true;
+  // Retail Director only applies to retail requests ('N/A' otherwise).
+  if (
+    retailDirector.length > 0 &&
+    chain.retailDirectorApprovalStatus !== "N/A"
+  ) {
+    return true;
+  }
 
   const retailDirectorDone =
     chain.retailDirectorApprovalStatus === "approved" ||
