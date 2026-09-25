@@ -307,6 +307,41 @@ export const TravelRequisitionPdf = ({
           </View>
         </View>
 
+        {/* HR Push-back History */}
+        {pdfData.pushbacks.length > 0 && (
+          <View style={tw("mb-4 border-t border-[#f0b4b4] pt-4")}>
+            <PdfSectionHeading title="HR Push-back History" />
+            {pdfData.pushbacks.map((pushback) => (
+              <View
+                key={pushback.pushbackid}
+                style={tw(
+                  "mb-2 rounded-lg border border-[#f0b4b4] bg-[#fafafa] p-3",
+                )}
+              >
+                <Text style={tw("mb-1 text-[9px] font-bold text-[#1e1b1b]")}>
+                  #{pushback.pushbacknumber} by {pushback.pushedbyname} -{" "}
+                  {dateFormatter(pushback.createdat)} -{" "}
+                  {pushback.previousstatus.toUpperCase()} to{" "}
+                  {pushback.newstatus.toUpperCase()}
+                </Text>
+                <Text style={tw("text-[8px] leading-relaxed text-[#7c5a5a]")}>
+                  Reason: {pushback.pushbackreason}
+                </Text>
+                <Text style={tw("text-[8px] leading-relaxed text-[#7c5a5a]")}>
+                  Previous comments
+                  {pushback.previousapprover
+                    ? ` (${pushback.previousapprover})`
+                    : ""}
+                  : {pushback.previouscomments || "No comments"}
+                </Text>
+                <Text style={tw("text-[8px] leading-relaxed text-[#7c5a5a]")}>
+                  New comments: {pushback.newcomments || "No comments"}
+                </Text>
+              </View>
+            ))}
+          </View>
+        )}
+
         {/* Footer Note */}
         <View style={tw("border-t border-[#f0b4b4] pt-4 mt-auto text-center")}>
           <Text style={tw("text-[9px] text-[#b0a0a0]")}>

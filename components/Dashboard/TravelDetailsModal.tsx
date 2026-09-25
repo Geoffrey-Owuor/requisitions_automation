@@ -12,6 +12,7 @@ import {
   Workflow,
   BriefcaseBusiness,
   ShieldUser,
+  Undo2,
 } from "lucide-react";
 import { QueryResultRow } from "pg";
 import StatusFormatter from "./StatusFormatter";
@@ -22,11 +23,22 @@ import { useUser } from "@/context/UserContext";
 import { getTravelApproverLink } from "@/serverActions/GetTravelApproverLink";
 import { useLoadingStore } from "@/store/useLoadingStore";
 import { useEffect, useState } from "react";
+import { getTravelPushbacks } from "@/serverActions/GetTravelPushbacks";
+import {
+  getTravelPushbackBlocker,
+  TravelPushbackValues,
+} from "@/lib/travelPushback";
+import TravelPushbackHistory from "@/components/Approvers/TravelApprovers/TravelPushbackHistory";
 
 interface ModalProps {
   data: QueryResultRow | null;
   isOpen: boolean;
-  dataFlag: "userData" | "hodPending" | "hrPending" | "directorPending" | "history";
+  dataFlag:
+    | "userData"
+    | "hodPending"
+    | "hrPending"
+    | "directorPending"
+    | "history";
   onClose: () => void;
 }
 
@@ -39,9 +51,16 @@ export const TravelDetailsModal = ({
   dataFlag,
 }: ModalProps) => {
   const setLoadingLine = useLoadingStore((state) => state.setLoadingLine);
-  const { email } = useUser();
+  const { memberships } = useUser();
   const [loading, setLoading] = useState(false);
   const [link, setLink] = useState("#");
+  // Keyed by request_id so a result fetched for a previously opened row is
+  // never shown against the current one.
+  const [pushbackLink, setPushbackLink] = useState({ uuid: "", link: "#" });
+  const [pushbackHistory, setPushbackHistory] = useState<{
+    uuid: string;
+    pushbacks: TravelPushbackValues[];
+  }>({ uuid: "", pushbacks: [] });
 
   const handleLinkClick = () => {
     setLoadingLine(true);
@@ -74,7 +93,6 @@ export const TravelDetailsModal = ({
 
         const uuid = data.request_id;
         const resolvedLink = await getTravelApproverLink({
-          email,
           stage,
           uuid,
         });
@@ -88,7 +106,45 @@ export const TravelDetailsModal = ({
     };
 
     getApprovalLink();
-  }, [data, stage, email]);
+  }, [data, stage]);
+
+  // HR push-back is offered from the read-only history table to travel-HR
+  // members. This only decides whether to show the button - the approval
+  // page and PushbackTravelHrDecision re-check every rule.
+  const canPushback =
+    !!data &&
+    dataFlag === "history" &&
+    memberships.hrForms.includes("travel") &&
+    getTravelPushbackBlocker({
+      hrStatus: data.travel_hr_approval_status,
+      approvalTier: data.travel_approval_tier,
+      pushbackCount: data.travel_hr_pushback_count,
+      withinWindow: data.within_pushback_window,
+    }) === null;
+
+  useEffect(() => {
+    if (!data || !canPushback) return;
+    const uuid = data.request_id;
+    getTravelApproverLink({ stage: "hr", uuid, mode: "pushback" })
+      .then((link) => setPushbackLink({ uuid, link }))
+      .catch((error) => console.error("Error fetching push-back link:", error));
+  }, [data, canPushback]);
+
+  // Only fetch the history when the requisition has actually been pushed back
+  useEffect(() => {
+    if (!data || Number(data.travel_hr_pushback_count) === 0) return;
+    const uuid = data.request_id;
+    getTravelPushbacks(uuid)
+      .then((pushbacks) => setPushbackHistory({ uuid, pushbacks }))
+      .catch((error) => console.error("Error fetching push-backs:", error));
+  }, [data]);
+
+  const resolvedPushbackLink =
+    data && pushbackLink.uuid === data.request_id ? pushbackLink.link : "#";
+  const pushbacks =
+    data && pushbackHistory.uuid === data.request_id
+      ? pushbackHistory.pushbacks
+      : [];
 
   if (!isOpen || !data) return null;
 
@@ -136,6 +192,17 @@ export const TravelDetailsModal = ({
                     )}
                   </>
                 )}
+              {canPushback && resolvedPushbackLink !== "#" && (
+                <Link
+                  href={resolvedPushbackLink}
+                  onClick={handleLinkClick}
+                  title="Change the recorded HR decision on this requisition"
+                  className="flex items-center gap-1 rounded-full bg-amber-500 px-3 py-1 text-xs font-semibold text-white transition-colors duration-200 hover:bg-amber-600"
+                >
+                  <Undo2 className="h-3.5 w-3.5" />
+                  Push-back
+                </Link>
+              )}
               <Link
                 href={`/dashboard/travelpdf/${data.request_id}`}
                 onClick={handleLinkClick}
@@ -233,6 +300,12 @@ export const TravelDetailsModal = ({
                 ))}
               </div>
             </div>
+
+            {pushbacks.length > 0 && (
+              <div className="col-span-full">
+                <TravelPushbackHistory pushbacks={pushbacks} />
+              </div>
+            )}
           </div>
         </div>
       </div>

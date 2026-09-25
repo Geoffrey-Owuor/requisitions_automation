@@ -1,10 +1,6 @@
 import { Metadata } from "next";
 import { Suspense } from "react";
-import { query } from "@/lib/db";
-import {
-  EmailDataValues as PdfDataValues,
-  travelDataQuery,
-} from "@/services/EmailSender";
+import { getTravelRequisitionData } from "@/services/EmailSender";
 import NotFoundRequest from "@/components/Approvers/TravelApprovers/NotFoundRequest";
 import RequisitionPdfModal from "@/components/Approvers/TravelApprovers/RequisitionPdfModal";
 import RequisitionPdfSkeleton from "@/components/Skeletons/RequisitionPdfSkeleton";
@@ -24,12 +20,10 @@ const page = async ({ params }: PdfDownloadProps) => {
 
   if (!uuid) return <NotFoundRequest />;
 
-  // Our query
-  const result = await query<PdfDataValues>(travelDataQuery, [uuid]);
+  // Requisition plus its HR push-back history
+  const pdfData = await getTravelRequisitionData(uuid);
 
-  if (result.length === 0) return <NotFoundRequest />;
-
-  const pdfData = result[0];
+  if (!pdfData) return <NotFoundRequest />;
 
   return (
     <RequisitionPagesWrapper>

@@ -4,6 +4,7 @@ import { Printer } from "lucide-react";
 import StatusFormatter from "@/components/Dashboard/StatusFormatter";
 import { dateFormatter } from "@/public/assets";
 import EngineeringJobSummaryCard from "./EngineeringJobSummaryCard";
+import TravelPushbackHistory from "./TravelPushbackHistory";
 
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { TravelRequisitionPdf } from "./pdf/TravelRequisitionPdf";
@@ -255,6 +256,8 @@ const RequisitionPdfModal = ({ pdfData }: { pdfData: TravelPdfValues }) => {
               )}
             </div>
           </div>
+
+          <TravelPushbackHistory pushbacks={pdfData.pushbacks} />
 
           {/* Footer */}
           <div className="border-t border-[rgba(240,180,180,0.4)] pt-6 text-center">
