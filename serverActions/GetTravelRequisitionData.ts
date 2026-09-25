@@ -9,6 +9,7 @@ import {
   toSafeOffsetLimit,
 } from "@/lib/pagination";
 import { QueryResultRow } from "pg";
+import { PUSHBACK_WINDOW_SQL } from "@/lib/travelPushback";
 
 export interface TravelRequisitionDataProps {
   dataFlag:
@@ -124,6 +125,8 @@ export const getTravelRequisitionData = async ({
         travel_mode, travel_total_cost,
         travel_cost_center,
         travel_hod_approval_status, travel_hr_approval_status, travel_director_approval_status,
+        travel_approval_tier, travel_hr_pushback_count,
+        ${PUSHBACK_WINDOW_SQL} AS within_pushback_window,
         COUNT(*) OVER() AS total_count
         FROM travel_requisitions
         ${whereClause}

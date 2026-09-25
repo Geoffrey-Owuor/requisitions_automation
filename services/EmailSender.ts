@@ -2,6 +2,10 @@ import { cache } from "react";
 import { query } from "@/lib/db";
 import { TravelRequisitionTemplate } from "@/utils/templates/TravelRequisitionTemplate";
 import { sendEmail } from "./EmailService";
+import {
+  TravelPushbackValues,
+  travelPushbacksQuery,
+} from "@/lib/travelPushback";
 
 export interface EmailDataValues {
   emailaddress: string;
@@ -34,6 +38,7 @@ export interface EmailDataValues {
   hrapprovalstatus: string;
   directorapprovalstatus: string;
   engineeringjobs: string;
+  pushbacks: TravelPushbackValues[];
 }
 
 export const travelDataQuery = `
@@ -81,10 +86,22 @@ export interface EmailDataProps {
   showPdfDownload?: boolean;
 }
 
+// Requisition row plus its HR push-back history, or undefined if not found.
+// Shared by the emails and the PDF page.
+export async function getTravelRequisitionData(
+  requestId: string,
+): Promise<EmailDataValues | undefined> {
+  const [result, pushbacks] = await Promise.all([
+    query<Omit<EmailDataValues, "pushbacks">>(travelDataQuery, [requestId]),
+    query<TravelPushbackValues>(travelPushbacksQuery, [requestId]),
+  ]);
+  if (result.length === 0) return undefined;
+  return { ...result[0], pushbacks };
+}
+
 // Cached query — repeated calls with the same requestId hit the DB only once
 export const getTravelEmailData = cache(async (requestId: string) => {
-  const result = await query<EmailDataValues>(travelDataQuery, [requestId]);
-  return result[0];
+  return (await getTravelRequisitionData(requestId))!;
 });
 
 export async function EmailSender({
