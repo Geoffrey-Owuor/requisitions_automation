@@ -3,6 +3,7 @@ import { loadITArray } from "@/lib/loadAppDataV2";
 import { ITEmailSender } from "@/services/ITEmailSender";
 import { query } from "@/lib/db";
 import { getSession } from "@/lib/session";
+import { loadHodAlternates } from "@/lib/hodAssignment";
 
 export async function POST(request: NextRequest) {
   // Check if we have a valid session
@@ -75,7 +76,7 @@ export async function POST(request: NextRequest) {
       `
       SELECT hod_uuid AS uuid, 
       hod_email AS email
-      FROM hod_array WHERE hod_name = $1 LIMIT 1
+      FROM hod_array WHERE hod_name = $1 AND is_alternate_only = false LIMIT 1
       `,
       [hodApprover],
     );
@@ -135,7 +136,7 @@ export async function POST(request: NextRequest) {
         UPDATE it_requisitions
         SET
         hod_approval_date = CURRENT_TIMESTAMP,
-        hod_approver_email = $1,
+        hod_actioned_by_email = $1,
         hod_approver_status = $2,
         hod_approver_comments = $3
         WHERE request_id = $4
@@ -181,6 +182,20 @@ export async function POST(request: NextRequest) {
         title: "Action Required: New IT Requisition",
         role: "HOD",
         reviewLink: `?token=${hodUuid}&stage=hod`,
+      });
+
+      // The HOD's alternates can also act on the HOD stage (first click wins)
+      const hodAlternates = await loadHodAlternates(hodEmail, email);
+      hodAlternates.forEach((alternate) => {
+        ITEmailSender({
+          to: alternate.email,
+          requestId: requestId,
+          message:
+            "A new IT Requisition has been submitted and requires your review as an alternate HOD approver",
+          title: "Action Required: New IT Requisition",
+          role: "HOD",
+          reviewLink: `?token=${alternate.uuid}&stage=hod`,
+        });
       });
 
       // Send Email to the HOD approver

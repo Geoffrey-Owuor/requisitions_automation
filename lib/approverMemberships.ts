@@ -6,6 +6,12 @@ import { HrForm } from "@/public/assets";
 // exactly who each stage's fan-out email goes to (lib/loadAppDataV2.ts), so
 // dashboard visibility can't drift from who is actually notified.
 export interface ApproverMemberships {
+  // In hod_array at all - an assigned-HOD candidate or an alternate HOD.
+  // The HOD stage itself is not array-based (only the assigned HOD and
+  // their alternates can act - lib/hodAssignment.ts); this only decides
+  // whether the HOD pending/history tables render, and those are scoped
+  // server-side to the viewer's email.
+  isHodApprover: boolean;
   isSecurityApprover: boolean;
   isITApprover: boolean;
   isDirector: boolean;
@@ -16,6 +22,7 @@ export interface ApproverMemberships {
 }
 
 export const EMPTY_MEMBERSHIPS: ApproverMemberships = {
+  isHodApprover: false,
   isSecurityApprover: false,
   isITApprover: false,
   isDirector: false,

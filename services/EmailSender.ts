@@ -30,7 +30,10 @@ export interface EmailDataValues {
   withinbudget: string;
   approvaltier: string;
   hodapprover: string;
+  // Whoever acted on the HOD stage (the assigned HOD until then)
   hodemail: string;
+  // The HOD selected at submission - never overwritten by an alternate
+  assignedhodemail: string;
   hodcomments: string;
   hrapprover: string;
   hremail: string;
@@ -69,7 +72,8 @@ export const travelDataQuery = `
        travel_hr_approval_status AS hrapprovalstatus,
        travel_director_approval_status AS directorapprovalstatus, 
        travel_hod_approver AS hodapprover,
-       travel_hod_email AS hodemail,
+       COALESCE(travel_hod_actioned_by_email, travel_hod_email) AS hodemail,
+       travel_hod_email AS assignedhodemail,
        travel_hod_comments AS hodcomments,
        travel_hr_approver AS hrapprover,
        travel_hr_email AS hremail,

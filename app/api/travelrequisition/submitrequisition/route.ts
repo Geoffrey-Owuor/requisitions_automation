@@ -3,6 +3,7 @@ import { loadHrArray } from "@/lib/loadAppDataV2";
 import { query } from "@/lib/db";
 import { EmailSender } from "@/services/EmailSender";
 import { getSession } from "@/lib/session";
+import { loadHodAlternates } from "@/lib/hodAssignment";
 import { validateTravelFormData } from "@/lib/travelRequisitionRules";
 
 export async function POST(request: NextRequest) {
@@ -65,7 +66,7 @@ export async function POST(request: NextRequest) {
       `
       SELECT hod_uuid AS uuid, 
       hod_email AS email
-      FROM hod_array WHERE hod_name = $1 LIMIT 1
+      FROM hod_array WHERE hod_name = $1 AND is_alternate_only = false LIMIT 1
       `,
       [hodApprover],
     );
@@ -144,7 +145,7 @@ export async function POST(request: NextRequest) {
         UPDATE travel_requisitions
         SET 
         travel_hod_approval_date = CURRENT_TIMESTAMP,
-        travel_hod_email = $1,
+        travel_hod_actioned_by_email = $1,
         travel_hod_approval_status = $2,
         travel_hod_comments = $3
         WHERE request_id = $4
@@ -194,6 +195,19 @@ export async function POST(request: NextRequest) {
         title: "Action Required: Travel Requisition Review",
         role: "HOD",
         reviewLink: `?token=${hodUuid}&stage=hod`,
+      });
+      // The HOD's alternates can also act on the HOD stage (first click wins)
+      const hodAlternates = await loadHodAlternates(hodEmail, email);
+      hodAlternates.forEach((alternate) => {
+        EmailSender({
+          to: alternate.email,
+          requestId: requestUuid,
+          message:
+            "A new travel requisition has been submitted and requires your approval as an alternate HOD approver",
+          title: "Action Required: Travel Requisition Review",
+          role: "HOD",
+          reviewLink: `?token=${alternate.uuid}&stage=hod`,
+        });
       });
       // User Send
       EmailSender({

@@ -2,7 +2,7 @@
 
 import { pool } from "@/lib/db";
 import { PoolClient } from "pg";
-import { isAssignedHod, NOT_ASSIGNED_HOD_MESSAGE } from "@/lib/hodAssignment";
+import { getHodActionError } from "@/lib/hodAssignment";
 import { AlertInfo } from "@/components/TravelRequisitionPage";
 import { hodApprovalStage } from "@/utils/TravelApprovalStages/hodApprovalStage";
 import { hrApprovalStage } from "@/utils/TravelApprovalStages/hrApprovalStage";
@@ -39,13 +39,20 @@ export async function UpdateTravelStatus(
 
   let client: PoolClient | undefined;
 
-  // Our base update query and params
+  // Our base update query and params. At the HOD stage travel_hod_email is
+  // the ASSIGNED HOD and is never overwritten - whoever acted (assigned HOD
+  // or an alternate) is recorded in travel_hod_actioned_by_email instead.
+  const approverEmailColumn =
+    payload.stage === "hod"
+      ? "travel_hod_actioned_by_email"
+      : `travel_${payload.stage}_email`;
+
   const baseUpdateQuery = `
     UPDATE travel_requisitions
     SET travel_${payload.stage}_approval_date = CURRENT_TIMESTAMP,
     travel_${payload.stage}_approval_status = $1,
     travel_${payload.stage}_approver = $2,
-    travel_${payload.stage}_email = $3,
+    ${approverEmailColumn} = $3,
     travel_${payload.stage}_comments = $4
     WHERE request_id = $5
     `;
@@ -69,6 +76,7 @@ export async function UpdateTravelStatus(
       `SELECT travel_${payload.stage}_approval_status AS approval_status,
        travel_${payload.stage}_approver AS approver,
        travel_approval_tier, submitter_email, travel_hod_email, travel_hod_approver, travel_hr_email,
+       COALESCE(travel_hod_actioned_by_email, travel_hod_email) AS travel_hod_actioned_by_email,
        amendment_count
         FROM travel_requisitions WHERE request_id = $1 FOR UPDATE`,
       [payload.uuid],
@@ -117,19 +125,27 @@ export async function UpdateTravelStatus(
 
     // Required stages data
     const userEmail = reviewedResult[0].submitter_email;
-    const hodEmail = reviewedResult[0].travel_hod_email;
+    const assignedHodEmail = reviewedResult[0].travel_hod_email;
+    // Whoever actually acted on the HOD stage (assigned HOD or an alternate) -
+    // later-stage emails and the Director auto-approve check use this person.
+    // travel_hod_approver already holds their name once the stage is acted on.
+    const hodEmail = reviewedResult[0].travel_hod_actioned_by_email;
     const hodApprover = reviewedResult[0].travel_hod_approver;
     const hrEmail = reviewedResult[0].travel_hr_email;
     const approvalTier = reviewedResult[0].travel_approval_tier;
 
-    // Only the HOD selected at submission may act on the HOD stage - being
-    // in hod_array alone is not enough (see lib/hodAssignment.ts).
-    if (
-      payload.stage === "hod" &&
-      !isAssignedHod(payload.approverEmail, hodEmail)
-    ) {
-      await client.query("ROLLBACK");
-      return { alertType: "error", alertMessage: NOT_ASSIGNED_HOD_MESSAGE };
+    // Only the assigned HOD or one of their alternates may act on the HOD
+    // stage - being in hod_array alone is not enough (lib/hodAssignment.ts).
+    if (payload.stage === "hod") {
+      const hodActionError = await getHodActionError(client, {
+        approverEmail: payload.approverEmail,
+        assignedHodEmail,
+        submitterEmail: userEmail,
+      });
+      if (hodActionError) {
+        await client.query("ROLLBACK");
+        return { alertType: "error", alertMessage: hodActionError };
+      }
     }
 
     // Director is only part of the chain for Tier 3 - reject action on that
@@ -165,7 +181,8 @@ export async function UpdateTravelStatus(
 
     await client.query(baseUpdateQuery, baseParams);
 
-    // If HR is approving a Tier 3 requisition whose HOD is also a Director,
+    // If HR is approving a Tier 3 requisition whose acting HOD (the assigned
+    // HOD or the alternate who approved) is also a Director,
     // auto-approve the Director stage in the same transaction so the same
     // person is never asked to approve twice under two different roles.
     let skipDirectorStage = false;
@@ -184,7 +201,7 @@ export async function UpdateTravelStatus(
           travel_director_approval_status = 'approved',
           travel_director_approver = $1,
           travel_director_email = $2,
-          travel_director_comments = 'Automatically approved - the selected HOD is also a Director, so a separate Director approval is not required'
+          travel_director_comments = 'Automatically approved - the approving HOD is also a Director, so a separate Director approval is not required'
           WHERE request_id = $3
           `,
           [hodApprover, hodEmail, payload.uuid],

@@ -2,6 +2,7 @@
 import { query } from "@/lib/db";
 import { getSession } from "@/lib/session";
 import { getUserRoles } from "@/serverActions/GetUserRoles";
+import { isHodViewer } from "@/lib/hodAssignment";
 import {
   TravelPushbackValues,
   travelPushbacksQuery,
@@ -31,13 +32,23 @@ export async function getTravelAuditTrail(
 
   try {
     const requisition = await query(
-      `SELECT submitter_email, travel_hod_email FROM travel_requisitions WHERE request_id = $1`,
+      `SELECT submitter_email, travel_hod_email, travel_hod_actioned_by_email,
+       travel_hod_approval_status
+       FROM travel_requisitions WHERE request_id = $1`,
       [requestId],
     );
     if (requisition.length === 0) return EMPTY_TRAIL;
 
     const isSubmitter = requisition[0].submitter_email === user.email;
-    const isHod = requisition[0].travel_hod_email === user.email;
+    // Assigned HOD, whoever acted on the HOD stage, or an alternate of the
+    // assigned HOD while it's still pending
+    const isHod =
+      !isSubmitter &&
+      (await isHodViewer(user.email, {
+        assignedHodEmail: requisition[0].travel_hod_email,
+        actionedByEmail: requisition[0].travel_hod_actioned_by_email,
+        hodStatus: requisition[0].travel_hod_approval_status,
+      }));
 
     if (!isSubmitter && !isHod) {
       const roles = await getUserRoles(user.email);

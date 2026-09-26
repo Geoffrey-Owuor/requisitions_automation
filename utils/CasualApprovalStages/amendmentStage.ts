@@ -1,5 +1,6 @@
 import { CasualEmailSender } from "@/services/CasualEmailSender";
 import { loadHrArray } from "@/lib/loadAppDataV2";
+import { loadHodAlternates } from "@/lib/hodAssignment";
 
 type AmendmentStageProps = {
   uuid: string;
@@ -52,6 +53,19 @@ export async function amendmentStage({
       title: "Action Required: Amended Casual Requisition",
       role: "HOD",
       reviewLink: `?token=${hodUuid}&stage=hod`,
+    });
+
+    // The HOD's alternates can also act on the HOD stage (first click wins)
+    const hodAlternates = await loadHodAlternates(hodEmail, userEmail);
+    hodAlternates.forEach((alternate) => {
+      CasualEmailSender({
+        to: alternate.email,
+        requestId: uuid,
+        message: `This casual requisition was amended by ${amenderName} and requires your approval as an alternate HOD approver. This supersedes any earlier notification for this requisition.`,
+        title: "Action Required: Amended Casual Requisition",
+        role: "HOD",
+        reviewLink: `?token=${alternate.uuid}&stage=hod`,
+      });
     });
   }
 }

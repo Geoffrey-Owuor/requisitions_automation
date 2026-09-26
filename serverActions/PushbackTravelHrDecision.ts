@@ -88,6 +88,7 @@ export async function PushbackTravelHrDecision(
         travel_hr_approver, travel_hr_email, travel_hr_comments,
         travel_hr_approval_date, travel_approval_tier,
         travel_hr_pushback_count, submitter_email, travel_hod_email,
+        COALESCE(travel_hod_actioned_by_email, travel_hod_email) AS travel_hod_actioned_by_email,
         amendment_count,
         ${PUSHBACK_WINDOW_SQL} AS within_window
        FROM travel_requisitions WHERE request_id = $1 FOR UPDATE`,
@@ -197,7 +198,8 @@ export async function PushbackTravelHrDecision(
     hrPushbackStage({
       uuid: payload.uuid,
       userEmail: requisition.submitter_email,
-      hodEmail: requisition.travel_hod_email,
+      // Whoever acted on the HOD stage (the assigned HOD or an alternate)
+      hodEmail: requisition.travel_hod_actioned_by_email,
       previousStatus,
       status: payload.status,
       reason,
