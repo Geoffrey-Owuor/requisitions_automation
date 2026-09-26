@@ -2,6 +2,7 @@
 import { query } from "@/lib/db";
 import { getSession } from "@/lib/session";
 import { getUserRoles } from "@/serverActions/GetUserRoles";
+import { hodHistoryScopeSql, hodPendingScopeSql } from "@/lib/hodAssignment";
 import {
   PaginatedResult,
   emptyPaginatedResult,
@@ -59,8 +60,9 @@ export const getITRequisitionData = async ({
       baseParams.push(user.email);
       break;
     case "hodPending":
+      // Assigned to me, or to a HOD I'm an alternate for
       conditions.push(
-        `hod_approver_email = $${baseParams.length + 1} AND hod_approver_status = $${baseParams.length + 2}`,
+        `${hodPendingScopeSql("hod_approver_email", "submitter_email", `$${baseParams.length + 1}`)} AND hod_approver_status = $${baseParams.length + 2}`,
       );
       baseParams.push(user.email, "pending");
       break;
@@ -71,9 +73,16 @@ export const getITRequisitionData = async ({
       baseParams.push("pending", "approved");
       break;
     case "history":
-      // HOD history — every requisition this user is the stored HOD for.
+      // HOD history — every requisition this user is the assigned HOD for,
+      // plus any they acted on as an alternate HOD.
       // IT admins get the full history from itAll instead.
-      conditions.push(`hod_approver_email = $${baseParams.length + 1}`);
+      conditions.push(
+        hodHistoryScopeSql(
+          "hod_approver_email",
+          "hod_actioned_by_email",
+          `$${baseParams.length + 1}`,
+        ),
+      );
       baseParams.push(user.email);
       break;
   }

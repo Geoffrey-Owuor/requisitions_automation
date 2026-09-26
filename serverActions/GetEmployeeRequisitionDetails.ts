@@ -21,7 +21,8 @@ export async function getEmployeeRequisitionDetails(
   const isApprover =
     !isSubmitter &&
     (await isEmployeeRequisitionApprover(session.email, {
-      hodEmail: data.hodemail,
+      assignedHodEmail: data.assignedhodemail,
+      hodActionedByEmail: data.hodemail,
       hodApprovalStatus: data.hodapprovalstatus,
       retailDirectorApprovalStatus: data.retaildirectorapprovalstatus,
       directorApprovalStatus: data.directorapprovalstatus,

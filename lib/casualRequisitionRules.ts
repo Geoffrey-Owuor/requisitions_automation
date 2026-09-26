@@ -150,7 +150,8 @@ export interface ResolvedHod {
 }
 
 // Looks up the HOD approver's uuid/email from hod_array - returns null when
-// no such HOD exists (e.g. a stale/tampered hodApprover name).
+// no such HOD exists (e.g. a stale/tampered hodApprover name) or when it is
+// an alternate-only HOD, which can never be selected as the assigned HOD.
 export async function resolveHod(
   hodApprover: string,
 ): Promise<ResolvedHod | null> {
@@ -158,7 +159,7 @@ export async function resolveHod(
     `
     SELECT hod_uuid AS uuid,
     hod_email AS email
-    FROM hod_array WHERE hod_name = $1 LIMIT 1
+    FROM hod_array WHERE hod_name = $1 AND is_alternate_only = false LIMIT 1
     `,
     [hodApprover],
   );

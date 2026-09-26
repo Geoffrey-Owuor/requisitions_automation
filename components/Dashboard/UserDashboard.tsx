@@ -28,13 +28,15 @@ const UserDashboard = () => {
 
   // Check user active roles
   const isITAdmin = roles.includes("it");
-  const isHod = roles.includes("hod");
   const isHr = roles.includes("hr-travel");
   const isDirector = roles.includes("director");
 
   // Array-based approval-stage membership (Security/IT/Director/Retail
   // Director/HR) — see serverActions/GetApproverMemberships.ts. Distinct
   // from `isDirector` above, which is Travel's role-based director gate.
+  // HOD tables render for anyone in hod_array (assigned HODs and alternate
+  // HODs alike) rather than the manual "hod" role.
+  const isHod = memberships.isHodApprover;
   const isSecurityApprover = memberships.isSecurityApprover;
   const isCasualHrApprover = memberships.hrForms.includes("casual");
   const isRetailDirectorApprover = memberships.isRetailDirector;

@@ -66,7 +66,10 @@ export interface CasualEmailDataValues {
   hodapprovalstatus: string;
   hrapprovalstatus: string;
   hodapprover: string;
+  // Whoever acted on the HOD stage (the assigned HOD until then)
   hodemail: string;
+  // The HOD selected at submission - never overwritten by an alternate
+  assignedhodemail: string;
   hodcomments: string;
   hrapprover: string;
   hremail: string;
@@ -88,7 +91,8 @@ export const casualDataQuery = `
        casual_hod_approval_status AS hodapprovalstatus,
        casual_hr_approval_status AS hrapprovalstatus,
        casual_hod_approver AS hodapprover,
-       casual_hod_email AS hodemail,
+       COALESCE(casual_hod_actioned_by_email, casual_hod_email) AS hodemail,
+       casual_hod_email AS assignedhodemail,
        casual_hod_comments AS hodcomments,
        casual_hr_approver AS hrapprover,
        casual_hr_email AS hremail,

@@ -1,6 +1,7 @@
 "use server";
 import { query } from "@/lib/db";
 import { getSession } from "@/lib/session";
+import { hodHistoryScopeSql, hodPendingScopeSql } from "@/lib/hodAssignment";
 import {
   PaginatedResult,
   emptyPaginatedResult,
@@ -83,8 +84,9 @@ export const getEmployeeRequisitionData = async ({
       baseParams.push(user.email);
       break;
     case "hodPending":
+      // Assigned to me, or to a HOD I'm an alternate for
       conditions.push(
-        `e.employee_hod_email = $${baseParams.length + 1} AND e.employee_hod_approval_status = $${baseParams.length + 2}`,
+        `${hodPendingScopeSql("e.employee_hod_email", "e.submitter_email", `$${baseParams.length + 1}`)} AND e.employee_hod_approval_status = $${baseParams.length + 2}`,
       );
       baseParams.push(user.email, "pending");
       break;
@@ -110,7 +112,14 @@ export const getEmployeeRequisitionData = async ({
       // Their own HOD rows, plus every request that has reached (or been
       // auto-approved past) each array stage they belong to. Retail Director
       // only ever applies to retail requests (status is 'N/A' otherwise).
-      const scopes = [`e.employee_hod_email = $${baseParams.length + 1}`];
+      // HOD rows: assigned to me, or acted on by me as an alternate HOD
+      const scopes = [
+        hodHistoryScopeSql(
+          "e.employee_hod_email",
+          "e.employee_hod_actioned_by_email",
+          `$${baseParams.length + 1}`,
+        ),
+      ];
       baseParams.push(user.email);
       if (isRetailDirector) {
         scopes.push(

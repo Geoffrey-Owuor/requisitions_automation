@@ -2,7 +2,7 @@
 import { UpdateRequestStatusProps } from "./UpdateTravelStatus";
 import { pool } from "@/lib/db";
 import { PoolClient } from "pg";
-import { isAssignedHod, NOT_ASSIGNED_HOD_MESSAGE } from "@/lib/hodAssignment";
+import { getHodActionError } from "@/lib/hodAssignment";
 import { AlertInfo } from "@/components/TravelRequisitionPage";
 import { AccessEmailSender } from "@/services/AccessEmailSender";
 import { securityApprovalStage } from "@/utils/AccessApprovalStages/securityApprovalStage";
@@ -21,13 +21,20 @@ export const UpdateAccessRequisitionStatus = async (
 
   let client: PoolClient | undefined;
 
-  //  Our base update status query
+  //  Our base update status query. At the HOD stage hod_approver_email is
+  // the ASSIGNED HOD and is never overwritten - whoever acted (assigned HOD
+  // or an alternate) is recorded in hod_actioned_by_email instead.
+  const approverEmailColumn =
+    payload.stage === "hod"
+      ? "hod_actioned_by_email"
+      : `${payload.stage}_approver_email`;
+
   const baseUpdateQuery = `
   UPDATE access_requisitions
   SET ${payload.stage}_approval_date = CURRENT_TIMESTAMP,
   ${payload.stage}_approver_status = $1,
   ${payload.stage}_approver_name = $2,
-  ${payload.stage}_approver_email = $3,
+  ${approverEmailColumn} = $3,
   ${payload.stage}_approver_comments = $4
   WHERE request_id = $5
   `;
@@ -51,7 +58,8 @@ export const UpdateAccessRequisitionStatus = async (
       `
       SELECT ${payload.stage}_approver_status AS approval_status,
       ${payload.stage}_approver_name AS approver,
-      submitter_email, hod_approver_email
+      submitter_email, hod_approver_email,
+      COALESCE(hod_actioned_by_email, hod_approver_email) AS hod_actioned_by_email
       FROM access_requisitions WHERE request_id = $1 FOR UPDATE
       `,
 
@@ -87,16 +95,22 @@ export const UpdateAccessRequisitionStatus = async (
 
     // Required stages data
     const userEmail = reviewedResult[0].submitter_email;
-    const hodEmail = reviewedResult[0].hod_approver_email;
+    const assignedHodEmail = reviewedResult[0].hod_approver_email;
+    // Later-stage emails go to whoever actually acted on the HOD stage
+    const hodEmail = reviewedResult[0].hod_actioned_by_email;
 
-    // Only the HOD selected at submission may act on the HOD stage - being
-    // in hod_array alone is not enough (see lib/hodAssignment.ts).
-    if (
-      payload.stage === "hod" &&
-      !isAssignedHod(payload.approverEmail, hodEmail)
-    ) {
-      await client.query("ROLLBACK");
-      return { alertType: "error", alertMessage: NOT_ASSIGNED_HOD_MESSAGE };
+    // Only the assigned HOD or one of their alternates may act on the HOD
+    // stage - being in hod_array alone is not enough (lib/hodAssignment.ts).
+    if (payload.stage === "hod") {
+      const hodActionError = await getHodActionError(client, {
+        approverEmail: payload.approverEmail,
+        assignedHodEmail,
+        submitterEmail: userEmail,
+      });
+      if (hodActionError) {
+        await client.query("ROLLBACK");
+        return { alertType: "error", alertMessage: hodActionError };
+      }
     }
 
     if (isReviewed !== "pending") {

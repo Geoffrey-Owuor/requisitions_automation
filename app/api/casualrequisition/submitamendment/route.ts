@@ -2,6 +2,7 @@ import { NextResponse, NextRequest } from "next/server";
 import { pool } from "@/lib/db";
 import { PoolClient } from "pg";
 import { getSession } from "@/lib/session";
+import { assignedHodNameSql } from "@/lib/hodAssignment";
 import {
   validateCasualFormData,
   resolveHod,
@@ -88,6 +89,7 @@ export async function POST(request: NextRequest) {
     const { rows: headerRows } = await client.query(
       `SELECT submitter_email, employee_department, casual_location, casual_category,
        casual_hod_approver, casual_hod_email, casual_hr_approval_status, amendment_count,
+       ${assignedHodNameSql("casual_hod_email", "casual_hod_approver")} AS assigned_hod_name,
        casual_hod_approval_status, casual_hod_comments, casual_hod_approval_date,
        casual_hr_approver, casual_hr_comments, casual_hr_approval_date
        FROM casual_requisitions WHERE request_id = $1 FOR UPDATE`,
@@ -175,12 +177,15 @@ export async function POST(request: NextRequest) {
         ? header.casual_category
         : null,
       newCasualCategory: casualCategoryChanged ? casualCategory ?? null : null,
+      // casual_hod_approver holds whoever acted on the HOD stage (possibly an
+      // alternate) - compare against the ASSIGNED HOD instead. The
+      // nullified-decision snapshot keeps the actual approver's name.
       previousHodApprover:
-        hodApprover !== header.casual_hod_approver
-          ? header.casual_hod_approver
+        hodApprover !== header.assigned_hod_name
+          ? header.assigned_hod_name
           : null,
       newHodApprover:
-        hodApprover !== header.casual_hod_approver ? hodApprover : null,
+        hodApprover !== header.assigned_hod_name ? hodApprover : null,
     };
     const headerChanged = Object.values(headerDiff).some((v) => v !== null);
 
@@ -397,6 +402,7 @@ export async function POST(request: NextRequest) {
        SET employee_department = $1, casual_location = $2, casual_category = $3,
        casual_hod_approver = $4, casual_hod_email = $5,
        casual_hod_approval_status = 'pending', casual_hod_comments = NULL, casual_hod_approval_date = NULL,
+       casual_hod_actioned_by_email = NULL,
        casual_hr_approval_status = 'pending', casual_hr_approver = NULL, casual_hr_email = NULL,
        casual_hr_comments = NULL, casual_hr_approval_date = NULL,
        amendment_count = $6, last_amended_at = CURRENT_TIMESTAMP
@@ -463,9 +469,10 @@ export async function POST(request: NextRequest) {
         `UPDATE casual_requisitions
          SET casual_hod_approval_status = 'approved',
          casual_hod_approval_date = CURRENT_TIMESTAMP,
+         casual_hod_actioned_by_email = $2,
          casual_hod_comments = 'Automatic HOD Approval'
          WHERE request_id = $1`,
-        [requestId],
+        [requestId, user.email],
       );
     }
 

@@ -35,7 +35,8 @@ const page = async ({ params }: ViewRequisitionProps) => {
     !isOwner &&
     !!session &&
     (await isEmployeeRequisitionApprover(session.email, {
-      hodEmail: viewData.hodemail,
+      assignedHodEmail: viewData.assignedhodemail,
+      hodActionedByEmail: viewData.hodemail,
       hodApprovalStatus: viewData.hodapprovalstatus,
       retailDirectorApprovalStatus: viewData.retaildirectorapprovalstatus,
       directorApprovalStatus: viewData.directorapprovalstatus,

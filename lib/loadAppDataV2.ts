@@ -43,7 +43,9 @@ export const loadBaseDepartments = unstable_cache(
   },
 );
 
-// Load the hod array
+// Load the hod array - selectable HODs only. Alternate-only HODs
+// (hod_array.is_alternate_only) are never offered in the submission dropdown
+// or department auto-select; they act through lib/hodAssignment.ts instead.
 export const loadHodArray = unstable_cache(
   async (): Promise<HodApproversObject[] | []> => {
     try {
@@ -53,6 +55,7 @@ export const loadHodArray = unstable_cache(
             hod_email AS email,
             hod_department AS department
             FROM hod_array
+            WHERE is_alternate_only = false
             `);
 
       return result;

@@ -1,6 +1,7 @@
 "use server";
 import { query } from "@/lib/db";
 import { getSession } from "@/lib/session";
+import { hodHistoryScopeSql, hodPendingScopeSql } from "@/lib/hodAssignment";
 import { getUserRoles } from "@/serverActions/GetUserRoles";
 import {
   PaginatedResult,
@@ -66,8 +67,9 @@ export const getTravelRequisitionData = async ({
       baseParams.push(user.email);
       break;
     case "hodPending":
+      // Assigned to me, or to a HOD I'm an alternate for
       conditions.push(
-        `travel_hod_email = $${baseParams.length + 1} AND travel_hod_approval_status = $${baseParams.length + 2}`,
+        `${hodPendingScopeSql("travel_hod_email", "submitter_email", `$${baseParams.length + 1}`)} AND travel_hod_approval_status = $${baseParams.length + 2}`,
       );
       baseParams.push(user.email, "pending");
       break;
@@ -87,7 +89,14 @@ export const getTravelRequisitionData = async ({
       // Union of every stage this user is involved in: their own HOD rows,
       // plus (HR) everything the HOD approved and (Director) every Tier 3
       // request that has reached the Director stage.
-      const scopes = [`travel_hod_email = $${baseParams.length + 1}`];
+      // HOD rows: assigned to me, or acted on by me as an alternate HOD
+      const scopes = [
+        hodHistoryScopeSql(
+          "travel_hod_email",
+          "travel_hod_actioned_by_email",
+          `$${baseParams.length + 1}`,
+        ),
+      ];
       baseParams.push(user.email);
       if (isHr) {
         scopes.push(`travel_hod_approval_status = $${baseParams.length + 1}`);

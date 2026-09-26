@@ -2,6 +2,7 @@
 
 import { query } from "@/lib/db";
 import { getSession } from "@/lib/session";
+import { assignedHodNameSql } from "@/lib/hodAssignment";
 import { CasualCategory, isCasualAmendableHrStatus } from "@/public/assets";
 import { CasualFormData } from "@/components/Modules/Retail/CasualRequisitionForm";
 import {
@@ -36,7 +37,8 @@ export async function getCasualAmendmentContext(
     casual_hod_approver: string;
   }>(
     `SELECT submitter_email, casual_hr_approval_status, amendment_count,
-     employee_department, casual_location, casual_category, casual_hod_approver
+     employee_department, casual_location, casual_category,
+     ${assignedHodNameSql("casual_hod_email", "casual_hod_approver")} AS casual_hod_approver
      FROM casual_requisitions WHERE request_id = $1`,
     [requestId],
   );

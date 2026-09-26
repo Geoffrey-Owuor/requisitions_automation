@@ -1,6 +1,7 @@
 "use server";
 import { query } from "@/lib/db";
 import { getSession } from "@/lib/session";
+import { hodHistoryScopeSql, hodPendingScopeSql } from "@/lib/hodAssignment";
 import {
   PaginatedResult,
   emptyPaginatedResult,
@@ -59,8 +60,9 @@ export const getAccessRequisitionData = async ({
       baseParams.push(user.email);
       break;
     case "hodPending":
+      // Assigned to me, or to a HOD I'm an alternate for
       conditions.push(
-        `hod_approver_email = $${baseParams.length + 1} AND hod_approver_status = $${baseParams.length + 2}`,
+        `${hodPendingScopeSql("hod_approver_email", "submitter_email", `$${baseParams.length + 1}`)} AND hod_approver_status = $${baseParams.length + 2}`,
       );
       baseParams.push(user.email, "pending");
       break;
@@ -71,8 +73,15 @@ export const getAccessRequisitionData = async ({
       baseParams.push("approved", "pending");
       break;
     case "history": {
-      // Their own HOD rows, plus (Security) everything the HOD approved.
-      const scopes = [`hod_approver_email = $${baseParams.length + 1}`];
+      // Their own HOD rows (assigned, or acted on as an alternate), plus
+      // (Security) everything the HOD approved.
+      const scopes = [
+        hodHistoryScopeSql(
+          "hod_approver_email",
+          "hod_actioned_by_email",
+          `$${baseParams.length + 1}`,
+        ),
+      ];
       baseParams.push(user.email);
       if (isSecurity) {
         scopes.push(`hod_approver_status = $${baseParams.length + 1}`);

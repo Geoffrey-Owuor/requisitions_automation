@@ -2,6 +2,7 @@
 
 import { query } from "@/lib/db";
 import { getSession } from "@/lib/session";
+import { assignedHodNameSql } from "@/lib/hodAssignment";
 import { TravelFormData } from "@/components/TravelRequisitionPage";
 import { PUSHBACK_WINDOW_SQL } from "@/lib/travelPushback";
 import {
@@ -31,7 +32,8 @@ export async function getTravelAmendmentContext(
   const [headerResult, history] = await Promise.all([
     query(
       `SELECT submitter_email, travel_hr_approval_status, amendment_count,
-       employee_name, employee_department, employee_designation, travel_hod_approver,
+       employee_name, employee_department, employee_designation,
+       ${assignedHodNameSql("travel_hod_email", "travel_hod_approver")} AS travel_hod_approver,
        travel_destination,
        TO_CHAR(travel_departure_date, 'YYYY-MM-DD') AS departure_date,
        TO_CHAR(travel_return_date, 'YYYY-MM-DD') AS return_date,

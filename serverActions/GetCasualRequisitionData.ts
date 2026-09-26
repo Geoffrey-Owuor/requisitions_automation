@@ -1,6 +1,7 @@
 "use server";
 import { query } from "@/lib/db";
 import { getSession } from "@/lib/session";
+import { hodHistoryScopeSql, hodPendingScopeSql } from "@/lib/hodAssignment";
 import {
   PaginatedResult,
   emptyPaginatedResult,
@@ -58,8 +59,9 @@ export const getCasualRequisitionData = async ({
       baseParams.push(user.email);
       break;
     case "hodPending":
+      // Assigned to me, or to a HOD I'm an alternate for
       conditions.push(
-        `c.casual_hod_email = $${baseParams.length + 1} AND c.casual_hod_approval_status = $${baseParams.length + 2}`,
+        `${hodPendingScopeSql("c.casual_hod_email", "c.submitter_email", `$${baseParams.length + 1}`)} AND c.casual_hod_approval_status = $${baseParams.length + 2}`,
       );
       baseParams.push(user.email, "pending");
       break;
@@ -72,7 +74,14 @@ export const getCasualRequisitionData = async ({
     case "history": {
       // Their own (current stored) HOD rows, plus (HR) everything the HOD
       // approved.
-      const scopes = [`c.casual_hod_email = $${baseParams.length + 1}`];
+      // HOD rows: assigned to me, or acted on by me as an alternate HOD
+      const scopes = [
+        hodHistoryScopeSql(
+          "c.casual_hod_email",
+          "c.casual_hod_actioned_by_email",
+          `$${baseParams.length + 1}`,
+        ),
+      ];
       baseParams.push(user.email);
       if (isHr) {
         scopes.push(`c.casual_hod_approval_status = $${baseParams.length + 1}`);

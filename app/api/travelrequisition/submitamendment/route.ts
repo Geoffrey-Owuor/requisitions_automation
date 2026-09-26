@@ -3,6 +3,7 @@ import { pool } from "@/lib/db";
 import { PoolClient } from "pg";
 import { getSession } from "@/lib/session";
 import { resolveHod } from "@/lib/casualRequisitionRules";
+import { assignedHodNameSql } from "@/lib/hodAssignment";
 import {
   TravelFormDataInput,
   validateTravelFormData,
@@ -100,6 +101,7 @@ export async function POST(request: NextRequest) {
       `SELECT submitter_email, amendment_count, travel_approval_tier, travel_total_cost,
        employee_name, employee_department, employee_designation, travel_cost_center,
        travel_hod_approver, travel_destination,
+       ${assignedHodNameSql("travel_hod_email", "travel_hod_approver")} AS assigned_hod_name,
        TO_CHAR(travel_departure_date, 'YYYY-MM-DD') AS travel_departure_date,
        TO_CHAR(travel_return_date, 'YYYY-MM-DD') AS travel_return_date,
        travel_category, travel_mode, travel_within_budget, travel_business_justification,
@@ -182,9 +184,17 @@ export async function POST(request: NextRequest) {
       engineeringJobs,
     };
 
+    // travel_hod_approver holds whoever acted on the HOD stage (possibly an
+    // alternate) - diff the HOD field against the ASSIGNED HOD instead. The
+    // nullified-decision snapshot below keeps the actual approver's name.
+    const diffSource = {
+      ...header,
+      travel_hod_approver: header.assigned_hod_name,
+    };
+
     const fieldDiffs = TRAVEL_AMENDMENT_FIELDS.map((field) => ({
       fieldKey: field.key,
-      previousValue: asText(header[field.column]),
+      previousValue: asText(diffSource[field.column]),
       newValue: asText(newValues[field.key]),
     })).filter((diff) => diff.previousValue !== diff.newValue);
 
@@ -259,6 +269,7 @@ export async function POST(request: NextRequest) {
        travel_other_costs = $15, travel_per_diem = $16, travel_total_cost = $17,
        travel_approval_tier = $18, engineering_jobs = $19,
        travel_hod_approval_status = 'pending', travel_hod_comments = NULL, travel_hod_approval_date = NULL,
+       travel_hod_actioned_by_email = NULL,
        travel_hr_approval_status = 'pending', travel_hr_approver = NULL, travel_hr_email = NULL,
        travel_hr_comments = NULL, travel_hr_approval_date = NULL,
        travel_director_approval_status = $20, travel_director_approver = NULL,
@@ -300,9 +311,10 @@ export async function POST(request: NextRequest) {
         `UPDATE travel_requisitions
          SET travel_hod_approval_status = 'approved',
          travel_hod_approval_date = CURRENT_TIMESTAMP,
+         travel_hod_actioned_by_email = $2,
          travel_hod_comments = 'Automatic HOD Approval'
          WHERE request_id = $1`,
-        [requestId],
+        [requestId, user.email],
       );
     }
 
