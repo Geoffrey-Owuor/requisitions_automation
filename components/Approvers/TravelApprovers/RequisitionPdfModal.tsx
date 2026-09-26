@@ -5,6 +5,7 @@ import StatusFormatter from "@/components/Dashboard/StatusFormatter";
 import { dateFormatter } from "@/public/assets";
 import EngineeringJobSummaryCard from "./EngineeringJobSummaryCard";
 import TravelPushbackHistory from "./TravelPushbackHistory";
+import TravelAmendmentHistory from "./TravelAmendmentHistory";
 
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { TravelRequisitionPdf } from "./pdf/TravelRequisitionPdf";
@@ -256,6 +257,8 @@ const RequisitionPdfModal = ({ pdfData }: { pdfData: TravelPdfValues }) => {
               )}
             </div>
           </div>
+
+          <TravelAmendmentHistory amendments={pdfData.amendments} />
 
           <TravelPushbackHistory pushbacks={pdfData.pushbacks} />
 

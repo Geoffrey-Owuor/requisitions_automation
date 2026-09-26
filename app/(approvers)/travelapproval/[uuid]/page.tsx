@@ -18,6 +18,10 @@ import {
   TravelPushbackValues,
   travelPushbacksQuery,
 } from "@/lib/travelPushback";
+import {
+  TravelAmendmentValues,
+  travelAmendmentsQuery,
+} from "@/lib/travelAmendment";
 
 type ApprovalPageProps = {
   params: Promise<{ uuid: string }>;
@@ -93,15 +97,16 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
         engineering_jobs,
         travel_hod_approver, travel_hod_approval_status, travel_hod_comments,
         travel_hr_approver, travel_hr_approval_status, travel_hr_comments,
-        travel_hr_pushback_count,
+        travel_hr_pushback_count, amendment_count,
         ${PUSHBACK_WINDOW_SQL} AS within_pushback_window
         FROM travel_requisitions
         WHERE request_id = $1
       `;
 
-  const [result, pushbacks] = await Promise.all([
+  const [result, pushbacks, amendments] = await Promise.all([
     query(baseQuery, [uuid]),
     query<TravelPushbackValues>(travelPushbacksQuery, [uuid]),
+    query<TravelAmendmentValues>(travelAmendmentsQuery, [uuid]),
   ]);
 
   // Entered request uuid could not be found in our database
@@ -195,6 +200,8 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
               engineeringJobs={requestData.engineering_jobs}
               previousApprovals={previousApprovals}
               pushbacks={pushbacks}
+              amendments={amendments}
+              amendmentCount={Number(requestData.amendment_count)}
               pushback={
                 isPushback
                   ? {

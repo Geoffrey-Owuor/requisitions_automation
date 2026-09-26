@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { QueryResultRow } from "pg";
 import StatusFormatter from "../StatusFormatter";
-import { dateFormatter } from "@/public/assets";
+import { dateFormatter, isCasualAmendableHrStatus } from "@/public/assets";
 import ClientPortal from "../../ClientPortal";
 import Link from "next/link";
 import { useUser } from "@/context/UserContext";
@@ -146,7 +146,7 @@ export const CasualDetailsModal = ({
             <div className="flex items-center gap-4">
               {dataFlag === "userData" &&
                 data.submitter_email === email &&
-                data.casual_hr_approval_status === "pending" && (
+                isCasualAmendableHrStatus(data.casual_hr_approval_status) && (
                   <button
                     onClick={() => {
                       setCasualAmendmentRequestId(data.request_id);

@@ -19,6 +19,10 @@ export type PushbackTravelHrDecisionProps = {
   // travel_hr_pushback_count the page was rendered with - rejects the
   // push-back if another HR member changed the decision in the meantime.
   expectedPushbackCount: number;
+  // amendment_count the page was rendered with - rejects the push-back if
+  // the submitter amended the requisition in the meantime, so HR never
+  // decides on content it hasn't seen.
+  expectedAmendmentCount: number;
 };
 
 /**
@@ -84,6 +88,7 @@ export async function PushbackTravelHrDecision(
         travel_hr_approver, travel_hr_email, travel_hr_comments,
         travel_hr_approval_date, travel_approval_tier,
         travel_hr_pushback_count, submitter_email, travel_hod_email,
+        amendment_count,
         ${PUSHBACK_WINDOW_SQL} AS within_window
        FROM travel_requisitions WHERE request_id = $1 FOR UPDATE`,
       [payload.uuid],
@@ -107,6 +112,18 @@ export async function PushbackTravelHrDecision(
         alertType: "error",
         alertMessage:
           "This requisition's HR decision was changed by someone else while you were reviewing it. Please reopen it and try again",
+      };
+    }
+
+    if (
+      Number(requisition.amendment_count) !==
+      Number(payload.expectedAmendmentCount)
+    ) {
+      await client.query("ROLLBACK");
+      return {
+        alertType: "error",
+        alertMessage:
+          "This requisition was amended by its submitter while you were reviewing it. Please reopen it and try again",
       };
     }
 

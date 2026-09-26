@@ -2,8 +2,10 @@ import {
   CheckCircle2,
   CreditCard,
   MapPin,
+  Pencil,
   Plane,
   Shield,
+  ShieldCheck,
   UserCircle,
 } from "lucide-react";
 import {
@@ -76,6 +78,31 @@ export default function TravelRequisitionGuideline() {
             cost="Above KES 100k"
             approvers={["HOD Approval", "HR Approval", "Director Approval"]}
             icon={<Shield size={22} />}
+          />
+        </div>
+      </section>
+
+      {/* Amendments Section */}
+      <section className="space-y-4">
+        <SectionTitle icon={<Pencil size={17} />}>Amendments</SectionTitle>
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+          <InfoCard
+            icon={<Pencil size={18} />}
+            title="Who & When"
+            items={[
+              "Only the original submitter can amend their own requisition.",
+              "Allowed until HR approves it - a HOD or HR decline can still be amended.",
+              "No amendments after the departure date, or once HR has approved.",
+            ]}
+          />
+          <InfoCard
+            icon={<ShieldCheck size={18} />}
+            title="What Happens on Submission"
+            items={[
+              "Any field can be changed - trip details, dates, costs, department or HOD approver.",
+              "The approval workflow restarts from HOD, and the tier is recalculated from the new total.",
+              "A record of every amendment - what changed and why - is kept and visible to approvers and on the requisition PDF/emails.",
+            ]}
           />
         </div>
       </section>

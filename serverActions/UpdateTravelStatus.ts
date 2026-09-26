@@ -20,8 +20,15 @@ export type UpdateRequestStatusProps = {
   approverEmail: string;
 };
 
+export type UpdateTravelStatusProps = UpdateRequestStatusProps & {
+  // The amendment_count the approver's screen was rendered from - guards
+  // against approving content that was superseded by an amendment while
+  // the approver was reviewing it.
+  expectedAmendmentCount: number;
+};
+
 export async function UpdateTravelStatus(
-  payload: UpdateRequestStatusProps,
+  payload: UpdateTravelStatusProps,
 ): Promise<AlertInfo> {
   if (!isValidTravelStage(payload.stage)) {
     return {
@@ -61,7 +68,8 @@ export async function UpdateTravelStatus(
     const { rows: reviewedResult } = await client.query(
       `SELECT travel_${payload.stage}_approval_status AS approval_status,
        travel_${payload.stage}_approver AS approver,
-       travel_approval_tier, submitter_email, travel_hod_email, travel_hod_approver, travel_hr_email
+       travel_approval_tier, submitter_email, travel_hod_email, travel_hod_approver, travel_hr_email,
+       amendment_count
         FROM travel_requisitions WHERE request_id = $1 FOR UPDATE`,
       [payload.uuid],
     );
@@ -140,6 +148,18 @@ export async function UpdateTravelStatus(
       return {
         alertType: "error",
         alertMessage: `This requisition has already been acted upon by ${previousApprover}, no further action is required`,
+      };
+    }
+
+    if (
+      reviewedResult[0].amendment_count !==
+      Number(payload.expectedAmendmentCount)
+    ) {
+      await client.query("ROLLBACK");
+      return {
+        alertType: "error",
+        alertMessage:
+          "This requisition was amended while you were reviewing it - please reload and try again",
       };
     }
 

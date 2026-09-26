@@ -13,6 +13,7 @@ import {
   BriefcaseBusiness,
   ShieldUser,
   Undo2,
+  Pencil,
 } from "lucide-react";
 import { QueryResultRow } from "pg";
 import StatusFormatter from "./StatusFormatter";
@@ -22,13 +23,16 @@ import Link from "next/link";
 import { useUser } from "@/context/UserContext";
 import { getTravelApproverLink } from "@/serverActions/GetTravelApproverLink";
 import { useLoadingStore } from "@/store/useLoadingStore";
+import { useToggleStore } from "@/store/useToggleStore";
 import { useEffect, useState } from "react";
-import { getTravelPushbacks } from "@/serverActions/GetTravelPushbacks";
 import {
-  getTravelPushbackBlocker,
-  TravelPushbackValues,
-} from "@/lib/travelPushback";
+  getTravelAuditTrail,
+  TravelAuditTrail,
+} from "@/serverActions/GetTravelAuditTrail";
+import { getTravelPushbackBlocker } from "@/lib/travelPushback";
+import { getTravelAmendmentBlocker } from "@/lib/travelAmendment";
 import TravelPushbackHistory from "@/components/Approvers/TravelApprovers/TravelPushbackHistory";
+import TravelAmendmentHistory from "@/components/Approvers/TravelApprovers/TravelAmendmentHistory";
 
 interface ModalProps {
   data: QueryResultRow | null;
@@ -51,16 +55,18 @@ export const TravelDetailsModal = ({
   dataFlag,
 }: ModalProps) => {
   const setLoadingLine = useLoadingStore((state) => state.setLoadingLine);
+  const setTravelAmendmentRequestId = useToggleStore(
+    (state) => state.setTravelAmendmentRequestId,
+  );
   const { memberships } = useUser();
   const [loading, setLoading] = useState(false);
   const [link, setLink] = useState("#");
   // Keyed by request_id so a result fetched for a previously opened row is
   // never shown against the current one.
   const [pushbackLink, setPushbackLink] = useState({ uuid: "", link: "#" });
-  const [pushbackHistory, setPushbackHistory] = useState<{
-    uuid: string;
-    pushbacks: TravelPushbackValues[];
-  }>({ uuid: "", pushbacks: [] });
+  const [auditTrail, setAuditTrail] = useState<
+    { uuid: string } & TravelAuditTrail
+  >({ uuid: "", pushbacks: [], amendments: [] });
 
   const handleLinkClick = () => {
     setLoadingLine(true);
@@ -130,21 +136,37 @@ export const TravelDetailsModal = ({
       .catch((error) => console.error("Error fetching push-back link:", error));
   }, [data, canPushback]);
 
-  // Only fetch the history when the requisition has actually been pushed back
+  // Only the submitter's own table offers Amend. This only decides whether to
+  // show the button - the amend form and the amendment route re-check it.
+  const canAmend =
+    !!data &&
+    dataFlag === "userData" &&
+    getTravelAmendmentBlocker({
+      hrStatus: data.travel_hr_approval_status,
+      withinWindow: data.within_pushback_window,
+    }) === null;
+
+  // Only fetch the history when the requisition has actually been pushed
+  // back or amended
   useEffect(() => {
-    if (!data || Number(data.travel_hr_pushback_count) === 0) return;
+    if (
+      !data ||
+      (Number(data.travel_hr_pushback_count) === 0 &&
+        Number(data.amendment_count) === 0)
+    )
+      return;
     const uuid = data.request_id;
-    getTravelPushbacks(uuid)
-      .then((pushbacks) => setPushbackHistory({ uuid, pushbacks }))
-      .catch((error) => console.error("Error fetching push-backs:", error));
+    getTravelAuditTrail(uuid)
+      .then((trail) => setAuditTrail({ uuid, ...trail }))
+      .catch((error) => console.error("Error fetching audit trail:", error));
   }, [data]);
 
   const resolvedPushbackLink =
     data && pushbackLink.uuid === data.request_id ? pushbackLink.link : "#";
-  const pushbacks =
-    data && pushbackHistory.uuid === data.request_id
-      ? pushbackHistory.pushbacks
-      : [];
+  const currentTrail =
+    data && auditTrail.uuid === data.request_id ? auditTrail : null;
+  const pushbacks = currentTrail?.pushbacks ?? [];
+  const amendments = currentTrail?.amendments ?? [];
 
   if (!isOpen || !data) return null;
 
@@ -175,6 +197,18 @@ export const TravelDetailsModal = ({
               </div>
             </div>
             <div className="flex items-center gap-4">
+              {canAmend && (
+                <button
+                  onClick={() => {
+                    setTravelAmendmentRequestId(data.request_id);
+                    onClose();
+                  }}
+                  className="flex items-center gap-1 rounded-full bg-amber-500 px-3 py-1 text-xs font-semibold text-white transition-colors duration-200 hover:bg-amber-600"
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                  Amend
+                </button>
+              )}
               {stage !== "user" &&
                 data[`travel_${stage}_approval_status`] === "pending" && (
                   <>
@@ -300,6 +334,12 @@ export const TravelDetailsModal = ({
                 ))}
               </div>
             </div>
+
+            {amendments.length > 0 && (
+              <div className="col-span-full">
+                <TravelAmendmentHistory amendments={amendments} />
+              </div>
+            )}
 
             {pushbacks.length > 0 && (
               <div className="col-span-full">

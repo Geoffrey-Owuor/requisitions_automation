@@ -209,6 +209,12 @@ export const OPERATIONS_SECTIONS = [
   "RHW2/RHW3",
 ];
 
+// A casual requisition stays amendable by its submitter until HR approves it -
+// HOD and HR declines can both be corrected by amending.
+export function isCasualAmendableHrStatus(hrStatus: string): boolean {
+  return hrStatus === "pending" || hrStatus === "declined";
+}
+
 export const ENGINEERING_HVAC_DEPARTMENT = "Engineering & HVAC";
 export const CASUAL_CATEGORIES = ["Technician", "Welder"] as const;
 export type CasualCategory = (typeof CASUAL_CATEGORIES)[number];
