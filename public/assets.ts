@@ -222,6 +222,7 @@ export const CASUAL_CATEGORY_RATES: Record<CasualCategory, number> = {
   Technician: 1000,
   Welder: 1500,
 };
+export const ENGINEERING_HVAC_NON_RUIRU_RATE = 900;
 
 export const REPLACEMENT_OR_NEW_OPTIONS = ["Replacement", "New"] as const;
 export type ReplacementOrNew = (typeof REPLACEMENT_OR_NEW_OPTIONS)[number];
@@ -303,8 +304,12 @@ export function getCasualRatePerDay(
   department?: string,
   casualCategory?: CasualCategory,
 ) {
+  // Engineering & HVAC category rates apply at Ruiru only; every other
+  // location pays a flat rate regardless of category.
   if (department === ENGINEERING_HVAC_DEPARTMENT) {
-    return CASUAL_CATEGORY_RATES[casualCategory ?? "Technician"];
+    return location === "Ruiru"
+      ? CASUAL_CATEGORY_RATES[casualCategory ?? "Technician"]
+      : ENGINEERING_HVAC_NON_RUIRU_RATE;
   }
   return location === "Ruiru" ? 798 : 868;
 }
