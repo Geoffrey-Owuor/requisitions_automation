@@ -8,6 +8,7 @@ import {
   CasualFormDataInput,
 } from "@/lib/casualRequisitionRules";
 import { amendmentStage } from "@/utils/CasualApprovalStages/amendmentStage";
+import { isCasualAmendableHrStatus } from "@/public/assets";
 
 interface ExistingSectionRow {
   section_id: string;
@@ -111,12 +112,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (header.casual_hr_approval_status !== "pending") {
+    if (!isCasualAmendableHrStatus(header.casual_hr_approval_status)) {
       await client.query("ROLLBACK");
       return NextResponse.json(
         {
           message:
-            "This requisition can no longer be amended - HR has already given a final decision",
+            "This requisition can no longer be amended - HR has already approved it",
         },
         { status: 409 },
       );

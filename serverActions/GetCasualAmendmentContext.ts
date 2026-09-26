@@ -2,7 +2,7 @@
 
 import { query } from "@/lib/db";
 import { getSession } from "@/lib/session";
-import { CasualCategory } from "@/public/assets";
+import { CasualCategory, isCasualAmendableHrStatus } from "@/public/assets";
 import { CasualFormData } from "@/components/Modules/Retail/CasualRequisitionForm";
 import {
   casualAmendmentsQuery,
@@ -16,8 +16,8 @@ export interface CasualAmendmentContext {
   history: CasualAmendmentValues[];
 }
 
-// Amendments are only allowed for the original submitter, before HR gives
-// final approval - a HOD decline is still amendable. Returns null when the
+// Amendments are only allowed for the original submitter, before HR approves
+// - a HOD or HR decline is still amendable. Returns null when the
 // requisition doesn't exist, isn't owned by the current user, or is no
 // longer within that window (mirrors GetCasualRequisitionDetails.ts).
 export async function getCasualAmendmentContext(
@@ -47,7 +47,7 @@ export async function getCasualAmendmentContext(
 
   const isAmendable =
     header.submitter_email === session.email &&
-    header.casual_hr_approval_status === "pending";
+    isCasualAmendableHrStatus(header.casual_hr_approval_status);
 
   if (!isAmendable) return null;
 

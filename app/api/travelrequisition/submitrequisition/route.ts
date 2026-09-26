@@ -3,7 +3,7 @@ import { loadHrArray } from "@/lib/loadAppDataV2";
 import { query } from "@/lib/db";
 import { EmailSender } from "@/services/EmailSender";
 import { getSession } from "@/lib/session";
-import { calculateTravelApprovalTier } from "@/utils/calculateTravelApprovalTier";
+import { validateTravelFormData } from "@/lib/travelRequisitionRules";
 
 export async function POST(request: NextRequest) {
   // Check if we have a valid session
@@ -53,30 +53,13 @@ export async function POST(request: NextRequest) {
 
     // Recompute total cost and approval tier server-side rather than trusting
     // the client-supplied values, so a tampered request can't skip HR/Director review.
-    const totalCost = Number(transportCost) + Number(otherCost) + Number(perDiem);
-    const approvalTier = calculateTravelApprovalTier(totalCost);
+    const validation = validateTravelFormData(formData);
 
-    const isEngineering = department === "Engineering & HVAC";
-
-    // More robust validation logic
-    // Returns true only if the value is genuinely missing (Allowing 0 values)
-    const isEmpty = (val: unknown) =>
-      val === null || val === undefined || val === "";
-
-    const missingFields =
-      Object.entries(formData).some(([key, value]) => {
-        if (key === "engineeringJobs") return false;
-
-        return isEmpty(value);
-      }) ||
-      (isEngineering && !engineeringJobs);
-
-    if (missingFields) {
-      return NextResponse.json(
-        { message: "Your requisition is missing some required form fields" },
-        { status: 400 },
-      );
+    if (!validation.ok) {
+      return NextResponse.json({ message: validation.message }, { status: 400 });
     }
+
+    const { totalCost, approvalTier } = validation;
 
     const hodApproverResult = await query(
       `

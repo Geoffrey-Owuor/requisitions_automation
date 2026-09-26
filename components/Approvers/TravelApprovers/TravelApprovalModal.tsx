@@ -32,6 +32,8 @@ import PreviousApprovalsSection, {
   PreviousApproval,
 } from "@/components/Approvers/PreviousApprovalsSection";
 import TravelPushbackHistory from "./TravelPushbackHistory";
+import TravelAmendmentHistory from "./TravelAmendmentHistory";
+import { TravelAmendmentValues } from "@/lib/travelAmendment";
 import { PushbackTravelHrDecision } from "@/serverActions/PushbackTravelHrDecision";
 import {
   MAX_PUSHBACK_REASON_LENGTH,
@@ -67,6 +69,8 @@ export interface TravelApprovalModalProps {
   engineeringJobs: string;
   previousApprovals: PreviousApproval[];
   pushbacks: TravelPushbackValues[];
+  amendments: TravelAmendmentValues[];
+  amendmentCount: number;
   // Set when HR is reversing its own recorded decision (mode=pushback)
   pushback?: {
     token: string;
@@ -140,6 +144,8 @@ const TravelApprovalModal = ({
   engineeringJobs,
   previousApprovals,
   pushbacks,
+  amendments,
+  amendmentCount,
   pushback,
 }: TravelApprovalModalProps) => {
   const [comments, setComments] = useState("");
@@ -173,6 +179,7 @@ const TravelApprovalModal = ({
             comments: commentsPayload,
             reason,
             expectedPushbackCount: pushback.pushbackCount,
+            expectedAmendmentCount: amendmentCount,
           })
         : await UpdateTravelStatus({
             uuid,
@@ -181,6 +188,7 @@ const TravelApprovalModal = ({
             comments: commentsPayload,
             approverName,
             approverEmail,
+            expectedAmendmentCount: amendmentCount,
           });
 
       // Set the alert info
@@ -428,6 +436,9 @@ const TravelApprovalModal = ({
                   : previousApprovals
               }
             />
+
+            {/* ── Amendment History ── */}
+            <TravelAmendmentHistory amendments={amendments} />
 
             {/* ── HR Push-back History ── */}
             <TravelPushbackHistory pushbacks={pushbacks} />

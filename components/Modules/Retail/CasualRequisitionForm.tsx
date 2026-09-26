@@ -398,8 +398,7 @@ export default function CasualRequisitionForm({
     return (
       <div className="mx-auto max-w-md rounded-2xl border border-rose-200 bg-rose-50 p-6 text-center text-sm text-rose-700">
         This requisition can no longer be amended. It may have already
-        received HR&apos;s final approval, or you may not be its original
-        submitter.
+        been approved by HR, or you may not be its original submitter.
       </div>
     );
   }
@@ -479,8 +478,8 @@ export default function CasualRequisitionForm({
             <div className="mb-6 flex items-start gap-2.5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3.5 text-[13px] text-amber-800">
               <Info className="mt-0.5 h-4 w-4 shrink-0" />
               <p>
-                Amendments are only possible before HR gives final approval.
-                Submitting this amendment resets both the HOD and HR approval
+                Amendments are only possible until HR approves this
+                requisition. Submitting this amendment resets both the HOD and HR approval
                 stages, so this requisition will need to be re-approved from
                 the HOD stage onward.
               </p>

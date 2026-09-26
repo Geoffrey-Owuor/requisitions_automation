@@ -126,11 +126,13 @@ export const getTravelRequisitionData = async ({
         travel_cost_center,
         travel_hod_approval_status, travel_hr_approval_status, travel_director_approval_status,
         travel_approval_tier, travel_hr_pushback_count,
+        amendment_count, last_amended_at,
+        -- Departure-date window shared by HR push-back and amendments
         ${PUSHBACK_WINDOW_SQL} AS within_pushback_window,
         COUNT(*) OVER() AS total_count
         FROM travel_requisitions
         ${whereClause}
-        ORDER BY request_created_at DESC
+        ORDER BY GREATEST(request_created_at, last_amended_at) DESC
         LIMIT $${baseParams.length + 1} OFFSET $${baseParams.length + 2}
     `;
 

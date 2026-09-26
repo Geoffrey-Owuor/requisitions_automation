@@ -95,7 +95,7 @@ export default function CasualRequisitionGuideline() {
             title="Who & When"
             items={[
               "Only the original submitter can amend their own requisition.",
-              "Allowed any time before HR gives final approval - a HOD decline can still be amended.",
+              "Allowed any time until HR approves it - a HOD or HR decline can still be amended.",
               "Once HR has approved, the requisition is locked and can no longer be changed.",
             ]}
           />

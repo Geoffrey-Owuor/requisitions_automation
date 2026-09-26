@@ -6,6 +6,10 @@ import {
   TravelPushbackValues,
   travelPushbacksQuery,
 } from "@/lib/travelPushback";
+import {
+  TravelAmendmentValues,
+  travelAmendmentsQuery,
+} from "@/lib/travelAmendment";
 
 export interface EmailDataValues {
   emailaddress: string;
@@ -39,6 +43,7 @@ export interface EmailDataValues {
   directorapprovalstatus: string;
   engineeringjobs: string;
   pushbacks: TravelPushbackValues[];
+  amendments: TravelAmendmentValues[];
 }
 
 export const travelDataQuery = `
@@ -86,17 +91,20 @@ export interface EmailDataProps {
   showPdfDownload?: boolean;
 }
 
-// Requisition row plus its HR push-back history, or undefined if not found.
-// Shared by the emails and the PDF page.
+// Requisition row plus its HR push-back and amendment history, or undefined
+// if not found. Shared by the emails and the PDF page.
 export async function getTravelRequisitionData(
   requestId: string,
 ): Promise<EmailDataValues | undefined> {
-  const [result, pushbacks] = await Promise.all([
-    query<Omit<EmailDataValues, "pushbacks">>(travelDataQuery, [requestId]),
+  const [result, pushbacks, amendments] = await Promise.all([
+    query<Omit<EmailDataValues, "pushbacks" | "amendments">>(travelDataQuery, [
+      requestId,
+    ]),
     query<TravelPushbackValues>(travelPushbacksQuery, [requestId]),
+    query<TravelAmendmentValues>(travelAmendmentsQuery, [requestId]),
   ]);
   if (result.length === 0) return undefined;
-  return { ...result[0], pushbacks };
+  return { ...result[0], pushbacks, amendments };
 }
 
 // Cached query — repeated calls with the same requestId hit the DB only once
