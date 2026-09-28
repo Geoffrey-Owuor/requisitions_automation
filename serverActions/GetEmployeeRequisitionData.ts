@@ -1,6 +1,7 @@
 "use server";
 import { query } from "@/lib/db";
 import { getSession } from "@/lib/session";
+import { hodHistoryScopeSql, hodPendingScopeSql } from "@/lib/hodAssignment";
 import {
   PaginatedResult,
   emptyPaginatedResult,
@@ -15,7 +16,8 @@ export interface EmployeeRequisitionDataProps {
     | "hodPending"
     | "retailDirectorPending"
     | "directorPending"
-    | "hrPending";
+    | "hrPending"
+    | "history";
   page?: number;
   pageSize?: number;
   searchTerm?: string;
@@ -57,6 +59,22 @@ export const getEmployeeRequisitionData = async ({
     if (membership.length === 0) return emptyPaginatedResult(page, pageSize);
   }
 
+  // History unions every stage this user is involved in, so it needs all
+  // three array memberships rather than just one.
+  let isRetailDirector = false;
+  let isDirector = false;
+  let isHr = false;
+  if (dataFlag === "history") {
+    const [retailDirector, director, hr] = await Promise.all([
+      query(MEMBERSHIP_QUERIES.retailDirectorPending!, [user.email]),
+      query(MEMBERSHIP_QUERIES.directorPending!, [user.email]),
+      query(MEMBERSHIP_QUERIES.hrPending!, [user.email]),
+    ]);
+    isRetailDirector = retailDirector.length > 0;
+    isDirector = director.length > 0;
+    isHr = hr.length > 0;
+  }
+
   const baseParams: (string | number)[] = [];
   const conditions: string[] = [];
 
@@ -66,8 +84,9 @@ export const getEmployeeRequisitionData = async ({
       baseParams.push(user.email);
       break;
     case "hodPending":
+      // Assigned to me, or to a HOD I'm an alternate for
       conditions.push(
-        `e.employee_hod_email = $${baseParams.length + 1} AND e.employee_hod_approval_status = $${baseParams.length + 2}`,
+        `${hodPendingScopeSql("e.employee_hod_email", "e.submitter_email", `$${baseParams.length + 1}`)} AND e.employee_hod_approval_status = $${baseParams.length + 2}`,
       );
       baseParams.push(user.email, "pending");
       break;
@@ -89,6 +108,40 @@ export const getEmployeeRequisitionData = async ({
       );
       baseParams.push("approved", "approved", "N/A", "approved", "pending");
       break;
+    case "history": {
+      // Their own HOD rows, plus every request that has reached (or been
+      // auto-approved past) each array stage they belong to. Retail Director
+      // only ever applies to retail requests (status is 'N/A' otherwise).
+      // HOD rows: assigned to me, or acted on by me as an alternate HOD
+      const scopes = [
+        hodHistoryScopeSql(
+          "e.employee_hod_email",
+          "e.employee_hod_actioned_by_email",
+          `$${baseParams.length + 1}`,
+        ),
+      ];
+      baseParams.push(user.email);
+      if (isRetailDirector) {
+        scopes.push(
+          `(e.employee_hod_approval_status = $${baseParams.length + 1} AND e.employee_retail_director_approval_status <> $${baseParams.length + 2})`,
+        );
+        baseParams.push("approved", "N/A");
+      }
+      if (isDirector) {
+        scopes.push(
+          `(e.employee_hod_approval_status = $${baseParams.length + 1} AND e.employee_retail_director_approval_status IN ($${baseParams.length + 2}, $${baseParams.length + 3}))`,
+        );
+        baseParams.push("approved", "approved", "N/A");
+      }
+      if (isHr) {
+        scopes.push(
+          `(e.employee_hod_approval_status = $${baseParams.length + 1} AND e.employee_retail_director_approval_status IN ($${baseParams.length + 2}, $${baseParams.length + 3}) AND e.employee_director_approval_status = $${baseParams.length + 4})`,
+        );
+        baseParams.push("approved", "approved", "N/A", "approved");
+      }
+      conditions.push(`(${scopes.join(" OR ")})`);
+      break;
+    }
   }
 
   if (searchTerm?.trim()) {

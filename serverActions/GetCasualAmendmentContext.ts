@@ -2,7 +2,8 @@
 
 import { query } from "@/lib/db";
 import { getSession } from "@/lib/session";
-import { CasualCategory } from "@/public/assets";
+import { assignedHodNameSql } from "@/lib/hodAssignment";
+import { CasualCategory, isCasualAmendableHrStatus } from "@/public/assets";
 import { CasualFormData } from "@/components/Modules/Retail/CasualRequisitionForm";
 import {
   casualAmendmentsQuery,
@@ -16,8 +17,8 @@ export interface CasualAmendmentContext {
   history: CasualAmendmentValues[];
 }
 
-// Amendments are only allowed for the original submitter, before HR gives
-// final approval - a HOD decline is still amendable. Returns null when the
+// Amendments are only allowed for the original submitter, before HR approves
+// - a HOD or HR decline is still amendable. Returns null when the
 // requisition doesn't exist, isn't owned by the current user, or is no
 // longer within that window (mirrors GetCasualRequisitionDetails.ts).
 export async function getCasualAmendmentContext(
@@ -36,7 +37,8 @@ export async function getCasualAmendmentContext(
     casual_hod_approver: string;
   }>(
     `SELECT submitter_email, casual_hr_approval_status, amendment_count,
-     employee_department, casual_location, casual_category, casual_hod_approver
+     employee_department, casual_location, casual_category,
+     ${assignedHodNameSql("casual_hod_email", "casual_hod_approver")} AS casual_hod_approver
      FROM casual_requisitions WHERE request_id = $1`,
     [requestId],
   );
@@ -47,7 +49,7 @@ export async function getCasualAmendmentContext(
 
   const isAmendable =
     header.submitter_email === session.email &&
-    header.casual_hr_approval_status === "pending";
+    isCasualAmendableHrStatus(header.casual_hr_approval_status);
 
   if (!isAmendable) return null;
 

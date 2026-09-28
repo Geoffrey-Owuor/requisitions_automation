@@ -31,10 +31,16 @@ export const DASHBOARD_TABLES: DashboardTableEntry[] = [
     label: "Travel · Director",
     Icon: BriefcaseBusiness,
   },
+  {
+    key: "travel-history",
+    label: "Travel · History",
+    Icon: BriefcaseBusiness,
+  },
   { key: "it-userData", label: "IT · Yours", Icon: Monitor },
   { key: "it-hodPending", label: "IT · HOD", Icon: Monitor },
   { key: "it-itPending", label: "IT · Fulfilment", Icon: Monitor },
   { key: "it-itAll", label: "IT · All", Icon: Monitor },
+  { key: "it-history", label: "IT · History", Icon: Monitor },
   { key: "access-userData", label: "Access · Yours", Icon: LockKeyhole },
   { key: "access-hodPending", label: "Access · HOD", Icon: LockKeyhole },
   {
@@ -42,9 +48,11 @@ export const DASHBOARD_TABLES: DashboardTableEntry[] = [
     label: "Access · Security",
     Icon: LockKeyhole,
   },
+  { key: "access-history", label: "Access · History", Icon: LockKeyhole },
   { key: "casual-userData", label: "Casual · Yours", Icon: HardHat },
   { key: "casual-hodPending", label: "Casual · HOD", Icon: HardHat },
   { key: "casual-hrPending", label: "Casual · HR", Icon: HardHat },
+  { key: "casual-history", label: "Casual · History", Icon: HardHat },
   {
     key: "employee-userData",
     label: "Employee · Yours",
@@ -66,4 +74,9 @@ export const DASHBOARD_TABLES: DashboardTableEntry[] = [
     Icon: UserRoundPlus,
   },
   { key: "employee-hrPending", label: "Employee · HR", Icon: UserRoundPlus },
+  {
+    key: "employee-history",
+    label: "Employee · History",
+    Icon: UserRoundPlus,
+  },
 ];

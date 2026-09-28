@@ -12,7 +12,11 @@ export async function getApproverMemberships(): Promise<ApproverMemberships> {
   if (!session) return EMPTY_MEMBERSHIPS;
 
   try {
-    const [security, it, director, retailDirector, hr] = await Promise.all([
+    const [hod, security, it, director, retailDirector, hr] = await Promise.all([
+      query<{ hod_email: string }>(
+        "SELECT hod_email FROM hod_array WHERE hod_email = $1",
+        [session.email],
+      ),
       query<{ security_email: string }>(
         "SELECT security_email FROM security_array WHERE security_email = $1",
         [session.email],
@@ -36,6 +40,7 @@ export async function getApproverMemberships(): Promise<ApproverMemberships> {
     ]);
 
     return {
+      isHodApprover: hod.length > 0,
       isSecurityApprover: security.length > 0,
       isITApprover: it.length > 0,
       isDirector: director.length > 0,

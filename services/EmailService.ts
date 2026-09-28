@@ -101,6 +101,7 @@ interface EmailOptions {
   from: string;
   to: string | string[];
   cc?: string | string[];
+  replyTo?: string | string[];
   subject: string;
   html: string;
   attachments?: {
@@ -123,6 +124,7 @@ export const sendEmail = async ({
   from,
   to,
   cc,
+  replyTo,
   subject,
   html,
   attachments,
@@ -138,6 +140,12 @@ export const sendEmail = async ({
 
     const ccRecipients = cc
       ? (Array.isArray(cc) ? cc : [cc]).map((email) => ({
+          emailAddress: { address: email },
+        }))
+      : [];
+
+    const replyToRecipients = replyTo
+      ? (Array.isArray(replyTo) ? replyTo : [replyTo]).map((email) => ({
           emailAddress: { address: email },
         }))
       : [];
@@ -163,6 +171,7 @@ export const sendEmail = async ({
         },
         toRecipients: toRecipients,
         ccRecipients: ccRecipients,
+        replyTo: replyToRecipients,
         attachments: formattedAttachments || [],
       },
       saveToSentItems: "true",

@@ -2,6 +2,14 @@ import { cache } from "react";
 import { query } from "@/lib/db";
 import { TravelRequisitionTemplate } from "@/utils/templates/TravelRequisitionTemplate";
 import { sendEmail } from "./EmailService";
+import {
+  TravelPushbackValues,
+  travelPushbacksQuery,
+} from "@/lib/travelPushback";
+import {
+  TravelAmendmentValues,
+  travelAmendmentsQuery,
+} from "@/lib/travelAmendment";
 
 export interface EmailDataValues {
   emailaddress: string;
@@ -22,7 +30,10 @@ export interface EmailDataValues {
   withinbudget: string;
   approvaltier: string;
   hodapprover: string;
+  // Whoever acted on the HOD stage (the assigned HOD until then)
   hodemail: string;
+  // The HOD selected at submission - never overwritten by an alternate
+  assignedhodemail: string;
   hodcomments: string;
   hrapprover: string;
   hremail: string;
@@ -34,6 +45,8 @@ export interface EmailDataValues {
   hrapprovalstatus: string;
   directorapprovalstatus: string;
   engineeringjobs: string;
+  pushbacks: TravelPushbackValues[];
+  amendments: TravelAmendmentValues[];
 }
 
 export const travelDataQuery = `
@@ -59,7 +72,8 @@ export const travelDataQuery = `
        travel_hr_approval_status AS hrapprovalstatus,
        travel_director_approval_status AS directorapprovalstatus, 
        travel_hod_approver AS hodapprover,
-       travel_hod_email AS hodemail,
+       COALESCE(travel_hod_actioned_by_email, travel_hod_email) AS hodemail,
+       travel_hod_email AS assignedhodemail,
        travel_hod_comments AS hodcomments,
        travel_hr_approver AS hrapprover,
        travel_hr_email AS hremail,
@@ -81,10 +95,25 @@ export interface EmailDataProps {
   showPdfDownload?: boolean;
 }
 
+// Requisition row plus its HR push-back and amendment history, or undefined
+// if not found. Shared by the emails and the PDF page.
+export async function getTravelRequisitionData(
+  requestId: string,
+): Promise<EmailDataValues | undefined> {
+  const [result, pushbacks, amendments] = await Promise.all([
+    query<Omit<EmailDataValues, "pushbacks" | "amendments">>(travelDataQuery, [
+      requestId,
+    ]),
+    query<TravelPushbackValues>(travelPushbacksQuery, [requestId]),
+    query<TravelAmendmentValues>(travelAmendmentsQuery, [requestId]),
+  ]);
+  if (result.length === 0) return undefined;
+  return { ...result[0], pushbacks, amendments };
+}
+
 // Cached query — repeated calls with the same requestId hit the DB only once
 export const getTravelEmailData = cache(async (requestId: string) => {
-  const result = await query<EmailDataValues>(travelDataQuery, [requestId]);
-  return result[0];
+  return (await getTravelRequisitionData(requestId))!;
 });
 
 export async function EmailSender({

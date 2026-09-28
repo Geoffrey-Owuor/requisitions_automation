@@ -2,6 +2,7 @@
 
 import { pool } from "@/lib/db";
 import { PoolClient } from "pg";
+import { getHodActionError } from "@/lib/hodAssignment";
 import { AlertInfo } from "@/components/TravelRequisitionPage";
 import { hodApprovalStage } from "@/utils/EmployeeApprovalStages/hodApprovalStage";
 import { retailDirectorApprovalStage } from "@/utils/EmployeeApprovalStages/retailDirectorApprovalStage";
@@ -33,13 +34,20 @@ export async function UpdateEmployeeStatus(
 
   let client: PoolClient | undefined;
 
-  // Our base update query and params
+  // Our base update query and params. At the HOD stage employee_hod_email is
+  // the ASSIGNED HOD and is never overwritten - whoever acted (assigned HOD
+  // or an alternate) is recorded in employee_hod_actioned_by_email instead.
+  const approverEmailColumn =
+    payload.stage === "hod"
+      ? "employee_hod_actioned_by_email"
+      : `employee_${payload.stage}_email`;
+
   const baseUpdateQuery = `
     UPDATE employee_requisitions
     SET employee_${payload.stage}_approval_date = CURRENT_TIMESTAMP,
     employee_${payload.stage}_approval_status = $1,
     employee_${payload.stage}_approver = $2,
-    employee_${payload.stage}_email = $3,
+    ${approverEmailColumn} = $3,
     employee_${payload.stage}_comments = $4
     WHERE request_id = $5
     `;
@@ -63,6 +71,7 @@ export async function UpdateEmployeeStatus(
       `SELECT employee_${payload.stage}_approval_status AS approval_status,
        employee_${payload.stage}_approver AS approver,
        submitter_email, employee_department, employee_hod_email,
+       COALESCE(employee_hod_actioned_by_email, employee_hod_email) AS employee_hod_actioned_by_email,
        employee_retail_director_email, employee_director_email,
        employee_director_approval_status AS director_approval_status
         FROM employee_requisitions WHERE request_id = $1 FOR UPDATE`,
@@ -113,9 +122,25 @@ export async function UpdateEmployeeStatus(
     // Required stages data
     const userEmail = reviewedResult[0].submitter_email;
     const department = reviewedResult[0].employee_department;
-    const hodEmail = reviewedResult[0].employee_hod_email;
+    const assignedHodEmail = reviewedResult[0].employee_hod_email;
+    // Later-stage emails go to whoever actually acted on the HOD stage
+    const hodEmail = reviewedResult[0].employee_hod_actioned_by_email;
     const retailDirectorEmail = reviewedResult[0].employee_retail_director_email;
     const directorEmail = reviewedResult[0].employee_director_email;
+
+    // Only the assigned HOD or one of their alternates may act on the HOD
+    // stage - being in hod_array alone is not enough (lib/hodAssignment.ts).
+    if (payload.stage === "hod") {
+      const hodActionError = await getHodActionError(client, {
+        approverEmail: payload.approverEmail,
+        assignedHodEmail,
+        submitterEmail: userEmail,
+      });
+      if (hodActionError) {
+        await client.query("ROLLBACK");
+        return { alertType: "error", alertMessage: hodActionError };
+      }
+    }
 
     // Retail Director is only part of the chain for Retail-department
     // requisitions - reject action on that stage otherwise, even if a valid

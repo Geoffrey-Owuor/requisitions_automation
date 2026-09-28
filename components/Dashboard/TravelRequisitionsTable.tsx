@@ -14,6 +14,7 @@ const dynamicTitles: Record<TravelRequisitionDataProps["dataFlag"], string> = {
   hodPending: "Travel Requisitions Pending Your Approval (HOD)",
   hrPending: "Travel Requisitions Pending Your Approval (HR)",
   directorPending: "Travel Requisitions Pending Your Approval (Director)",
+  history: "Travel Requisitions Approval History",
 };
 
 const COLUMNS = [
@@ -63,9 +64,16 @@ export default function TravelRequisitionsTable({
       renderRow={(req) => (
         <>
           <td className="px-6 py-5">
-            <span className="text-sm text-[#1e1b1b]">
-              {req.employee_name}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-[#1e1b1b]">
+                {req.employee_name}
+              </span>
+              {req.amendment_count > 0 && (
+                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
+                  Amended ×{req.amendment_count}
+                </span>
+              )}
+            </div>
           </td>
           <td className="px-6 py-5">
             <span className="text-sm text-[#1e1b1b]">

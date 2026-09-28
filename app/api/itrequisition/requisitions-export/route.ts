@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { query } from "@/lib/db";
 import { Workbook } from "exceljs";
 import { getSession } from "@/lib/session";
+import { getUserRoles } from "@/serverActions/GetUserRoles";
 
 export async function GET() {
   // Check if we have a valid session
@@ -11,6 +12,16 @@ export async function GET() {
     return NextResponse.json(
       { message: "Invalid or no user found" },
       { status: 401 },
+    );
+  }
+
+  // The export contains every IT requisition — restrict it to IT admins,
+  // the same "it" role that gates the "IT · All" dashboard table.
+  const roles = await getUserRoles(user.email);
+  if (!roles.includes("it")) {
+    return NextResponse.json(
+      { message: "You are not authorized to export IT requisitions" },
+      { status: 403 },
     );
   }
 

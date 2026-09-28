@@ -209,6 +209,12 @@ export const OPERATIONS_SECTIONS = [
   "RHW2/RHW3",
 ];
 
+// A casual requisition stays amendable by its submitter until HR approves it -
+// HOD and HR declines can both be corrected by amending.
+export function isCasualAmendableHrStatus(hrStatus: string): boolean {
+  return hrStatus === "pending" || hrStatus === "declined";
+}
+
 export const ENGINEERING_HVAC_DEPARTMENT = "Engineering & HVAC";
 export const CASUAL_CATEGORIES = ["Technician", "Welder"] as const;
 export type CasualCategory = (typeof CASUAL_CATEGORIES)[number];
@@ -216,6 +222,7 @@ export const CASUAL_CATEGORY_RATES: Record<CasualCategory, number> = {
   Technician: 1000,
   Welder: 1500,
 };
+export const ENGINEERING_HVAC_NON_RUIRU_RATE = 900;
 
 export const REPLACEMENT_OR_NEW_OPTIONS = ["Replacement", "New"] as const;
 export type ReplacementOrNew = (typeof REPLACEMENT_OR_NEW_OPTIONS)[number];
@@ -297,8 +304,12 @@ export function getCasualRatePerDay(
   department?: string,
   casualCategory?: CasualCategory,
 ) {
+  // Engineering & HVAC category rates apply at Ruiru only; every other
+  // location pays a flat rate regardless of category.
   if (department === ENGINEERING_HVAC_DEPARTMENT) {
-    return CASUAL_CATEGORY_RATES[casualCategory ?? "Technician"];
+    return location === "Ruiru"
+      ? CASUAL_CATEGORY_RATES[casualCategory ?? "Technician"]
+      : ENGINEERING_HVAC_NON_RUIRU_RATE;
   }
   return location === "Ruiru" ? 798 : 868;
 }

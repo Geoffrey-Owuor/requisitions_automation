@@ -1,6 +1,7 @@
 "use server";
 import { query } from "@/lib/db";
 import { getSession } from "@/lib/session";
+import { hodHistoryScopeSql, hodPendingScopeSql } from "@/lib/hodAssignment";
 import {
   PaginatedResult,
   emptyPaginatedResult,
@@ -10,7 +11,7 @@ import {
 import { QueryResultRow } from "pg";
 
 export interface CasualRequisitionDataProps {
-  dataFlag: "userData" | "hodPending" | "hrPending";
+  dataFlag: "userData" | "hodPending" | "hrPending" | "history";
   page?: number;
   pageSize?: number;
   searchTerm?: string;
@@ -37,12 +38,16 @@ export const getCasualRequisitionData = async ({
 
   // HR is array-based and form-scoped — verify this approver is actually
   // permitted to act on casual requisitions rather than trusting a role.
-  if (dataFlag === "hrPending") {
+  let isHr = false;
+  if (dataFlag === "hrPending" || dataFlag === "history") {
     const membership = await query(
       "SELECT 1 FROM hr_array WHERE hr_email = $1 AND 'casual' = ANY(hr_forms) LIMIT 1",
       [user.email],
     );
-    if (membership.length === 0) return emptyPaginatedResult(page, pageSize);
+    isHr = membership.length > 0;
+    if (dataFlag === "hrPending" && !isHr) {
+      return emptyPaginatedResult(page, pageSize);
+    }
   }
 
   const baseParams: (string | number)[] = [];
@@ -54,8 +59,9 @@ export const getCasualRequisitionData = async ({
       baseParams.push(user.email);
       break;
     case "hodPending":
+      // Assigned to me, or to a HOD I'm an alternate for
       conditions.push(
-        `c.casual_hod_email = $${baseParams.length + 1} AND c.casual_hod_approval_status = $${baseParams.length + 2}`,
+        `${hodPendingScopeSql("c.casual_hod_email", "c.submitter_email", `$${baseParams.length + 1}`)} AND c.casual_hod_approval_status = $${baseParams.length + 2}`,
       );
       baseParams.push(user.email, "pending");
       break;
@@ -65,6 +71,25 @@ export const getCasualRequisitionData = async ({
       );
       baseParams.push("approved", "pending");
       break;
+    case "history": {
+      // Their own (current stored) HOD rows, plus (HR) everything the HOD
+      // approved.
+      // HOD rows: assigned to me, or acted on by me as an alternate HOD
+      const scopes = [
+        hodHistoryScopeSql(
+          "c.casual_hod_email",
+          "c.casual_hod_actioned_by_email",
+          `$${baseParams.length + 1}`,
+        ),
+      ];
+      baseParams.push(user.email);
+      if (isHr) {
+        scopes.push(`c.casual_hod_approval_status = $${baseParams.length + 1}`);
+        baseParams.push("approved");
+      }
+      conditions.push(`(${scopes.join(" OR ")})`);
+      break;
+    }
   }
 
   if (searchTerm?.trim()) {

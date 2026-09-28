@@ -1,6 +1,14 @@
 import { EmailDataValues, EmailDataProps } from "@/services/EmailSender";
 import { dateFormatter } from "@/public/assets";
 import { BASE_URL } from "@/public/assets";
+import { TravelPushbackValues } from "@/lib/travelPushback";
+import {
+  formatTravelAmendmentValue,
+  sortTravelAmendmentFields,
+  TravelAmendmentValues,
+  travelAmendmentFieldLabel,
+} from "@/lib/travelAmendment";
+import { escapeHtml } from "@/utils/escapeHtml";
 
 interface TravelRequisitionProps extends Omit<EmailDataProps, "to"> {
   emailData: EmailDataValues;
@@ -128,6 +136,10 @@ export function TravelRequisitionTemplate({
              ${emailData.approvaltier === "Tier 3" ? statusCard("Executive Director", emailData.directorapprovalstatus, emailData.directorapprover, emailData.directoremail, emailData.directorcomments, true) : ""}
           </div>
 
+          ${getAmendmentHistoryEmailHtml(emailData.amendments)}
+
+          ${getPushbackHistoryEmailHtml(emailData.pushbacks)}
+
           <div style="margin-top: 32px; text-align: center;">
             <div style="${buttonStyle}">
               <a href="${BASE_URL}/travelapproval/${requestId}${reviewLink}" style="background-color: #a31d1d; color: #ffffff; padding: 14px 36px; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 13px; display: inline-block;">Review Requisition</a>
@@ -203,6 +215,80 @@ function statusCard(
         </tr>
       </table>
       ${comments ? `<p style="margin: 8px 0 0; font-size: 12px; color: #5a3a3a; font-style: italic; background-color: #ffffff; padding: 8px; border-radius: 8px; border: 1px dashed #eee;">"${comments}"</p>` : ""}
+    </div>
+  `;
+}
+
+// HELPER - AMENDMENT HISTORY (reason and field values are free text, so escaped)
+function getAmendmentHistoryEmailHtml(
+  amendments: TravelAmendmentValues[] = [],
+): string {
+  if (amendments.length === 0) return "";
+
+  const entriesHtml = amendments
+    .map((amendment) => {
+      const fieldsHtml = sortTravelAmendmentFields(amendment.fields)
+        .map(
+          (field) => `
+          <tr>
+            <td style="padding: 4px 8px 4px 0; font-size: 12px; color: #7c5a5a; vertical-align: top;">${escapeHtml(travelAmendmentFieldLabel(field.fieldKey))}</td>
+            <td style="padding: 4px 0; font-size: 12px; color: #a18080; text-decoration: line-through; vertical-align: top; white-space: pre-line;">${escapeHtml(formatTravelAmendmentValue(field.fieldKey, field.previousValue))}</td>
+            <td style="padding: 4px 0 4px 8px; font-size: 12px; color: #1a0f0f; font-weight: 700; vertical-align: top; white-space: pre-line;">${escapeHtml(formatTravelAmendmentValue(field.fieldKey, field.newValue))}</td>
+          </tr>`,
+        )
+        .join("");
+
+      const tierChange =
+        amendment.previousapprovaltier !== amendment.newapprovaltier
+          ? `<p style="margin: 6px 0 0; font-size: 12px; color: #5a3a3a;"><strong>Approval tier:</strong> ${escapeHtml(amendment.previousapprovaltier)} &rarr; ${escapeHtml(amendment.newapprovaltier)}</p>`
+          : "";
+
+      return `
+      <div style="padding: 14px 16px; border-bottom: 1px solid #f5e6c8; background-color: #fffbeb;">
+        <p style="margin: 0; font-size: 12px; font-weight: 700; color: #1a0f0f;">Amendment #${amendment.amendmentnumber}</p>
+        <p style="margin: 2px 0 0; font-size: 11px; color: #8c7474;">${escapeHtml(amendment.amendedbyname)} &middot; ${dateFormatter(amendment.createdat)}</p>
+        <p style="margin: 8px 0 0; font-size: 12px; color: #5a3a3a;"><strong>Reason:</strong> ${escapeHtml(amendment.amendmentreason)}</p>
+        ${tierChange}
+        <table width="100%" style="margin-top: 8px; border-collapse: collapse;">${fieldsHtml}</table>
+      </div>
+    `;
+    })
+    .join("");
+
+  return `
+    <p style="font-size: 11px; font-weight: 700; color: #a31d1d; text-transform: uppercase; letter-spacing: 1.5px; margin: 24px 0 12px;">Amendment History</p>
+    <div style="border-radius: 16px; border: 1px solid #f5e6c8; overflow: hidden;">
+      ${entriesHtml}
+    </div>
+  `;
+}
+
+// HELPER - HR PUSH-BACK HISTORY (reason/comments are free text, so escaped)
+function getPushbackHistoryEmailHtml(
+  pushbacks: TravelPushbackValues[] = [],
+): string {
+  if (pushbacks.length === 0) return "";
+
+  const entriesHtml = pushbacks
+    .map(
+      (pushback) => `
+      <div style="padding: 14px 16px; border-bottom: 1px solid #f5e6c8; background-color: #fffbeb;">
+        <p style="margin: 0; font-size: 12px; font-weight: 700; color: #1a0f0f;">
+          Push-back #${pushback.pushbacknumber}: ${pushback.previousstatus.toUpperCase()} &rarr; ${pushback.newstatus.toUpperCase()}
+        </p>
+        <p style="margin: 2px 0 0; font-size: 11px; color: #8c7474;">${escapeHtml(pushback.pushedbyname)} &middot; ${dateFormatter(pushback.createdat)}</p>
+        <p style="margin: 8px 0 0; font-size: 12px; color: #5a3a3a;"><strong>Reason:</strong> ${escapeHtml(pushback.pushbackreason)}</p>
+        <p style="margin: 4px 0 0; font-size: 12px; color: #5a3a3a;"><strong>Previous comments:</strong> ${escapeHtml(pushback.previouscomments || "No comments")}</p>
+        <p style="margin: 4px 0 0; font-size: 12px; color: #5a3a3a;"><strong>New comments:</strong> ${escapeHtml(pushback.newcomments || "No comments")}</p>
+      </div>
+    `,
+    )
+    .join("");
+
+  return `
+    <p style="font-size: 11px; font-weight: 700; color: #a31d1d; text-transform: uppercase; letter-spacing: 1.5px; margin: 24px 0 12px;">HR Push-back History</p>
+    <div style="border-radius: 16px; border: 1px solid #f5e6c8; overflow: hidden;">
+      ${entriesHtml}
     </div>
   `;
 }

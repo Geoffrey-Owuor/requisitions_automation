@@ -12,6 +12,8 @@ import {
   Plane,
   Globe,
   CheckCircle2,
+  History,
+  Loader2,
 } from "lucide-react";
 import Image from "next/image";
 import { assets } from "@/public/assets";
@@ -20,7 +22,7 @@ import {
   TRAVEL_MODES,
   BUDGET_STATUS,
 } from "@/public/assets";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { loadBaseDepartments, loadHodArray } from "@/lib/loadAppDataV2";
 import TravelConfirmationModal from "./TravelConfirmationModal";
 import { ApiHandler } from "@/utils/ApiHandler";
@@ -34,6 +36,9 @@ import {
   findHodForDepartment,
   excludeSubmitterFromHodArray,
 } from "./Modules/Retail/CasualRequisitionForm";
+import { getTravelAmendmentContext } from "@/serverActions/GetTravelAmendmentContext";
+import TravelAmendmentHistory from "./Approvers/TravelApprovers/TravelAmendmentHistory";
+import { MAX_AMENDMENT_REASON_LENGTH } from "@/lib/travelAmendment";
 
 export interface TravelFormData {
   employeeName: string;
@@ -86,8 +91,16 @@ interface FormInputProps {
   onChange: (value: string | number) => void;
 }
 
-export default function TravelRequisitionPage() {
+export default function TravelRequisitionPage({
+  amendRequestId,
+}: {
+  amendRequestId?: string | null;
+} = {}) {
   const { username, email } = useUser();
+  const queryClient = useQueryClient();
+  const setTravelAmendmentRequestId = useToggleStore(
+    (state) => state.setTravelAmendmentRequestId,
+  );
 
   const triggerScroll = useToggleStore((state) => state.triggerScroll);
   const scrollTrigger = useToggleStore((state) => state.scrollTrigger);
@@ -106,9 +119,47 @@ export default function TravelRequisitionPage() {
   const hodArray = excludeSubmitterFromHodArray(rawHodArray, email);
   const HOD_APPROVERS = hodArray.map((hod) => hod.name);
 
+  // Amend mode: fetch the eligibility check + pre-fill data for this
+  // requisition. Re-checked server-side every time the modal opens.
+  const { data: amendmentContext, isLoading: amendmentLoading } = useQuery({
+    queryKey: ["TravelAmendmentContext", amendRequestId],
+    queryFn: () => getTravelAmendmentContext(amendRequestId!),
+    enabled: !!amendRequestId,
+  });
+  const amendmentNotEligible =
+    !!amendRequestId && !amendmentLoading && !amendmentContext;
+  const isAmendment = !!amendRequestId;
+
   const [formData, setFormData] = useState<TravelFormData>(InitialFormState);
+  const [reason, setReason] = useState("");
 
   const [step, setStep] = useState(1);
+
+  // Seed the form once the amendment context loads (runs at most once per
+  // mount - the modal remounts this component fresh each time it opens, so
+  // there's no risk of clobbering later user edits).
+  const [seededFromAmendment, setSeededFromAmendment] = useState(false);
+  if (!seededFromAmendment && amendmentContext?.initialData) {
+    setSeededFromAmendment(true);
+    setFormData(amendmentContext.initialData);
+  }
+
+  // Once seeded, if the pre-filled HOD approver has since left hod_array, or
+  // the submitter has since become that HOD (and is now filtered out by
+  // excludeSubmitterFromHodArray), force a re-pick rather than silently
+  // submitting a stale/self-defeating approver. Runs at most once per mount.
+  const [hodValidityChecked, setHodValidityChecked] = useState(false);
+  if (
+    isAmendment &&
+    seededFromAmendment &&
+    !hodValidityChecked &&
+    !hodsLoading
+  ) {
+    setHodValidityChecked(true);
+    if (formData.hodApprover && !HOD_APPROVERS.includes(formData.hodApprover)) {
+      setFormData((prev) => ({ ...prev, hodApprover: "" }));
+    }
+  }
 
   //alert object
   const [alertInfo, setAlertInfo] = useState<AlertInfo>({
@@ -135,7 +186,8 @@ export default function TravelRequisitionPage() {
     (isEngineering &&
       formData.engineeringJobs.some(
         (job) => !job.title || isEmpty(job.amount),
-      ));
+      )) ||
+    (isAmendment && reason.trim() === "");
 
   // Getting the total cost
   const totalCost =
@@ -166,26 +218,37 @@ export default function TravelRequisitionPage() {
         .join("\n");
     }
 
-    const payload = {
-      formData: {
-        ...formData,
-        // We override this property specifically for the database string
-        engineeringJobs: formattedEngineeringJobs,
-      },
-      totalCost,
-      approvalTier: generatedAprovalTier,
-      submittedBy: {
-        name: username,
-        email: email,
-      },
+    const submittedFormData = {
+      ...formData,
+      // We override this property specifically for the database string
+      engineeringJobs: formattedEngineeringJobs,
     };
+
+    const payload = isAmendment
+      ? {
+          requestId: amendRequestId,
+          expectedAmendmentCount: amendmentContext?.expectedAmendmentCount,
+          reason,
+          formData: submittedFormData,
+        }
+      : {
+          formData: submittedFormData,
+          totalCost,
+          approvalTier: generatedAprovalTier,
+          submittedBy: {
+            name: username,
+            email: email,
+          },
+        };
 
     setSubmitting(true);
 
     // Posting the submitted data
     try {
       const response = await ApiHandler(
-        "/api/travelrequisition/submitrequisition",
+        isAmendment
+          ? "/api/travelrequisition/submitamendment"
+          : "/api/travelrequisition/submitrequisition",
         "POST",
         payload,
       );
@@ -206,8 +269,12 @@ export default function TravelRequisitionPage() {
           "Your requisition has been submitted successfully, you will receive a confirmation email shortly",
       });
 
-      // Clear the form data
-      setFormData(InitialFormState);
+      if (isAmendment) {
+        queryClient.invalidateQueries({ queryKey: ["TravelRequisitionsData"] });
+      } else {
+        // Clear the form data
+        setFormData(InitialFormState);
+      }
 
       // set step to to show final modal step
       setStep(3);
@@ -241,11 +308,46 @@ export default function TravelRequisitionPage() {
     }));
   };
 
+  if (amendRequestId && amendmentLoading) {
+    return (
+      <div className="flex items-center justify-center py-24">
+        <Loader2 className="h-6 w-6 animate-spin text-rose-500" />
+      </div>
+    );
+  }
+
+  if (amendmentNotEligible) {
+    return (
+      <div className="mx-auto max-w-md rounded-2xl border border-rose-200 bg-rose-50 p-6 text-center text-sm text-rose-700">
+        This requisition can no longer be amended. It may have already been
+        approved by HR, its departure date may have passed, or you may not be
+        its original submitter.
+      </div>
+    );
+  }
+
   return (
     <div className="relative p-2">
       {submitting && <SubmittingOverlay />}
       {step === 3 && (
-        <AlertModal alertInfo={alertInfo} onBack={() => setStep(1)} />
+        <AlertModal
+          alertInfo={alertInfo}
+          heading={
+            isAmendment
+              ? { success: "Amendment submitted!", error: "Amendment failed" }
+              : undefined
+          }
+          buttonLabel={
+            isAmendment ? { success: "Close", error: "Try again" } : undefined
+          }
+          onBack={() => {
+            if (isAmendment && alertInfo.alertType === "success") {
+              setTravelAmendmentRequestId(null);
+            } else {
+              setStep(1);
+            }
+          }}
+        />
       )}
       {step === 2 && (
         <TravelConfirmationModal
@@ -259,6 +361,8 @@ export default function TravelRequisitionPage() {
           onSubmit={handleSubmit}
           submitting={submitting}
           totalEngineeringAmount={totalEngineeringCost}
+          isAmendment={isAmendment}
+          reason={reason}
         />
       )}
       {step === 1 && (
@@ -277,13 +381,38 @@ export default function TravelRequisitionPage() {
           <header className="mb-8 flex items-end justify-between max-sm:flex-col max-sm:items-start max-sm:gap-5">
             <div>
               <h1 className="m-0 text-2xl font-semibold tracking-[-0.5px] text-[#1e1b1b]">
-                Travel Requisition
+                {isAmendment ? "Amend Travel Requisition" : "Travel Requisition"}
               </h1>
               <p className="mt-1 text-[14px] text-[#7c5a5a]">
-                Submit your business travel details for approval.
+                {isAmendment
+                  ? "Update this requisition - the approval workflow will restart from HOD."
+                  : "Submit your business travel details for approval."}
               </p>
             </div>
           </header>
+
+          {isAmendment && (
+            <div className="mb-6 flex items-start gap-2.5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3.5 text-[13px] text-amber-800">
+              <Info className="mt-0.5 h-4 w-4 shrink-0" />
+              <p>
+                Amendments are only possible until HR approves this
+                requisition, and no later than its departure date. Submitting
+                this amendment resets every approval stage, so it will need to
+                be re-approved from the HOD stage onward. If the new total
+                changes the approval tier, the Director stage is added or
+                removed to match.
+              </p>
+            </div>
+          )}
+
+          {isAmendment && !!amendmentContext?.history.length && (
+            <div className="mb-6 rounded-3xl border border-white/85 bg-white/65 px-6 py-6 shadow-[0_24px_48px_rgba(160,60,60,0.10)] backdrop-blur-2xl sm:px-8">
+              <h2 className="mb-2 flex items-center gap-2 text-[13px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
+                <History size={16} /> Previous Amendments
+              </h2>
+              <TravelAmendmentHistory amendments={amendmentContext.history} />
+            </div>
+          )}
 
           {/* Compact Travel Approval Tiers Guideline Card */}
           <div className="mb-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
@@ -565,6 +694,25 @@ export default function TravelRequisitionPage() {
                   </div>
                 </div>
               </div>
+
+              {/* Reason for Amendment */}
+              {isAmendment && (
+                <div>
+                  <h2 className="mb-4 flex items-center gap-2 text-[13px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
+                    <History size={16} /> Reason for Amendment
+                  </h2>
+                  <textarea
+                    className="h-20 w-full resize-none rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 py-3 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
+                    placeholder="Explain what changed and why..."
+                    value={reason}
+                    maxLength={MAX_AMENDMENT_REASON_LENGTH}
+                    required
+                    onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+                      setReason(e.target.value)
+                    }
+                  />
+                </div>
+              )}
 
               <button
                 type="submit"

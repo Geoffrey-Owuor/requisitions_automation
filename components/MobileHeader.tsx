@@ -59,6 +59,12 @@ const MobileHeader = () => {
   const showTravelRequisition = useToggleStore(
     (state) => state.showTravelRequisition,
   );
+  const travelAmendmentRequestId = useToggleStore(
+    (state) => state.travelAmendmentRequestId,
+  );
+  const setTravelAmendmentRequestId = useToggleStore(
+    (state) => state.setTravelAmendmentRequestId,
+  );
   const setShowTravelRequisition = useToggleStore(
     (state) => state.setShowTravelRequisition,
   );
@@ -110,10 +116,13 @@ const MobileHeader = () => {
 
       {/* Travel Modal */}
       <ModalWrapper
-        isOpen={showTravelRequisition}
-        onClose={() => setShowTravelRequisition(false)}
+        isOpen={showTravelRequisition || !!travelAmendmentRequestId}
+        onClose={() => {
+          setShowTravelRequisition(false);
+          setTravelAmendmentRequestId(null);
+        }}
       >
-        <TravelRequisitionPage />
+        <TravelRequisitionPage amendRequestId={travelAmendmentRequestId} />
       </ModalWrapper>
 
       {/* Key Access Requisition Modal */}
