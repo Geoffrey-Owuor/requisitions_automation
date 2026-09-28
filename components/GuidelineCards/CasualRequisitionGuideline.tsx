@@ -63,7 +63,7 @@ export default function CasualRequisitionGuideline() {
             items={[
               "Ruiru location: KES 798 per casual, per day.",
               "All other locations: KES 868 per casual, per day.",
-              "Engineering & HVAC department: KES 1,000 per casual, per day for Technicians, KES 1,500 for Welders (overrides the location-based rate).",
+              "Engineering & HVAC department: at Ruiru, KES 1,000 per casual, per day for Technicians and KES 1,500 for Welders; at all other locations, KES 900 per casual, per day for both (overrides the location-based rate).",
               "Total cost = Number of Casuals &times; Rate per Day &times; Engagement Days.",
             ]}
           />
@@ -95,7 +95,7 @@ export default function CasualRequisitionGuideline() {
             title="Who & When"
             items={[
               "Only the original submitter can amend their own requisition.",
-              "Allowed any time before HR gives final approval - a HOD decline can still be amended.",
+              "Allowed any time until HR approves it - a HOD or HR decline can still be amended.",
               "Once HR has approved, the requisition is locked and can no longer be changed.",
             ]}
           />

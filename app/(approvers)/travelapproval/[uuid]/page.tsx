@@ -10,11 +10,22 @@ import TravelApprovalSkeleton from "@/components/Skeletons/TravelApprovalSkeleto
 import AlreadyProcessed from "@/components/Approvers/TravelApprovers/AlreadyProcessed";
 import InvalidToken from "@/components/Approvers/TravelApprovers/InvalidToken";
 import NotFoundRequest from "@/components/Approvers/TravelApprovers/NotFoundRequest";
+import PushbackUnavailable from "@/components/Approvers/TravelApprovers/PushbackUnavailable";
 import { isValidTravelStage, TRAVEL_STAGE_LABELS } from "@/public/assets";
+import {
+  getTravelPushbackBlocker,
+  PUSHBACK_WINDOW_SQL,
+  TravelPushbackValues,
+  travelPushbacksQuery,
+} from "@/lib/travelPushback";
+import {
+  TravelAmendmentValues,
+  travelAmendmentsQuery,
+} from "@/lib/travelAmendment";
 
 type ApprovalPageProps = {
   params: Promise<{ uuid: string }>;
-  searchParams: Promise<{ token: string; stage: string }>;
+  searchParams: Promise<{ token: string; stage: string; mode?: string }>;
 };
 
 // Generating page metadata
@@ -40,10 +51,16 @@ export const generateMetadata = async ({
 
 const page = async ({ params, searchParams }: ApprovalPageProps) => {
   const { uuid } = await params;
-  const { token, stage } = await searchParams;
+  const { token, stage, mode } = await searchParams;
 
   // First fallback - one of our props is missing/falsy
   if (!uuid || !token || !isValidTravelStage(stage)) return <NotFoundRequest />;
+
+  // Push-back mode (HR reversing its own recorded decision) only exists on
+  // the HR stage. It only changes what this page shows - the rules are
+  // enforced by PushbackTravelHrDecision.
+  const isPushback = mode === "pushback";
+  if (isPushback && stage !== "hr") return <NotFoundRequest />;
 
   // HR approvers are additionally scoped to the forms in their hr_forms
   // allow-list - an approver not permitted for this form is treated the
@@ -79,12 +96,18 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
         travel_within_budget, travel_approval_tier,
         engineering_jobs,
         travel_hod_approver, travel_hod_approval_status, travel_hod_comments,
-        travel_hr_approver, travel_hr_approval_status, travel_hr_comments
+        travel_hr_approver, travel_hr_approval_status, travel_hr_comments,
+        travel_hr_pushback_count, amendment_count,
+        ${PUSHBACK_WINDOW_SQL} AS within_pushback_window
         FROM travel_requisitions
         WHERE request_id = $1
       `;
 
-  const result = await query(baseQuery, [uuid]);
+  const [result, pushbacks, amendments] = await Promise.all([
+    query(baseQuery, [uuid]),
+    query<TravelPushbackValues>(travelPushbacksQuery, [uuid]),
+    query<TravelAmendmentValues>(travelAmendmentsQuery, [uuid]),
+  ]);
 
   // Entered request uuid could not be found in our database
   if (result.length === 0) return <NotFoundRequest />;
@@ -100,7 +123,15 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
   const approvalStatus = requestData.approval_status;
   const approverName = requestData.approver_name;
 
-  if (approvalStatus !== "pending" && approvalStatus !== "N/A")
+  if (isPushback) {
+    const blocker = getTravelPushbackBlocker({
+      hrStatus: approvalStatus,
+      approvalTier: requestData.travel_approval_tier,
+      pushbackCount: requestData.travel_hr_pushback_count,
+      withinWindow: requestData.within_pushback_window,
+    });
+    if (blocker) return <PushbackUnavailable reason={blocker} />;
+  } else if (approvalStatus !== "pending" && approvalStatus !== "N/A")
     return (
       <AlreadyProcessed processedBy={approverName} status={approvalStatus} />
     );
@@ -168,6 +199,22 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
               requestCreatedAt={requestData.request_created_at}
               engineeringJobs={requestData.engineering_jobs}
               previousApprovals={previousApprovals}
+              pushbacks={pushbacks}
+              amendments={amendments}
+              amendmentCount={Number(requestData.amendment_count)}
+              pushback={
+                isPushback
+                  ? {
+                      token,
+                      currentStatus: approvalStatus,
+                      currentApprover: requestData.travel_hr_approver,
+                      currentComments: requestData.travel_hr_comments,
+                      pushbackCount: Number(
+                        requestData.travel_hr_pushback_count,
+                      ),
+                    }
+                  : undefined
+              }
             />
           </Suspense>
         </RequisitionPagesWrapper>

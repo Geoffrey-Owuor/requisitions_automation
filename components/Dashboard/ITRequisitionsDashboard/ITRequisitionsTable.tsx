@@ -15,6 +15,7 @@ const dynamicTitles: Record<ITRequisitionDataProps["dataFlag"], string> = {
   hodPending: "IT Requisitions Pending Your Approval (HOD)",
   itPending: "IT Requisitions Pending IT Approval",
   itAll: "All Submitted IT Requisitions",
+  history: "IT Requisitions Approval History (HOD)",
 };
 
 const COLUMNS = [

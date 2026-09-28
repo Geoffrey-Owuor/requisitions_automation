@@ -19,6 +19,7 @@ const dynamicTitles: Record<
     "Employee Requisitions Pending Your Approval (Retail Director)",
   directorPending: "Employee Requisitions Pending Your Approval (CEO)",
   hrPending: "Employee Requisitions Pending Your Approval (HR)",
+  history: "Employee Requisitions Approval History",
 };
 
 const COLUMNS = [

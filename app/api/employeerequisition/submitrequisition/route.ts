@@ -8,6 +8,7 @@ import {
 import { query, pool } from "@/lib/db";
 import { EmployeeEmailSender } from "@/services/EmployeeEmailSender";
 import { getSession } from "@/lib/session";
+import { loadHodAlternates } from "@/lib/hodAssignment";
 import { isDirectorEmail } from "@/utils/isDirectorEmail";
 import { isRetailDirectorEmail } from "@/utils/isRetailDirectorEmail";
 import {
@@ -236,7 +237,7 @@ export async function POST(request: NextRequest) {
       `
       SELECT hod_uuid AS uuid,
       hod_email AS email
-      FROM hod_array WHERE hod_name = $1 LIMIT 1
+      FROM hod_array WHERE hod_name = $1 AND is_alternate_only = false LIMIT 1
       `,
       [hodApprover],
     );
@@ -409,7 +410,7 @@ export async function POST(request: NextRequest) {
         UPDATE employee_requisitions
         SET
         employee_hod_approval_date = CURRENT_TIMESTAMP,
-        employee_hod_email = $1,
+        employee_hod_actioned_by_email = $1,
         employee_hod_approval_status = $2,
         employee_hod_comments = $3
         WHERE request_id = $4
@@ -559,6 +560,19 @@ export async function POST(request: NextRequest) {
         role: "HOD",
         reviewLink: `?token=${hodUuid}&stage=hod`,
       });
+      // The HOD's alternates can also act on the HOD stage (first click wins)
+      const hodAlternates = await loadHodAlternates(hodEmail, email);
+      for (const alternate of hodAlternates) {
+        EmployeeEmailSender({
+          to: alternate.email,
+          requestId,
+          message:
+            "A new employee requisition has been submitted and requires your approval as an alternate HOD approver",
+          title: "Action Required: Employee Requisition Review",
+          role: "HOD",
+          reviewLink: `?token=${alternate.uuid}&stage=hod`,
+        });
+      }
 
       EmployeeEmailSender({
         to: email,

@@ -19,6 +19,7 @@ import {
   Check,
   X,
   MessageSquareText,
+  Undo2,
 } from "lucide-react";
 import { dateFormatter } from "@/public/assets";
 import SubmittingOverlay from "@/components/SubmittingOverlay";
@@ -30,6 +31,16 @@ import EngineeringJobSummaryCard from "./EngineeringJobSummaryCard";
 import PreviousApprovalsSection, {
   PreviousApproval,
 } from "@/components/Approvers/PreviousApprovalsSection";
+import TravelPushbackHistory from "./TravelPushbackHistory";
+import TravelAmendmentHistory from "./TravelAmendmentHistory";
+import { TravelAmendmentValues } from "@/lib/travelAmendment";
+import { PushbackTravelHrDecision } from "@/serverActions/PushbackTravelHrDecision";
+import {
+  MAX_PUSHBACK_REASON_LENGTH,
+  MAX_TRAVEL_HR_PUSHBACKS,
+  oppositeHrStatus,
+  TravelPushbackValues,
+} from "@/lib/travelPushback";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -57,6 +68,17 @@ export interface TravelApprovalModalProps {
   requestCreatedAt: string;
   engineeringJobs: string;
   previousApprovals: PreviousApproval[];
+  pushbacks: TravelPushbackValues[];
+  amendments: TravelAmendmentValues[];
+  amendmentCount: number;
+  // Set when HR is reversing its own recorded decision (mode=pushback)
+  pushback?: {
+    token: string;
+    currentStatus: string;
+    currentApprover: string;
+    currentComments: string;
+    pushbackCount: number;
+  };
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -121,8 +143,13 @@ const TravelApprovalModal = ({
   requestCreatedAt,
   engineeringJobs,
   previousApprovals,
+  pushbacks,
+  amendments,
+  amendmentCount,
+  pushback,
 }: TravelApprovalModalProps) => {
   const [comments, setComments] = useState("");
+  const [reason, setReason] = useState("");
   const [approving, setApproving] = useState(false);
   const [declining, setDeclining] = useState(false);
   const [alertInfo, setAlertInfo] = useState<AlertInfo>({
@@ -143,15 +170,26 @@ const TravelApprovalModal = ({
       comments.trim() === "" ? "No comments" : comments.trim();
 
     try {
-      // Call our approval server action
-      const response = await UpdateTravelStatus({
-        uuid,
-        stage,
-        status,
-        comments: commentsPayload,
-        approverName,
-        approverEmail,
-      });
+      // Call our approval (or push-back) server action
+      const response = pushback
+        ? await PushbackTravelHrDecision({
+            uuid,
+            token: pushback.token,
+            status,
+            comments: commentsPayload,
+            reason,
+            expectedPushbackCount: pushback.pushbackCount,
+            expectedAmendmentCount: amendmentCount,
+          })
+        : await UpdateTravelStatus({
+            uuid,
+            stage,
+            status,
+            comments: commentsPayload,
+            approverName,
+            approverEmail,
+            expectedAmendmentCount: amendmentCount,
+          });
 
       // Set the alert info
       setAlertInfo({
@@ -161,6 +199,7 @@ const TravelApprovalModal = ({
 
       // Reset comments
       setComments("");
+      setReason("");
 
       // Set the step
       setStep(2);
@@ -205,13 +244,16 @@ const TravelApprovalModal = ({
           {/* Page header */}
           <div className="mb-8">
             <p className="mb-1 text-[11px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
-              {roleLabel} Review
+              {roleLabel} {pushback ? "Push-back" : "Review"}
             </p>
             <h1 className="text-2xl leading-tight font-semibold tracking-[-0.5px] text-[#1e1b1b]">
               Travel Requisition - {employeeName}
             </h1>
             <p className="mt-1 text-[14px] text-[#7c5a5a]">
-              Submitted {dateFormatter(requestCreatedAt)} · Pending your review
+              Submitted {dateFormatter(requestCreatedAt)} ·{" "}
+              {pushback
+                ? `Pushing back the recorded HR decision (${pushback.pushbackCount + 1} of ${MAX_TRAVEL_HR_PUSHBACKS})`
+                : "Pending your review"}
             </p>
           </div>
 
@@ -231,7 +273,7 @@ const TravelApprovalModal = ({
                 </div>
               </div>
               <span className="rounded-lg bg-rose-100 px-3 py-1 text-[11px] font-medium text-rose-700">
-                Reviewing
+                {pushback ? "Pushing back" : "Reviewing"}
               </span>
             </div>
 
@@ -379,7 +421,50 @@ const TravelApprovalModal = ({
             </div>
 
             {/* ── Previous Approvals ── */}
-            <PreviousApprovalsSection approvals={previousApprovals} />
+            <PreviousApprovalsSection
+              approvals={
+                pushback
+                  ? [
+                      ...previousApprovals,
+                      {
+                        label: `${stageLabel.hr} (current decision)`,
+                        approverName: pushback.currentApprover,
+                        status: pushback.currentStatus,
+                        comments: pushback.currentComments,
+                      },
+                    ]
+                  : previousApprovals
+              }
+            />
+
+            {/* ── Amendment History ── */}
+            <TravelAmendmentHistory amendments={amendments} />
+
+            {/* ── HR Push-back History ── */}
+            <TravelPushbackHistory pushbacks={pushbacks} />
+
+            {/* ── Push-back Reason (push-back mode only) ── */}
+            {pushback && (
+              <div className="mb-6 border-t border-[rgba(240,180,180,0.4)] pt-6">
+                <div className="flex items-center gap-1.5">
+                  <Undo2 className="mb-2.5 h-3.5 w-3.5 text-amber-500" />
+                  <SectionLabel>Push-back Reason (required)</SectionLabel>
+                </div>
+                <textarea
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                  maxLength={MAX_PUSHBACK_REASON_LENGTH}
+                  placeholder="Why is the HR decision being changed?"
+                  rows={3}
+                  className="w-full resize-none rounded-2xl border border-amber-300 bg-white/70 px-4 py-3.5 text-[13px] leading-relaxed text-[#1e1b1b] transition-all duration-200 outline-none placeholder:text-[#c0a0a0] focus:border-amber-400 focus:bg-white/90 focus:shadow-[0_0_0_3px_rgba(245,158,11,0.1)]"
+                />
+                <p className="mt-1.5 text-[11px] text-[#b0a0a0]">
+                  {reason.trim() === ""
+                    ? "A reason is required to push back this decision"
+                    : `${reason.trim().length} / ${MAX_PUSHBACK_REASON_LENGTH} characters`}
+                </p>
+              </div>
+            )}
 
             {/* ── Approver Comments ── */}
             <div className="mb-6 border-t border-[rgba(240,180,180,0.4)] pt-6">
@@ -402,29 +487,53 @@ const TravelApprovalModal = ({
             </div>
 
             {/* ── Actions ── */}
-            <div className="flex gap-3 pt-1">
-              {/* Decline */}
-              <button
-                type="button"
-                disabled={declining}
-                onClick={() => handleApproval("declined")}
-                className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-[14px] border border-rose-200 bg-white/80 py-4 text-[14px] font-semibold text-rose-700 transition-all duration-200 hover:border-rose-300 hover:bg-rose-50 active:scale-[0.98]"
-              >
-                <X className="h-4 w-4" />
-                {declining ? "Declining..." : "Decline"}
-              </button>
+            {pushback ? (
+              // A push-back must flip the decision, so only the opposite
+              // decision is offered.
+              <div className="flex gap-3 pt-1">
+                <button
+                  type="button"
+                  disabled={approving || declining || reason.trim() === ""}
+                  onClick={() =>
+                    handleApproval(oppositeHrStatus(pushback.currentStatus))
+                  }
+                  className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-[14px] border-none bg-slate-900 py-4 text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none"
+                >
+                  {oppositeHrStatus(pushback.currentStatus) === "approved" ? (
+                    <Check className="h-4 w-4" />
+                  ) : (
+                    <X className="h-4 w-4" />
+                  )}
+                  {approving || declining
+                    ? "Submitting..."
+                    : `Push back to ${oppositeHrStatus(pushback.currentStatus) === "approved" ? "Approved" : "Declined"}`}
+                </button>
+              </div>
+            ) : (
+              <div className="flex gap-3 pt-1">
+                {/* Decline */}
+                <button
+                  type="button"
+                  disabled={declining}
+                  onClick={() => handleApproval("declined")}
+                  className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-[14px] border border-rose-200 bg-white/80 py-4 text-[14px] font-semibold text-rose-700 transition-all duration-200 hover:border-rose-300 hover:bg-rose-50 active:scale-[0.98]"
+                >
+                  <X className="h-4 w-4" />
+                  {declining ? "Declining..." : "Decline"}
+                </button>
 
-              {/* Approve */}
-              <button
-                type="button"
-                disabled={approving}
-                onClick={() => handleApproval("approved")}
-                className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-[14px] border-none bg-slate-900 py-4 text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)] active:scale-[0.98]"
-              >
-                <Check className="h-4 w-4" />
-                {approving ? "Approving..." : "Approve"}
-              </button>
-            </div>
+                {/* Approve */}
+                <button
+                  type="button"
+                  disabled={approving}
+                  onClick={() => handleApproval("approved")}
+                  className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-[14px] border-none bg-slate-900 py-4 text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)] active:scale-[0.98]"
+                >
+                  <Check className="h-4 w-4" />
+                  {approving ? "Approving..." : "Approve"}
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Footer note */}

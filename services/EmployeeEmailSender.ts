@@ -33,7 +33,10 @@ export interface EmployeeEmailDataValues {
   directorapprovalstatus: string;
   hrapprovalstatus: string;
   hodapprover: string;
+  // Whoever acted on the HOD stage (the assigned HOD until then)
   hodemail: string;
+  // The HOD selected at submission - never overwritten by an alternate
+  assignedhodemail: string;
   hodcomments: string;
   retaildirectorapprover: string;
   retaildirectoremail: string;
@@ -59,7 +62,8 @@ export const employeeDataQuery = `
        employee_director_approval_status AS directorapprovalstatus,
        employee_hr_approval_status AS hrapprovalstatus,
        employee_hod_approver AS hodapprover,
-       employee_hod_email AS hodemail,
+       COALESCE(employee_hod_actioned_by_email, employee_hod_email) AS hodemail,
+       employee_hod_email AS assignedhodemail,
        employee_hod_comments AS hodcomments,
        employee_retail_director_approver AS retaildirectorapprover,
        employee_retail_director_email AS retaildirectoremail,

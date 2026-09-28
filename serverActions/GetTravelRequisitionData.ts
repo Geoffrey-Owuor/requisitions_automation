@@ -1,6 +1,8 @@
 "use server";
 import { query } from "@/lib/db";
 import { getSession } from "@/lib/session";
+import { hodHistoryScopeSql, hodPendingScopeSql } from "@/lib/hodAssignment";
+import { getUserRoles } from "@/serverActions/GetUserRoles";
 import {
   PaginatedResult,
   emptyPaginatedResult,
@@ -8,9 +10,15 @@ import {
   toSafeOffsetLimit,
 } from "@/lib/pagination";
 import { QueryResultRow } from "pg";
+import { PUSHBACK_WINDOW_SQL } from "@/lib/travelPushback";
 
 export interface TravelRequisitionDataProps {
-  dataFlag: "userData" | "hodPending" | "hrPending" | "directorPending";
+  dataFlag:
+    | "userData"
+    | "hodPending"
+    | "hrPending"
+    | "directorPending"
+    | "history";
   page?: number;
   pageSize?: number;
   searchTerm?: string;
@@ -36,6 +44,18 @@ export const getTravelRequisitionData = async ({
   const user = await getSession();
   if (!user) return emptyPaginatedResult(page, pageSize);
 
+  // Travel HR/Director dashboard access is role-based — verify the role
+  // server-side rather than trusting the dashboard's role gate.
+  const roles = await getUserRoles(user.email);
+  const isHr = roles.includes("hr-travel");
+  const isDirector = roles.includes("director");
+  if (dataFlag === "hrPending" && !isHr) {
+    return emptyPaginatedResult(page, pageSize);
+  }
+  if (dataFlag === "directorPending" && !isDirector) {
+    return emptyPaginatedResult(page, pageSize);
+  }
+
   const baseParams: (string | number)[] = [];
   const conditions: string[] = [];
 
@@ -47,8 +67,9 @@ export const getTravelRequisitionData = async ({
       baseParams.push(user.email);
       break;
     case "hodPending":
+      // Assigned to me, or to a HOD I'm an alternate for
       conditions.push(
-        `travel_hod_email = $${baseParams.length + 1} AND travel_hod_approval_status = $${baseParams.length + 2}`,
+        `${hodPendingScopeSql("travel_hod_email", "submitter_email", `$${baseParams.length + 1}`)} AND travel_hod_approval_status = $${baseParams.length + 2}`,
       );
       baseParams.push(user.email, "pending");
       break;
@@ -64,6 +85,32 @@ export const getTravelRequisitionData = async ({
       );
       baseParams.push("approved", "approved", "pending");
       break;
+    case "history": {
+      // Union of every stage this user is involved in: their own HOD rows,
+      // plus (HR) everything the HOD approved and (Director) every Tier 3
+      // request that has reached the Director stage.
+      // HOD rows: assigned to me, or acted on by me as an alternate HOD
+      const scopes = [
+        hodHistoryScopeSql(
+          "travel_hod_email",
+          "travel_hod_actioned_by_email",
+          `$${baseParams.length + 1}`,
+        ),
+      ];
+      baseParams.push(user.email);
+      if (isHr) {
+        scopes.push(`travel_hod_approval_status = $${baseParams.length + 1}`);
+        baseParams.push("approved");
+      }
+      if (isDirector) {
+        scopes.push(
+          `(travel_hod_approval_status = $${baseParams.length + 1} AND travel_hr_approval_status = $${baseParams.length + 2} AND travel_director_approval_status <> $${baseParams.length + 3})`,
+        );
+        baseParams.push("approved", "approved", "N/A");
+      }
+      conditions.push(`(${scopes.join(" OR ")})`);
+      break;
+    }
   }
 
   if (searchTerm?.trim()) {
@@ -87,10 +134,14 @@ export const getTravelRequisitionData = async ({
         travel_mode, travel_total_cost,
         travel_cost_center,
         travel_hod_approval_status, travel_hr_approval_status, travel_director_approval_status,
+        travel_approval_tier, travel_hr_pushback_count,
+        amendment_count, last_amended_at,
+        -- Departure-date window shared by HR push-back and amendments
+        ${PUSHBACK_WINDOW_SQL} AS within_pushback_window,
         COUNT(*) OVER() AS total_count
         FROM travel_requisitions
         ${whereClause}
-        ORDER BY request_created_at DESC
+        ORDER BY GREATEST(request_created_at, last_amended_at) DESC
         LIMIT $${baseParams.length + 1} OFFSET $${baseParams.length + 2}
     `;
 

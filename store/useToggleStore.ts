@@ -9,6 +9,8 @@ interface ToggleButtonState {
   // Set to a request_id to open the Casual Requisition form in amend mode
   // for that requisition; null when not amending.
   casualAmendmentRequestId: string | null;
+  // Same, for the Travel Requisition form
+  travelAmendmentRequestId: string | null;
   scrollTrigger: boolean;
 }
 
@@ -19,6 +21,7 @@ interface ToggleButtonActions {
   setShowCasualRequisition: (value: boolean) => void;
   setShowEmployeeRequisition: (value: boolean) => void;
   setCasualAmendmentRequestId: (value: string | null) => void;
+  setTravelAmendmentRequestId: (value: string | null) => void;
   triggerScroll: (value: boolean) => void;
   reset: () => void; //The reset function
 }
@@ -32,6 +35,7 @@ const initialValues: ReducedToggleButtonState = {
   showCasualRequisition: false,
   showEmployeeRequisition: false,
   casualAmendmentRequestId: null,
+  travelAmendmentRequestId: null,
 };
 
 // Creating the store
@@ -44,6 +48,7 @@ export const useToggleStore = create<ToggleButtonState & ToggleButtonActions>()(
     showCasualRequisition: false,
     showEmployeeRequisition: false,
     casualAmendmentRequestId: null,
+    travelAmendmentRequestId: null,
     scrollTrigger: false,
 
     // Actions
@@ -55,6 +60,8 @@ export const useToggleStore = create<ToggleButtonState & ToggleButtonActions>()(
       set({ showEmployeeRequisition: value }),
     setCasualAmendmentRequestId: (value) =>
       set({ casualAmendmentRequestId: value }),
+    setTravelAmendmentRequestId: (value) =>
+      set({ travelAmendmentRequestId: value }),
     triggerScroll: (value) => set({ scrollTrigger: value }),
     reset: () => set(initialValues),
   }),

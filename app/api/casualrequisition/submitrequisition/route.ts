@@ -3,6 +3,7 @@ import { loadHrArray } from "@/lib/loadAppDataV2";
 import { query } from "@/lib/db";
 import { CasualEmailSender } from "@/services/CasualEmailSender";
 import { getSession } from "@/lib/session";
+import { loadHodAlternates } from "@/lib/hodAssignment";
 import {
   validateCasualFormData,
   resolveHod,
@@ -127,7 +128,7 @@ export async function POST(request: NextRequest) {
         UPDATE casual_requisitions
         SET
         casual_hod_approval_date = CURRENT_TIMESTAMP,
-        casual_hod_email = $1,
+        casual_hod_actioned_by_email = $1,
         casual_hod_approval_status = $2,
         casual_hod_comments = $3
         WHERE request_id = $4
@@ -174,6 +175,19 @@ export async function POST(request: NextRequest) {
         title: "Action Required: Casual Requisition Review",
         role: "HOD",
         reviewLink: `?token=${hodUuid}&stage=hod`,
+      });
+      // The HOD's alternates can also act on the HOD stage (first click wins)
+      const hodAlternates = await loadHodAlternates(hodEmail, email);
+      hodAlternates.forEach((alternate) => {
+        CasualEmailSender({
+          to: alternate.email,
+          requestId: requestUuid,
+          message:
+            "A new casual requisition has been submitted and requires your approval as an alternate HOD approver",
+          title: "Action Required: Casual Requisition Review",
+          role: "HOD",
+          reviewLink: `?token=${alternate.uuid}&stage=hod`,
+        });
       });
       // User Send
       CasualEmailSender({

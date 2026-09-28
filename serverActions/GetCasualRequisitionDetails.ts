@@ -1,6 +1,7 @@
 "use server";
 import { query } from "@/lib/db";
 import { getSession } from "@/lib/session";
+import { isHodViewer } from "@/lib/hodAssignment";
 import {
   getCasualEmailData,
   CasualEmailDataValues,
@@ -20,7 +21,15 @@ export async function getCasualRequisitionDetails(
   if (!data.emailaddress) return null; // no such requisition
 
   const isSubmitter = data.emailaddress === session.email;
-  const isHod = data.hodemail === session.email;
+  // Assigned HOD, whoever acted on the HOD stage, or an alternate of the
+  // assigned HOD while it's still pending
+  const isHod =
+    !isSubmitter &&
+    (await isHodViewer(session.email, {
+      assignedHodEmail: data.assignedhodemail,
+      actionedByEmail: data.hodemail,
+      hodStatus: data.hodapprovalstatus,
+    }));
 
   let isPermittedHr = false;
   if (!isSubmitter && !isHod) {

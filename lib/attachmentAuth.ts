@@ -11,6 +11,7 @@ export type AttachmentRow = {
   submitter_email: string;
   request_id: string;
   employee_hod_email: string | null;
+  employee_hod_actioned_by_email: string | null;
   employee_hod_approval_status: string;
   employee_retail_director_approval_status: string;
   employee_director_approval_status: string;
@@ -31,7 +32,8 @@ export async function authorizeAttachmentRequest(
   const result = await query<AttachmentRow>(
     `
     SELECT a.original_filename, a.file_path, a.mime_type, r.submitter_email,
-    r.request_id, r.employee_hod_email, r.employee_hod_approval_status,
+    r.request_id, r.employee_hod_email, r.employee_hod_actioned_by_email,
+    r.employee_hod_approval_status,
     r.employee_retail_director_approval_status, r.employee_director_approval_status
     FROM employee_requisition_attachments a
     JOIN employee_requisitions r ON r.request_id = a.request_id
@@ -79,7 +81,8 @@ export async function authorizeAttachmentRequest(
   // above (deliberately looser: any array member, any stage, always).
   if (!authorized && session) {
     authorized = await isEmployeeRequisitionApprover(session.email, {
-      hodEmail: attachment.employee_hod_email,
+      assignedHodEmail: attachment.employee_hod_email,
+      hodActionedByEmail: attachment.employee_hod_actioned_by_email,
       hodApprovalStatus: attachment.employee_hod_approval_status,
       retailDirectorApprovalStatus:
         attachment.employee_retail_director_approval_status,

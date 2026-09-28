@@ -4,6 +4,11 @@ import { Document, Page, Text, View } from "@react-pdf/renderer";
 import { createTw } from "react-pdf-tailwind";
 import { EmailDataValues as TravelPdfValues } from "@/services/EmailSender";
 import { dateFormatter } from "@/public/assets";
+import {
+  formatTravelAmendmentValue,
+  sortTravelAmendmentFields,
+  travelAmendmentFieldLabel,
+} from "@/lib/travelAmendment";
 
 // Initialize Tailwind for React-PDF
 const tw = createTw({
@@ -306,6 +311,87 @@ export const TravelRequisitionPdf = ({
             )}
           </View>
         </View>
+
+        {/* Amendment History */}
+        {pdfData.amendments.length > 0 && (
+          <View style={tw("mb-4 border-t border-[#f0b4b4] pt-4")}>
+            <PdfSectionHeading title="Amendment History" />
+            {pdfData.amendments.map((amendment) => (
+              <View
+                key={amendment.amendmentid}
+                style={tw(
+                  "mb-2 rounded-lg border border-[#f0b4b4] bg-[#fafafa] p-3",
+                )}
+              >
+                <Text style={tw("mb-1 text-[9px] font-bold text-[#1e1b1b]")}>
+                  #{amendment.amendmentnumber} by {amendment.amendedbyname} -{" "}
+                  {dateFormatter(amendment.createdat)}
+                </Text>
+                <Text style={tw("text-[8px] leading-relaxed text-[#7c5a5a]")}>
+                  Reason: {amendment.amendmentreason}
+                </Text>
+                {amendment.previousapprovaltier !==
+                  amendment.newapprovaltier && (
+                  <Text
+                    style={tw("text-[8px] leading-relaxed text-[#7c5a5a]")}
+                  >
+                    Approval Tier: {amendment.previousapprovaltier} to{" "}
+                    {amendment.newapprovaltier}
+                  </Text>
+                )}
+                {sortTravelAmendmentFields(amendment.fields).map((field) => (
+                  <Text
+                    key={field.fieldKey}
+                    style={tw("text-[8px] leading-relaxed text-[#7c5a5a]")}
+                  >
+                    {travelAmendmentFieldLabel(field.fieldKey)}:{" "}
+                    {formatTravelAmendmentValue(
+                      field.fieldKey,
+                      field.previousValue,
+                    )}{" "}
+                    to{" "}
+                    {formatTravelAmendmentValue(field.fieldKey, field.newValue)}
+                  </Text>
+                ))}
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* HR Push-back History */}
+        {pdfData.pushbacks.length > 0 && (
+          <View style={tw("mb-4 border-t border-[#f0b4b4] pt-4")}>
+            <PdfSectionHeading title="HR Push-back History" />
+            {pdfData.pushbacks.map((pushback) => (
+              <View
+                key={pushback.pushbackid}
+                style={tw(
+                  "mb-2 rounded-lg border border-[#f0b4b4] bg-[#fafafa] p-3",
+                )}
+              >
+                <Text style={tw("mb-1 text-[9px] font-bold text-[#1e1b1b]")}>
+                  #{pushback.pushbacknumber} by {pushback.pushedbyname} -{" "}
+                  {dateFormatter(pushback.createdat)} -{" "}
+                  {pushback.previousstatus.toUpperCase()} to{" "}
+                  {pushback.newstatus.toUpperCase()}
+                </Text>
+                <Text style={tw("text-[8px] leading-relaxed text-[#7c5a5a]")}>
+                  Reason: {pushback.pushbackreason}
+                </Text>
+                <Text style={tw("text-[8px] leading-relaxed text-[#7c5a5a]")}>
+                  Previous comments
+                  {pushback.previousapprover
+                    ? ` (${pushback.previousapprover})`
+                    : ""}
+                  : {pushback.previouscomments || "No comments"}
+                </Text>
+                <Text style={tw("text-[8px] leading-relaxed text-[#7c5a5a]")}>
+                  New comments: {pushback.newcomments || "No comments"}
+                </Text>
+              </View>
+            ))}
+          </View>
+        )}
 
         {/* Footer Note */}
         <View style={tw("border-t border-[#f0b4b4] pt-4 mt-auto text-center")}>

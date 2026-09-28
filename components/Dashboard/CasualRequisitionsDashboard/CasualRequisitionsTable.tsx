@@ -13,6 +13,7 @@ const dynamicTitles: Record<CasualRequisitionDataProps["dataFlag"], string> = {
   userData: "Your Submitted Casual Requisitions",
   hodPending: "Casual Requisitions Pending Your Approval (HOD)",
   hrPending: "Casual Requisitions Pending Your Approval (HR)",
+  history: "Casual Requisitions Approval History",
 };
 
 const COLUMNS = [
