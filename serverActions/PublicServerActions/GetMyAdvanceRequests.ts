@@ -23,7 +23,7 @@ export interface MyAdvanceRequest {
   approvalStatus: string;
   approverComments: string;
   exported: boolean;
-  phoneNumber: string;
+  phoneNumber: string | null;
   elapsedInstallments: number;
   remainingInstallments: number;
   alterations: AdvanceAlterationSummary[];
@@ -43,7 +43,7 @@ interface MyAdvanceRequestRow {
   approval_status: string;
   approver_comments: string;
   exported: boolean;
-  staff_phone_number: string;
+  staff_phone_number: string | null;
   elapsed_installments: number;
   remaining_installments: number;
   alterations: AdvanceAlterationSummary[];

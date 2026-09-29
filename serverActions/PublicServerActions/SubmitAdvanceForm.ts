@@ -7,7 +7,7 @@ import {
   getBlockingActiveAdvance,
   getInstallmentCompletionDate,
 } from "@/lib/salaryAdvanceRules";
-import { normalizeKenyanPhone } from "@/public/assets";
+import { isAdvancePhoneRequired, normalizeKenyanPhone } from "@/public/assets";
 
 export interface MessageResponse {
   type: "error" | "success";
@@ -38,13 +38,18 @@ export async function SubmitAdvanceForm(
     const installments =
       requestType === "continuous" ? "1" : formData.installments;
 
-    // Re-validate the phone number here too, not just on the client.
-    const normalizedPhone = normalizeKenyanPhone(phoneNumber);
-    if (!normalizedPhone) {
-      return {
-        type: "error",
-        message: "Enter a valid Kenyan phone number, e.g. 07XXXXXXXX.",
-      };
+    // The phone number is only required for multi-installment requests —
+    // derived from the final installments here, not trusted from the client,
+    // and stored as NULL (even if one was sent) when it isn't required.
+    let normalizedPhone: string | null = null;
+    if (isAdvancePhoneRequired(installments)) {
+      normalizedPhone = normalizeKenyanPhone(phoneNumber);
+      if (!normalizedPhone) {
+        return {
+          type: "error",
+          message: "Enter a valid Kenyan phone number, e.g. 07XXXXXXXX.",
+        };
+      }
     }
 
     // RULE 2: Block submission while the staff has an active continuous
