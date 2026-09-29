@@ -33,7 +33,7 @@ import SalaryAdvanceFormSkeleton from "../Skeletons/SalaryAdvanceFormSkeleton";
 import SalaryAdvanceAlterationSection from "./SalaryAdvanceAlterationSection";
 import SalaryAdvanceHistorySection from "./SalaryAdvanceHistorySection";
 import EmailChangeRequestModal from "./EmailChangeRequestModal";
-import { isValidKenyanPhone } from "@/public/assets";
+import { isAdvancePhoneRequired, isValidKenyanPhone } from "@/public/assets";
 
 export interface SalaryAdvanceFormData {
   staffNumber: string;
@@ -194,13 +194,30 @@ export default function SalaryAdvanceClient() {
   // Continuous requests are always repaid in a single installment, so the
   // installments field is locked to "1" and hidden as soon as this is chosen;
   // switching back to one-off clears it so the user picks explicitly again.
+  // Either way the phone fields hide, so they're cleared too.
   const handleRequestTypeChange = (value: string) => {
     setFormData((prev) => ({
       ...prev,
       requestType: value,
       installments: value === "continuous" ? "1" : "",
+      phoneNumber: "",
     }));
+    setPhoneNumberConfirm("");
   };
+
+  // The phone fields only show for multi-installment requests; clear them
+  // when they hide so a stale, unconfirmed number never lingers in the form.
+  const handleInstallmentsChange = (value: string) => {
+    const keepPhone = isAdvancePhoneRequired(value);
+    setFormData((prev) => ({
+      ...prev,
+      installments: value,
+      phoneNumber: keepPhone ? prev.phoneNumber : "",
+    }));
+    if (!keepPhone) setPhoneNumberConfirm("");
+  };
+
+  const phoneRequired = isAdvancePhoneRequired(formData.installments);
 
   // On mount, check whether the user already has a valid verified form session,
   // so they don't have to re-verify their email if they refresh mid-form.
@@ -248,7 +265,6 @@ export default function SalaryAdvanceClient() {
     "staffEmail",
     "department",
     "location",
-    "phoneNumber",
     "requestAmount",
     "installments",
     "repaymentStartDate",
@@ -256,8 +272,9 @@ export default function SalaryAdvanceClient() {
   ];
   const isFormValid =
     requiredFields.every((field) => formData[field]) &&
-    isValidKenyanPhone(formData.phoneNumber) &&
-    formData.phoneNumber === phoneNumberConfirm &&
+    (!phoneRequired ||
+      (isValidKenyanPhone(formData.phoneNumber) &&
+        formData.phoneNumber === phoneNumberConfirm)) &&
     policyAccepted;
 
   const handleRequestCode = async (e: React.FormEvent) => {
@@ -433,7 +450,7 @@ export default function SalaryAdvanceClient() {
         // request; only the fields the staff member actually filled in
         // reset. Phone number is re-entered (and re-confirmed) every time
         // rather than carried over, since a stale or mistyped number here
-        // can misdirect contact or a mobile-money disbursement.
+        // would misdirect repayment follow-up.
         setFormData((prev) => ({
           ...InitialFormState,
           staffNumber: prev.staffNumber,
@@ -877,8 +894,7 @@ export default function SalaryAdvanceClient() {
                   </div>
                   <p className="mb-4 text-xs text-slate-500">
                     Your staff details were verified against your record and
-                    can&apos;t be edited here - only the phone number below
-                    needs to be filled in. Contact HR if anything else is
+                    can&apos;t be edited here. Contact HR if anything is
                     incorrect.
                   </p>
                   <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
@@ -902,59 +918,6 @@ export default function SalaryAdvanceClient() {
                       label="Location"
                       value={formData.location}
                     />
-                    <div className="flex flex-col gap-2">
-                      <label className="text-[13px] font-medium text-[#7c5a5a]">
-                        Phone Number <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="tel"
-                        inputMode="tel"
-                        required
-                        placeholder="07XX XXX XXX"
-                        className="h-10 rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
-                        value={formData.phoneNumber}
-                        onChange={(e) =>
-                          updateField("phoneNumber", e.target.value)
-                        }
-                      />
-                      {formData.phoneNumber &&
-                        !isValidKenyanPhone(formData.phoneNumber) && (
-                          <p className="text-[11.5px] text-rose-600">
-                            Enter a valid Kenyan number, e.g. 07XXXXXXXX or
-                            +2547XXXXXXXX.
-                          </p>
-                        )}
-                    </div>
-                    <div className="flex flex-col gap-2">
-                      <label className="text-[13px] font-medium text-[#7c5a5a]">
-                        Confirm Phone Number{" "}
-                        <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="tel"
-                        inputMode="tel"
-                        required
-                        placeholder="Re-enter your phone number"
-                        className="h-10 rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
-                        value={phoneNumberConfirm}
-                        onChange={(e) => setPhoneNumberConfirm(e.target.value)}
-                      />
-                      {phoneNumberConfirm &&
-                        formData.phoneNumber !== phoneNumberConfirm && (
-                          <p className="text-[11.5px] text-rose-600">
-                            Phone numbers don&apos;t match.
-                          </p>
-                        )}
-                    </div>
-                  </div>
-                  <div className="mt-4 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-900">
-                    <Lightbulb size={16} className="mt-0.5 shrink-0" />
-                    <p className="text-xs leading-relaxed">
-                      Make sure the above number is correct and belongs to you -
-                      HR and Finance will use it to reach you about this request
-                      and, where applicable, to disburse funds. An incorrect or
-                      third-party number may delay or invalidate your advance.
-                    </p>
                   </div>
                 </div>
 
@@ -1021,11 +984,75 @@ export default function SalaryAdvanceClient() {
                           label="No. of Installments"
                           options={INSTALLMENT_OPTIONS}
                           value={formData.installments}
-                          onChange={(val) => updateField("installments", val)}
+                          onChange={handleInstallmentsChange}
                         />
                       )
                     )}
                   </div>
+                  {/* Phone number: only collected for multi-installment
+                    requests, so HR/Finance can follow up on repayment. */}
+                  {phoneRequired && (
+                    <>
+                      <div className="mt-5 grid grid-cols-1 gap-5 md:grid-cols-2">
+                        <div className="flex flex-col gap-2">
+                          <label className="text-[13px] font-medium text-[#7c5a5a]">
+                            Phone Number <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="tel"
+                            inputMode="tel"
+                            required
+                            placeholder="07XX XXX XXX"
+                            className="h-10 rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
+                            value={formData.phoneNumber}
+                            onChange={(e) =>
+                              updateField("phoneNumber", e.target.value)
+                            }
+                          />
+                          {formData.phoneNumber &&
+                            !isValidKenyanPhone(formData.phoneNumber) && (
+                              <p className="text-[11.5px] text-rose-600">
+                                Enter a valid Kenyan number, e.g. 07XXXXXXXX or
+                                +2547XXXXXXXX.
+                              </p>
+                            )}
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <label className="text-[13px] font-medium text-[#7c5a5a]">
+                            Confirm Phone Number{" "}
+                            <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="tel"
+                            inputMode="tel"
+                            required
+                            placeholder="Re-enter your phone number"
+                            className="h-10 rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
+                            value={phoneNumberConfirm}
+                            onChange={(e) =>
+                              setPhoneNumberConfirm(e.target.value)
+                            }
+                          />
+                          {phoneNumberConfirm &&
+                            formData.phoneNumber !== phoneNumberConfirm && (
+                              <p className="text-[11.5px] text-rose-600">
+                                Phone numbers don&apos;t match.
+                              </p>
+                            )}
+                        </div>
+                      </div>
+                      <div className="mt-4 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-900">
+                        <Lightbulb size={16} className="mt-0.5 shrink-0" />
+                        <p className="text-xs leading-relaxed">
+                          Make sure the above number is correct and belongs to
+                          you - HR and Finance may use it if salary advance
+                          disbursement to the phone number via M-PESA is
+                          applicable. An incorrect or third-party number may
+                          delay or invalidate your advance.
+                        </p>
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 {/* Policy & Disclaimer */}
@@ -1072,6 +1099,17 @@ export default function SalaryAdvanceClient() {
                       &quot;Modify Existing Request&quot; above - no new
                       submission needed.
                     </li>
+                    {phoneRequired && (
+                      <li>
+                        <strong>Contact Number:</strong> For advances repaid
+                        over more than one installment, you must provide a valid
+                        phone number that belongs to you, hereby authorizing
+                        Hotpoint Appliances Limited to use it solely for the
+                        processing and disbursement of your salary advance
+                        request via M-Pesa in accordance with the salary advance
+                        policy.
+                      </li>
+                    )}
                   </ul>
 
                   <label className="flex cursor-pointer items-start gap-3 rounded-xl p-4 transition-all hover:bg-red-50">

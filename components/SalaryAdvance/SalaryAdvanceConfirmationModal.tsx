@@ -2,7 +2,7 @@
 
 import { ArrowLeft, Send } from "lucide-react";
 import { dateFormatter } from "@/public/assets";
-import { initialsHelper } from "@/public/assets";
+import { initialsHelper, isAdvancePhoneRequired } from "@/public/assets";
 import { SalaryAdvanceFormData } from "./SalaryAdvanceClient"; // Adjust import path as needed
 
 interface SalaryAdvanceConfirmationModalProps {
@@ -24,7 +24,10 @@ export default function SalaryAdvanceConfirmationModal({
     { label: "Staff Email", value: formData.staffEmail },
     { label: "Department", value: formData.department },
     { label: "Location", value: formData.location || "N/A" },
-    { label: "Phone Number", value: formData.phoneNumber },
+    // Only collected (and so only shown) for multi-installment requests.
+    ...(isAdvancePhoneRequired(formData.installments)
+      ? [{ label: "Phone Number", value: formData.phoneNumber }]
+      : []),
   ];
 
   const advanceDetails: { label: string; value: string }[] = [
