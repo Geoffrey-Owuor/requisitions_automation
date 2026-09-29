@@ -10,7 +10,7 @@ export interface AdvanceMailTemplateValues {
   staffemail: string;
   staffdepartment: string;
   stafflocation: string;
-  staffphonenumber: string;
+  staffphonenumber: string | null;
   requestamount: number;
   installments: string;
   repaymentstartdate: string;

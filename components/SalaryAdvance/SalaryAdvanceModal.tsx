@@ -148,7 +148,10 @@ export function SalaryAdvanceModal({
                 <Field label="Location" value={data.staff_location} />
                 <Field
                   label="Phone Number"
-                  value={formatPhoneForDisplay(data.staff_phone_number)}
+                  value={formatPhoneForDisplay(
+                    data.staff_phone_number,
+                    data.no_of_installments,
+                  )}
                 />
               </div>
             </section>

@@ -27,7 +27,7 @@ export interface SalaryAdvanceData {
   staff_email: string;
   staff_department: string;
   staff_location: string;
-  staff_phone_number: string;
+  staff_phone_number: string | null;
   request_amount: number;
   no_of_installments: string;
   repayment_start_date: string;

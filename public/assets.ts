@@ -147,9 +147,13 @@ export const ALTERATION_TYPE_LABELS: Record<string, string> = {
   delete_request: "Deleted",
 };
 
-// Sentinel written by migration 013 for rows submitted before the salary
-// advance phone number field existed.
-export const PHONE_NOT_PROVIDED = "not provided";
+// A salary advance phone number is only collected (and then required) when
+// the request is repaid over more than one installment, so HR/Finance can
+// follow up on multi-month repayments. Shared by the form and
+// SubmitAdvanceForm.ts so the client and server rule can't drift.
+export function isAdvancePhoneRequired(installments: number | string): boolean {
+  return Number(installments) > 1;
+}
 
 // Accepts common Kenyan mobile formats (07xx…, 01xx…, 254xx…, +254xx…, with
 // or without spaces/dashes) and normalizes to a canonical +254xxxxxxxxx
@@ -173,10 +177,15 @@ export function isValidKenyanPhone(raw: string): boolean {
   return normalizeKenyanPhone(raw) !== null;
 }
 
-// Renders the pre-migration sentinel value in a friendlier form wherever
-// legacy salary advance rows are displayed.
-export function formatPhoneForDisplay(value: string): string {
-  return value === PHONE_NOT_PROVIDED ? "Not provided" : value;
+// HR-facing display of a salary advance phone number. A missing number on a
+// multi-installment request predates the field (migration 014/019 legacy
+// rows); on a single-installment request it was never asked for.
+export function formatPhoneForDisplay(
+  value: string | null,
+  installments: number | string,
+): string {
+  if (value) return value;
+  return isAdvancePhoneRequired(installments) ? "Not provided" : "Not required";
 }
 
 export const ALL_CASUAL_LOCATIONS = [
@@ -269,21 +278,21 @@ export const EMPLOYEE_ATTACHMENT_TYPE_LABELS: Record<
 // Locations available per department. Departments not listed here fall back
 // to showing all locations rather than blocking the form.
 export const CASUAL_DEPARTMENT_LOCATIONS: Record<string, string[]> = {
-  "IT & Projects": ["Ruiru"],
-  Finance: ["Ruiru"],
-  Marketing: ["Ruiru"],
+  "IT & Projects": ALL_CASUAL_LOCATIONS,
+  Finance: ALL_CASUAL_LOCATIONS,
+  Marketing: ALL_CASUAL_LOCATIONS,
   Operations: ["Ruiru"],
-  Commercial: ["Ruiru"],
-  "HR & Admin": ["Ruiru"],
-  "Modern Trade": ["Ruiru"],
-  Directorate: ["Ruiru"],
-  "Internal Audit": ["Ruiru"],
-  B2B: ["Ruiru"],
+  Commercial: ALL_CASUAL_LOCATIONS,
+  "HR & Admin": ALL_CASUAL_LOCATIONS,
+  "Modern Trade": ALL_CASUAL_LOCATIONS,
+  Directorate: ALL_CASUAL_LOCATIONS,
+  "Internal Audit": ALL_CASUAL_LOCATIONS,
+  B2B: ALL_CASUAL_LOCATIONS,
   "Retail Projects": ALL_CASUAL_LOCATIONS,
   Security: ALL_CASUAL_LOCATIONS,
-  Retail: ALL_CASUAL_LOCATIONS.filter((location) => location !== "Ruiru"),
-  "Engineering & HVAC": ["Ruiru", "Diani", "Likoni", "Nyali"],
-  "Service Center": ["Ruiru", "Sarit", "Diani", "Likoni", "Nyali"],
+  Retail: ALL_CASUAL_LOCATIONS,
+  "Engineering & HVAC": ALL_CASUAL_LOCATIONS,
+  "Service Center": ALL_CASUAL_LOCATIONS,
 };
 
 export function getCasualLocationsForDepartment(department: string): string[] {
