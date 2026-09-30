@@ -81,6 +81,16 @@ html {
   background-color: #fca5a5; /* red */
   border-radius: 999px;
 }
+
+/* Firefox: standard scrollbar properties. Scoped to browsers without
+   ::-webkit-scrollbar support, since Chromium 121+ ignores the webkit
+   pseudo-elements above whenever scrollbar-width/scrollbar-color are set. */
+@supports not selector(::-webkit-scrollbar) {
+  .sidebar-nav {
+    scrollbar-width: thin;
+    scrollbar-color: #fca5a5 transparent; /* thumb track */
+  }
+}
 /* Normal scrollbar */
 .normal-scrollbar {
   scrollbar-color: #a3a3a3 transparent;
