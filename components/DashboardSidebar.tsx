@@ -22,12 +22,6 @@ import {
 import { usePathname, useRouter } from "next/navigation";
 import ClientPortal from "./ClientPortal";
 import { useRef, useState } from "react";
-import ITRequisitionPage from "./ITRequisition/ITRequisitionPage";
-import TravelRequisitionPage from "./TravelRequisitionPage";
-import ModalWrapper from "./Modules/ModalWrapper";
-import KeyAccessRequisitionForm from "./Modules/Retail/KeyAccessRequisitionForm";
-import CasualRequisitionForm from "./Modules/Retail/CasualRequisitionForm";
-import EmployeeRequisitionForm from "./Modules/Retail/EmployeeRequisitionForm";
 import MoreMenuModal from "./Modules/MoreMenuModal";
 import { useToggleStore } from "@/store/useToggleStore";
 
@@ -54,47 +48,18 @@ const DashboardSidebar = () => {
 
   const router = useRouter();
 
-  // Zustand stores
-  const showITRequisition = useToggleStore((state) => state.showITRequisition);
+  // Zustand stores (the modals themselves live in Dashboard/DashboardModals)
   const setShowITRequisition = useToggleStore(
     (state) => state.setShowITRequisition,
-  );
-
-  const showTravelRequisition = useToggleStore(
-    (state) => state.showTravelRequisition,
-  );
-  const travelAmendmentRequestId = useToggleStore(
-    (state) => state.travelAmendmentRequestId,
-  );
-  const setTravelAmendmentRequestId = useToggleStore(
-    (state) => state.setTravelAmendmentRequestId,
   );
   const setShowTravelRequisition = useToggleStore(
     (state) => state.setShowTravelRequisition,
   );
-
-  const showAccessRequisition = useToggleStore(
-    (state) => state.showAccessRequisition,
-  );
   const setShowAccessRequisition = useToggleStore(
     (state) => state.setShowAccessRequisition,
   );
-
-  const showCasualRequisition = useToggleStore(
-    (state) => state.showCasualRequisition,
-  );
-  const casualAmendmentRequestId = useToggleStore(
-    (state) => state.casualAmendmentRequestId,
-  );
-  const setCasualAmendmentRequestId = useToggleStore(
-    (state) => state.setCasualAmendmentRequestId,
-  );
   const setShowCasualRequisition = useToggleStore(
     (state) => state.setShowCasualRequisition,
-  );
-
-  const showEmployeeRequisition = useToggleStore(
-    (state) => state.showEmployeeRequisition,
   );
   const setShowEmployeeRequisition = useToggleStore(
     (state) => state.setShowEmployeeRequisition,
@@ -102,52 +67,6 @@ const DashboardSidebar = () => {
 
   return (
     <>
-      {/* IT Modal */}
-      <ModalWrapper
-        isOpen={showITRequisition}
-        onClose={() => setShowITRequisition(false)}
-      >
-        <ITRequisitionPage />
-      </ModalWrapper>
-
-      {/* Travel Modal */}
-      <ModalWrapper
-        isOpen={showTravelRequisition || !!travelAmendmentRequestId}
-        onClose={() => {
-          setShowTravelRequisition(false);
-          setTravelAmendmentRequestId(null);
-        }}
-      >
-        <TravelRequisitionPage amendRequestId={travelAmendmentRequestId} />
-      </ModalWrapper>
-
-      {/* Key Access Requisition Modal */}
-      <ModalWrapper
-        isOpen={showAccessRequisition}
-        onClose={() => setShowAccessRequisition(false)}
-      >
-        <KeyAccessRequisitionForm />
-      </ModalWrapper>
-
-      {/* Casual Requisition Modal */}
-      <ModalWrapper
-        isOpen={showCasualRequisition || !!casualAmendmentRequestId}
-        onClose={() => {
-          setShowCasualRequisition(false);
-          setCasualAmendmentRequestId(null);
-        }}
-      >
-        <CasualRequisitionForm amendRequestId={casualAmendmentRequestId} />
-      </ModalWrapper>
-
-      {/* Employee Requisition Modal */}
-      <ModalWrapper
-        isOpen={showEmployeeRequisition}
-        onClose={() => setShowEmployeeRequisition(false)}
-      >
-        <EmployeeRequisitionForm />
-      </ModalWrapper>
-
       <aside className="custom:flex fixed top-1 bottom-1 left-0 z-50 hidden w-20 flex-col items-center pt-0 pb-2">
         {/* Brand (Icon Only) */}
         <DashboardBrand showText={false} />
@@ -165,7 +84,7 @@ const DashboardSidebar = () => {
         </div>
 
         {/* Vertical Navigation */}
-        <nav className="mb-2 flex w-full flex-1 scrollbar-none flex-col items-center gap-1.5 overflow-y-auto mask-[linear-gradient(to_bottom,transparent_0%,black_24px,black_calc(100%-24px),transparent_100%)] px-2">
+        <nav className="sidebar-nav mb-2 flex w-full flex-1 flex-col items-center gap-1.5 overflow-y-auto mask-[linear-gradient(to_bottom,transparent_0%,black_24px,black_calc(100%-24px),transparent_100%)] px-2">
           {/* IT Requisition */}
           <SideBarButton
             label="IT Req"
