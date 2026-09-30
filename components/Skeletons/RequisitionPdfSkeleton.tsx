@@ -9,7 +9,7 @@ const RequisitionPdfSkeleton = () => {
         </div>
 
         {/* Title block */}
-        <div className="mb-6 rounded-3xl border border-white/85 bg-white/65 px-10 py-7 backdrop-blur-2xl">
+        <div className="mb-6 rounded-3xl border border-white/85 bg-white/65 px-10 py-7">
           <div className="mb-2 h-6 w-64 rounded-lg bg-gray-200" />
           <div className="h-4 w-40 rounded bg-gray-100" />
         </div>
@@ -18,7 +18,7 @@ const RequisitionPdfSkeleton = () => {
         {[1, 2, 3].map((s) => (
           <div
             key={s}
-            className="mb-5 rounded-3xl border border-white/85 bg-white/65 px-10 py-7 backdrop-blur-2xl"
+            className="mb-5 rounded-3xl border border-white/85 bg-white/65 px-10 py-7"
           >
             <div className="mb-5 h-4 w-36 rounded bg-gray-200" />
             <div className="grid grid-cols-2 gap-5 max-sm:grid-cols-1">
@@ -33,7 +33,7 @@ const RequisitionPdfSkeleton = () => {
         ))}
 
         {/* Approval tier bar */}
-        <div className="mb-5 rounded-3xl border border-white/85 bg-white/65 px-10 py-7 backdrop-blur-2xl">
+        <div className="mb-5 rounded-3xl border border-white/85 bg-white/65 px-10 py-7">
           <div className="mb-5 h-4 w-36 rounded bg-gray-200" />
           <div className="grid grid-cols-3 gap-4">
             {[1, 2, 3].map((i) => (

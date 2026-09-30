@@ -14,7 +14,7 @@ export default function TravelApprovalSkeleton() {
         </div>
 
         {/* Card shell */}
-        <div className="rounded-3xl border border-gray-100 bg-white/65 p-10 shadow-[0_24px_48px_rgba(160,60,60,0.10)] backdrop-blur-2xl">
+        <div className="rounded-3xl border border-gray-100 bg-white/65 p-10 shadow-[0_24px_48px_rgba(160,60,60,0.10)]">
           {/* Step label */}
           <div className="mb-5">
             <div className="mb-2 h-3 w-24 rounded-full bg-rose-100/70" />

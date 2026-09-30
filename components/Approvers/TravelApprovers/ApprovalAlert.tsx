@@ -19,7 +19,7 @@ export default function ApprovalAlert(alertInfo: AlertInfo) {
 
   return (
     <div className="relative z-10 mx-auto flex min-h-[80vh] max-w-md items-center justify-center px-5 py-10">
-      <div className="w-full rounded-3xl border border-gray-100 bg-white/65 p-10 text-center shadow-[0_24px_48px_rgba(160,60,60,0.10)] backdrop-blur-2xl">
+      <div className="w-full rounded-3xl border border-gray-100 bg-white/65 p-10 text-center shadow-[0_24px_48px_rgba(160,60,60,0.10)]">
         {/* Icon */}
         <div
           className={`mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl ${config.iconBg}`}

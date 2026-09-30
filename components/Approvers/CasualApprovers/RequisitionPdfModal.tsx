@@ -111,7 +111,7 @@ const RequisitionPdfModal = ({
     <div className="relative p-4 font-sans">
       <div className="relative z-10 mx-auto max-w-3xl">
         {/* Toolbar — hidden in print */}
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-gray-100 bg-white/70 px-6 py-4 shadow-[0_8px_16px_rgba(160,60,60,0.06)] backdrop-blur-xl">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-gray-100 bg-white/70 px-6 py-4 shadow-[0_8px_16px_rgba(160,60,60,0.06)]">
           <span className="text-[13px] font-medium text-[#7c5a5a]">
             Casual Requisition - {pdfData.submittername}
           </span>
@@ -140,7 +140,7 @@ const RequisitionPdfModal = ({
         {/* Document */}
         <div
           id="printable-area"
-          className="rounded-3xl border border-white/85 bg-white/65 px-6 py-8 shadow-[0_24px_48px_rgba(160,60,60,0.10)] backdrop-blur-2xl sm:px-8"
+          className="rounded-3xl border border-white/85 bg-white/65 px-6 py-8 shadow-[0_24px_48px_rgba(160,60,60,0.10)] sm:px-8"
         >
           {/* Doc header */}
           <div className="mb-8 border-b border-[rgba(240,180,180,0.4)] pb-6">

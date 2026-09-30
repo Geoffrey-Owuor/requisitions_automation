@@ -37,7 +37,7 @@ const AccessPdfModal = ({ pdfData }: { pdfData: AccessPdfValues }) => {
     <div className="relative p-4 font-sans">
       <div className="relative z-10 mx-auto max-w-180">
         {/* Toolbar */}
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-gray-100 bg-white/70 px-6 py-4 shadow-[0_8px_16px_rgba(160,60,60,0.06)] backdrop-blur-xl">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-gray-100 bg-white/70 px-6 py-4 shadow-[0_8px_16px_rgba(160,60,60,0.06)]">
           <span className="text-[13px] font-medium text-[#7c5a5a]">
             Access Requisition - {pdfData.employeename}
           </span>
@@ -63,7 +63,7 @@ const AccessPdfModal = ({ pdfData }: { pdfData: AccessPdfValues }) => {
         </div>
 
         {/* HTML Document Preview */}
-        <div className="rounded-3xl border border-white/85 bg-white/65 px-6 py-8 shadow-[0_24px_48px_rgba(160,60,60,0.10)] backdrop-blur-2xl sm:px-8">
+        <div className="rounded-3xl border border-white/85 bg-white/65 px-6 py-8 shadow-[0_24px_48px_rgba(160,60,60,0.10)] sm:px-8">
           {/* Header */}
           <div className="mb-8 border-b border-[rgba(240,180,180,0.4)] pb-6">
             <h1 className="text-[26px] font-semibold tracking-[-0.5px] text-[#1e1b1b]">
