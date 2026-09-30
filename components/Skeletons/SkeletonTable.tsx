@@ -7,7 +7,7 @@ export const SkeletonTable = () => {
         <div className="mb-6 h-10 w-100 rounded-xl bg-neutral-200" />
 
         {/* Table Container */}
-        <div className="h-full w-full rounded-2xl border border-gray-200 bg-white px-4 py-2 backdrop-blur-2xl">
+        <div className="h-full w-full rounded-2xl border border-gray-200 bg-white px-4 py-2">
           {/* Table Header Row */}
           <div className="flex space-x-4 border-b border-neutral-200/50 py-4">
             {[...Array(5)].map((_, i) => (

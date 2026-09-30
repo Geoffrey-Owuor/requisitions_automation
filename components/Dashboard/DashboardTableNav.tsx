@@ -31,7 +31,7 @@ export default function DashboardTableNav({
   return (
     <nav
       aria-label="Jump to table"
-      className="sticky top-0 z-20 rounded-xl border border-rose-200 bg-white/70 p-2 backdrop-blur-xl"
+      className="sticky top-0 z-20 rounded-xl border border-rose-200 bg-white/95 p-2"
     >
       <div className="small-scrollbar flex flex-row gap-1.5 overflow-x-auto">
         {items.map(({ key, label, Icon }) => (
