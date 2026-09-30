@@ -11,7 +11,7 @@ const SalaryAdvanceFormSkeleton = () => {
       </div>
 
       {/* Card */}
-      <div className="rounded-3xl border border-white/85 bg-white/65 px-6 py-8 shadow-[0_24px_48px_rgba(160,60,60,0.10)] backdrop-blur-2xl sm:px-8">
+      <div className="rounded-3xl border border-white/85 bg-white/65 px-6 py-8 shadow-[0_24px_48px_rgba(160,60,60,0.10)] sm:px-8">
         {/* Staff Information */}
         <div>
           <div className="mb-5 h-3.5 w-36 rounded bg-rose-100" />

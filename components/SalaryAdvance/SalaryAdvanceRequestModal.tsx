@@ -30,7 +30,7 @@ export default function SalaryAdvanceRequestModal({
       >
         <div
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-lg rounded-[20px] border border-white/80 bg-white/95 shadow-[0_32px_64px_rgba(160,60,60,0.15)] backdrop-blur-2xl"
+          className="relative w-full max-w-lg rounded-[20px] border border-white/80 bg-white/95 shadow-[0_32px_64px_rgba(160,60,60,0.15)]"
         >
           <div className="flex items-center justify-between gap-2 rounded-t-[20px] bg-white px-6 py-4">
             <div>

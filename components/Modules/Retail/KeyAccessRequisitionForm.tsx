@@ -217,7 +217,7 @@ export default function KeyAccessRequisitionForm() {
           </header>
 
           {/* Form Card */}
-          <div className="rounded-3xl border border-white/85 bg-white/65 px-6 py-8 shadow-[0_24px_48px_rgba(160,60,60,0.10)] backdrop-blur-2xl sm:px-8">
+          <div className="rounded-3xl border border-white/85 bg-white/65 px-6 py-8 shadow-[0_24px_48px_rgba(160,60,60,0.10)] sm:px-8">
             <form
               className="flex flex-col gap-10"
               onSubmit={(e) => {

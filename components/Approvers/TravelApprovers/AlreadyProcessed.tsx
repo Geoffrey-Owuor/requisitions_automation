@@ -17,7 +17,7 @@ export default function AlreadyProcessed({
 
   return (
     <div className="layout-scrollbar relative flex h-screen items-center justify-center overflow-y-auto p-5">
-      <div className="mx-auto max-w-md rounded-3xl border border-gray-100 bg-white/65 p-10 text-center shadow-[0_24px_48px_rgba(160,60,60,0.10)] backdrop-blur-2xl">
+      <div className="mx-auto max-w-md rounded-3xl border border-gray-100 bg-white/65 p-10 text-center shadow-[0_24px_48px_rgba(160,60,60,0.10)]">
         {/* Icon */}
         <div
           className={`mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full ${

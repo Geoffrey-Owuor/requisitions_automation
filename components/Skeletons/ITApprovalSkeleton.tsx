@@ -13,7 +13,7 @@ const ITApprovalSkeleton = () => {
         </div>
 
         {/* Card */}
-        <div className="rounded-3xl border border-gray-100 bg-white/65 p-10 shadow-[0_24px_48px_rgba(160,60,60,0.10)] backdrop-blur-2xl">
+        <div className="rounded-3xl border border-gray-100 bg-white/65 p-10 shadow-[0_24px_48px_rgba(160,60,60,0.10)]">
           {/* Approver badge */}
           <div className="mb-7 flex items-center gap-3 rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white/80 px-4 py-3">
             <div className="h-10 w-10 shrink-0 rounded-full bg-rose-100" />

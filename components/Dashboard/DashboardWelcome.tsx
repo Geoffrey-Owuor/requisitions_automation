@@ -97,7 +97,7 @@ const DashboardWelcome = () => {
 
   return (
     <div className="flex flex-col items-center justify-center px-4 py-16 text-center">
-      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/80 bg-white/40 text-red-400 shadow-[0_8px_16px_rgba(160,60,60,0.08)] backdrop-blur-md">
+      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/80 bg-white/40 text-red-400 shadow-[0_8px_16px_rgba(160,60,60,0.08)]">
         <HousePlug size={32} strokeWidth={1.5} />
       </div>
 
@@ -129,7 +129,7 @@ const DashboardWelcome = () => {
           );
 
           const className =
-            "group flex items-center gap-3 rounded-2xl border border-gray-200 bg-white/50 p-4 text-left shadow-[0_12px_24px_rgba(160,60,60,0.05)] backdrop-blur-xl transition-all hover:border-red-200 hover:bg-white/80";
+            "group flex items-center gap-3 rounded-2xl border border-gray-200 bg-white/50 p-4 text-left shadow-[0_12px_24px_rgba(160,60,60,0.05)] transition-all hover:border-red-200 hover:bg-white/80";
 
           return href ? (
             <Link key={label} href={href} className={className}>

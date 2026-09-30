@@ -169,7 +169,7 @@ export default function SalaryAdvanceTable() {
               placeholder="Search employee, department or status..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full rounded-xl border border-gray-300 bg-white/60 py-2.5 pr-4 pl-12 text-sm shadow-[0_8px_16px_rgba(60,100,160,0.02)] outline-hidden backdrop-blur-xl transition-all focus:border-red-400 focus:ring-4 focus:ring-red-500/5"
+              className="w-full rounded-xl border border-gray-300 bg-white/60 py-2.5 pr-4 pl-12 text-sm shadow-[0_8px_16px_rgba(60,100,160,0.02)] outline-hidden transition-all focus:border-red-400 focus:ring-4 focus:ring-red-500/5"
             />
             {searchTerm && (
               <button
@@ -233,7 +233,7 @@ export default function SalaryAdvanceTable() {
 
         {/* Table Container */}
         <div
-          className={`overflow-x-auto rounded-2xl border border-gray-200 bg-white/50 shadow-[0_24px_48px_rgba(160,60,60,0.08)] backdrop-blur-2xl transition-opacity ${isFetching ? "animate-pulse opacity-60" : ""}`}
+          className={`overflow-x-auto rounded-2xl border border-gray-200 bg-white/50 shadow-[0_24px_48px_rgba(160,60,60,0.08)] transition-opacity ${isFetching ? "animate-pulse opacity-60" : ""}`}
         >
           <table className="w-full border-collapse text-left">
             <thead>
@@ -383,7 +383,7 @@ export default function SalaryAdvanceTable() {
                 <tr>
                   <td colSpan={10} className="px-6 py-20">
                     <div className="flex flex-col items-center justify-center text-center">
-                      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/80 bg-white/40 text-red-300 shadow-[0_8px_16px_rgba(60,100,160,0.05)] backdrop-blur-md">
+                      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/80 bg-white/40 text-red-300 shadow-[0_8px_16px_rgba(60,100,160,0.05)]">
                         <CircleDollarSign size={32} strokeWidth={1.5} />
                       </div>
                       <h3 className="text-base font-semibold text-[#1e1b1b]">
