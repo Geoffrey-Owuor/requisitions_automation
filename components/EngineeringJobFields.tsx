@@ -104,7 +104,7 @@ export function EngineeringJobFields({
 
       {/* Total Amount Area */}
       <div className="mt-5 flex items-center justify-end border-t border-rose-200/60 pt-4">
-        <div className="flex items-center gap-3 rounded-xl border border-rose-100 bg-white/60 px-3 py-2.5 text-sm font-semibold tracking-tight shadow-xs backdrop-blur-sm">
+        <div className="flex items-center gap-3 rounded-xl border border-rose-100 bg-white/60 px-3 py-2.5 text-sm font-semibold tracking-tight shadow-xs">
           <span className="inline-flex items-center gap-1 text-rose-700">
             <Wallet className="h-4 w-4" />
             Total Amount:

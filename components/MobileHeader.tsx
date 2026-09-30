@@ -20,14 +20,8 @@ import {
   CircleDollarSign,
   UserRoundPlus,
 } from "lucide-react";
-import ModalWrapper from "./Modules/ModalWrapper";
-import ITRequisitionPage from "./ITRequisition/ITRequisitionPage";
-import TravelRequisitionPage from "./TravelRequisitionPage";
 import { usePathname } from "next/navigation";
 import { useToggleStore } from "@/store/useToggleStore";
-import KeyAccessRequisitionForm from "./Modules/Retail/KeyAccessRequisitionForm";
-import CasualRequisitionForm from "./Modules/Retail/CasualRequisitionForm";
-import EmployeeRequisitionForm from "./Modules/Retail/EmployeeRequisitionForm";
 import MoreMenuModal from "./Modules/MoreMenuModal";
 
 const links = [
@@ -50,47 +44,18 @@ const MobileHeader = () => {
   const isHomeActive = pathname === "/dashboard";
   const isAdvanceActive = pathname === "/dashboard/advance";
 
-  // Zustand stores
-  const showITRequisition = useToggleStore((state) => state.showITRequisition);
+  // Zustand stores (the modals themselves live in Dashboard/DashboardModals)
   const setShowITRequisition = useToggleStore(
     (state) => state.setShowITRequisition,
-  );
-
-  const showTravelRequisition = useToggleStore(
-    (state) => state.showTravelRequisition,
-  );
-  const travelAmendmentRequestId = useToggleStore(
-    (state) => state.travelAmendmentRequestId,
-  );
-  const setTravelAmendmentRequestId = useToggleStore(
-    (state) => state.setTravelAmendmentRequestId,
   );
   const setShowTravelRequisition = useToggleStore(
     (state) => state.setShowTravelRequisition,
   );
-
-  const showAccessRequisition = useToggleStore(
-    (state) => state.showAccessRequisition,
-  );
   const setShowAccessRequisition = useToggleStore(
     (state) => state.setShowAccessRequisition,
   );
-
-  const showCasualRequisition = useToggleStore(
-    (state) => state.showCasualRequisition,
-  );
-  const casualAmendmentRequestId = useToggleStore(
-    (state) => state.casualAmendmentRequestId,
-  );
-  const setCasualAmendmentRequestId = useToggleStore(
-    (state) => state.setCasualAmendmentRequestId,
-  );
   const setShowCasualRequisition = useToggleStore(
     (state) => state.setShowCasualRequisition,
-  );
-
-  const showEmployeeRequisition = useToggleStore(
-    (state) => state.showEmployeeRequisition,
   );
   const setShowEmployeeRequisition = useToggleStore(
     (state) => state.setShowEmployeeRequisition,
@@ -106,52 +71,6 @@ const MobileHeader = () => {
   };
   return (
     <>
-      {/* IT Modal */}
-      <ModalWrapper
-        isOpen={showITRequisition}
-        onClose={() => setShowITRequisition(false)}
-      >
-        <ITRequisitionPage />
-      </ModalWrapper>
-
-      {/* Travel Modal */}
-      <ModalWrapper
-        isOpen={showTravelRequisition || !!travelAmendmentRequestId}
-        onClose={() => {
-          setShowTravelRequisition(false);
-          setTravelAmendmentRequestId(null);
-        }}
-      >
-        <TravelRequisitionPage amendRequestId={travelAmendmentRequestId} />
-      </ModalWrapper>
-
-      {/* Key Access Requisition Modal */}
-      <ModalWrapper
-        isOpen={showAccessRequisition}
-        onClose={() => setShowAccessRequisition(false)}
-      >
-        <KeyAccessRequisitionForm />
-      </ModalWrapper>
-
-      {/* Casual Requisition Modal */}
-      <ModalWrapper
-        isOpen={showCasualRequisition || !!casualAmendmentRequestId}
-        onClose={() => {
-          setShowCasualRequisition(false);
-          setCasualAmendmentRequestId(null);
-        }}
-      >
-        <CasualRequisitionForm amendRequestId={casualAmendmentRequestId} />
-      </ModalWrapper>
-
-      {/* Employee Requisition Modal */}
-      <ModalWrapper
-        isOpen={showEmployeeRequisition}
-        onClose={() => setShowEmployeeRequisition(false)}
-      >
-        <EmployeeRequisitionForm />
-      </ModalWrapper>
-
       {/* Overlay & Sliding Mobile Sidebar */}
       <div
         className={`fixed inset-0 z-70 ${

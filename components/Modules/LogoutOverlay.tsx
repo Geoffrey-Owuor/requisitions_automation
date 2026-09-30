@@ -22,7 +22,7 @@ const LogoutOverlay = () => {
   return (
     <ClientPortal>
       <div
-        className="animate-in fade-in fixed inset-0 z-9999 flex items-center justify-center bg-white backdrop-blur-sm duration-200"
+        className="animate-in fade-in fixed inset-0 z-9999 flex items-center justify-center bg-white duration-200"
         role="status"
         aria-live="polite"
         aria-busy="true"

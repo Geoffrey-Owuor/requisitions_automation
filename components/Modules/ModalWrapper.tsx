@@ -75,7 +75,7 @@ const ModalWrapper = ({ isOpen, onClose, children }: ModalWrapperProps) => {
 
           <div
             ref={modalWrapperRef}
-            className="normal-scrollbar min-h-0 w-full flex-1 overflow-y-auto p-2"
+            className="normal-scrollbar min-h-0 w-full flex-1 overflow-y-auto bg-white p-2"
           >
             {children}
           </div>

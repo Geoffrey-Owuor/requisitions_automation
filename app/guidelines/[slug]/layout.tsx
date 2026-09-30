@@ -24,7 +24,7 @@ export default async function GuidelinesLayout({ children, params }: Props) {
         <aside className="w-full min-w-0 lg:w-58 lg:shrink-0">
           <nav
             aria-label="Guidelines"
-            className="flex flex-col gap-2 py-2 lg:sticky lg:top-20 lg:rounded-2xl lg:border lg:border-slate-200/70 lg:bg-white/70 lg:p-2.5 lg:shadow-sm lg:backdrop-blur-xl"
+            className="flex flex-col gap-2 py-2 lg:sticky lg:top-20 lg:rounded-2xl lg:border lg:border-slate-200/70 lg:bg-white/70 lg:p-2.5 lg:shadow-sm lg:backdrop-blur-sm"
           >
             <span className="hidden px-2 pb-1 text-[10px] font-bold tracking-[0.16em] text-slate-400 uppercase lg:block">
               Guidelines

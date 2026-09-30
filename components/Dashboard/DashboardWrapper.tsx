@@ -1,5 +1,6 @@
 import DashboardSidebar from "../DashboardSidebar";
 import MobileHeader from "../MobileHeader";
+import DashboardModals from "./DashboardModals";
 
 const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -9,6 +10,9 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
 
       {/* Desktop sidebar handles lg screens */}
       <DashboardSidebar />
+
+      {/* Requisition form modals, shared by both navs */}
+      <DashboardModals />
       <div
         id="dashboard-wrapper"
         className="layout-scrollbar custom:bottom-2 custom:right-2 custom:top-2 custom:left-20 custom:rounded-b-2xl fixed top-16 right-0 bottom-0 left-0 rounded-t-2xl bg-white"
