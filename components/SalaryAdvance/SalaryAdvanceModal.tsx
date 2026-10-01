@@ -200,8 +200,7 @@ export function SalaryAdvanceModal({
               {!data.exported && (
                 <p className="mt-3 text-[11px] text-gray-400">
                   Not yet included in an HR/Finance export — the staff member
-                  can still delete or alter this request without an audit
-                  trail.
+                  can still delete or alter this request without an audit trail.
                 </p>
               )}
             </section>

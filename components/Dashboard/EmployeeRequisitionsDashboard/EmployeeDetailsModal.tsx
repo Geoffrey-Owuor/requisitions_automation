@@ -11,7 +11,11 @@ import {
 } from "lucide-react";
 import { QueryResultRow } from "pg";
 import StatusFormatter from "../StatusFormatter";
-import { RETAIL_DEPARTMENT, dateFormatter, getJobGradeNumber } from "@/public/assets";
+import {
+  RETAIL_DEPARTMENT,
+  dateFormatter,
+  getJobGradeNumber,
+} from "@/public/assets";
 import ClientPortal from "../../ClientPortal";
 import Link from "next/link";
 import { useUser } from "@/context/UserContext";
