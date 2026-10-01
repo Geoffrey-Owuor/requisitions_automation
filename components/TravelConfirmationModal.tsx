@@ -49,7 +49,7 @@ export default function TravelConfirmationModal({
   ];
 
   return (
-    <div className="mx-auto max-w-3xl rounded-3xl border border-gray-100 bg-white/65 p-10 shadow-[0_24px_48px_rgba(160,60,60,0.10)]">
+    <div className="mx-auto max-w-3xl rounded-3xl border border-gray-100 bg-white p-10 shadow-[0_24px_48px_rgba(160,60,60,0.10)]">
       {/* Header */}
       <div className="mb-6">
         <p className="text-[11px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
@@ -70,14 +70,12 @@ export default function TravelConfirmationModal({
           <p className="mb-1 text-[11px] font-semibold tracking-[0.4px] text-amber-700 uppercase">
             Reason for Amendment
           </p>
-          <p className="text-[13px] leading-relaxed text-amber-900">
-            {reason}
-          </p>
+          <p className="text-[13px] leading-relaxed text-amber-900">{reason}</p>
         </div>
       )}
 
       {/* User account card */}
-      <div className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white/80 px-4 py-3">
+      <div className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white px-4 py-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-rose-100 text-[13px] font-semibold text-rose-700">
           {initialsHelper(nameString)}
         </div>
@@ -125,7 +123,7 @@ export default function TravelConfirmationModal({
         <p className="mb-2 text-[11px] font-semibold tracking-[0.4px] text-[#b0a0a0] uppercase">
           Business Justification
         </p>
-        <p className="rounded-xl bg-white/60 py-3 text-[13px] leading-relaxed text-[#1e1b1b]">
+        <p className="rounded-xl bg-white py-3 text-[13px] leading-relaxed text-[#1e1b1b]">
           {formData.justification}
         </p>
       </div>
@@ -135,7 +133,7 @@ export default function TravelConfirmationModal({
         {/* --- NEW: Engineering Jobs Breakdown --- */}
         {formData.department === "Engineering & HVAC" &&
           formData.engineeringJobs && (
-            <div className="mb-3 rounded-2xl border border-rose-100 bg-rose-50/50 p-4">
+            <div className="mb-3 rounded-2xl border border-rose-100 bg-rose-50 p-4">
               <span className="mb-3 flex items-center gap-2 text-[11px] font-semibold tracking-[0.4px] text-rose-800 uppercase">
                 <Wrench className="h-3.5 w-3.5" />
                 Engineering Job Allocations
@@ -195,7 +193,7 @@ export default function TravelConfirmationModal({
               KES {totalCost.toLocaleString()}
             </span>
           </div>
-          <div className="flex items-center justify-between rounded-2xl bg-rose-900/80 px-5 py-4 text-rose-50">
+          <div className="flex items-center justify-between rounded-2xl bg-rose-800 px-5 py-4 text-rose-50">
             <span className="text-[13px] text-rose-200">Approval Tier</span>
             <span className="text-[16px] font-semibold">{approvalTier}</span>
           </div>
@@ -207,7 +205,7 @@ export default function TravelConfirmationModal({
         <button
           type="button"
           onClick={onBack}
-          className="flex cursor-pointer items-center gap-2 rounded-[14px] border border-[rgba(240,180,180,0.6)] bg-transparent px-6 py-4 text-[14px] font-semibold text-[#1e1b1b] transition-all duration-200 hover:bg-white/60"
+          className="flex cursor-pointer items-center gap-2 rounded-[14px] border border-[rgba(240,180,180,0.6)] bg-transparent px-6 py-4 text-[14px] font-semibold text-[#1e1b1b] transition-all duration-200 hover:bg-rose-50"
         >
           <ArrowLeft className="h-4 w-4" />
           Back

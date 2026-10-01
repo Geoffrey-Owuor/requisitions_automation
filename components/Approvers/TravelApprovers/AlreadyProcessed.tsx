@@ -17,7 +17,7 @@ export default function AlreadyProcessed({
 
   return (
     <div className="layout-scrollbar relative flex h-screen items-center justify-center overflow-y-auto p-5">
-      <div className="mx-auto max-w-md rounded-3xl border border-gray-100 bg-white/65 p-10 text-center shadow-[0_24px_48px_rgba(160,60,60,0.10)]">
+      <div className="mx-auto max-w-md rounded-3xl border border-gray-100 bg-white p-10 text-center shadow-[0_24px_48px_rgba(160,60,60,0.10)]">
         {/* Icon */}
         <div
           className={`mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full ${
@@ -49,7 +49,7 @@ export default function AlreadyProcessed({
         </p>
 
         {/* Meta card */}
-        <div className="mb-7 flex flex-col gap-2.5 rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white/80 px-5 py-4 text-left">
+        <div className="mb-7 flex flex-col gap-2.5 rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white px-5 py-4 text-left">
           {[
             { label: "Decision", value: status },
             { label: "Processed by", value: processedBy },

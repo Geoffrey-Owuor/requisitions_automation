@@ -191,9 +191,9 @@ const AccessApprovalModal = ({ data }: { data: AccessRequisitionData }) => {
           </div>
 
           {/* ── Card ── */}
-          <div className="rounded-3xl border border-gray-100 bg-white/65 px-6 py-8 shadow-[0_24px_48px_rgba(160,60,60,0.10)] sm:px-8">
+          <div className="rounded-3xl border border-gray-100 bg-white px-6 py-8 shadow-[0_24px_48px_rgba(160,60,60,0.10)] sm:px-8">
             {/* Approver identity badge */}
-            <div className="mb-7 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white/80 px-4 py-3">
+            <div className="mb-7 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white px-4 py-3">
               <div className="inline-flex items-center gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-rose-100 text-[13px] font-semibold text-rose-700">
                   {initialsHelper(approverName)}
@@ -311,7 +311,7 @@ const AccessApprovalModal = ({ data }: { data: AccessRequisitionData }) => {
                 onChange={(e) => setComments(e.target.value)}
                 placeholder="No comments"
                 rows={4}
-                className="w-full resize-none rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white/70 px-4 py-3.5 text-[13px] leading-relaxed text-[#1e1b1b] transition-all duration-200 outline-none placeholder:text-[#c0a0a0] focus:border-rose-300 focus:bg-white/90 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.07)]"
+                className="w-full resize-none rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white px-4 py-3.5 text-[13px] leading-relaxed text-[#1e1b1b] transition-all duration-200 outline-none placeholder:text-[#c0a0a0] focus:border-rose-300 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.07)]"
               />
               <p className="mt-1.5 text-[11px] text-[#b0a0a0]">
                 {comments.trim() === ""
@@ -326,7 +326,7 @@ const AccessApprovalModal = ({ data }: { data: AccessRequisitionData }) => {
                 type="button"
                 disabled={declining || approving}
                 onClick={() => handleApproval("declined")}
-                className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-[14px] border border-rose-200 bg-white/80 py-4 text-[14px] font-semibold text-rose-700 transition-all duration-200 hover:border-rose-300 hover:bg-rose-50 active:scale-[0.98]"
+                className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-[14px] border border-rose-200 bg-white py-4 text-[14px] font-semibold text-rose-700 transition-all duration-200 hover:border-rose-300 hover:bg-rose-50 active:scale-[0.98]"
               >
                 <X className="h-4 w-4" />
                 {declining ? "Declining..." : "Decline"}
