@@ -58,7 +58,7 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
           <span className="flex flex-wrap items-center gap-2">
             {valueArray.map((value) => (
               <div
-                className="rounded-lg bg-neutral-200/70 px-2 py-1 text-xs font-medium"
+                className="rounded-lg bg-neutral-200 px-2 py-1 text-xs font-medium"
                 key={value}
               >
                 {value}
@@ -159,10 +159,10 @@ export function ITRequisitionModal({
         {/* Modal Panel */}
         <div
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-2xl rounded-[20px] border border-b border-gray-200 bg-white/90 shadow-[0_32px_64px_rgba(60,100,160,0.15)]"
+          className="relative w-full max-w-2xl rounded-[20px] border border-b border-gray-200 bg-white shadow-[0_32px_64px_rgba(60,100,160,0.15)]"
         >
           {/* Header */}
-          <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-2 rounded-t-[20px] border-b border-neutral-100/50 bg-neutral-50/40 px-6 py-4">
+          <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-2 rounded-t-[20px] border-b border-neutral-100/50 bg-white px-6 py-4">
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-red-400 shadow-sm">
                 <Monitor size={18} />
@@ -218,7 +218,7 @@ export function ITRequisitionModal({
             {/* — Submitter Info — */}
             <section>
               <SectionHeader icon={UserRound} title="Submitted By" />
-              <div className="grid grid-cols-2 gap-4 rounded-2xl border border-gray-100 bg-white/60 p-4">
+              <div className="grid grid-cols-2 gap-4 rounded-2xl border border-gray-100 bg-neutral-50 p-4">
                 <Field label="Name" value={data.submitter_name} />
                 <Field label="Email" value={data.submitter_email} />
               </div>
@@ -227,7 +227,7 @@ export function ITRequisitionModal({
             {/* — Employee Info — */}
             <section>
               <SectionHeader icon={Building2} title="Employee Details" />
-              <div className="grid grid-cols-2 gap-4 rounded-2xl border border-gray-100 bg-white/60 p-4">
+              <div className="grid grid-cols-2 gap-4 rounded-2xl border border-gray-100 bg-neutral-50 p-4">
                 <Field label="Employee Name" value={data.employee_name} />
                 <Field
                   label="Staff Number"
@@ -254,7 +254,7 @@ export function ITRequisitionModal({
             {/* — Requisition Details — */}
             <section>
               <SectionHeader icon={ClipboardList} title="Requisition Details" />
-              <div className="grid grid-cols-1 gap-4 rounded-2xl border border-gray-100 bg-white/60 p-4">
+              <div className="grid grid-cols-1 gap-4 rounded-2xl border border-gray-100 bg-neutral-50 p-4">
                 <Field
                   label="Requirements"
                   value={formatRequirements(data.requirements)}
@@ -271,7 +271,7 @@ export function ITRequisitionModal({
             {/* — Dates — */}
             <section>
               <SectionHeader icon={Calendar} title="Key Dates" />
-              <div className="grid grid-cols-2 gap-4 rounded-2xl border border-gray-100 bg-white/60 p-4">
+              <div className="grid grid-cols-2 gap-4 rounded-2xl border border-gray-100 bg-neutral-50 p-4">
                 <Field
                   label="Requisition Date"
                   value={dateFormatter(data.requisition_date)}
@@ -286,7 +286,7 @@ export function ITRequisitionModal({
             {/* — HOD Approval — */}
             <section>
               <SectionHeader icon={CheckCircle2} title="HOD Approval" />
-              <div className="grid grid-cols-2 gap-4 rounded-2xl border border-gray-100 bg-white/60 p-4">
+              <div className="grid grid-cols-2 gap-4 rounded-2xl border border-gray-100 bg-neutral-50 p-4">
                 <Field label="Approver" value={data.hod_approver_name} />
                 <Field
                   label="Status"
@@ -305,7 +305,7 @@ export function ITRequisitionModal({
             {/* — IT Approval — */}
             <section>
               <SectionHeader icon={CheckCircle2} title="IT Approval" />
-              <div className="grid grid-cols-2 gap-4 rounded-2xl border border-gray-100 bg-white/60 p-4">
+              <div className="grid grid-cols-2 gap-4 rounded-2xl border border-gray-100 bg-neutral-50 p-4">
                 <Field label="Approver" value={data.it_approver_name} />
                 <Field
                   label="Status"
@@ -323,7 +323,7 @@ export function ITRequisitionModal({
 
             {/* — Completion — */}
             <section>
-              <div className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white/60 px-4 py-3">
+              <div className="flex items-center justify-between rounded-2xl border border-gray-100 bg-neutral-50 px-4 py-3">
                 <span className="text-[11px] font-bold tracking-widest text-gray-400 uppercase">
                   Completion Status
                 </span>
