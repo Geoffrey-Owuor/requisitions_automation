@@ -17,9 +17,7 @@ import ClientPortal from "../../ClientPortal";
 import Link from "next/link";
 import { useUser } from "@/context/UserContext";
 import { getCasualApproverLink } from "@/serverActions/GetCasualApproverLink";
-import {
-  getCasualRequisitionDetails,
-} from "@/serverActions/GetCasualRequisitionDetails";
+import { getCasualRequisitionDetails } from "@/serverActions/GetCasualRequisitionDetails";
 import { CasualEmailDataValues } from "@/services/CasualEmailSender";
 import { useLoadingStore } from "@/store/useLoadingStore";
 import { useToggleStore } from "@/store/useToggleStore";

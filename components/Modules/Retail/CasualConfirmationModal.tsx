@@ -72,9 +72,7 @@ export default function CasualConfirmationModal({
           <p className="mb-1 text-[11px] font-semibold tracking-[0.4px] text-amber-700 uppercase">
             Reason for Amendment
           </p>
-          <p className="text-[13px] leading-relaxed text-amber-900">
-            {reason}
-          </p>
+          <p className="text-[13px] leading-relaxed text-amber-900">{reason}</p>
         </div>
       )}
 
