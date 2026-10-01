@@ -109,10 +109,10 @@ export function SalaryAdvanceModal({
       >
         <div
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-2xl rounded-[20px] border border-b border-gray-200 bg-white/90 shadow-[0_32px_64px_rgba(60,100,160,0.15)]"
+          className="relative w-full max-w-2xl rounded-[20px] border border-b border-gray-200 bg-white shadow-[0_32px_64px_rgba(60,100,160,0.15)]"
         >
           {/* Header */}
-          <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-2 rounded-t-[20px] border-b border-neutral-100/50 bg-neutral-50/40 px-6 py-4">
+          <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-2 rounded-t-[20px] border-b border-neutral-100/50 bg-white px-6 py-4">
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-red-400 shadow-sm">
                 <CircleDollarSign size={18} />
@@ -140,7 +140,7 @@ export function SalaryAdvanceModal({
             {/* — Employee Info — */}
             <section>
               <SectionHeader icon={UserRound} title="Employee Details" />
-              <div className="grid grid-cols-2 gap-4 rounded-2xl border border-gray-100 bg-white/60 p-4">
+              <div className="grid grid-cols-2 gap-4 rounded-2xl border border-gray-100 bg-neutral-50 p-4">
                 <Field label="Staff Name" value={data.staff_name} />
                 <Field label="Staff Number" value={data.staff_number} />
                 <Field label="Email" value={data.staff_email} />
@@ -159,7 +159,7 @@ export function SalaryAdvanceModal({
             {/* — Advance Details — */}
             <section>
               <SectionHeader icon={Banknote} title="Advance Details" />
-              <div className="grid grid-cols-2 gap-4 rounded-2xl border border-gray-100 bg-white/60 p-4">
+              <div className="grid grid-cols-2 gap-4 rounded-2xl border border-gray-100 bg-neutral-50 p-4">
                 <Field
                   label="Request Amount"
                   value={`KES ${Number(data.request_amount).toLocaleString()}`}
@@ -210,7 +210,7 @@ export function SalaryAdvanceModal({
             {data.alterations.length > 0 && (
               <section>
                 <SectionHeader icon={History} title="Alteration History" />
-                <div className="space-y-2 rounded-2xl border border-gray-100 bg-white/60 p-4">
+                <div className="space-y-2 rounded-2xl border border-gray-100 bg-neutral-50 p-4">
                   {data.alterations.map((alteration, idx) => (
                     <div
                       key={idx}
@@ -242,7 +242,7 @@ export function SalaryAdvanceModal({
             {/* — Approval Workflow / Review Area — */}
             <section>
               <SectionHeader icon={CheckCircle2} title="Approval Workflow" />
-              <div className="rounded-2xl border border-gray-100 bg-white/60 p-4">
+              <div className="rounded-2xl border border-gray-100 bg-neutral-50 p-4">
                 <div className="mb-4 flex items-center justify-between">
                   <span className="text-[11px] font-bold tracking-widest text-gray-400 uppercase">
                     Current Status

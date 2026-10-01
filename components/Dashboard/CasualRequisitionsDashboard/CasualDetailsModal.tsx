@@ -125,7 +125,7 @@ export const CasualDetailsModal = ({
       >
         <div
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-2xl rounded-[20px] border border-white/80 bg-white/90 shadow-[0_32px_64px_rgba(20,140,100,0.15)]"
+          className="relative w-full max-w-2xl rounded-[20px] border border-white/80 bg-white shadow-[0_32px_64px_rgba(20,140,100,0.15)]"
         >
           {/* Header */}
           <div className="flex flex-wrap items-center justify-between gap-2 overflow-hidden rounded-t-[20px] bg-white px-8 py-4">
@@ -194,7 +194,7 @@ export const CasualDetailsModal = ({
 
           <div className="layout-scrollbar max-h-[80vh] space-y-4 p-6">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div className="flex items-start gap-3 rounded-xl bg-white/60 p-3">
+              <div className="flex items-start gap-3 rounded-xl bg-neutral-50 p-3">
                 <MapPin size={16} className="mt-1 shrink-0 text-emerald-500" />
                 <div>
                   <p className="text-[10px] font-bold tracking-wider text-emerald-500 uppercase">
@@ -205,7 +205,7 @@ export const CasualDetailsModal = ({
                   </p>
                 </div>
               </div>
-              <div className="flex items-start gap-3 rounded-xl bg-white/60 p-3">
+              <div className="flex items-start gap-3 rounded-xl bg-neutral-50 p-3">
                 <Users size={16} className="mt-1 shrink-0 text-emerald-500" />
                 <div>
                   <p className="text-[10px] font-bold tracking-wider text-emerald-500 uppercase">
@@ -233,7 +233,7 @@ export const CasualDetailsModal = ({
                   {details?.sections.map((section) => (
                     <div
                       key={section.sectionname}
-                      className="rounded-xl bg-white/60 p-3"
+                      className="rounded-xl bg-neutral-50 p-3"
                     >
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-semibold text-[#1e1b1b]">
@@ -264,7 +264,7 @@ export const CasualDetailsModal = ({
                     </div>
                   ))}
                   {details && (
-                    <div className="flex items-center justify-between rounded-xl bg-emerald-50/50 p-3 text-sm">
+                    <div className="flex items-center justify-between rounded-xl bg-emerald-50 p-3 text-sm">
                       <span className="font-semibold text-[#1e1b1b]">
                         Total ({details.totalcasuals} casuals)
                       </span>
@@ -290,7 +290,7 @@ export const CasualDetailsModal = ({
                 ].map((step, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center justify-between rounded-xl bg-white/60 p-3"
+                    className="flex items-center justify-between rounded-xl bg-neutral-50 p-3"
                   >
                     <span className="text-sm text-[#1e1b1b]">
                       {step.label} Status
