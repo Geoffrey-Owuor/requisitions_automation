@@ -13,9 +13,9 @@ const AccessApprovalSkeleton = () => {
         </div>
 
         {/* Card */}
-        <div className="rounded-3xl border border-gray-100 bg-white/65 p-10 shadow-[0_24px_48px_rgba(160,60,60,0.10)]">
+        <div className="rounded-3xl border border-gray-100 bg-white p-10 shadow-[0_24px_48px_rgba(160,60,60,0.10)]">
           {/* Approver badge */}
-          <div className="mb-7 flex items-center gap-3 rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white/80 px-4 py-3">
+          <div className="mb-7 flex items-center gap-3 rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white px-4 py-3">
             <div className="h-10 w-10 shrink-0 rounded-full bg-rose-100" />
             <div className="space-y-1.5">
               <div className="h-3.5 w-32 rounded bg-gray-200" />
