@@ -14,7 +14,7 @@ export default function TravelApprovalSkeleton() {
         </div>
 
         {/* Card shell */}
-        <div className="rounded-3xl border border-gray-100 bg-white/65 p-10 shadow-[0_24px_48px_rgba(160,60,60,0.10)]">
+        <div className="rounded-3xl border border-gray-100 bg-white p-10 shadow-[0_24px_48px_rgba(160,60,60,0.10)]">
           {/* Step label */}
           <div className="mb-5">
             <div className="mb-2 h-3 w-24 rounded-full bg-rose-100/70" />
@@ -23,7 +23,7 @@ export default function TravelApprovalSkeleton() {
           </div>
 
           {/* Approver badge */}
-          <div className="mb-6 flex items-center gap-3 rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white/80 px-4 py-3">
+          <div className="mb-6 flex items-center gap-3 rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white px-4 py-3">
             <div className="h-10 w-10 shrink-0 rounded-full bg-rose-100/70" />
             <div className="flex-1">
               <div className="mb-1.5 h-3.5 w-32 rounded-lg bg-rose-100/70" />
@@ -52,7 +52,7 @@ export default function TravelApprovalSkeleton() {
           {/* Justification block */}
           <div className="mb-5 border-t border-[rgba(240,180,180,0.4)] pt-5">
             <div className="mb-3 h-3 w-36 rounded-full bg-rose-100/60" />
-            <div className="flex flex-col gap-2 rounded-xl bg-white/60 py-3">
+            <div className="flex flex-col gap-2 rounded-xl bg-white py-3">
               <div className="h-3 w-full rounded-full bg-rose-100/40" />
               <div className="h-3 w-5/6 rounded-full bg-rose-100/40" />
               <div className="h-3 w-4/6 rounded-full bg-rose-100/40" />
@@ -82,7 +82,7 @@ export default function TravelApprovalSkeleton() {
           {/* Comments area */}
           <div className="mb-5 border-t border-[rgba(240,180,180,0.4)] pt-5">
             <div className="mb-3 h-3 w-28 rounded-full bg-rose-100/60" />
-            <div className="h-28 rounded-2xl border border-[rgba(240,180,180,0.4)] bg-white/60" />
+            <div className="h-28 rounded-2xl border border-[rgba(240,180,180,0.4)] bg-white" />
           </div>
 
           {/* Action buttons */}

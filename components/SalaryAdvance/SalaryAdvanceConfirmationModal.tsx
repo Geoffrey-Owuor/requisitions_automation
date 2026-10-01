@@ -47,7 +47,7 @@ export default function SalaryAdvanceConfirmationModal({
   ];
 
   return (
-    <div className="mx-auto max-w-3xl rounded-3xl border border-gray-100 bg-white/65 p-10 shadow-[0_24px_48px_rgba(160,60,60,0.10)]">
+    <div className="mx-auto max-w-3xl rounded-3xl border border-gray-100 bg-white p-10 shadow-[0_24px_48px_rgba(160,60,60,0.10)]">
       {/* Header */}
       <div className="mb-6">
         <p className="text-[11px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
@@ -62,7 +62,7 @@ export default function SalaryAdvanceConfirmationModal({
       </div>
 
       {/* User account card */}
-      <div className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white/80 px-4 py-3">
+      <div className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white px-4 py-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-rose-100 text-[13px] font-semibold text-rose-700">
           {initialsHelper(formData.staffName)}
         </div>
@@ -121,7 +121,7 @@ export default function SalaryAdvanceConfirmationModal({
         <p className="mb-2 text-[11px] font-semibold tracking-[0.4px] text-[#b0a0a0] uppercase">
           Policy Agreement
         </p>
-        <span className="inline-flex items-center gap-2 rounded-xl bg-white/60 py-3 text-[13px] leading-relaxed text-[#1e1b1b]">
+        <span className="inline-flex items-center gap-2 rounded-xl bg-white py-3 text-[13px] leading-relaxed text-[#1e1b1b]">
           You have acknowledged and agreed to comply with the Salary Advance
           Policy, adhering strictly to the one-third (1/3) rule and repayment
           schedules.
@@ -133,7 +133,7 @@ export default function SalaryAdvanceConfirmationModal({
         <button
           type="button"
           onClick={onBack}
-          className="flex cursor-pointer items-center gap-2 rounded-[14px] border border-[rgba(240,180,180,0.6)] bg-transparent px-6 py-4 text-[14px] font-semibold text-[#1e1b1b] transition-all duration-200 hover:bg-white/60"
+          className="flex cursor-pointer items-center gap-2 rounded-[14px] border border-[rgba(240,180,180,0.6)] bg-transparent px-6 py-4 text-[14px] font-semibold text-[#1e1b1b] transition-all duration-200 hover:bg-rose-50"
         >
           <ArrowLeft className="h-4 w-4" />
           Back
