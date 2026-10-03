@@ -10,6 +10,8 @@ import TravelApprovalSkeleton from "@/components/Skeletons/TravelApprovalSkeleto
 import AlreadyProcessed from "@/components/Approvers/TravelApprovers/AlreadyProcessed";
 import InvalidToken from "@/components/Approvers/TravelApprovers/InvalidToken";
 import NotFoundRequest from "@/components/Approvers/TravelApprovers/NotFoundRequest";
+import NotAssignedHod from "@/components/Approvers/NotAssignedHod";
+import { getHodPageAccess } from "@/lib/hodAssignment";
 import PushbackUnavailable from "@/components/Approvers/TravelApprovers/PushbackUnavailable";
 import { isValidTravelStage, TRAVEL_STAGE_LABELS } from "@/public/assets";
 import {
@@ -82,6 +84,20 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
   }
 
   const approverDetails = validApprover[0];
+
+  // HOD stage: only the assigned HOD or one of their alternates may review
+  // this requisition - checked before any of its details are loaded.
+  if (stage === "hod") {
+    const hodAccess = await getHodPageAccess(
+      "travel_requisitions",
+      "travel_hod_email",
+      uuid,
+      approverDetails.email,
+    );
+    if (hodAccess.status === "not_found") return <NotFoundRequest />;
+    if (hodAccess.status === "denied")
+      return <NotAssignedHod message={hodAccess.message} />;
+  }
 
   // Token is valid - lets query the database for the travel data
   const baseQuery = `

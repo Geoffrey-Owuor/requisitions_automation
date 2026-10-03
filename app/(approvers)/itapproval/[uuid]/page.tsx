@@ -8,6 +8,8 @@ import InvalidToken from "@/components/Approvers/TravelApprovers/InvalidToken";
 import AlreadyProcessed from "@/components/Approvers/TravelApprovers/AlreadyProcessed";
 import ITApprovalSkeleton from "@/components/Skeletons/ITApprovalSkeleton";
 import NotFoundRequest from "@/components/Approvers/TravelApprovers/NotFoundRequest";
+import NotAssignedHod from "@/components/Approvers/NotAssignedHod";
+import { getHodPageAccess } from "@/lib/hodAssignment";
 import ITApprovalModal, {
   ITRequisitionData,
 } from "@/components/Approvers/ITApprovers/ITApprovalModal";
@@ -58,6 +60,20 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
   if (validApprover.length === 0) return <InvalidToken />;
 
   const approverDetails = validApprover[0];
+
+  // HOD stage: only the assigned HOD or one of their alternates may review
+  // this requisition - checked before any of its details are loaded.
+  if (stage === "hod") {
+    const hodAccess = await getHodPageAccess(
+      "it_requisitions",
+      "hod_approver_email",
+      uuid,
+      approverDetails.email,
+    );
+    if (hodAccess.status === "not_found") return <NotFoundRequest />;
+    if (hodAccess.status === "denied")
+      return <NotAssignedHod message={hodAccess.message} />;
+  }
 
   // Valid approval token - query the database for the IT requisition data
   const baseQuery = `
