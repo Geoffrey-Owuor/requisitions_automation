@@ -4,7 +4,7 @@ import {
   loadDirectorArray,
   loadHrArray,
   loadRetailDirectorArray,
-} from "@/lib/loadAppDataV2";
+} from "@/lib/loadApprovers";
 import { query, pool } from "@/lib/db";
 import { EmployeeEmailSender } from "@/services/EmployeeEmailSender";
 import { getSession } from "@/lib/session";

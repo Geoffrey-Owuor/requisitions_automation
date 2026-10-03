@@ -1,6 +1,6 @@
 import { PoolClient } from "pg";
 import { query } from "@/lib/db";
-import type { ApproversObject } from "@/lib/loadAppDataV2";
+import type { ApproversObject } from "@/lib/loadApprovers";
 
 // The HOD stage is a single ASSIGNED HOD (selected at submission and stored
 // on the requisition row in *_hod_email / hod_approver_email) plus that HOD's
@@ -115,7 +115,7 @@ export async function isHodViewer(
 // Each alternate's own hod_uuid is their approval token. `excludeEmail` drops
 // the submitter so nobody is asked to approve their own requisition.
 // Deliberately not in lib/loadAppDataV2.ts ("use server"), so the tokens are
-// never exposed as a client-callable server action.
+// never exposed as a client-callable server action (see lib/loadApprovers.ts).
 export async function loadHodAlternates(
   hodEmail: string,
   excludeEmail?: string,

@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from "next/server";
-import { loadITArray } from "@/lib/loadAppDataV2";
+import { loadITArray } from "@/lib/loadApprovers";
 import { ITEmailSender } from "@/services/ITEmailSender";
 import { query } from "@/lib/db";
 import { getSession } from "@/lib/session";

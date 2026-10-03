@@ -1,24 +1,24 @@
-// Version 2 of loading app data - queries data from the database
+// Version 2 of loading app data - queries data from the database.
+// "use server": these are called from the submission forms in the browser,
+// so nothing here may return approval tokens (*_uuid). Approver lists with
+// tokens live in the server-only lib/loadApprovers.ts.
 "use server";
 import { unstable_cache } from "next/cache";
 import { query } from "./db";
-import { HrForm } from "@/public/assets";
+import { getSession } from "./session";
 
 // Global Interfaces
 interface BaseDepartments {
   department_name: string;
 }
 
-// Approvers Object
-export interface ApproversObject {
-  uuid: string;
+// HOD approver for the submission forms, carrying the department it should
+// be auto-selected for (null when a HOD isn't tied to a specific department).
+// Deliberately has no uuid: hod_uuid is the HOD's approval token and this
+// list is sent to the browser.
+export interface HodApproversObject {
   name: string;
   email: string;
-}
-
-// HOD approver, additionally carrying the department it should be
-// auto-selected for (null when a HOD isn't tied to a specific department)
-export interface HodApproversObject extends ApproversObject {
   department: string | null;
 }
 
@@ -46,12 +46,11 @@ export const loadBaseDepartments = unstable_cache(
 // Load the hod array - selectable HODs only. Alternate-only HODs
 // (hod_array.is_alternate_only) are never offered in the submission dropdown
 // or department auto-select; they act through lib/hodAssignment.ts instead.
-export const loadHodArray = unstable_cache(
+const loadCachedHodArray = unstable_cache(
   async (): Promise<HodApproversObject[] | []> => {
     try {
       const result = await query<HodApproversObject>(`
-            SELECT hod_uuid AS uuid,
-            hod_name AS name,
+            SELECT hod_name AS name,
             hod_email AS email,
             hod_department AS department
             FROM hod_array
@@ -64,123 +63,15 @@ export const loadHodArray = unstable_cache(
       return [];
     }
   },
-  ["hod_array"],
+  ["hod_array_public"],
   {
     revalidate: 3600,
     tags: ["GetHodArray"],
   },
 );
 
-// Load the hr array, scoped to approvers permitted to act on `form`
-// (hr_array.hr_forms) - salary advance never calls this, it has its own
-// dedicated approver email from the environment.
-export const loadHrArray = async (
-  form: HrForm,
-): Promise<ApproversObject[] | []> => {
-  try {
-    const result = await query<ApproversObject>(
-      `
-            SELECT hr_uuid AS uuid,
-            hr_name AS name,
-            hr_email AS email
-            FROM hr_array
-            WHERE $1 = ANY(hr_forms)
-            `,
-      [form],
-    );
-
-    return result;
-  } catch (error) {
-    console.error("Error while trying to fetch hr array data:", error);
-    return [];
-  }
-};
-
-// Load the director array
-export const loadDirectorArray = async (): Promise<ApproversObject[] | []> => {
-  try {
-    const result = await query<ApproversObject>(`
-            SELECT director_uuid AS uuid,
-            director_name AS name,
-            director_email AS email
-            FROM director_array
-            `);
-
-    return result;
-  } catch (error) {
-    console.error("Error while trying to fetch director array data:", error);
-    return [];
-  }
-};
-
-// Load the retail director array
-export const loadRetailDirectorArray = async (): Promise<
-  ApproversObject[] | []
-> => {
-  try {
-    const result = await query<ApproversObject>(`
-            SELECT retail_director_uuid AS uuid,
-            retail_director_name AS name,
-            retail_director_email AS email
-            FROM retail_director_array
-            `);
-
-    return result;
-  } catch (error) {
-    console.error(
-      "Error while trying to fetch retail director array data:",
-      error,
-    );
-    return [];
-  }
-};
-
-// Load the it array
-export const loadITArray = async (): Promise<ApproversObject[] | []> => {
-  try {
-    const result = await query<ApproversObject>(`
-            SELECT it_uuid AS uuid,
-            it_name AS name,
-            it_email AS email
-            FROM it_array
-            `);
-
-    return result;
-  } catch (error) {
-    console.error("Error while trying to fetch it array data:", error);
-    return [];
-  }
-};
-
-// Load the security array
-export const loadSecurityArray = async (): Promise<ApproversObject[] | []> => {
-  try {
-    const result = await query<ApproversObject>(`
-      SELECT security_uuid AS uuid,
-      security_name AS name,
-      security_email AS email
-      FROM security_array `);
-
-    return result;
-  } catch (error) {
-    console.error("Error while trying to fetch security array data:", error);
-    return [];
-  }
-};
-
-// Load the finance array
-export const loadFinanceArray = async (): Promise<ApproversObject[] | []> => {
-  try {
-    const result = await query<ApproversObject>(`
-            SELECT finance_uuid AS uuid,
-            finance_name AS name,
-            finance_email AS email
-            FROM finance_array
-            `);
-
-    return result;
-  } catch (error) {
-    console.error("Error while trying to fetch finance array data:", error);
-    return [];
-  }
+// Client-callable (the submission forms load it), so it is session-gated.
+export const loadHodArray = async (): Promise<HodApproversObject[] | []> => {
+  if (!(await getSession())) return [];
+  return loadCachedHodArray();
 };

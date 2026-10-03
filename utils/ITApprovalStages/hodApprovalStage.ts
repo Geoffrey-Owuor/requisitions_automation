@@ -1,5 +1,5 @@
 import { ITEmailSender } from "@/services/ITEmailSender";
-import { loadITArray } from "@/lib/loadAppDataV2";
+import { loadITArray } from "@/lib/loadApprovers";
 
 type HodApprovalStageProps = {
   uuid: string;

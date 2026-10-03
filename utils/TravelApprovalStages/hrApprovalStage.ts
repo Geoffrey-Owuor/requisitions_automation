@@ -1,4 +1,4 @@
-import { loadDirectorArray } from "@/lib/loadAppDataV2";
+import { loadDirectorArray } from "@/lib/loadApprovers";
 import { EmailSender } from "@/services/EmailSender";
 
 type HrApprovalStageProps = {
