@@ -48,7 +48,9 @@ export interface TravelApprovalModalProps {
   uuid: string;
   stage: string;
   approverName: string;
-  approverEmail: string;
+  // Approval token from the emailed link - the server resolves the acting
+  // approver from it (lib/approverToken.ts)
+  token: string;
   employeeName: string;
   employeeDepartment: string;
   employeeDesignation: string;
@@ -123,7 +125,7 @@ const TravelApprovalModal = ({
   uuid,
   stage,
   approverName,
-  approverEmail,
+  token,
   employeeName,
   employeeDepartment,
   employeeDesignation,
@@ -186,8 +188,7 @@ const TravelApprovalModal = ({
             stage,
             status,
             comments: commentsPayload,
-            approverName,
-            approverEmail,
+            token,
             expectedAmendmentCount: amendmentCount,
           });
 

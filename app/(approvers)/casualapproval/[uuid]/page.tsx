@@ -147,8 +147,8 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
             <CasualApprovalModal
               uuid={uuid}
               stage={stage}
+              token={token}
               approverName={currentApprover}
-              approverEmail={currentApproverEmail}
               submitterName={requestData.submitter_name}
               submitterEmail={requestData.submitter_email}
               department={requestData.employee_department}

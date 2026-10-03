@@ -58,7 +58,6 @@ export interface EmployeeApprovalModalProps {
   stage: string;
   token: string;
   approverName: string;
-  approverEmail: string;
   submitterName: string;
   submitterEmail: string;
   department: string;
@@ -110,7 +109,6 @@ const EmployeeApprovalModal = ({
   stage,
   token,
   approverName,
-  approverEmail,
   submitterName,
   submitterEmail,
   department,
@@ -150,8 +148,7 @@ const EmployeeApprovalModal = ({
         stage,
         status,
         comments: commentsPayload,
-        approverName,
-        approverEmail,
+        token,
       });
 
       // Set the alert info
