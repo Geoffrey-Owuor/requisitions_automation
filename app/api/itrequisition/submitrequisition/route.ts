@@ -3,7 +3,7 @@ import { loadITArray } from "@/lib/loadApprovers";
 import { ITEmailSender } from "@/services/ITEmailSender";
 import { query } from "@/lib/db";
 import { getSession } from "@/lib/session";
-import { loadHodAlternates } from "@/lib/hodAssignment";
+import { loadHodAlternates, resolveHod, sameEmail } from "@/lib/hodAssignment";
 
 export async function POST(request: NextRequest) {
   // Check if we have a valid session
@@ -21,18 +21,11 @@ export async function POST(request: NextRequest) {
 
   try {
     // Getting our payload
-    const { formData, submittedBy } = await request.json();
+    const { formData } = await request.json();
 
-    // Destructure submitted area to get a valid email and name
-    const { name, email } = submittedBy;
-
-    // Unauthorized user
-    if (!name || !email) {
-      return NextResponse.json(
-        { message: "Cannot verify the user trying to make this requisition" },
-        { status: 400 },
-      );
-    }
+    // The submitter is always the signed-in user - never client-supplied, or
+    // anyone could submit as their own HOD and be auto-approved
+    const { name, email } = user;
 
     // Form Data destructuring
     const {
@@ -72,16 +65,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const hodApproverResult = await query(
-      `
-      SELECT hod_uuid AS uuid, 
-      hod_email AS email
-      FROM hod_array WHERE hod_name = $1 AND is_alternate_only = false LIMIT 1
-      `,
-      [hodApprover],
-    );
+    // The form sends the HOD's email; the stored name comes from hod_array
+    const resolvedHod = await resolveHod(hodApprover);
 
-    if (hodApproverResult.length === 0) {
+    if (!resolvedHod) {
       return NextResponse.json(
         {
           message:
@@ -91,9 +78,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // get the hod uuid and email - or fall back to an invalid string
-    const hodUuid = hodApproverResult[0].uuid;
-    const hodEmail = hodApproverResult[0].email;
+    const { uuid: hodUuid, name: hodName, email: hodEmail } = resolvedHod;
 
     //Join the requirements array into one text separated by comas
     const joinedRequirements = requirements.join(", ");
@@ -120,7 +105,7 @@ export async function POST(request: NextRequest) {
       otherRequirements,
       requisitionDate,
       dateJoining,
-      hodApprover,
+      hodName,
       hodEmail,
     ];
 
@@ -131,7 +116,7 @@ export async function POST(request: NextRequest) {
     const requestId = result[0].request_id;
 
     // Logic for when the requestor is an HOD
-    if (hodEmail === email) {
+    if (sameEmail(hodEmail, email)) {
       const updateQuery = `
         UPDATE it_requisitions
         SET

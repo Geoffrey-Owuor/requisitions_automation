@@ -8,6 +8,8 @@ import { initialsHelper } from "@/public/assets";
 
 interface KeyConfirmationModalProps {
   formData: KeyAccessFormData;
+  // Display name for formData.hodApprover, which holds the HOD's email
+  hodApproverName: string;
   onBack: () => void;
   onSubmit: () => Promise<void>;
   submitting: boolean;
@@ -15,6 +17,7 @@ interface KeyConfirmationModalProps {
 
 export default function KeyConfirmationModal({
   formData,
+  hodApproverName,
   onBack,
   onSubmit,
   submitting,
@@ -27,7 +30,7 @@ export default function KeyConfirmationModal({
     { label: "Staff Name", value: formData.employeeName },
     { label: "Department", value: formData.department },
     { label: "Staff Number", value: formData.staffNumber },
-    { label: "HOD Approver", value: formData.hodApprover },
+    { label: "HOD Approver", value: hodApproverName },
   ];
 
   const dateDetails: { label: string; value: string }[] = [

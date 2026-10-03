@@ -8,7 +8,7 @@ import {
 import { query, pool } from "@/lib/db";
 import { EmployeeEmailSender } from "@/services/EmployeeEmailSender";
 import { getSession } from "@/lib/session";
-import { loadHodAlternates } from "@/lib/hodAssignment";
+import { loadHodAlternates, resolveHod, sameEmail } from "@/lib/hodAssignment";
 import { isDirectorEmail } from "@/utils/isDirectorEmail";
 import { isRetailDirectorEmail } from "@/utils/isRetailDirectorEmail";
 import {
@@ -233,16 +233,10 @@ export async function POST(request: NextRequest) {
       positionFiles.push(typedFiles);
     }
 
-    const hodApproverResult = await query(
-      `
-      SELECT hod_uuid AS uuid,
-      hod_email AS email
-      FROM hod_array WHERE hod_name = $1 AND is_alternate_only = false LIMIT 1
-      `,
-      [hodApprover],
-    );
+    // The form sends the HOD's email; the stored name comes from hod_array
+    const resolvedHod = await resolveHod(hodApprover);
 
-    if (hodApproverResult.length === 0) {
+    if (!resolvedHod) {
       return NextResponse.json(
         {
           message:
@@ -252,8 +246,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const hodUuid = hodApproverResult[0].uuid;
-    const hodEmail = hodApproverResult[0].email;
+    const { uuid: hodUuid, name: hodName, email: hodEmail } = resolvedHod;
 
     // Generate ids up front so we know the final file paths before touching Postgres
     requestId = randomUUID();
@@ -311,7 +304,7 @@ export async function POST(request: NextRequest) {
           retailDirectorApprovalStatus,
           "pending",
           "pending",
-          hodApprover,
+          hodName,
           hodEmail,
         ],
       );
@@ -404,7 +397,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Running an update if the requestor is the HOD
-    if (hodEmail === email) {
+    if (sameEmail(hodEmail, email)) {
       await query(
         `
         UPDATE employee_requisitions

@@ -7,6 +7,8 @@ import { initialsHelper } from "@/public/assets";
 
 interface ITConfirmationModalProps {
   formData: ITFormData;
+  // Display name for formData.hodApprover, which holds the HOD's email
+  hodApproverName: string;
   onBack: () => void;
   onSubmit: () => Promise<void>;
   submitting: boolean;
@@ -14,6 +16,7 @@ interface ITConfirmationModalProps {
 
 export default function ITConfirmationModal({
   formData,
+  hodApproverName,
   onBack,
   onSubmit,
   submitting,
@@ -27,7 +30,7 @@ export default function ITConfirmationModal({
     { label: "Department", value: formData.department },
     { label: "Staff Number", value: formData.staffNumber },
     { label: "Replacement/New", value: formData.requestType },
-    { label: "HOD Approver", value: formData.hodApprover },
+    { label: "HOD Approver", value: hodApproverName },
   ];
 
   const dateDetails: { label: string; value: string }[] = [

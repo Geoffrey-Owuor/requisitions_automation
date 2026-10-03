@@ -17,8 +17,12 @@ export const NOT_ASSIGNED_HOD_MESSAGE =
 export const HOD_SELF_APPROVAL_MESSAGE =
   "You cannot approve a requisition you submitted, another HOD approver will act on it";
 
-const sameEmail = (a: string | null | undefined, b: string | null | undefined) =>
-  !!a && !!b && a.toLowerCase() === b.toLowerCase();
+// Emails are compared case-insensitively - Entra and hod_array can disagree
+// on casing for the same mailbox.
+export const sameEmail = (
+  a: string | null | undefined,
+  b: string | null | undefined,
+) => !!a && !!b && a.toLowerCase() === b.toLowerCase();
 
 // Emails of the HODs the email in `param` is an alternate for
 const coveredHodsSql = (param: string) => `
@@ -43,6 +47,33 @@ async function isAlternateOf(
     ? (await client.query(sql, params)).rows
     : await query(sql, params);
   return rows.length > 0;
+}
+
+export interface ResolvedHod {
+  uuid: string;
+  name: string;
+  email: string;
+}
+
+// Resolves the HOD picked on a submission/amendment form, which sends the
+// HOD's email (hod_email is unique; names are not). Returns null when no
+// such HOD exists (e.g. a stale/tampered value) or when it is an
+// alternate-only HOD, which can never be selected as the assigned HOD. The
+// name stored on the requisition comes from here, never from the client.
+export async function resolveHod(
+  hodEmail: string,
+): Promise<ResolvedHod | null> {
+  if (typeof hodEmail !== "string" || !hodEmail.trim()) return null;
+
+  const result = await query<ResolvedHod>(
+    `
+    SELECT hod_uuid AS uuid, hod_name AS name, hod_email AS email
+    FROM hod_array WHERE hod_email = $1 AND is_alternate_only = false LIMIT 1
+    `,
+    [hodEmail.trim().toLowerCase()],
+  );
+
+  return result[0] ?? null;
 }
 
 // Returns null when `approverEmail` may act on the HOD stage, otherwise the
@@ -176,8 +207,8 @@ export async function loadHodAlternates(
 
 // Name of the ASSIGNED HOD for SQL selects. The *_hod_approver name column
 // is overwritten with whoever acted on the HOD stage (possibly an alternate),
-// so amendment prefill/diffing must resolve the assigned HOD's name from
-// their stored email instead. Falls back to the name column if the HOD has
+// so amendment diffing must resolve the assigned HOD's name from their
+// stored email instead. Falls back to the name column if the HOD has
 // since been removed from hod_array.
 export function assignedHodNameSql(
   hodEmailColumn: string,

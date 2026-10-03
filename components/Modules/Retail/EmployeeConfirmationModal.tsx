@@ -13,6 +13,8 @@ import { initialsHelper } from "@/public/assets";
 
 interface EmployeeConfirmationModalProps {
   formData: EmployeeFormData;
+  // Display name for formData.hodApprover, which holds the HOD's email
+  hodApproverName: string;
   onBack: () => void;
   onSubmit: () => Promise<void>;
   submitting: boolean;
@@ -20,6 +22,7 @@ interface EmployeeConfirmationModalProps {
 
 export default function EmployeeConfirmationModal({
   formData,
+  hodApproverName,
   onBack,
   onSubmit,
   submitting,
@@ -30,7 +33,7 @@ export default function EmployeeConfirmationModal({
 
   const requisitionDetails: { label: string; value: string }[] = [
     { label: "Department", value: formData.department },
-    { label: "HOD Approver", value: formData.hodApprover },
+    { label: "HOD Approver", value: hodApproverName },
   ];
 
   const overallTotalRequired = formData.positions.reduce(

@@ -2,10 +2,9 @@ import { NextResponse, NextRequest } from "next/server";
 import { pool } from "@/lib/db";
 import { PoolClient } from "pg";
 import { getSession } from "@/lib/session";
-import { assignedHodNameSql } from "@/lib/hodAssignment";
+import { assignedHodNameSql, resolveHod, sameEmail } from "@/lib/hodAssignment";
 import {
   validateCasualFormData,
-  resolveHod,
   CasualFormDataInput,
 } from "@/lib/casualRequisitionRules";
 import { amendmentStage } from "@/utils/CasualApprovalStages/amendmentStage";
@@ -106,7 +105,7 @@ export async function POST(request: NextRequest) {
 
     const header = headerRows[0];
 
-    if (header.submitter_email !== user.email) {
+    if (!sameEmail(header.submitter_email, user.email)) {
       await client.query("ROLLBACK");
       return NextResponse.json(
         { message: "You are not authorized to amend this requisition" },
@@ -149,7 +148,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { uuid: hodUuid, email: newHodEmail } = resolvedHod;
+    const { uuid: hodUuid, name: newHodName, email: newHodEmail } = resolvedHod;
+    const hodChanged = !sameEmail(newHodEmail, header.casual_hod_email);
 
     const { rows: existingSections } = await client.query<ExistingSectionRow>(
       `SELECT section_id, section_name, casual_justification, number_of_casuals,
@@ -177,15 +177,12 @@ export async function POST(request: NextRequest) {
         ? header.casual_category
         : null,
       newCasualCategory: casualCategoryChanged ? casualCategory ?? null : null,
-      // casual_hod_approver holds whoever acted on the HOD stage (possibly an
-      // alternate) - compare against the ASSIGNED HOD instead. The
-      // nullified-decision snapshot keeps the actual approver's name.
-      previousHodApprover:
-        hodApprover !== header.assigned_hod_name
-          ? header.assigned_hod_name
-          : null,
-      newHodApprover:
-        hodApprover !== header.assigned_hod_name ? hodApprover : null,
+      // The HOD is compared by email (names aren't unique) and recorded by
+      // name. casual_hod_approver holds whoever acted on the HOD stage
+      // (possibly an alternate), so the previous name is the ASSIGNED HOD's.
+      // The nullified-decision snapshot keeps the actual approver's name.
+      previousHodApprover: hodChanged ? header.assigned_hod_name : null,
+      newHodApprover: hodChanged ? newHodName : null,
     };
     const headerChanged = Object.values(headerDiff).some((v) => v !== null);
 
@@ -411,7 +408,7 @@ export async function POST(request: NextRequest) {
         department,
         location,
         casualCategory ?? null,
-        hodApprover,
+        newHodName,
         newHodEmail,
         amendmentNumber,
         requestId,
@@ -462,7 +459,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Reproduce the self-HOD auto-approve branch from the initial submission
-    const selfHodAutoApproved = newHodEmail === user.email;
+    const selfHodAutoApproved = sameEmail(newHodEmail, user.email);
 
     if (selfHodAutoApproved) {
       await client.query(

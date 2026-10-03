@@ -11,9 +11,13 @@ export type SessionPayload = {
   email: string;
 };
 
+// Emails are stored and compared lowercase everywhere (migration
+// 020_lowercase_emails.sql) - Entra may return any casing for a mailbox.
+export const normalizeEmail = (email: string) => email.trim().toLowerCase();
+
 // 1. Create a signed JWT payload
 export async function encrypt(payload: SessionPayload): Promise<string> {
-  return new SignJWT(payload)
+  return new SignJWT({ ...payload, email: normalizeEmail(payload.email) })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("7d") // Valid for 1 week
@@ -26,7 +30,9 @@ export async function decrypt(token: string): Promise<SessionPayload | null> {
     const { payload } = await jwtVerify(token, SECRET_KEY, {
       algorithms: ["HS256"],
     });
-    return payload as SessionPayload;
+    const session = payload as SessionPayload;
+    // Sessions issued before emails were normalized may carry mixed case
+    return { ...session, email: normalizeEmail(session.email) };
   } catch {
     return null; // Invalid token or expired
   }

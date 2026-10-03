@@ -2,8 +2,7 @@ import { NextResponse, NextRequest } from "next/server";
 import { pool } from "@/lib/db";
 import { PoolClient } from "pg";
 import { getSession } from "@/lib/session";
-import { resolveHod } from "@/lib/casualRequisitionRules";
-import { assignedHodNameSql } from "@/lib/hodAssignment";
+import { assignedHodNameSql, resolveHod, sameEmail } from "@/lib/hodAssignment";
 import {
   TravelFormDataInput,
   validateTravelFormData,
@@ -100,7 +99,7 @@ export async function POST(request: NextRequest) {
     const { rows: headerRows } = await client.query(
       `SELECT submitter_email, amendment_count, travel_approval_tier, travel_total_cost,
        employee_name, employee_department, employee_designation, travel_cost_center,
-       travel_hod_approver, travel_destination,
+       travel_hod_approver, travel_hod_email, travel_destination,
        ${assignedHodNameSql("travel_hod_email", "travel_hod_approver")} AS assigned_hod_name,
        TO_CHAR(travel_departure_date, 'YYYY-MM-DD') AS travel_departure_date,
        TO_CHAR(travel_return_date, 'YYYY-MM-DD') AS travel_return_date,
@@ -126,7 +125,7 @@ export async function POST(request: NextRequest) {
 
     const header = headerRows[0];
 
-    if (header.submitter_email !== user.email) {
+    if (!sameEmail(header.submitter_email, user.email)) {
       await client.query("ROLLBACK");
       return NextResponse.json(
         { message: "You are not authorized to amend this requisition" },
@@ -176,11 +175,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { uuid: hodUuid, email: newHodEmail } = resolvedHod;
+    const { uuid: hodUuid, name: newHodName, email: newHodEmail } = resolvedHod;
+    const hodChanged = !sameEmail(newHodEmail, header.travel_hod_email);
 
     // ---- Field diff ----
+    // The form sends the HOD's email; the HOD is recorded by name
     const newValues: Record<string, unknown> = {
       ...input,
+      hodApprover: newHodName,
       engineeringJobs,
     };
 
@@ -196,7 +198,12 @@ export async function POST(request: NextRequest) {
       fieldKey: field.key,
       previousValue: asText(diffSource[field.column]),
       newValue: asText(newValues[field.key]),
-    })).filter((diff) => diff.previousValue !== diff.newValue);
+    })).filter((diff) =>
+      // Names aren't unique - the HOD counts as changed by email
+      diff.fieldKey === "hodApprover"
+        ? hodChanged
+        : diff.previousValue !== diff.newValue,
+    );
 
     if (fieldDiffs.length === 0) {
       await client.query("ROLLBACK");
@@ -282,7 +289,7 @@ export async function POST(request: NextRequest) {
         input.department,
         input.designation,
         input.costCentre,
-        input.hodApprover,
+        newHodName,
         newHodEmail,
         input.destination,
         input.departureDate,
@@ -304,7 +311,7 @@ export async function POST(request: NextRequest) {
     );
 
     // Reproduce the self-HOD auto-approve branch from the initial submission
-    const selfHodAutoApproved = newHodEmail === user.email;
+    const selfHodAutoApproved = sameEmail(newHodEmail, user.email);
 
     if (selfHodAutoApproved) {
       await client.query(

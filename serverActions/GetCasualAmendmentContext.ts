@@ -2,7 +2,7 @@
 
 import { query } from "@/lib/db";
 import { getSession } from "@/lib/session";
-import { assignedHodNameSql } from "@/lib/hodAssignment";
+import { sameEmail } from "@/lib/hodAssignment";
 import { CasualCategory, isCasualAmendableHrStatus } from "@/public/assets";
 import { CasualFormData } from "@/components/Modules/Retail/CasualRequisitionForm";
 import {
@@ -34,11 +34,11 @@ export async function getCasualAmendmentContext(
     employee_department: string;
     casual_location: string;
     casual_category: CasualCategory | null;
-    casual_hod_approver: string;
+    casual_hod_email: string;
   }>(
     `SELECT submitter_email, casual_hr_approval_status, amendment_count,
      employee_department, casual_location, casual_category,
-     ${assignedHodNameSql("casual_hod_email", "casual_hod_approver")} AS casual_hod_approver
+     casual_hod_email
      FROM casual_requisitions WHERE request_id = $1`,
     [requestId],
   );
@@ -48,7 +48,7 @@ export async function getCasualAmendmentContext(
   const header = headerResult[0];
 
   const isAmendable =
-    header.submitter_email === session.email &&
+    sameEmail(header.submitter_email, session.email) &&
     isCasualAmendableHrStatus(header.casual_hr_approval_status);
 
   if (!isAmendable) return null;
@@ -77,7 +77,8 @@ export async function getCasualAmendmentContext(
 
   const initialData: CasualFormData = {
     department: header.employee_department,
-    hodApprover: header.casual_hod_approver,
+    // The form holds the assigned HOD's email (see hodNameLabel)
+    hodApprover: header.casual_hod_email,
     location: header.casual_location,
     casualCategory: header.casual_category ?? undefined,
     sections: sections.map((section) => ({
