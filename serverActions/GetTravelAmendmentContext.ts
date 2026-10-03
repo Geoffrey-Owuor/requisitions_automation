@@ -2,7 +2,7 @@
 
 import { query } from "@/lib/db";
 import { getSession } from "@/lib/session";
-import { assignedHodNameSql } from "@/lib/hodAssignment";
+import { sameEmail } from "@/lib/hodAssignment";
 import { TravelFormData } from "@/components/TravelRequisitionPage";
 import { PUSHBACK_WINDOW_SQL } from "@/lib/travelPushback";
 import {
@@ -33,7 +33,7 @@ export async function getTravelAmendmentContext(
     query(
       `SELECT submitter_email, travel_hr_approval_status, amendment_count,
        employee_name, employee_department, employee_designation,
-       ${assignedHodNameSql("travel_hod_email", "travel_hod_approver")} AS travel_hod_approver,
+       travel_hod_email,
        travel_destination,
        TO_CHAR(travel_departure_date, 'YYYY-MM-DD') AS departure_date,
        TO_CHAR(travel_return_date, 'YYYY-MM-DD') AS return_date,
@@ -52,7 +52,7 @@ export async function getTravelAmendmentContext(
   const header = headerResult[0];
 
   const isAmendable =
-    header.submitter_email === session.email &&
+    sameEmail(header.submitter_email, session.email) &&
     getTravelAmendmentBlocker({
       hrStatus: header.travel_hr_approval_status,
       withinWindow: header.within_window,
@@ -68,7 +68,8 @@ export async function getTravelAmendmentContext(
     employeeName: header.employee_name,
     department: header.employee_department,
     designation: header.employee_designation,
-    hodApprover: header.travel_hod_approver,
+    // The form holds the assigned HOD's email (see hodNameLabel)
+    hodApprover: header.travel_hod_email,
     destination: header.travel_destination,
     departureDate: header.departure_date,
     returnDate: header.return_date,
