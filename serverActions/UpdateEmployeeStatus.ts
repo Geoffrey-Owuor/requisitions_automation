@@ -3,6 +3,7 @@
 import { pool } from "@/lib/db";
 import { PoolClient } from "pg";
 import { getHodActionError } from "@/lib/hodAssignment";
+import { resolveApproverByToken } from "@/lib/approverToken";
 import { AlertInfo } from "@/components/TravelRequisitionPage";
 import { hodApprovalStage } from "@/utils/EmployeeApprovalStages/hodApprovalStage";
 import { retailDirectorApprovalStage } from "@/utils/EmployeeApprovalStages/retailDirectorApprovalStage";
@@ -18,8 +19,9 @@ export type UpdateRequestStatusProps = {
   stage: string;
   status: string;
   comments: string;
-  approverName: string;
-  approverEmail: string;
+  // The emailed link's approval token - the acting approver is resolved
+  // from it server-side (lib/approverToken.ts), never from the client.
+  token: string;
 };
 
 export async function UpdateEmployeeStatus(
@@ -52,15 +54,6 @@ export async function UpdateEmployeeStatus(
     WHERE request_id = $5
     `;
 
-  //  params
-  const baseParams = [
-    payload.status,
-    payload.approverName,
-    payload.approverEmail,
-    payload.comments,
-    payload.uuid,
-  ];
-
   try {
     client = await pool.connect();
 
@@ -87,34 +80,22 @@ export async function UpdateEmployeeStatus(
       };
     }
 
-    // Check if the approver exists in our table array data set. HR approvers
-    // are additionally scoped to the forms in their hr_forms allow-list -
-    // salary advance never reaches this check, it has its own approver.
-    const isHrStage = payload.stage === "hr";
-    const { rows: approverResult } = await client.query(
-      isHrStage
-        ? `SELECT id, hr_forms FROM hr_array WHERE hr_email = $1 FOR UPDATE`
-        : `SELECT id FROM ${payload.stage}_array WHERE ${payload.stage}_email = $1 FOR UPDATE`,
-      [payload.approverEmail],
+    // The acting approver comes from the approval token, never from the
+    // client. HR approvers are additionally scoped to the forms in their
+    // hr_forms allow-list - salary advance never reaches this check.
+    const approver = await resolveApproverByToken(
+      client,
+      payload.stage,
+      payload.token,
+      "employee",
     );
 
-    if (approverResult.length === 0) {
+    if (!approver.ok) {
       await client.query("ROLLBACK");
-      return {
-        alertType: "error",
-        alertMessage:
-          "Could not verify the current approver, please contact your admin for support",
-      };
+      return { alertType: "error", alertMessage: approver.message };
     }
 
-    if (isHrStage && !approverResult[0].hr_forms.includes("employee")) {
-      await client.query("ROLLBACK");
-      return {
-        alertType: "error",
-        alertMessage:
-          "You are not authorized to approve employee requisitions, please contact your admin for support",
-      };
-    }
+    const { name: approverName, email: approverEmail } = approver;
 
     const isReviewed = reviewedResult[0].approval_status;
     const previousApprover = reviewedResult[0].approver;
@@ -132,7 +113,7 @@ export async function UpdateEmployeeStatus(
     // stage - being in hod_array alone is not enough (lib/hodAssignment.ts).
     if (payload.stage === "hod") {
       const hodActionError = await getHodActionError(client, {
-        approverEmail: payload.approverEmail,
+        approverEmail,
         assignedHodEmail,
         submitterEmail: userEmail,
       });
@@ -162,7 +143,13 @@ export async function UpdateEmployeeStatus(
       };
     }
 
-    await client.query(baseUpdateQuery, baseParams);
+    await client.query(baseUpdateQuery, [
+      payload.status,
+      approverName,
+      approverEmail,
+      payload.comments,
+      payload.uuid,
+    ]);
 
     // If the approving HOD is also a Retail Director and/or a Director/CEO,
     // auto-approve those stages in the same transaction so the same person
@@ -174,7 +161,7 @@ export async function UpdateEmployeeStatus(
       if (department === RETAIL_DEPARTMENT) {
         skipRetailDirectorStage = await isRetailDirectorEmail(
           client,
-          payload.approverEmail,
+          approverEmail,
         );
 
         if (skipRetailDirectorStage) {
@@ -188,12 +175,12 @@ export async function UpdateEmployeeStatus(
             employee_retail_director_comments = 'Automatically approved - the HOD is also a Retail Director, so a separate Retail Director approval is not required'
             WHERE request_id = $3
             `,
-            [payload.approverName, payload.approverEmail, payload.uuid],
+            [approverName, approverEmail, payload.uuid],
           );
         }
       }
 
-      skipDirectorStage = await isDirectorEmail(client, payload.approverEmail);
+      skipDirectorStage = await isDirectorEmail(client, approverEmail);
 
       if (skipDirectorStage) {
         await client.query(
@@ -206,7 +193,7 @@ export async function UpdateEmployeeStatus(
           employee_director_comments = 'Automatically approved - the HOD is also a Director/CEO, so a separate CEO approval is not required'
           WHERE request_id = $3
           `,
-          [payload.approverName, payload.approverEmail, payload.uuid],
+          [approverName, approverEmail, payload.uuid],
         );
       }
     }
@@ -219,8 +206,8 @@ export async function UpdateEmployeeStatus(
           uuid: payload.uuid,
           userEmail,
           status: payload.status,
-          approverEmail: payload.approverEmail,
-          approverName: payload.approverName,
+          approverEmail,
+          approverName,
           department,
           skipRetailDirectorStage,
           skipDirectorStage,
@@ -235,8 +222,8 @@ export async function UpdateEmployeeStatus(
           userEmail,
           hodEmail,
           status: payload.status,
-          approverEmail: payload.approverEmail,
-          approverName: payload.approverName,
+          approverEmail,
+          approverName,
           skipDirectorStage:
             reviewedResult[0].director_approval_status === "approved",
         });
@@ -247,8 +234,8 @@ export async function UpdateEmployeeStatus(
           userEmail,
           hodEmail,
           status: payload.status,
-          approverEmail: payload.approverEmail,
-          approverName: payload.approverName,
+          approverEmail,
+          approverName,
         });
         break;
       case "hr":
@@ -259,8 +246,8 @@ export async function UpdateEmployeeStatus(
           retailDirectorEmail,
           directorEmail,
           status: payload.status,
-          approverEmail: payload.approverEmail,
-          approverName: payload.approverName,
+          approverEmail,
+          approverName,
         });
         break;
       default:

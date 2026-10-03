@@ -35,7 +35,9 @@ export interface AccessRequisitionData {
   uuid: string;
   stage: string;
   approverName: string;
-  approverEmail: string;
+  // Approval token from the emailed link - the server resolves the acting
+  // approver from it (lib/approverToken.ts)
+  token: string;
   submitterName: string;
   submitterEmail: string;
   employeeName: string;
@@ -91,7 +93,7 @@ const AccessApprovalModal = ({ data }: { data: AccessRequisitionData }) => {
     uuid,
     stage,
     approverName,
-    approverEmail,
+    token,
     submitterName,
     submitterEmail,
     employeeName,
@@ -128,8 +130,7 @@ const AccessApprovalModal = ({ data }: { data: AccessRequisitionData }) => {
         stage,
         status,
         comments: commentsPayload,
-        approverName,
-        approverEmail,
+        token,
       });
 
       setAlertInfo({

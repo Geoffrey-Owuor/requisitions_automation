@@ -112,7 +112,7 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
     uuid,
     stage,
     approverName: approverDetails.name,
-    approverEmail: approverDetails.email,
+    token,
     requestCreatedAt: requestData.request_created_at,
     submitterName: requestData.submitter_name,
     submitterEmail: requestData.submitter_email,

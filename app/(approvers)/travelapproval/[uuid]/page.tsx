@@ -176,8 +176,8 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
             <TravelApprovalModal
               uuid={uuid}
               stage={stage}
+              token={token}
               approverName={currentApprover}
-              approverEmail={currentApproverEmail}
               employeeName={requestData.employee_name}
               employeeDepartment={requestData.employee_department}
               employeeDesignation={requestData.employee_designation}

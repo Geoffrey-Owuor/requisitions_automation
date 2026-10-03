@@ -3,6 +3,7 @@ import { UpdateRequestStatusProps } from "./UpdateTravelStatus";
 import { pool } from "@/lib/db";
 import { PoolClient } from "pg";
 import { getHodActionError } from "@/lib/hodAssignment";
+import { resolveApproverByToken } from "@/lib/approverToken";
 import { AlertInfo } from "@/components/TravelRequisitionPage";
 import { ITEmailSender } from "@/services/ITEmailSender";
 import { itApprovalStage } from "@/utils/ITApprovalStages/itApprovalStage";
@@ -39,15 +40,6 @@ export async function UpdateITRequisitionStatus(
   WHERE request_id = $5
   `;
 
-  // Our base params
-  const baseParams = [
-    payload.status,
-    payload.approverName,
-    payload.approverEmail,
-    payload.comments,
-    payload.uuid,
-  ];
-
   try {
     client = await pool.connect();
 
@@ -75,20 +67,20 @@ export async function UpdateITRequisitionStatus(
       };
     }
 
-    // Check if the approver exists in our table array data set
-    const { rows: approverResult } = await client.query(
-      `SELECT id FROM ${payload.stage}_array WHERE ${payload.stage}_email = $1`,
-      [payload.approverEmail],
+    // The acting approver comes from the approval token, never from the
+    // client.
+    const approver = await resolveApproverByToken(
+      client,
+      payload.stage,
+      payload.token,
     );
 
-    if (approverResult.length === 0) {
+    if (!approver.ok) {
       await client.query("ROLLBACK");
-      return {
-        alertType: "error",
-        alertMessage:
-          "Could not verify the current approver, please contact your admin for support",
-      };
+      return { alertType: "error", alertMessage: approver.message };
     }
+
+    const { name: approverName, email: approverEmail } = approver;
 
     const isReviewed = reviewedResult[0].approval_status;
     const previousApprover = reviewedResult[0].approver;
@@ -103,7 +95,7 @@ export async function UpdateITRequisitionStatus(
     // stage - being in hod_array alone is not enough (lib/hodAssignment.ts).
     if (payload.stage === "hod") {
       const hodActionError = await getHodActionError(client, {
-        approverEmail: payload.approverEmail,
+        approverEmail,
         assignedHodEmail,
         submitterEmail: userEmail,
       });
@@ -121,7 +113,13 @@ export async function UpdateITRequisitionStatus(
       };
     }
 
-    await client.query(baseUpdateQuery, baseParams);
+    await client.query(baseUpdateQuery, [
+      payload.status,
+      approverName,
+      approverEmail,
+      payload.comments,
+      payload.uuid,
+    ]);
 
     await client.query("COMMIT");
 
@@ -132,8 +130,8 @@ export async function UpdateITRequisitionStatus(
           uuid: payload.uuid,
           userEmail,
           status: payload.status,
-          approverEmail: payload.approverEmail,
-          approverName: payload.approverName,
+          approverEmail,
+          approverName,
         });
         break;
       case "it":
@@ -142,8 +140,8 @@ export async function UpdateITRequisitionStatus(
           userEmail,
           hodEmail,
           status: payload.status,
-          approverEmail: payload.approverEmail,
-          approverName: payload.approverName,
+          approverEmail,
+          approverName,
         });
         break;
       default:
