@@ -46,9 +46,10 @@ async function isAlternateOf(
 }
 
 // Returns null when `approverEmail` may act on the HOD stage, otherwise the
-// message to show. Run inside the update transaction (pass its client).
+// message to show. Run inside the update transaction (pass its client); the
+// approval pages pass null to run the same check before rendering.
 export async function getHodActionError(
-  client: Pick<PoolClient, "query">,
+  client: Pick<PoolClient, "query"> | null,
   {
     approverEmail,
     assignedHodEmail,
@@ -67,6 +68,41 @@ export async function getHodActionError(
   if (sameEmail(approverEmail, assignedHodEmail)) return null;
   if (await isAlternateOf(client, approverEmail, assignedHodEmail)) return null;
   return NOT_ASSIGNED_HOD_MESSAGE;
+}
+
+// HOD-stage gate for the (approvers) pages, run before any requisition
+// details are loaded so a HOD holding their own token can't view requisitions
+// assigned to someone else. Same rule as the update actions. `table` and
+// `hodEmailColumn` are fixed per form, never user input.
+export type HodPageAccess =
+  | { status: "ok" }
+  | { status: "not_found" }
+  | { status: "denied"; message: string };
+
+export async function getHodPageAccess(
+  table: string,
+  hodEmailColumn: string,
+  requestId: string,
+  approverEmail: string,
+): Promise<HodPageAccess> {
+  const rows = await query<{
+    assigned_hod_email: string | null;
+    submitter_email: string;
+  }>(
+    `SELECT ${hodEmailColumn} AS assigned_hod_email, submitter_email
+     FROM ${table} WHERE request_id = $1`,
+    [requestId],
+  );
+
+  if (rows.length === 0) return { status: "not_found" };
+
+  const message = await getHodActionError(null, {
+    approverEmail,
+    assignedHodEmail: rows[0].assigned_hod_email,
+    submitterEmail: rows[0].submitter_email,
+  });
+
+  return message ? { status: "denied", message } : { status: "ok" };
 }
 
 // Pending-queue scope: requisitions assigned to me, plus those assigned to a
