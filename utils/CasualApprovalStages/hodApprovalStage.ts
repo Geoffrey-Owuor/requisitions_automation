@@ -1,5 +1,5 @@
 import { CasualEmailSender } from "@/services/CasualEmailSender";
-import { loadHrArray } from "@/lib/loadAppDataV2";
+import { loadHrArray } from "@/lib/loadApprovers";
 
 type HodApprovalStageProps = {
   uuid: string;

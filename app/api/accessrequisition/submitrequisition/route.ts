@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from "next/server";
-import { loadSecurityArray } from "@/lib/loadAppDataV2";
+import { loadSecurityArray } from "@/lib/loadApprovers";
 import { AccessEmailSender } from "@/services/AccessEmailSender";
 import { query } from "@/lib/db";
 import { getSession } from "@/lib/session";
