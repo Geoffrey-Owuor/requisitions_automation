@@ -16,7 +16,7 @@ export default function AlreadyProcessed({
   const isApproved = status === "approved" || status === "accepted";
 
   return (
-    <div className="layout-scrollbar relative flex h-screen items-center justify-center overflow-y-auto p-5">
+    <div className="relative flex min-h-full flex-1 items-center justify-center p-5">
       <div className="mx-auto max-w-md rounded-3xl border border-gray-100 bg-white p-10 text-center shadow-[0_24px_48px_rgba(160,60,60,0.10)]">
         {/* Icon */}
         <div
