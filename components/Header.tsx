@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import Brand from "./Brand";
 import { BookText, CircleGauge, Menu, X } from "lucide-react";
 import Link from "next/link";
@@ -14,7 +14,11 @@ const homeNavItems = [
   { href: "#faq", label: "FAQs" },
 ];
 
-const Header = () => {
+const Header = ({
+  loginReturnsHere = false,
+}: {
+  loginReturnsHere?: boolean;
+}) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
@@ -22,6 +26,15 @@ const Header = () => {
   const onHome = pathname === "/";
   const onGuidelines = pathname.startsWith("/guidelines");
   const onLogin = pathname.startsWith("/login");
+
+  // The non-home Login: when loginReturnsHere, sends the current path + query
+  // as returnTo (read at submit time, so no useSearchParams Suspense boundary)
+  const handlePageLoginSubmit = (e: FormEvent<HTMLFormElement>) => {
+    const returnTo = e.currentTarget.elements.namedItem("returnTo");
+    if (returnTo instanceof HTMLInputElement)
+      returnTo.value = window.location.pathname + window.location.search;
+    setIsLoading(true);
+  };
 
   /** Only the homepage has sections to scroll to, so only it gets the nav
    *  links and the logo-plus-drawer mobile layout. Every other page keeps
@@ -37,8 +50,9 @@ const Header = () => {
               <form
                 action="/api/auth/login"
                 method="GET"
-                onSubmit={() => setIsLoading(true)}
+                onSubmit={handlePageLoginSubmit}
               >
+                {loginReturnsHere && <input type="hidden" name="returnTo" />}
                 <button
                   type="submit"
                   disabled={isLoading}
