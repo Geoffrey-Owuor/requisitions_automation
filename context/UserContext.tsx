@@ -15,9 +15,9 @@ interface UserDetails {
 }
 
 type UserProviderProps = {
-  // memberships is optional here so the (approvers)/*/[uuid] pages — which
-  // build their own per-stage UserProvider unrelated to array membership —
-  // don't need to supply it; it falls back to all-false/empty.
+  // memberships is optional; it falls back to all-false/empty. Every
+  // provider is built from the session (components/Dashboard/AuthenticatedShell)
+  // - the (approvers) pages no longer build one from the approval token.
   user: Omit<UserDetails, "memberships"> & {
     memberships?: ApproverMemberships;
   };

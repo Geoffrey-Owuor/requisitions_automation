@@ -1,8 +1,6 @@
 import { Metadata } from "next";
 import { Suspense } from "react";
-import DashboardWrapper from "@/components/Dashboard/DashboardWrapper";
-import RequisitionPagesWrapper from "@/components/Dashboard/RequisitionPagesWrapper";
-import { UserProvider } from "@/context/UserContext";
+import ApproverShell from "@/components/Approvers/ApproverShell";
 import { query } from "@/lib/db";
 import TravelApprovalModal from "@/components/Approvers/TravelApprovers/TravelApprovalModal";
 import { PreviousApproval } from "@/components/Approvers/PreviousApprovalsSection";
@@ -51,7 +49,10 @@ export const generateMetadata = async ({
   };
 };
 
-const page = async ({ params, searchParams }: ApprovalPageProps) => {
+const ApprovalPageContent = async ({
+  params,
+  searchParams,
+}: ApprovalPageProps) => {
   const { uuid } = await params;
   const { token, stage, mode } = await searchParams;
 
@@ -154,14 +155,6 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
 
   // Our current approver
   const currentApprover = approverDetails.name;
-  const currentApproverEmail = approverDetails.email;
-
-  // context object
-  const contextObject = {
-    username: currentApprover,
-    email: currentApproverEmail,
-    roles: [stage],
-  };
 
   // Director only sits in the chain for Tier 3 requisitions, after HOD and
   // HR. Tier 1/2 requisitions finalize at HR, so HOD is the only stage that
@@ -185,58 +178,56 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
   }
 
   return (
-    <UserProvider user={contextObject}>
-      <DashboardWrapper>
-        <RequisitionPagesWrapper>
-          <Suspense fallback={<TravelApprovalSkeleton />}>
-            <TravelApprovalModal
-              uuid={uuid}
-              stage={stage}
-              token={token}
-              approverName={currentApprover}
-              employeeName={requestData.employee_name}
-              employeeDepartment={requestData.employee_department}
-              employeeDesignation={requestData.employee_designation}
-              travelDestination={requestData.travel_destination}
-              travelDepartureDate={requestData.travel_departure_date}
-              travelReturnDate={requestData.travel_return_date}
-              travelCategory={requestData.travel_category}
-              travelBusinessJustification={
-                requestData.travel_business_justification
+    <Suspense fallback={<TravelApprovalSkeleton />}>
+      <TravelApprovalModal
+        uuid={uuid}
+        stage={stage}
+        token={token}
+        approverName={currentApprover}
+        employeeName={requestData.employee_name}
+        employeeDepartment={requestData.employee_department}
+        employeeDesignation={requestData.employee_designation}
+        travelDestination={requestData.travel_destination}
+        travelDepartureDate={requestData.travel_departure_date}
+        travelReturnDate={requestData.travel_return_date}
+        travelCategory={requestData.travel_category}
+        travelBusinessJustification={requestData.travel_business_justification}
+        travelMode={requestData.travel_mode}
+        travelTransportCost={requestData.travel_transport_cost}
+        travelOtherCosts={requestData.travel_other_costs}
+        travelPerDiem={requestData.travel_per_diem}
+        travelTotalCost={requestData.travel_total_cost}
+        travelCostCenter={requestData.travel_cost_center}
+        travelWithinBudget={requestData.travel_within_budget}
+        travelApprovalTier={requestData.travel_approval_tier}
+        requestCreatedAt={requestData.request_created_at}
+        engineeringJobs={requestData.engineering_jobs}
+        previousApprovals={previousApprovals}
+        pushbacks={pushbacks}
+        amendments={amendments}
+        amendmentCount={Number(requestData.amendment_count)}
+        pushback={
+          isPushback
+            ? {
+                token,
+                currentStatus: approvalStatus,
+                currentApprover: requestData.travel_hr_approver,
+                currentComments: requestData.travel_hr_comments,
+                pushbackCount: Number(requestData.travel_hr_pushback_count),
               }
-              travelMode={requestData.travel_mode}
-              travelTransportCost={requestData.travel_transport_cost}
-              travelOtherCosts={requestData.travel_other_costs}
-              travelPerDiem={requestData.travel_per_diem}
-              travelTotalCost={requestData.travel_total_cost}
-              travelCostCenter={requestData.travel_cost_center}
-              travelWithinBudget={requestData.travel_within_budget}
-              travelApprovalTier={requestData.travel_approval_tier}
-              requestCreatedAt={requestData.request_created_at}
-              engineeringJobs={requestData.engineering_jobs}
-              previousApprovals={previousApprovals}
-              pushbacks={pushbacks}
-              amendments={amendments}
-              amendmentCount={Number(requestData.amendment_count)}
-              pushback={
-                isPushback
-                  ? {
-                      token,
-                      currentStatus: approvalStatus,
-                      currentApprover: requestData.travel_hr_approver,
-                      currentComments: requestData.travel_hr_comments,
-                      pushbackCount: Number(
-                        requestData.travel_hr_pushback_count,
-                      ),
-                    }
-                  : undefined
-              }
-            />
-          </Suspense>
-        </RequisitionPagesWrapper>
-      </DashboardWrapper>
-    </UserProvider>
+            : undefined
+        }
+      />
+    </Suspense>
   );
 };
+
+// Every outcome - the approval modal and each status screen - renders inside
+// the session-chosen shell.
+const page = (props: ApprovalPageProps) => (
+  <ApproverShell>
+    <ApprovalPageContent {...props} />
+  </ApproverShell>
+);
 
 export default page;

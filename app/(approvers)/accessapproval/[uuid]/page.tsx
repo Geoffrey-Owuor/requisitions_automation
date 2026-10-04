@@ -1,9 +1,7 @@
 import { Metadata } from "next";
 import { Suspense } from "react";
 import { query } from "@/lib/db";
-import DashboardWrapper from "@/components/Dashboard/DashboardWrapper";
-import RequisitionPagesWrapper from "@/components/Dashboard/RequisitionPagesWrapper";
-import { UserProvider } from "@/context/UserContext";
+import ApproverShell from "@/components/Approvers/ApproverShell";
 import InvalidToken from "@/components/Approvers/TravelApprovers/InvalidToken";
 import AlreadyProcessed from "@/components/Approvers/TravelApprovers/AlreadyProcessed";
 import AccessApprovalSkeleton from "@/components/Skeletons/AccessApprovalSkeleton";
@@ -43,7 +41,10 @@ export const generateMetadata = async ({
   };
 };
 
-const page = async ({ params, searchParams }: ApprovalPageProps) => {
+const ApprovalPageContent = async ({
+  params,
+  searchParams,
+}: ApprovalPageProps) => {
   const { uuid } = await params;
   const { token, stage } = await searchParams;
 
@@ -103,12 +104,6 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
       <AlreadyProcessed processedBy={approverName} status={approvalStatus} />
     );
 
-  const contextObject = {
-    username: approverDetails.name,
-    email: approverDetails.email,
-    roles: [stage],
-  };
-
   // Security is the second and final stage - HOD is the only stage that can
   // precede it.
   const previousApprovals: PreviousApproval[] =
@@ -142,16 +137,18 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
   };
 
   return (
-    <UserProvider user={contextObject}>
-      <DashboardWrapper>
-        <RequisitionPagesWrapper>
-          <Suspense fallback={<AccessApprovalSkeleton />}>
-            <AccessApprovalModal data={modalData} />
-          </Suspense>
-        </RequisitionPagesWrapper>
-      </DashboardWrapper>
-    </UserProvider>
+    <Suspense fallback={<AccessApprovalSkeleton />}>
+      <AccessApprovalModal data={modalData} />
+    </Suspense>
   );
 };
+
+// Every outcome - the approval modal and each status screen - renders inside
+// the session-chosen shell.
+const page = (props: ApprovalPageProps) => (
+  <ApproverShell>
+    <ApprovalPageContent {...props} />
+  </ApproverShell>
+);
 
 export default page;
