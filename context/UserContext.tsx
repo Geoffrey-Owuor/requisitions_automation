@@ -37,6 +37,11 @@ export const UserProvider = ({ user, children }: UserProviderProps) => {
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 };
 
+// True under a UserProvider. Every provider is built from the session, so this
+// means the viewer is signed in - without throwing when they aren't (e.g. the
+// approval pages' status screens, which render for visitors too).
+export const useIsSignedIn = () => useContext(UserContext) !== null;
+
 // Custom hook
 export const useUser = () => {
   const context = useContext(UserContext);
