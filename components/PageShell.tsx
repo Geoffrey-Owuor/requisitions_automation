@@ -6,6 +6,8 @@ type PageShellProps = {
   children: ReactNode;
   /** Constrains the main column. Login uses "narrow"; content pages use "wide". */
   width?: "wide" | "narrow";
+  /** Login returns to the current page (path + query) instead of /dashboard. */
+  loginReturnsHere?: boolean;
 };
 
 /**
@@ -14,7 +16,11 @@ type PageShellProps = {
  * `h-screen` with an inner scroller is required while `html { overflow: hidden }`
  * is set globally in css/globals.css for the dashboard — see note in that file.
  */
-const PageShell = ({ children, width = "wide" }: PageShellProps) => {
+const PageShell = ({
+  children,
+  width = "wide",
+  loginReturnsHere = false,
+}: PageShellProps) => {
   return (
     <div className="layout-scrollbar bg-canvas selection:bg-brand-100 selection:text-brand-900 relative flex h-screen flex-col text-slate-900">
       {/* Ambient Background */}
@@ -24,7 +30,7 @@ const PageShell = ({ children, width = "wide" }: PageShellProps) => {
         <div className="hero-grid absolute inset-x-0 top-0 h-[60vh]" />
       </div>
 
-      <Header />
+      <Header loginReturnsHere={loginReturnsHere} />
 
       <main
         className={`relative z-10 mx-auto flex w-full flex-1 flex-col px-4 ${
