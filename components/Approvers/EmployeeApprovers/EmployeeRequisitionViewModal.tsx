@@ -8,6 +8,7 @@ import {
   RETAIL_DEPARTMENT,
 } from "@/public/assets";
 import AttachmentTypeGroups from "./AttachmentTypeGroups";
+import EmployeeAmendmentHistory from "./EmployeeAmendmentHistory";
 
 const Field = ({ label, value }: { label: string; value: string | number }) => (
   <div className="flex flex-col gap-1">
@@ -146,6 +147,11 @@ const EmployeeRequisitionViewModal = ({
             <p className="mt-1 text-[13px] text-[#7c5a5a]">
               Reference: {viewData.emailaddress}
             </p>
+            {viewData.amendmentcount > 0 && (
+              <span className="mt-3 inline-block rounded-full bg-amber-100 px-3 py-1 text-[11px] font-semibold text-amber-700">
+                Amended &middot; Version {viewData.amendmentcount + 1}
+              </span>
+            )}
           </div>
 
           {/* Section 1: Submitter */}
@@ -230,6 +236,13 @@ const EmployeeRequisitionViewModal = ({
               )}
             </div>
           </div>
+
+          {/* Section 5: Amendment History */}
+          {viewData.amendments.length > 0 && (
+            <div className="mb-8 border-t border-[rgba(240,180,180,0.4)] pt-8">
+              <EmployeeAmendmentHistory amendments={viewData.amendments} />
+            </div>
+          )}
 
           {/* Footer */}
           <div className="border-t border-[rgba(240,180,180,0.4)] pt-6 text-center">

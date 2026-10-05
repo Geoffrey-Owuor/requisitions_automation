@@ -11,6 +11,10 @@ import NotFoundRequest from "@/components/Approvers/TravelApprovers/NotFoundRequ
 import NotAssignedHod from "@/components/Approvers/NotAssignedHod";
 import { getHodPageAccess } from "@/lib/hodAssignment";
 import {
+  employeeAmendmentsQuery,
+  EmployeeAmendmentValues,
+} from "@/lib/employeeAmendment";
+import {
   isValidEmployeeStage,
   RETAIL_DEPARTMENT,
   EMPLOYEE_STAGE_LABELS,
@@ -98,7 +102,7 @@ const ApprovalPageContent = async ({
         employee_retail_director_approver, employee_retail_director_approval_status,
         employee_retail_director_comments,
         employee_director_approver, employee_director_approval_status,
-        employee_director_comments
+        employee_director_comments, amendment_count
         FROM employee_requisitions
         WHERE request_id = $1
       `;
@@ -158,7 +162,7 @@ const ApprovalPageContent = async ({
         position_replacement_or_new, position_job_grade, position_salary_range
         FROM employee_requisition_positions
         WHERE request_id = $1
-        ORDER BY position_created_at
+        ORDER BY position_created_at, position_id
       `,
     [uuid],
   );
@@ -170,6 +174,11 @@ const ApprovalPageContent = async ({
         WHERE request_id = $1
         ORDER BY position_id, attachment_type
       `,
+    [uuid],
+  );
+
+  const amendments = await query<EmployeeAmendmentValues>(
+    employeeAmendmentsQuery,
     [uuid],
   );
 
@@ -197,6 +206,8 @@ const ApprovalPageContent = async ({
         department={requestData.employee_department}
         requestCreatedAt={requestData.request_created_at}
         previousApprovals={previousApprovals}
+        amendmentCount={requestData.amendment_count}
+        amendments={amendments}
         positions={positionsResult.map((position) => ({
           positionId: position.position_id,
           positionTitle: position.position_title,

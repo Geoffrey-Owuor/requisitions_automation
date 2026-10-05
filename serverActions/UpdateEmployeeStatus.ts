@@ -22,6 +22,10 @@ export type UpdateRequestStatusProps = {
   // The emailed link's approval token - the acting approver is resolved
   // from it server-side (lib/approverToken.ts), never from the client.
   token: string;
+  // The amendment_count the approver's screen was rendered from - guards
+  // against approving content that was superseded by an amendment while
+  // this approver had the page open.
+  expectedAmendmentCount: number;
 };
 
 export async function UpdateEmployeeStatus(
@@ -66,7 +70,8 @@ export async function UpdateEmployeeStatus(
        submitter_email, employee_department, employee_hod_email,
        COALESCE(employee_hod_actioned_by_email, employee_hod_email) AS employee_hod_actioned_by_email,
        employee_retail_director_email, employee_director_email,
-       employee_director_approval_status AS director_approval_status
+       employee_director_approval_status AS director_approval_status,
+       amendment_count
         FROM employee_requisitions WHERE request_id = $1 FOR UPDATE`,
       [payload.uuid],
     );
@@ -132,6 +137,15 @@ export async function UpdateEmployeeStatus(
         alertType: "error",
         alertMessage:
           "This approval stage does not apply to this requisition, no action is required",
+      };
+    }
+
+    if (reviewedResult[0].amendment_count !== payload.expectedAmendmentCount) {
+      await client.query("ROLLBACK");
+      return {
+        alertType: "error",
+        alertMessage:
+          "This requisition was amended while you were reviewing it - please reload and try again",
       };
     }
 

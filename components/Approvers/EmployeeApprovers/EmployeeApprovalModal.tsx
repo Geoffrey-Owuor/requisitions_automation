@@ -28,6 +28,8 @@ import ApprovalAlert from "@/components/Approvers/TravelApprovers/ApprovalAlert"
 import { initialsHelper, EmployeeAttachmentType } from "@/public/assets";
 import Image from "next/image";
 import AttachmentTypeGroups from "./AttachmentTypeGroups";
+import EmployeeAmendmentHistory from "./EmployeeAmendmentHistory";
+import { EmployeeAmendmentValues } from "@/lib/employeeAmendment";
 import PreviousApprovalsSection, {
   PreviousApproval,
 } from "@/components/Approvers/PreviousApprovalsSection";
@@ -64,6 +66,8 @@ export interface EmployeeApprovalModalProps {
   requestCreatedAt: string;
   positions: EmployeeApprovalPosition[];
   previousApprovals: PreviousApproval[];
+  amendmentCount: number;
+  amendments: EmployeeAmendmentValues[];
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -115,6 +119,8 @@ const EmployeeApprovalModal = ({
   requestCreatedAt,
   positions,
   previousApprovals,
+  amendmentCount,
+  amendments,
 }: EmployeeApprovalModalProps) => {
   const [comments, setComments] = useState("");
   const [approving, setApproving] = useState(false);
@@ -149,6 +155,7 @@ const EmployeeApprovalModal = ({
         status,
         comments: commentsPayload,
         token,
+        expectedAmendmentCount: amendmentCount,
       });
 
       // Set the alert info
@@ -351,6 +358,16 @@ const EmployeeApprovalModal = ({
                 ))}
               </div>
             </div>
+
+            {/* ── Amendment History ── */}
+            {amendments.length > 0 && (
+              <div className="mb-6 border-t border-[rgba(240,180,180,0.4)] pt-6">
+                <EmployeeAmendmentHistory
+                  amendments={amendments}
+                  queryString={`token=${token}&stage=${stage}`}
+                />
+              </div>
+            )}
 
             {/* ── Previous Approvals ── */}
             <PreviousApprovalsSection approvals={previousApprovals} />
