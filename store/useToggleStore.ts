@@ -11,6 +11,8 @@ interface ToggleButtonState {
   casualAmendmentRequestId: string | null;
   // Same, for the Travel Requisition form
   travelAmendmentRequestId: string | null;
+  // Same, for the Employee Requisition form
+  employeeAmendmentRequestId: string | null;
   scrollTrigger: boolean;
 }
 
@@ -22,6 +24,7 @@ interface ToggleButtonActions {
   setShowEmployeeRequisition: (value: boolean) => void;
   setCasualAmendmentRequestId: (value: string | null) => void;
   setTravelAmendmentRequestId: (value: string | null) => void;
+  setEmployeeAmendmentRequestId: (value: string | null) => void;
   triggerScroll: (value: boolean) => void;
   reset: () => void; //The reset function
 }
@@ -36,6 +39,7 @@ const initialValues: ReducedToggleButtonState = {
   showEmployeeRequisition: false,
   casualAmendmentRequestId: null,
   travelAmendmentRequestId: null,
+  employeeAmendmentRequestId: null,
 };
 
 // Creating the store
@@ -49,6 +53,7 @@ export const useToggleStore = create<ToggleButtonState & ToggleButtonActions>()(
     showEmployeeRequisition: false,
     casualAmendmentRequestId: null,
     travelAmendmentRequestId: null,
+    employeeAmendmentRequestId: null,
     scrollTrigger: false,
 
     // Actions
@@ -62,6 +67,8 @@ export const useToggleStore = create<ToggleButtonState & ToggleButtonActions>()(
       set({ casualAmendmentRequestId: value }),
     setTravelAmendmentRequestId: (value) =>
       set({ travelAmendmentRequestId: value }),
+    setEmployeeAmendmentRequestId: (value) =>
+      set({ employeeAmendmentRequestId: value }),
     triggerScroll: (value) => set({ scrollTrigger: value }),
     reset: () => set(initialValues),
   }),

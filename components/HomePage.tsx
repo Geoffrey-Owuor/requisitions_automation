@@ -237,7 +237,7 @@ const faqItems: FAQItem[] = [
   {
     question: "Can I fix a mistake after submitting?",
     answer:
-      "For Casual and Travel Requisitions, yes - any field can be amended until HR approves it (even after a decline), which restarts the chain from your HOD. Travel amendments also close on the departure date. Other forms don't yet support this, so it's worth double-checking before you submit.",
+      "For Casual, Travel and Employee Requisitions, yes - any field can be amended until HR approves it (even after a decline), which restarts the chain from your HOD. Travel amendments also close on the departure date, and Employee amendments let you replace individual attachments without re-uploading the rest. Other forms don't yet support this, so it's worth double-checking before you submit.",
   },
   {
     question: "What if I'm the HOD for my own department?",
