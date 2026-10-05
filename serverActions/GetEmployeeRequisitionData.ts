@@ -174,6 +174,7 @@ export const getEmployeeRequisitionData = async ({
         e.employee_retail_director_approval_status, e.employee_retail_director_approver,
         e.employee_director_approval_status, e.employee_director_approver,
         e.employee_hr_approval_status, e.employee_hr_approver,
+        e.amendment_count, e.last_amended_at,
         agg.total_positions, agg.total_headcount,
         COUNT(*) OVER() AS total_count
         FROM employee_requisitions e
