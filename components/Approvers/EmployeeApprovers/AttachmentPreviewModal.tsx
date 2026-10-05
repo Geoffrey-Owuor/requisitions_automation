@@ -8,6 +8,8 @@ interface AttachmentPreviewModalProps {
   attachmentId: string;
   label: string;
   queryString?: string;
+  // Serve a file an amendment replaced/removed (see lib/attachmentAuth.ts)
+  archived?: boolean;
   onClose: () => void;
 }
 
@@ -20,17 +22,19 @@ export default function AttachmentPreviewModal({
   attachmentId,
   label,
   queryString,
+  archived = false,
   onClose,
 }: AttachmentPreviewModalProps) {
   const [iframeLoaded, setIframeLoaded] = useState(false);
 
   const baseParams = new URLSearchParams(queryString);
+  if (archived) baseParams.set("archived", "1");
   const searchSuffix = baseParams.toString() ? `?${baseParams.toString()}` : "";
 
   const rawUrl = `/api/employeerequisition/attachment/${attachmentId}${searchSuffix}`;
   const previewUrl = `/api/employeerequisition/attachment/${attachmentId}/preview${searchSuffix}`;
 
-  const downloadParams = new URLSearchParams(queryString);
+  const downloadParams = new URLSearchParams(baseParams);
   downloadParams.set("download", "1");
   const downloadUrl = `/api/employeerequisition/attachment/${attachmentId}?${downloadParams.toString()}`;
 
