@@ -1,9 +1,7 @@
 import { Metadata } from "next";
 import { Suspense } from "react";
 import { query } from "@/lib/db";
-import DashboardWrapper from "@/components/Dashboard/DashboardWrapper";
-import RequisitionPagesWrapper from "@/components/Dashboard/RequisitionPagesWrapper";
-import { UserProvider } from "@/context/UserContext";
+import ApproverShell from "@/components/Approvers/ApproverShell";
 import InvalidToken from "@/components/Approvers/TravelApprovers/InvalidToken";
 import AlreadyProcessed from "@/components/Approvers/TravelApprovers/AlreadyProcessed";
 import AccessApprovalSkeleton from "@/components/Skeletons/AccessApprovalSkeleton";
@@ -12,6 +10,8 @@ import AccessApprovalModal, {
 } from "@/components/Approvers/AccessApprovers/AccessApprovalModal";
 import { PreviousApproval } from "@/components/Approvers/PreviousApprovalsSection";
 import NotFoundRequest from "@/components/Approvers/TravelApprovers/NotFoundRequest";
+import NotAssignedHod from "@/components/Approvers/NotAssignedHod";
+import { getHodPageAccess } from "@/lib/hodAssignment";
 import { isValidAccessStage, ACCESS_STAGE_LABELS } from "@/public/assets";
 
 type ApprovalPageProps = {
@@ -41,7 +41,10 @@ export const generateMetadata = async ({
   };
 };
 
-const page = async ({ params, searchParams }: ApprovalPageProps) => {
+const ApprovalPageContent = async ({
+  params,
+  searchParams,
+}: ApprovalPageProps) => {
   const { uuid } = await params;
   const { token, stage } = await searchParams;
 
@@ -58,6 +61,20 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
   if (validApprover.length === 0) return <InvalidToken />;
 
   const approverDetails = validApprover[0];
+
+  // HOD stage: only the assigned HOD or one of their alternates may review
+  // this requisition - checked before any of its details are loaded.
+  if (stage === "hod") {
+    const hodAccess = await getHodPageAccess(
+      "access_requisitions",
+      "hod_approver_email",
+      uuid,
+      approverDetails.email,
+    );
+    if (hodAccess.status === "not_found") return <NotFoundRequest />;
+    if (hodAccess.status === "denied")
+      return <NotAssignedHod message={hodAccess.message} />;
+  }
 
   // Valid approval token - query the database for the IT requisition data
   const baseQuery = `
@@ -87,12 +104,6 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
       <AlreadyProcessed processedBy={approverName} status={approvalStatus} />
     );
 
-  const contextObject = {
-    username: approverDetails.name,
-    email: approverDetails.email,
-    roles: [stage],
-  };
-
   // Security is the second and final stage - HOD is the only stage that can
   // precede it.
   const previousApprovals: PreviousApproval[] =
@@ -112,7 +123,7 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
     uuid,
     stage,
     approverName: approverDetails.name,
-    approverEmail: approverDetails.email,
+    token,
     requestCreatedAt: requestData.request_created_at,
     submitterName: requestData.submitter_name,
     submitterEmail: requestData.submitter_email,
@@ -126,16 +137,18 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
   };
 
   return (
-    <UserProvider user={contextObject}>
-      <DashboardWrapper>
-        <RequisitionPagesWrapper>
-          <Suspense fallback={<AccessApprovalSkeleton />}>
-            <AccessApprovalModal data={modalData} />
-          </Suspense>
-        </RequisitionPagesWrapper>
-      </DashboardWrapper>
-    </UserProvider>
+    <Suspense fallback={<AccessApprovalSkeleton />}>
+      <AccessApprovalModal data={modalData} />
+    </Suspense>
   );
 };
+
+// Every outcome - the approval modal and each status screen - renders inside
+// the session-chosen shell.
+const page = (props: ApprovalPageProps) => (
+  <ApproverShell>
+    <ApprovalPageContent {...props} />
+  </ApproverShell>
+);
 
 export default page;

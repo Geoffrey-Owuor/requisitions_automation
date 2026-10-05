@@ -3,7 +3,7 @@ import {
   loadDirectorArray,
   loadHrArray,
   loadRetailDirectorArray,
-} from "@/lib/loadAppDataV2";
+} from "@/lib/loadApprovers";
 import { RETAIL_DEPARTMENT } from "@/public/assets";
 
 type HodApprovalStageProps = {

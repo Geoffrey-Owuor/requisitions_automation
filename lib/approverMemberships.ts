@@ -3,7 +3,7 @@ import { HrForm } from "@/public/assets";
 // Array-based approval stages (Security, IT, Director, Retail Director, HR)
 // have no "assigned to me" column — every member of the stage's array table
 // sees the same pending rows once the prior stage has approved. This mirrors
-// exactly who each stage's fan-out email goes to (lib/loadAppDataV2.ts), so
+// exactly who each stage's fan-out email goes to (lib/loadApprovers.ts), so
 // dashboard visibility can't drift from who is actually notified.
 export interface ApproverMemberships {
   // In hod_array at all - an assigned-HOD candidate or an alternate HOD.

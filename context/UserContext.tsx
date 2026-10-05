@@ -15,9 +15,9 @@ interface UserDetails {
 }
 
 type UserProviderProps = {
-  // memberships is optional here so the (approvers)/*/[uuid] pages — which
-  // build their own per-stage UserProvider unrelated to array membership —
-  // don't need to supply it; it falls back to all-false/empty.
+  // memberships is optional; it falls back to all-false/empty. Every
+  // provider is built from the session (components/Dashboard/AuthenticatedShell)
+  // - the (approvers) pages no longer build one from the approval token.
   user: Omit<UserDetails, "memberships"> & {
     memberships?: ApproverMemberships;
   };
@@ -36,6 +36,11 @@ export const UserProvider = ({ user, children }: UserProviderProps) => {
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 };
+
+// True under a UserProvider. Every provider is built from the session, so this
+// means the viewer is signed in - without throwing when they aren't (e.g. the
+// approval pages' status screens, which render for visitors too).
+export const useIsSignedIn = () => useContext(UserContext) !== null;
 
 // Custom hook
 export const useUser = () => {

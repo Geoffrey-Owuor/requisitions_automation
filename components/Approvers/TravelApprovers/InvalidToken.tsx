@@ -1,11 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { useIsSignedIn } from "@/context/UserContext";
 import { ShieldAlert, Circle, Home } from "lucide-react";
 
 export default function InvalidToken() {
+  const isSignedIn = useIsSignedIn();
+
   return (
-    <div className="layout-scrollbar relative flex h-screen items-center justify-center overflow-y-auto p-5">
+    <div className="relative flex min-h-full flex-1 items-center justify-center p-5">
       <div className="mx-auto max-w-md rounded-3xl border border-gray-100 bg-white p-10 text-center shadow-[0_24px_48px_rgba(160,60,60,0.10)]">
         {/* Icon */}
         <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100">
@@ -28,7 +31,7 @@ export default function InvalidToken() {
         </p>
 
         {/* Hint card */}
-        <div className="mb-7 rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white px-5 py-4 text-left">
+        <div className="mb-7 rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white px-5 py-4 text-left last:mb-0">
           <p className="mb-2.5 text-[11px] font-semibold tracking-[0.4px] text-[#b0a0a0] uppercase">
             What you can do
           </p>
@@ -52,14 +55,17 @@ export default function InvalidToken() {
           </ul>
         </div>
 
-        {/* Action */}
-        <Link
-          href="/"
-          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-[14px] bg-slate-900 py-4 text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(30,27,27,0.3)]"
-        >
-          <Home size={16} />
-          Go to Homepage
-        </Link>
+        {/* Action - signed-in users already have the dashboard nav, and
+            "/" would only redirect them back to /dashboard */}
+        {!isSignedIn && (
+          <Link
+            href="/"
+            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-[14px] bg-slate-900 py-4 text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(30,27,27,0.3)]"
+          >
+            <Home size={16} />
+            Go to Homepage
+          </Link>
+        )}
       </div>
     </div>
   );

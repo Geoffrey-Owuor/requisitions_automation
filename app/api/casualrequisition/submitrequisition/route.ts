@@ -1,12 +1,11 @@
 import { NextResponse, NextRequest } from "next/server";
-import { loadHrArray } from "@/lib/loadAppDataV2";
+import { loadHrArray } from "@/lib/loadApprovers";
 import { query } from "@/lib/db";
 import { CasualEmailSender } from "@/services/CasualEmailSender";
 import { getSession } from "@/lib/session";
-import { loadHodAlternates } from "@/lib/hodAssignment";
+import { loadHodAlternates, resolveHod, sameEmail } from "@/lib/hodAssignment";
 import {
   validateCasualFormData,
-  resolveHod,
   CasualFormDataInput,
 } from "@/lib/casualRequisitionRules";
 
@@ -24,18 +23,11 @@ export async function POST(request: NextRequest) {
   const HR_ARRAY = await loadHrArray("casual");
 
   try {
-    const { formData, submittedBy } = await request.json();
+    const { formData } = await request.json();
 
-    // Destructure the submitted by area to get a valid name and email
-    const { name, email } = submittedBy;
-
-    // Unauthorized user
-    if (!name || !email) {
-      return NextResponse.json(
-        { message: "Cannot verify the user trying to make this requisition" },
-        { status: 400 },
-      );
-    }
+    // The submitter is always the signed-in user - never client-supplied, or
+    // anyone could submit as their own HOD and be auto-approved
+    const { name, email } = user;
 
     const validation = validateCasualFormData(formData as CasualFormDataInput);
 
@@ -46,6 +38,7 @@ export async function POST(request: NextRequest) {
     const { ratePerDay, computedSections } = validation;
     const { department, hodApprover, location, casualCategory } = formData;
 
+    // The form sends the HOD's email; the stored name comes from hod_array
     const resolvedHod = await resolveHod(hodApprover);
 
     if (!resolvedHod) {
@@ -58,7 +51,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { uuid: hodUuid, email: hodEmail } = resolvedHod;
+    const { uuid: hodUuid, name: hodName, email: hodEmail } = resolvedHod;
 
     // Create the header insert query - both stages are always active (no tiering)
     const insertQuery = `
@@ -79,7 +72,7 @@ export async function POST(request: NextRequest) {
       casualCategory ?? null,
       "pending",
       "pending",
-      hodApprover,
+      hodName,
       hodEmail,
     ];
 
@@ -123,7 +116,7 @@ export async function POST(request: NextRequest) {
     );
 
     // Running an update if the requestor is the HOD
-    if (hodEmail === email) {
+    if (sameEmail(hodEmail, email)) {
       const updateQuery = `
         UPDATE casual_requisitions
         SET

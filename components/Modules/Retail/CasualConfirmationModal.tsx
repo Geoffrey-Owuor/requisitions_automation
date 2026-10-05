@@ -14,6 +14,8 @@ interface SectionDerived {
 
 interface CasualConfirmationModalProps {
   formData: CasualFormData;
+  // Display name for formData.hodApprover, which holds the HOD's email
+  hodApproverName: string;
   ratePerDay: number;
   sectionDerived: SectionDerived[];
   overallTotalAmount: number;
@@ -27,6 +29,7 @@ interface CasualConfirmationModalProps {
 
 export default function CasualConfirmationModal({
   formData,
+  hodApproverName,
   ratePerDay,
   sectionDerived,
   overallTotalAmount,
@@ -43,7 +46,7 @@ export default function CasualConfirmationModal({
 
   const requisitionDetails: { label: string; value: string }[] = [
     { label: "Department", value: formData.department },
-    { label: "HOD Approver", value: formData.hodApprover },
+    { label: "HOD Approver", value: hodApproverName },
     { label: "Location", value: formData.location },
     ...(formData.casualCategory
       ? [{ label: "Casual Category", value: formData.casualCategory }]

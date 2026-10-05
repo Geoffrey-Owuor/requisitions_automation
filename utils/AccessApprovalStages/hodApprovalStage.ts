@@ -1,5 +1,5 @@
 import { AccessEmailSender } from "@/services/AccessEmailSender";
-import { loadSecurityArray } from "@/lib/loadAppDataV2";
+import { loadSecurityArray } from "@/lib/loadApprovers";
 
 type HodApprovalStageProps = {
   uuid: string;

@@ -32,6 +32,7 @@ import { useToggleStore } from "@/store/useToggleStore";
 import {
   FormSelect,
   findHodForDepartment,
+  hodNameLabel,
   excludeSubmitterFromHodArray,
 } from "./CasualRequisitionForm";
 import Image from "next/image";
@@ -115,7 +116,8 @@ export default function EmployeeRequisitionForm() {
     queryFn: loadHodArray,
   });
   const hodArray = excludeSubmitterFromHodArray(rawHodArray, email);
-  const HOD_APPROVERS = hodArray.map((hod) => hod.name);
+  const HOD_APPROVERS = hodArray.map((hod) => hod.email);
+  const hodLabel = hodNameLabel(hodArray);
 
   const [formData, setFormData] = useState<EmployeeFormData>(InitialFormState);
   const [step, setStep] = useState(1);
@@ -335,6 +337,7 @@ export default function EmployeeRequisitionForm() {
       {step === 2 && (
         <EmployeeConfirmationModal
           formData={formData}
+          hodApproverName={hodLabel(formData.hodApprover)}
           onBack={() => {
             setStep(1);
             triggerScroll(!scrollTrigger);
@@ -393,6 +396,7 @@ export default function EmployeeRequisitionForm() {
                   <FormSelect
                     label="HOD Approver"
                     options={HOD_APPROVERS}
+                    optionLabel={hodLabel}
                     value={formData.hodApprover}
                     loading={hodsLoading}
                     onChange={(v) => updateField("hodApprover", v)}

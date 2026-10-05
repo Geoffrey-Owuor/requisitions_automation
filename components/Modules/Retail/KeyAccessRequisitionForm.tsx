@@ -26,6 +26,7 @@ import { useToggleStore } from "@/store/useToggleStore";
 import {
   FormSelect,
   findHodForDepartment,
+  hodNameLabel,
   excludeSubmitterFromHodArray,
 } from "./CasualRequisitionForm";
 
@@ -60,7 +61,7 @@ interface FormInputProps {
 
 // ---- Main Page ----
 export default function KeyAccessRequisitionForm() {
-  const { username, email } = useUser();
+  const { email } = useUser();
 
   const scrollTrigger = useToggleStore((state) => state.scrollTrigger);
   const triggerScroll = useToggleStore((state) => state.triggerScroll);
@@ -77,7 +78,8 @@ export default function KeyAccessRequisitionForm() {
     queryFn: loadHodArray,
   });
   const hodArray = excludeSubmitterFromHodArray(rawHodArray, email);
-  const HOD_APPROVERS = hodArray.map((hod) => hod.name);
+  const HOD_APPROVERS = hodArray.map((hod) => hod.email);
+  const hodLabel = hodNameLabel(hodArray);
 
   const [formData, setFormData] = useState<KeyAccessFormData>(InitialFormState);
   const [step, setStep] = useState(1);
@@ -123,10 +125,6 @@ export default function KeyAccessRequisitionForm() {
   const handleSubmit = async () => {
     const payload = {
       formData,
-      submittedBy: {
-        name: username,
-        email: email,
-      },
     };
 
     setSubmitting(true);
@@ -182,6 +180,7 @@ export default function KeyAccessRequisitionForm() {
       {step === 2 && (
         <KeyConfirmationModal
           formData={formData}
+          hodApproverName={hodLabel(formData.hodApprover)}
           onBack={() => {
             setStep(1);
             triggerScroll(!scrollTrigger);
@@ -254,6 +253,7 @@ export default function KeyAccessRequisitionForm() {
                   <FormSelect
                     label="HOD Approver"
                     options={HOD_APPROVERS}
+                    optionLabel={hodLabel}
                     value={formData.hodApprover}
                     loading={hodsLoading}
                     onChange={(v) => updateField("hodApprover", v)}

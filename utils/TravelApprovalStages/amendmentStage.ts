@@ -1,5 +1,5 @@
 import { EmailSender } from "@/services/EmailSender";
-import { loadHrArray } from "@/lib/loadAppDataV2";
+import { loadHrArray } from "@/lib/loadApprovers";
 import { loadHodAlternates } from "@/lib/hodAssignment";
 
 type AmendmentStageProps = {

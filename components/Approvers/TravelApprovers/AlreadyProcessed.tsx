@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useIsSignedIn } from "@/context/UserContext";
 import { CheckCircle2, XCircle } from "lucide-react";
 
 interface AlreadyProcessedProps {
@@ -12,11 +13,13 @@ export default function AlreadyProcessed({
   processedBy = "",
   status = "approved",
 }: AlreadyProcessedProps) {
+  const isSignedIn = useIsSignedIn();
+
   // Logic to determine if the status is positive
   const isApproved = status === "approved" || status === "accepted";
 
   return (
-    <div className="layout-scrollbar relative flex h-screen items-center justify-center overflow-y-auto p-5">
+    <div className="relative flex min-h-full flex-1 items-center justify-center p-5">
       <div className="mx-auto max-w-md rounded-3xl border border-gray-100 bg-white p-10 text-center shadow-[0_24px_48px_rgba(160,60,60,0.10)]">
         {/* Icon */}
         <div
@@ -49,7 +52,7 @@ export default function AlreadyProcessed({
         </p>
 
         {/* Meta card */}
-        <div className="mb-7 flex flex-col gap-2.5 rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white px-5 py-4 text-left">
+        <div className="mb-7 flex flex-col gap-2.5 rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white px-5 py-4 text-left last:mb-0">
           {[
             { label: "Decision", value: status },
             { label: "Processed by", value: processedBy },
@@ -71,13 +74,16 @@ export default function AlreadyProcessed({
           ))}
         </div>
 
-        {/* Action */}
-        <Link
-          href="/"
-          className="block w-full cursor-pointer rounded-[14px] bg-slate-900 py-4 text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(30,27,27,0.3)]"
-        >
-          Go to Homepage
-        </Link>
+        {/* Action - signed-in users already have the dashboard nav, and
+            "/" would only redirect them back to /dashboard */}
+        {!isSignedIn && (
+          <Link
+            href="/"
+            className="block w-full cursor-pointer rounded-[14px] bg-slate-900 py-4 text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(30,27,27,0.3)]"
+          >
+            Go to Homepage
+          </Link>
+        )}
       </div>
     </div>
   );

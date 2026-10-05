@@ -89,15 +89,27 @@ export function computeEngagementDays(periodFrom: string, periodTo: string) {
   return diffDays > 0 ? diffDays : 0;
 }
 
+// The HOD form field (hodApprover) holds the HOD's EMAIL - hod_email is
+// unique, names are not - and the dropdown shows names via hodNameLabel.
+// The submission routes resolve the stored name from hod_array.
+
 // Looks up the HOD whose hod_department matches the selected department, so
 // forms can auto-select a HOD instead of requiring a manual dropdown pick.
-// Returns "" (not undefined) when there's no match, so it drops straight
-// into a form field's string value.
+// Returns the HOD's email, or "" (not undefined) when there's no match, so
+// it drops straight into a form field's string value.
 export function findHodForDepartment(
   hodArray: HodApproversObject[],
   department: string,
 ): string {
-  return hodArray.find((hod) => hod.department === department)?.name ?? "";
+  return hodArray.find((hod) => hod.department === department)?.email ?? "";
+}
+
+// Display label for a HOD email held in the form - falls back to the raw
+// value if that HOD is no longer in the list.
+export function hodNameLabel(
+  hodArray: HodApproversObject[],
+): (email: string) => string {
+  return (email) => hodArray.find((hod) => hod.email === email)?.name ?? email;
 }
 
 // Removes the current submitter from the HOD list so an HOD submitting their
@@ -106,7 +118,8 @@ export function excludeSubmitterFromHodArray(
   hodArray: HodApproversObject[],
   submitterEmail: string,
 ): HodApproversObject[] {
-  return hodArray.filter((hod) => hod.email !== submitterEmail);
+  const submitter = submitterEmail.toLowerCase();
+  return hodArray.filter((hod) => hod.email.toLowerCase() !== submitter);
 }
 
 // ---- Sub-component prop types ----
@@ -125,7 +138,7 @@ export default function CasualRequisitionForm({
 }: {
   amendRequestId?: string | null;
 }) {
-  const { username, email } = useUser();
+  const { email } = useUser();
   const queryClient = useQueryClient();
   const setCasualAmendmentRequestId = useToggleStore(
     (state) => state.setCasualAmendmentRequestId,
@@ -146,7 +159,8 @@ export default function CasualRequisitionForm({
     queryFn: loadHodArray,
   });
   const hodArray = excludeSubmitterFromHodArray(rawHodArray, email);
-  const HOD_APPROVERS = hodArray.map((hod) => hod.name);
+  const HOD_APPROVERS = hodArray.map((hod) => hod.email);
+  const hodLabel = hodNameLabel(hodArray);
 
   // Amend mode: fetch the eligibility check + pre-fill data for this
   // requisition. Re-checked server-side every time the modal opens.
@@ -337,10 +351,6 @@ export default function CasualRequisitionForm({
         }
       : {
           formData,
-          submittedBy: {
-            name: username,
-            email: email,
-          },
         };
 
     setSubmitting(true);
@@ -433,6 +443,7 @@ export default function CasualRequisitionForm({
       {step === 2 && (
         <CasualConfirmationModal
           formData={formData}
+          hodApproverName={hodLabel(formData.hodApprover)}
           ratePerDay={ratePerDay}
           sectionDerived={sectionDerived}
           overallTotalAmount={overallTotalAmount}
@@ -524,6 +535,7 @@ export default function CasualRequisitionForm({
                   <FormSelect
                     label="HOD Approver"
                     options={HOD_APPROVERS}
+                    optionLabel={hodLabel}
                     value={formData.hodApprover}
                     loading={hodsLoading}
                     onChange={(v) => updateField("hodApprover", v)}
