@@ -25,17 +25,28 @@ export type AttachmentAuthResult =
 // Shared by every route that serves an employee requisition attachment
 // (raw file download/inline view, rendered preview) so the authorization
 // rules stay in exactly one place.
+//
+// With ?archived=1 the id is looked up among the files an amendment replaced
+// or removed (employee_requisition_archived_attachments), under the same
+// access rules. Without it only live attachments resolve, so a link to a
+// replaced file in an earlier email stops working instead of quietly
+// showing an outdated document.
 export async function authorizeAttachmentRequest(
   request: NextRequest,
   attachmentId: string,
 ): Promise<AttachmentAuthResult> {
+  const attachmentTable =
+    request.nextUrl.searchParams.get("archived") === "1"
+      ? "employee_requisition_archived_attachments"
+      : "employee_requisition_attachments";
+
   const result = await query<AttachmentRow>(
     `
     SELECT a.original_filename, a.file_path, a.mime_type, r.submitter_email,
     r.request_id, r.employee_hod_email, r.employee_hod_actioned_by_email,
     r.employee_hod_approval_status,
     r.employee_retail_director_approval_status, r.employee_director_approval_status
-    FROM employee_requisition_attachments a
+    FROM ${attachmentTable} a
     JOIN employee_requisitions r ON r.request_id = a.request_id
     WHERE a.attachment_id = $1
     `,

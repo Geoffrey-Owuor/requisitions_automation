@@ -3,6 +3,10 @@ import { query } from "@/lib/db";
 import { EmployeeRequisitionTemplate } from "@/utils/templates/EmployeeRequisitionTemplate";
 import { sendEmail } from "./EmailService";
 import { EmployeeAttachmentType } from "@/public/assets";
+import {
+  employeeAmendmentsQuery,
+  EmployeeAmendmentValues,
+} from "@/lib/employeeAmendment";
 
 export interface EmployeeAttachmentValues {
   attachmentid: string;
@@ -47,9 +51,11 @@ export interface EmployeeEmailDataValues {
   hrapprover: string;
   hremail: string;
   hrcomments: string;
+  amendmentcount: number;
   positions: EmployeePositionValues[];
   totalpositions: number;
   totalnumberrequired: number;
+  amendments: EmployeeAmendmentValues[];
 }
 
 export const employeeDataQuery = `
@@ -73,7 +79,8 @@ export const employeeDataQuery = `
        employee_director_comments AS directorcomments,
        employee_hr_approver AS hrapprover,
        employee_hr_email AS hremail,
-       employee_hr_comments AS hrcomments
+       employee_hr_comments AS hrcomments,
+       amendment_count AS amendmentcount
        FROM employee_requisitions WHERE request_id = $1
 `;
 
@@ -88,7 +95,7 @@ export const employeePositionsQuery = `
        position_justification AS justification,
        position_reporting_to AS reportingto,
        date_position_filled AS datefilled
-       FROM employee_requisition_positions WHERE request_id = $1 ORDER BY position_created_at
+       FROM employee_requisition_positions WHERE request_id = $1 ORDER BY position_created_at, position_id
 `;
 
 export const employeeAttachmentsQuery = `
@@ -112,18 +119,19 @@ export interface EmployeeEmailDataProps {
 
 type EmployeeHeaderRow = Omit<
   EmployeeEmailDataValues,
-  "positions" | "totalpositions" | "totalnumberrequired"
+  "positions" | "totalpositions" | "totalnumberrequired" | "amendments"
 >;
 
 // Cached query — repeated calls with the same requestId hit the DB only once
 export const getEmployeeEmailData = cache(async (requestId: string) => {
-  const [headerResult, positions, attachments] = await Promise.all([
+  const [headerResult, positions, attachments, amendments] = await Promise.all([
     query<EmployeeHeaderRow>(employeeDataQuery, [requestId]),
     query<Omit<EmployeePositionValues, "attachments">>(
       employeePositionsQuery,
       [requestId],
     ),
     query<EmployeeAttachmentValues>(employeeAttachmentsQuery, [requestId]),
+    query<EmployeeAmendmentValues>(employeeAmendmentsQuery, [requestId]),
   ]);
 
   const positionsWithAttachments: EmployeePositionValues[] = positions.map(
@@ -146,6 +154,7 @@ export const getEmployeeEmailData = cache(async (requestId: string) => {
     positions: positionsWithAttachments,
     totalpositions,
     totalnumberrequired,
+    amendments,
   } as EmployeeEmailDataValues;
 });
 

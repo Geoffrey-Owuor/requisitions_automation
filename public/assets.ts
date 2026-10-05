@@ -256,10 +256,30 @@ export function formatSalaryRange(min: number, max: number): string {
   return `${min} - ${max}`;
 }
 
+// Inverse of formatSalaryRange. Also reads the older "<min> to <max>" form
+// some early rows were stored in. Returns null for anything unparseable.
+export function parseSalaryRange(
+  value: string,
+): { min: number; max: number } | null {
+  const match = /^\s*(\d+(?:\.\d+)?)\s*(?:-|to)\s*(\d+(?:\.\d+)?)\s*$/.exec(
+    value,
+  );
+  return match ? { min: Number(match[1]), max: Number(match[2]) } : null;
+}
+
 // Employee Requisition position attachments: exactly one file per type is
 // required. Slugs sort alphabetically into the desired display order
 // (job-description < kpis < org-chart), so `ORDER BY attachment_type` in SQL
 // needs no CASE expression to get Job Description, KPIs, Org Chart order.
+// Longest amendment reason an employee requisition amendment accepts
+export const MAX_AMENDMENT_REASON_LENGTH = 1000;
+
+// An employee requisition stays amendable by its submitter until HR approves
+// it - a decline at any stage can be corrected by amending.
+export function isEmployeeAmendableHrStatus(hrStatus: string): boolean {
+  return hrStatus === "pending" || hrStatus === "declined";
+}
+
 export const EMPLOYEE_ATTACHMENT_TYPES = [
   "job-description",
   "kpis",
