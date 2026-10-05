@@ -1,5 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
+import { randomUUID } from "crypto";
 import { EmployeeAttachmentType } from "@/public/assets";
 
 // Allowed attachment types for Employee Requisition position attachments
@@ -53,6 +54,7 @@ export function isAllowedAttachmentType(
 }
 
 export type StoredAttachment = {
+  attachmentId: string; // generated here - insert it as attachment_id
   originalFilename: string;
   storedFilename: string;
   filePath: string; // relative to UPLOAD_DIRECTORY
@@ -62,11 +64,16 @@ export type StoredAttachment = {
 };
 
 // Writes each typed file for a single position to
-// UPLOAD_DIRECTORY/{requestId}/{positionId}/{attachmentType}/{sanitizedName}
+// UPLOAD_DIRECTORY/{requestId}/{positionId}/{attachmentType}/{attachmentId}/{sanitizedName}.
+// The per-attachment directory means a new file can never overwrite one
+// already on disk - an amendment replacing "JD.pdf" with another "JD.pdf"
+// writes alongside the original, so a rolled-back amendment loses nothing.
+// (Files from before this layout sit directly under {attachmentType}/; the
+// stored file_path is relative, so both layouts are served the same way.)
 export async function writePositionAttachments(
   requestId: string,
   positionId: string,
-  files: Record<EmployeeAttachmentType, File>,
+  files: Partial<Record<EmployeeAttachmentType, File>>,
 ): Promise<StoredAttachment[]> {
   const stored: StoredAttachment[] = [];
 
@@ -74,17 +81,22 @@ export async function writePositionAttachments(
     EmployeeAttachmentType,
     File,
   ][]) {
-    const typeDir = path.join(
-      /*turbopackIgnore: true*/ getUploadDirectory(),
-      requestId,
+    const attachmentId = randomUUID();
+    const relativeDir = path.join(
+      /*turbopackIgnore: true*/ requestId,
       positionId,
       attachmentType,
+      attachmentId,
     );
-    await fs.mkdir(typeDir, { recursive: true });
+    const attachmentDir = path.join(
+      /*turbopackIgnore: true*/ getUploadDirectory(),
+      relativeDir,
+    );
+    await fs.mkdir(attachmentDir, { recursive: true });
 
     const storedFilename = sanitizeFilename(file.name);
     const absolutePath = path.join(
-      /*turbopackIgnore: true*/ typeDir,
+      /*turbopackIgnore: true*/ attachmentDir,
       storedFilename,
     );
 
@@ -92,12 +104,11 @@ export async function writePositionAttachments(
     await fs.writeFile(absolutePath, buffer);
 
     stored.push({
+      attachmentId,
       originalFilename: file.name,
       storedFilename,
       filePath: path.join(
-        /*turbopackIgnore: true*/ requestId,
-        positionId,
-        attachmentType,
+        /*turbopackIgnore: true*/ relativeDir,
         storedFilename,
       ),
       mimeType: file.type,
@@ -109,8 +120,32 @@ export async function writePositionAttachments(
   return stored;
 }
 
+// Removes just the given newly-written attachments (their per-attachment
+// directories) - used to clean up after a failed amendment without touching
+// the requisition's existing files. Best effort: a failure only leaks disk.
+export async function deleteStoredAttachments(
+  attachments: StoredAttachment[],
+): Promise<void> {
+  await Promise.all(
+    attachments.map((attachment) =>
+      fs
+        .rm(
+          path.join(
+            /*turbopackIgnore: true*/ getUploadDirectory(),
+            path.dirname(attachment.filePath),
+          ),
+          { recursive: true, force: true },
+        )
+        .catch((error) =>
+          console.error("Error while removing an orphaned attachment", error),
+        ),
+    ),
+  );
+}
+
 // Removes the entire directory tree for a requisition (used to clean up
 // partial writes when a submission fails after some files were saved).
+// Never call this for an existing requisition - use deleteStoredAttachments.
 export async function deleteRequisitionDirectory(
   requestId: string,
 ): Promise<void> {
