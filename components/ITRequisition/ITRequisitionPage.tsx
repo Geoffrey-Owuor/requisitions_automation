@@ -23,6 +23,7 @@ import { useToggleStore } from "@/store/useToggleStore";
 import {
   FormSelect,
   findHodForDepartment,
+  hodNameLabel,
   excludeSubmitterFromHodArray,
 } from "../Modules/Retail/CasualRequisitionForm";
 
@@ -82,7 +83,7 @@ interface CheckboxGroupProps {
 
 // ---- Main Page ----
 export default function ITRequisitionPage() {
-  const { username, email } = useUser();
+  const { email } = useUser();
 
   const triggerScroll = useToggleStore((state) => state.triggerScroll);
   const scrollTrigger = useToggleStore((state) => state.scrollTrigger);
@@ -99,7 +100,8 @@ export default function ITRequisitionPage() {
     queryFn: loadHodArray,
   });
   const hodArray = excludeSubmitterFromHodArray(rawHodArray, email);
-  const HOD_APPROVERS = hodArray.map((hod) => hod.name);
+  const HOD_APPROVERS = hodArray.map((hod) => hod.email);
+  const hodLabel = hodNameLabel(hodArray);
 
   const [formData, setFormData] = useState<ITFormData>(InitialFormState);
   const [step, setStep] = useState(1);
@@ -148,10 +150,6 @@ export default function ITRequisitionPage() {
         // Default otherRequirements if empty
         otherRequirements:
           formData.otherRequirements || "No other requirements",
-      },
-      submittedBy: {
-        name: username,
-        email: email,
       },
     };
 
@@ -203,6 +201,7 @@ export default function ITRequisitionPage() {
       {step === 2 && (
         <ITConfirmationModal
           formData={formData}
+          hodApproverName={hodLabel(formData.hodApprover)}
           onBack={() => {
             setStep(1);
             triggerScroll(!scrollTrigger);
@@ -298,6 +297,7 @@ export default function ITRequisitionPage() {
                   <FormSelect
                     label="HOD Approver"
                     options={HOD_APPROVERS}
+                    optionLabel={hodLabel}
                     value={formData.hodApprover}
                     loading={hodsLoading}
                     onChange={(v) => updateField("hodApprover", v)}

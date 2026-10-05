@@ -1,9 +1,9 @@
 import { NextResponse, NextRequest } from "next/server";
-import { loadSecurityArray } from "@/lib/loadAppDataV2";
+import { loadSecurityArray } from "@/lib/loadApprovers";
 import { AccessEmailSender } from "@/services/AccessEmailSender";
 import { query } from "@/lib/db";
 import { getSession } from "@/lib/session";
-import { loadHodAlternates } from "@/lib/hodAssignment";
+import { loadHodAlternates, resolveHod, sameEmail } from "@/lib/hodAssignment";
 
 export async function POST(request: NextRequest) {
   // Check if we have a valid session
@@ -20,18 +20,11 @@ export async function POST(request: NextRequest) {
 
   try {
     // Getting our payload
-    const { formData, submittedBy } = await request.json();
+    const { formData } = await request.json();
 
-    // Destructure submitted area to get a valid email and name
-    const { name, email } = submittedBy;
-
-    // Bad request
-    if (!name || !email) {
-      return NextResponse.json(
-        { message: "Cannot verify the user trying to make this requisition" },
-        { status: 400 },
-      );
-    }
+    // The submitter is always the signed-in user - never client-supplied, or
+    // anyone could submit as their own HOD and be auto-approved
+    const { name, email } = user;
 
     // Form data destructuring
     const {
@@ -68,16 +61,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const hodApproverResult = await query(
-      `
-      SELECT hod_uuid AS uuid, 
-      hod_email AS email
-      FROM hod_array WHERE hod_name = $1 AND is_alternate_only = false LIMIT 1
-      `,
-      [hodApprover],
-    );
+    // The form sends the HOD's email; the stored name comes from hod_array
+    const resolvedHod = await resolveHod(hodApprover);
 
-    if (hodApproverResult.length === 0) {
+    if (!resolvedHod) {
       return NextResponse.json(
         {
           message:
@@ -87,17 +74,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // get the hod uuid and email - or fall back to an invalid string
-    const hodUuid = hodApproverResult[0].uuid;
-    const hodEmail = hodApproverResult[0].email;
+    const { uuid: hodUuid, name: hodName, email: hodEmail } = resolvedHod;
 
     // First insert query
     const insertQuery = `
     INSERT INTO access_requisitions
     (submitter_email, submitter_name, employee_name, employee_department, employee_staff_number, 
-    issuance_date, access_locations, access_requirements, hod_approver_name)
+    issuance_date, access_locations, access_requirements, hod_approver_name,
+    hod_approver_email)
     VALUES
-    ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+    ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
     RETURNING request_id
     `;
 
@@ -111,7 +97,8 @@ export async function POST(request: NextRequest) {
       issuanceDate,
       locations,
       requirements,
-      hodApprover,
+      hodName,
+      hodEmail,
     ];
 
     // Run the query
@@ -120,7 +107,7 @@ export async function POST(request: NextRequest) {
     // Get the returned uuid
     const requestId = result[0].request_id;
 
-    if (hodEmail === email) {
+    if (sameEmail(hodEmail, email)) {
       const updateQuery = `
         UPDATE access_requisitions
         SET

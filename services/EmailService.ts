@@ -112,6 +112,31 @@ interface EmailOptions {
 
 const cca = new ConfidentialClientApplication(msalConfig);
 
+// Kill switch for every notification email - all mail goes through sendEmail.
+// Only an explicit NOTIFICATION_EMAILS_ENABLED=false (any case) disables it;
+// missing or any other value sends as normal.
+const EMAILS_DISABLED_MESSAGE =
+  "Notification emails are disabled (NOTIFICATION_EMAILS_ENABLED=false)";
+
+let warnedAboutFlagValue = false;
+
+function notificationEmailsEnabled(): boolean {
+  const raw = process.env.NOTIFICATION_EMAILS_ENABLED;
+  if (raw === undefined) return true;
+
+  const value = raw.trim().toLowerCase();
+  if (value === "false") return false;
+
+  // Surface typos like "flase" or "0" instead of silently sending
+  if (value !== "true" && !warnedAboutFlagValue) {
+    warnedAboutFlagValue = true;
+    console.warn(
+      `NOTIFICATION_EMAILS_ENABLED has an unrecognised value "${raw}" - emails will be sent. Use "false" to disable them.`,
+    );
+  }
+  return true;
+}
+
 async function getAccessToken() {
   const result = await cca.acquireTokenByClientCredential({
     // Using Graph scope now
@@ -128,7 +153,22 @@ export const sendEmail = async ({
   subject,
   html,
   attachments,
-}: EmailOptions) => {
+}: EmailOptions): Promise<{
+  success: boolean;
+  skipped?: boolean;
+  error?: string;
+}> => {
+  // Reported as a failure (skipped: true) so callers that act on success -
+  // e.g. the salary advance export only flags rows as exported once the
+  // email goes out - never treat an unsent email as delivered. The body is
+  // never logged: it carries approval-link tokens and verification codes.
+  if (!notificationEmailsEnabled()) {
+    console.info(
+      `[email skipped] ${EMAILS_DISABLED_MESSAGE} - from: ${from}, to: ${[to].flat().join(", ")}${cc ? `, cc: ${[cc].flat().join(", ")}` : ""}, subject: "${subject}"`,
+    );
+    return { success: false, skipped: true, error: EMAILS_DISABLED_MESSAGE };
+  }
+
   try {
     const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("Failed to retrieve access token");

@@ -1,9 +1,9 @@
 import { NextResponse, NextRequest } from "next/server";
-import { loadHrArray } from "@/lib/loadAppDataV2";
+import { loadHrArray } from "@/lib/loadApprovers";
 import { query } from "@/lib/db";
 import { EmailSender } from "@/services/EmailSender";
 import { getSession } from "@/lib/session";
-import { loadHodAlternates } from "@/lib/hodAssignment";
+import { loadHodAlternates, resolveHod, sameEmail } from "@/lib/hodAssignment";
 import { validateTravelFormData } from "@/lib/travelRequisitionRules";
 
 export async function POST(request: NextRequest) {
@@ -19,18 +19,11 @@ export async function POST(request: NextRequest) {
 
   const HR_ARRAY = await loadHrArray("travel");
   try {
-    const { formData, submittedBy } = await request.json();
+    const { formData } = await request.json();
 
-    // Destructure the submitted by area to get a valid name and email
-    const { name, email } = submittedBy;
-
-    // Unauthorized user
-    if (!name || !email) {
-      return NextResponse.json(
-        { message: "Cannot verify the user trying to make this requisition" },
-        { status: 400 },
-      );
-    }
+    // The submitter is always the signed-in user - never client-supplied, or
+    // anyone could submit as their own HOD and be auto-approved
+    const { name, email } = user;
 
     // Destructure form data
     const {
@@ -62,16 +55,10 @@ export async function POST(request: NextRequest) {
 
     const { totalCost, approvalTier } = validation;
 
-    const hodApproverResult = await query(
-      `
-      SELECT hod_uuid AS uuid, 
-      hod_email AS email
-      FROM hod_array WHERE hod_name = $1 AND is_alternate_only = false LIMIT 1
-      `,
-      [hodApprover],
-    );
+    // The form sends the HOD's email; the stored name comes from hod_array
+    const resolvedHod = await resolveHod(hodApprover);
 
-    if (hodApproverResult.length === 0) {
+    if (!resolvedHod) {
       return NextResponse.json(
         {
           message:
@@ -81,9 +68,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // get the hod uuid and email - or fall back to an invalid string
-    const hodUuid = hodApproverResult[0].uuid;
-    const hodEmail = hodApproverResult[0].email;
+    const { uuid: hodUuid, name: hodName, email: hodEmail } = resolvedHod;
 
     // Generate status for HOD Approval, HR Approval and Director Approval Statuses
     const hodStatus = "pending";
@@ -128,7 +113,7 @@ export async function POST(request: NextRequest) {
       hodStatus,
       hrStatus,
       directorStatus,
-      hodApprover,
+      hodName,
       hodEmail,
       engineeringJobs || null,
     ];
@@ -140,7 +125,7 @@ export async function POST(request: NextRequest) {
     const requestUuid = result[0].request_id;
 
     // Running an update if the requestor is an HOD
-    if (hodEmail === email) {
+    if (sameEmail(hodEmail, email)) {
       const updateQuery = `
         UPDATE travel_requisitions
         SET 

@@ -6,6 +6,8 @@ import { useUser } from "@/context/UserContext";
 
 interface ConfirmationModalProps {
   formData: TravelFormData;
+  // Display name for formData.hodApprover, which holds the HOD's email
+  hodApproverName: string;
   totalCost: number;
   approvalTier: string;
   onBack: () => void;
@@ -18,6 +20,7 @@ interface ConfirmationModalProps {
 
 export default function TravelConfirmationModal({
   formData,
+  hodApproverName,
   totalCost,
   approvalTier,
   onBack,
@@ -35,7 +38,7 @@ export default function TravelConfirmationModal({
       { label: "Name", value: formData.employeeName },
       { label: "Department", value: formData.department },
       { label: "Designation", value: formData.designation },
-      { label: "HOD Approver", value: formData.hodApprover },
+      { label: "HOD Approver", value: hodApproverName },
       { label: "Cost Centre", value: formData.costCentre },
     ],
     [

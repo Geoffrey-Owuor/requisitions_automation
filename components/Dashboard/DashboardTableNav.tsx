@@ -31,9 +31,9 @@ export default function DashboardTableNav({
   return (
     <nav
       aria-label="Jump to table"
-      className="sticky top-0 z-20 rounded-xl border border-rose-200 bg-white/95 p-2"
+      className="sticky top-0 z-20 rounded-xl border border-rose-200 bg-white/95"
     >
-      <div className="small-scrollbar flex flex-row gap-1.5 overflow-x-auto">
+      <div className="small-scrollbar flex flex-row gap-1.5 overflow-x-auto p-2">
         {items.map(({ key, label, Icon }) => (
           <button
             key={key}

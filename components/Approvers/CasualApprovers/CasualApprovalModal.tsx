@@ -47,7 +47,9 @@ export interface CasualApprovalModalProps {
   uuid: string;
   stage: string;
   approverName: string;
-  approverEmail: string;
+  // Approval token from the emailed link - the server resolves the acting
+  // approver from it (lib/approverToken.ts)
+  token: string;
   submitterName: string;
   submitterEmail: string;
   department: string;
@@ -101,7 +103,7 @@ const CasualApprovalModal = ({
   uuid,
   stage,
   approverName,
-  approverEmail,
+  token,
   submitterName,
   submitterEmail,
   department,
@@ -148,8 +150,7 @@ const CasualApprovalModal = ({
         stage,
         status,
         comments: commentsPayload,
-        approverName,
-        approverEmail,
+        token,
         expectedAmendmentCount: amendmentCount,
       });
 

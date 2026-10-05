@@ -3,6 +3,7 @@
 import { pool } from "@/lib/db";
 import { PoolClient } from "pg";
 import { getHodActionError } from "@/lib/hodAssignment";
+import { resolveApproverByToken } from "@/lib/approverToken";
 import { AlertInfo } from "@/components/TravelRequisitionPage";
 import { hodApprovalStage } from "@/utils/CasualApprovalStages/hodApprovalStage";
 import { hrApprovalStage } from "@/utils/CasualApprovalStages/hrApprovalStage";
@@ -14,8 +15,9 @@ export type UpdateRequestStatusProps = {
   stage: string;
   status: string;
   comments: string;
-  approverName: string;
-  approverEmail: string;
+  // The emailed link's approval token - the acting approver is resolved
+  // from it server-side (lib/approverToken.ts), never from the client.
+  token: string;
   // The amendment_count the approver's screen was rendered from - guards
   // against approving content that was superseded by an amendment while
   // this approver had the page open.
@@ -52,15 +54,6 @@ export async function UpdateCasualStatus(
     WHERE request_id = $5
     `;
 
-  //  params
-  const baseParams = [
-    payload.status,
-    payload.approverName,
-    payload.approverEmail,
-    payload.comments,
-    payload.uuid,
-  ];
-
   try {
     client = await pool.connect();
 
@@ -85,34 +78,22 @@ export async function UpdateCasualStatus(
       };
     }
 
-    // Check if the approver exists in our table array data set. HR approvers
-    // are additionally scoped to the forms in their hr_forms allow-list -
-    // salary advance never reaches this check, it has its own approver.
-    const isHrStage = payload.stage === "hr";
-    const { rows: approverResult } = await client.query(
-      isHrStage
-        ? `SELECT id, hr_forms FROM hr_array WHERE hr_email = $1 FOR UPDATE`
-        : `SELECT id FROM ${payload.stage}_array WHERE ${payload.stage}_email = $1 FOR UPDATE`,
-      [payload.approverEmail],
+    // The acting approver comes from the approval token, never from the
+    // client. HR approvers are additionally scoped to the forms in their
+    // hr_forms allow-list - salary advance never reaches this check.
+    const approver = await resolveApproverByToken(
+      client,
+      payload.stage,
+      payload.token,
+      "casual",
     );
 
-    if (approverResult.length === 0) {
+    if (!approver.ok) {
       await client.query("ROLLBACK");
-      return {
-        alertType: "error",
-        alertMessage:
-          "Could not verify the current approver, please contact your admin for support",
-      };
+      return { alertType: "error", alertMessage: approver.message };
     }
 
-    if (isHrStage && !approverResult[0].hr_forms.includes("casual")) {
-      await client.query("ROLLBACK");
-      return {
-        alertType: "error",
-        alertMessage:
-          "You are not authorized to approve casual requisitions, please contact your admin for support",
-      };
-    }
+    const { name: approverName, email: approverEmail } = approver;
 
     const isReviewed = reviewedResult[0].approval_status;
     const previousApprover = reviewedResult[0].approver;
@@ -127,7 +108,7 @@ export async function UpdateCasualStatus(
     // stage - being in hod_array alone is not enough (lib/hodAssignment.ts).
     if (payload.stage === "hod") {
       const hodActionError = await getHodActionError(client, {
-        approverEmail: payload.approverEmail,
+        approverEmail,
         assignedHodEmail,
         submitterEmail: userEmail,
       });
@@ -154,7 +135,13 @@ export async function UpdateCasualStatus(
       };
     }
 
-    await client.query(baseUpdateQuery, baseParams);
+    await client.query(baseUpdateQuery, [
+      payload.status,
+      approverName,
+      approverEmail,
+      payload.comments,
+      payload.uuid,
+    ]);
 
     await client.query("COMMIT");
 
@@ -164,8 +151,8 @@ export async function UpdateCasualStatus(
           uuid: payload.uuid,
           userEmail,
           status: payload.status,
-          approverEmail: payload.approverEmail,
-          approverName: payload.approverName,
+          approverEmail,
+          approverName,
         });
         break;
       case "hr":
@@ -174,8 +161,8 @@ export async function UpdateCasualStatus(
           userEmail,
           hodEmail,
           status: payload.status,
-          approverEmail: payload.approverEmail,
-          approverName: payload.approverName,
+          approverEmail,
+          approverName,
         });
         break;
       default:

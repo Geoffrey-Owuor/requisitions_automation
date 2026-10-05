@@ -1,8 +1,6 @@
 import { Metadata } from "next";
 import { Suspense } from "react";
-import DashboardWrapper from "@/components/Dashboard/DashboardWrapper";
-import RequisitionPagesWrapper from "@/components/Dashboard/RequisitionPagesWrapper";
-import { UserProvider } from "@/context/UserContext";
+import ApproverShell from "@/components/Approvers/ApproverShell";
 import { query } from "@/lib/db";
 import CasualApprovalModal from "@/components/Approvers/CasualApprovers/CasualApprovalModal";
 import { PreviousApproval } from "@/components/Approvers/PreviousApprovalsSection";
@@ -14,6 +12,8 @@ import TravelApprovalSkeleton from "@/components/Skeletons/TravelApprovalSkeleto
 import AlreadyProcessed from "@/components/Approvers/TravelApprovers/AlreadyProcessed";
 import InvalidToken from "@/components/Approvers/TravelApprovers/InvalidToken";
 import NotFoundRequest from "@/components/Approvers/TravelApprovers/NotFoundRequest";
+import NotAssignedHod from "@/components/Approvers/NotAssignedHod";
+import { getHodPageAccess } from "@/lib/hodAssignment";
 import { isValidCasualStage, CASUAL_STAGE_LABELS } from "@/public/assets";
 
 type ApprovalPageProps = {
@@ -42,7 +42,10 @@ export const generateMetadata = async ({
   };
 };
 
-const page = async ({ params, searchParams }: ApprovalPageProps) => {
+const ApprovalPageContent = async ({
+  params,
+  searchParams,
+}: ApprovalPageProps) => {
   const { uuid } = await params;
   const { token, stage } = await searchParams;
 
@@ -69,6 +72,20 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
   }
 
   const approverDetails = validApprover[0];
+
+  // HOD stage: only the assigned HOD or one of their alternates may review
+  // this requisition - checked before any of its details are loaded.
+  if (stage === "hod") {
+    const hodAccess = await getHodPageAccess(
+      "casual_requisitions",
+      "casual_hod_email",
+      uuid,
+      approverDetails.email,
+    );
+    if (hodAccess.status === "not_found") return <NotFoundRequest />;
+    if (hodAccess.status === "denied")
+      return <NotAssignedHod message={hodAccess.message} />;
+  }
 
   // Token is valid - lets query the database for the casual requisition data
   const baseQuery = `
@@ -116,14 +133,6 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
 
   // Our current approver
   const currentApprover = approverDetails.name;
-  const currentApproverEmail = approverDetails.email;
-
-  // context object
-  const contextObject = {
-    username: currentApprover,
-    email: currentApproverEmail,
-    roles: [stage],
-  };
 
   // HR is the second and final stage - HOD is the only stage that can
   // precede it.
@@ -140,41 +149,43 @@ const page = async ({ params, searchParams }: ApprovalPageProps) => {
       : [];
 
   return (
-    <UserProvider user={contextObject}>
-      <DashboardWrapper>
-        <RequisitionPagesWrapper>
-          <Suspense fallback={<TravelApprovalSkeleton />}>
-            <CasualApprovalModal
-              uuid={uuid}
-              stage={stage}
-              approverName={currentApprover}
-              approverEmail={currentApproverEmail}
-              submitterName={requestData.submitter_name}
-              submitterEmail={requestData.submitter_email}
-              department={requestData.employee_department}
-              location={requestData.casual_location}
-              requestCreatedAt={requestData.request_created_at}
-              previousApprovals={previousApprovals}
-              amendments={amendmentsResult}
-              amendmentCount={requestData.amendment_count}
-              sections={sectionsResult.map((section) => ({
-                sectionId: section.section_id,
-                sectionName: section.section_name,
-                justification: section.casual_justification,
-                numberOfCasuals: section.number_of_casuals,
-                ppesRequired: section.ppes_required,
-                periodFrom: section.engagement_period_from,
-                periodTo: section.engagement_period_to,
-                engagementDays: section.engagement_days,
-                ratePerDay: section.casual_rate_per_day,
-                totalAmount: section.casual_total_amount,
-              }))}
-            />
-          </Suspense>
-        </RequisitionPagesWrapper>
-      </DashboardWrapper>
-    </UserProvider>
+    <Suspense fallback={<TravelApprovalSkeleton />}>
+      <CasualApprovalModal
+        uuid={uuid}
+        stage={stage}
+        token={token}
+        approverName={currentApprover}
+        submitterName={requestData.submitter_name}
+        submitterEmail={requestData.submitter_email}
+        department={requestData.employee_department}
+        location={requestData.casual_location}
+        requestCreatedAt={requestData.request_created_at}
+        previousApprovals={previousApprovals}
+        amendments={amendmentsResult}
+        amendmentCount={requestData.amendment_count}
+        sections={sectionsResult.map((section) => ({
+          sectionId: section.section_id,
+          sectionName: section.section_name,
+          justification: section.casual_justification,
+          numberOfCasuals: section.number_of_casuals,
+          ppesRequired: section.ppes_required,
+          periodFrom: section.engagement_period_from,
+          periodTo: section.engagement_period_to,
+          engagementDays: section.engagement_days,
+          ratePerDay: section.casual_rate_per_day,
+          totalAmount: section.casual_total_amount,
+        }))}
+      />
+    </Suspense>
   );
 };
+
+// Every outcome - the approval modal and each status screen - renders inside
+// the session-chosen shell.
+const page = (props: ApprovalPageProps) => (
+  <ApproverShell>
+    <ApprovalPageContent {...props} />
+  </ApproverShell>
+);
 
 export default page;

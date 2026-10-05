@@ -34,6 +34,7 @@ import { EngineeringJobFields, EngineeringJob } from "./EngineeringJobFields";
 import {
   FormSelect,
   findHodForDepartment,
+  hodNameLabel,
   excludeSubmitterFromHodArray,
 } from "./Modules/Retail/CasualRequisitionForm";
 import { getTravelAmendmentContext } from "@/serverActions/GetTravelAmendmentContext";
@@ -96,7 +97,7 @@ export default function TravelRequisitionPage({
 }: {
   amendRequestId?: string | null;
 } = {}) {
-  const { username, email } = useUser();
+  const { email } = useUser();
   const queryClient = useQueryClient();
   const setTravelAmendmentRequestId = useToggleStore(
     (state) => state.setTravelAmendmentRequestId,
@@ -117,7 +118,8 @@ export default function TravelRequisitionPage({
     queryFn: loadHodArray,
   });
   const hodArray = excludeSubmitterFromHodArray(rawHodArray, email);
-  const HOD_APPROVERS = hodArray.map((hod) => hod.name);
+  const HOD_APPROVERS = hodArray.map((hod) => hod.email);
+  const hodLabel = hodNameLabel(hodArray);
 
   // Amend mode: fetch the eligibility check + pre-fill data for this
   // requisition. Re-checked server-side every time the modal opens.
@@ -235,10 +237,6 @@ export default function TravelRequisitionPage({
           formData: submittedFormData,
           totalCost,
           approvalTier: generatedAprovalTier,
-          submittedBy: {
-            name: username,
-            email: email,
-          },
         };
 
     setSubmitting(true);
@@ -352,6 +350,7 @@ export default function TravelRequisitionPage({
       {step === 2 && (
         <TravelConfirmationModal
           formData={formData}
+          hodApproverName={hodLabel(formData.hodApprover)}
           totalCost={totalCost}
           approvalTier={generatedAprovalTier}
           onBack={() => {
@@ -561,6 +560,7 @@ export default function TravelRequisitionPage({
                   <FormSelect
                     label="Hod Approver"
                     options={HOD_APPROVERS}
+                    optionLabel={hodLabel}
                     value={formData.hodApprover}
                     loading={hodsLoading}
                     onChange={(v) => updateField("hodApprover", v)}
