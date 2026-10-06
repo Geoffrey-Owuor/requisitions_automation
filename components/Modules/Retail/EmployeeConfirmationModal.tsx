@@ -15,6 +15,8 @@ interface EmployeeConfirmationModalProps {
   formData: EmployeeFormData;
   // Display name for formData.hodApprover, which holds the HOD's email
   hodApproverName: string;
+  isAmendment?: boolean;
+  reason?: string;
   onBack: () => void;
   onSubmit: () => Promise<void>;
   submitting: boolean;
@@ -23,6 +25,8 @@ interface EmployeeConfirmationModalProps {
 export default function EmployeeConfirmationModal({
   formData,
   hodApproverName,
+  isAmendment = false,
+  reason,
   onBack,
   onSubmit,
   submitting,
@@ -49,12 +53,25 @@ export default function EmployeeConfirmationModal({
           Step 2 of 2
         </p>
         <h2 className="mt-1 text-[22px] font-semibold tracking-[-0.3px] text-[#1e1b1b]">
-          Review &amp; confirm
+          {isAmendment ? "Review amendment" : "Review & confirm"}
         </h2>
         <p className="mt-1 text-[13px] text-[#7c5a5a]">
-          Please review your Employee requisition before submitting.
+          {isAmendment
+            ? "Please review your amendment before submitting. The approval workflow will restart from HOD."
+            : "Please review your Employee requisition before submitting."}
         </p>
       </div>
+
+      {isAmendment && reason && (
+        <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3.5">
+          <p className="mb-1 text-[11px] font-semibold tracking-[0.4px] text-amber-700 uppercase">
+            Reason for Amendment
+          </p>
+          <p className="text-[13px] leading-relaxed whitespace-pre-line text-amber-900">
+            {reason}
+          </p>
+        </div>
+      )}
 
       {/* User account card */}
       <div className="mb-6 flex items-center gap-3 rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white px-4 py-3">
@@ -96,8 +113,13 @@ export default function EmployeeConfirmationModal({
               key={position.clientId}
               className="rounded-2xl border border-[rgba(240,180,180,0.4)] bg-white p-5"
             >
-              <h3 className="mb-3 text-[13px] font-semibold text-[#1e1b1b]">
+              <h3 className="mb-3 flex items-center gap-2 text-[13px] font-semibold text-[#1e1b1b]">
                 {position.title || `Position ${index + 1}`}
+                {isAmendment && !position.positionId && (
+                  <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
+                    New position
+                  </span>
+                )}
               </h3>
 
               <div className="mb-3 grid grid-cols-2 gap-3 text-[13px] max-sm:grid-cols-1">
@@ -159,14 +181,37 @@ export default function EmployeeConfirmationModal({
                   Attachments
                 </p>
                 <div className="flex flex-col gap-1">
-                  {EMPLOYEE_ATTACHMENT_TYPES.map((type) => (
-                    <span key={type} className="text-[13px] text-[#1e1b1b]">
-                      <span className="text-[#7c5a5a]">
-                        {EMPLOYEE_ATTACHMENT_TYPE_LABELS[type]}:
-                      </span>{" "}
-                      {position.files[type]?.name ?? "—"}
-                    </span>
-                  ))}
+                  {EMPLOYEE_ATTACHMENT_TYPES.map((type) => {
+                    const newFile = position.files[type];
+                    const existing = position.existingFiles?.[type];
+
+                    return (
+                      <span key={type} className="text-[13px] text-[#1e1b1b]">
+                        <span className="text-[#7c5a5a]">
+                          {EMPLOYEE_ATTACHMENT_TYPE_LABELS[type]}:
+                        </span>{" "}
+                        {newFile ? (
+                          <>
+                            {newFile.name}
+                            {existing && (
+                              <span className="ml-1.5 text-[11px] font-semibold text-amber-700">
+                                (replaces {existing.originalFilename})
+                              </span>
+                            )}
+                          </>
+                        ) : existing ? (
+                          <>
+                            {existing.originalFilename}
+                            <span className="ml-1.5 text-[11px] text-[#a18080]">
+                              (unchanged)
+                            </span>
+                          </>
+                        ) : (
+                          "—"
+                        )}
+                      </span>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -207,7 +252,11 @@ export default function EmployeeConfirmationModal({
           disabled={submitting}
           className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-[14px] border-none bg-slate-900 py-4 text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)] disabled:opacity-50"
         >
-          {submitting ? "Submitting..." : "Submit request"}
+          {submitting
+            ? "Submitting..."
+            : isAmendment
+              ? "Submit amendment"
+              : "Submit request"}
           <Send className="h-4 w-4" />
         </button>
       </div>

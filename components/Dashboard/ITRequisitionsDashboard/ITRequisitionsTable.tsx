@@ -1,8 +1,6 @@
 "use client";
-import {
-  getITRequisitionData,
-  ITRequisitionDataProps,
-} from "@/serverActions/GetITRequisitionData";
+import type { ITRequisitionDataProps } from "@/serverActions/GetITRequisitionData";
+import { fetchDashboardTable } from "@/lib/dashboardApi";
 import { Monitor, Info } from "lucide-react";
 import RequisitionTable, { NEUTRAL_THEME } from "../RequisitionTable";
 import { ITRequisitionModal } from "./ITRequisitionsModal";
@@ -31,10 +29,7 @@ const COLUMNS = [
 
 export default function ITRequisitionsTable({
   dataFlag,
-  onStatusChange,
-}: ITRequisitionDataProps & {
-  onStatusChange?: (hasData: boolean) => void;
-}) {
+}: ITRequisitionDataProps) {
   // Zustand store
   const setShowITRequisition = useToggleStore(
     (state) => state.setShowITRequisition,
@@ -51,13 +46,11 @@ export default function ITRequisitionsTable({
       queryKey={["ITRequisitionsData"]}
       params={{ dataFlag }}
       queryFn={({ params, page, pageSize, searchTerm }) =>
-        getITRequisitionData({ ...params, page, pageSize, searchTerm })
+        fetchDashboardTable("it", { ...params, page, pageSize, searchTerm })
       }
-      onStatusChange={onStatusChange}
       toolbarSlot={dataFlag === "itAll" ? <ITDataExport /> : undefined}
       emptyState={{
         Icon: Monitor,
-        body: "Your IT requisition history is currently empty.",
         onNewRequisition:
           dataFlag === "userData"
             ? () => setShowITRequisition(true)

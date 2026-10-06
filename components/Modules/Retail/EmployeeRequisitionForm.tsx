@@ -11,8 +11,13 @@ import {
   Plus,
   Paperclip,
   X,
+  Loader2,
+  Info,
+  History,
+  RefreshCw,
 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { DASHBOARD_SUMMARY_KEY } from "@/hooks/useDashboardSummary";
 import { loadHodArray, loadBaseDepartments } from "@/lib/loadAppDataV2";
 import {
   assets,
@@ -22,8 +27,12 @@ import {
   EMPLOYEE_ATTACHMENT_TYPES,
   EMPLOYEE_ATTACHMENT_TYPE_LABELS,
   EmployeeAttachmentType,
+  MAX_AMENDMENT_REASON_LENGTH,
 } from "@/public/assets";
 import { ApiFormHandler } from "@/utils/ApiHandler";
+import { getEmployeeAmendmentContext } from "@/serverActions/GetEmployeeAmendmentContext";
+import EmployeeAmendmentHistory from "@/components/Approvers/EmployeeApprovers/EmployeeAmendmentHistory";
+import AttachmentLink from "@/components/Approvers/EmployeeApprovers/AttachmentLink";
 import SubmittingOverlay from "@/components/SubmittingOverlay";
 import AlertModal from "@/components/AlertModal";
 import { AlertInfo } from "@/components/TravelRequisitionPage";
@@ -48,8 +57,16 @@ export const ALLOWED_ATTACHMENT_EXTENSIONS = [
 export const MAX_ATTACHMENT_BYTES_PER_FILE = 2 * 1024 * 1024; // 2MB
 
 // ---- Types ----
+export interface ExistingAttachment {
+  attachmentId: string;
+  originalFilename: string;
+}
+
 export interface EmployeePositionFormData {
   clientId: string;
+  // Amend mode only: set for a position that already exists on the
+  // requisition, absent for one added during the amendment
+  positionId?: string;
   title: string;
   numberRequired: number;
   replacementOrNew: string;
@@ -59,7 +76,10 @@ export interface EmployeePositionFormData {
   justification: string;
   reportingTo: string;
   dateFilled: string;
+  // Newly chosen files. In amend mode a type with no new file keeps the
+  // position's existing attachment of that type.
   files: Partial<Record<EmployeeAttachmentType, File>>;
+  existingFiles?: Partial<Record<EmployeeAttachmentType, ExistingAttachment>>;
 }
 
 export interface EmployeeFormData {
@@ -100,8 +120,16 @@ function hasDisallowedExtension(fileName: string) {
 }
 
 // ---- Main Page ----
-export default function EmployeeRequisitionForm() {
+export default function EmployeeRequisitionForm({
+  amendRequestId,
+}: {
+  amendRequestId?: string | null;
+}) {
   const { email } = useUser();
+  const queryClient = useQueryClient();
+  const setEmployeeAmendmentRequestId = useToggleStore(
+    (state) => state.setEmployeeAmendmentRequestId,
+  );
 
   const scrollTrigger = useToggleStore((state) => state.scrollTrigger);
   const triggerScroll = useToggleStore((state) => state.triggerScroll);
@@ -119,7 +147,19 @@ export default function EmployeeRequisitionForm() {
   const HOD_APPROVERS = hodArray.map((hod) => hod.email);
   const hodLabel = hodNameLabel(hodArray);
 
+  // Amend mode: fetch the eligibility check + pre-fill data for this
+  // requisition. Re-checked server-side every time the modal opens.
+  const { data: amendmentContext, isLoading: amendmentLoading } = useQuery({
+    queryKey: ["EmployeeAmendmentContext", amendRequestId],
+    queryFn: () => getEmployeeAmendmentContext(amendRequestId!),
+    enabled: !!amendRequestId,
+  });
+  const amendmentNotEligible =
+    !!amendRequestId && !amendmentLoading && !amendmentContext;
+  const isAmendment = !!amendRequestId;
+
   const [formData, setFormData] = useState<EmployeeFormData>(InitialFormState);
+  const [reason, setReason] = useState("");
   const [step, setStep] = useState(1);
   const [alertInfo, setAlertInfo] = useState<AlertInfo>({
     alertType: "",
@@ -127,6 +167,32 @@ export default function EmployeeRequisitionForm() {
   });
   const [submitting, setSubmitting] = useState(false);
   const [fileErrors, setFileErrors] = useState<Record<string, string>>({});
+
+  // Seed the form once the amendment context loads (runs at most once per
+  // mount - the modal remounts this component fresh each time it opens, so
+  // there's no risk of clobbering later user edits).
+  const [seededFromAmendment, setSeededFromAmendment] = useState(false);
+  if (!seededFromAmendment && amendmentContext?.initialData) {
+    setSeededFromAmendment(true);
+    setFormData(amendmentContext.initialData);
+  }
+
+  // Once seeded, if the pre-filled HOD approver has since left hod_array, or
+  // the submitter has since become that HOD (and is now filtered out by
+  // excludeSubmitterFromHodArray), force a re-pick rather than silently
+  // submitting a stale/self-defeating approver. Runs at most once per mount.
+  const [hodValidityChecked, setHodValidityChecked] = useState(false);
+  if (
+    amendRequestId &&
+    seededFromAmendment &&
+    !hodValidityChecked &&
+    !hodsLoading
+  ) {
+    setHodValidityChecked(true);
+    if (formData.hodApprover && !HOD_APPROVERS.includes(formData.hodApprover)) {
+      setFormData((prev) => ({ ...prev, hodApprover: "" }));
+    }
+  }
 
   const isEmpty = (val: unknown) =>
     val === null || val === undefined || val === "";
@@ -151,8 +217,9 @@ export default function EmployeeRequisitionForm() {
         Number(position.salaryMax) < Number(position.salaryMin) ||
         EMPLOYEE_ATTACHMENT_TYPES.some((type) => {
           const file = position.files[type];
+          // No new file is fine when the position keeps an existing one
+          if (!file) return !position.existingFiles?.[type];
           return (
-            !file ||
             file.size > MAX_ATTACHMENT_BYTES_PER_FILE ||
             hasDisallowedExtension(file.name)
           );
@@ -163,7 +230,10 @@ export default function EmployeeRequisitionForm() {
   const buttonDisabled =
     isEmpty(formData.department) ||
     isEmpty(formData.hodApprover) ||
-    positionsInvalid;
+    positionsInvalid ||
+    (isAmendment &&
+      (isEmpty(reason.trim()) ||
+        reason.trim().length > MAX_AMENDMENT_REASON_LENGTH));
 
   const updateField = <K extends keyof EmployeeFormData>(
     field: K,
@@ -263,9 +333,15 @@ export default function EmployeeRequisitionForm() {
     payload.append(
       "metadata",
       JSON.stringify({
+        ...(isAmendment && {
+          requestId: amendRequestId,
+          expectedAmendmentCount: amendmentContext?.expectedAmendmentCount,
+          reason: reason.trim(),
+        }),
         department: formData.department,
         hodApprover: formData.hodApprover,
         positions: formData.positions.map((p) => ({
+          positionId: p.positionId,
           title: p.title,
           numberRequired: Number(p.numberRequired),
           replacementOrNew: p.replacementOrNew,
@@ -290,7 +366,9 @@ export default function EmployeeRequisitionForm() {
 
     try {
       const response = await ApiFormHandler(
-        "/api/employeerequisition/submitrequisition",
+        isAmendment
+          ? "/api/employeerequisition/submitamendment"
+          : "/api/employeerequisition/submitrequisition",
         "POST",
         payload,
       );
@@ -310,7 +388,16 @@ export default function EmployeeRequisitionForm() {
           "Your Employee requisition has been submitted successfully, you will receive a confirmation email shortly",
       });
 
-      setFormData(InitialFormState);
+      // Home page and tab counts
+      queryClient.invalidateQueries({ queryKey: DASHBOARD_SUMMARY_KEY });
+
+      if (isAmendment) {
+        queryClient.invalidateQueries({
+          queryKey: ["EmployeeRequisitionsData"],
+        });
+      } else {
+        setFormData(InitialFormState);
+      }
       setStep(3);
     } catch (error) {
       if (error instanceof Error) {
@@ -326,18 +413,54 @@ export default function EmployeeRequisitionForm() {
     }
   };
 
+  if (amendRequestId && amendmentLoading) {
+    return (
+      <div className="flex items-center justify-center py-24">
+        <Loader2 className="h-6 w-6 animate-spin text-rose-500" />
+      </div>
+    );
+  }
+
+  if (amendmentNotEligible) {
+    return (
+      <div className="mx-auto max-w-md rounded-2xl border border-rose-200 bg-rose-50 p-6 text-center text-sm text-rose-700">
+        This requisition can no longer be amended. It may have already been
+        approved by HR, or you may not be its original submitter.
+      </div>
+    );
+  }
+
   return (
     <div className="relative p-2">
       {submitting && <SubmittingOverlay />}
 
       {step === 3 && (
-        <AlertModal alertInfo={alertInfo} onBack={() => setStep(1)} />
+        <AlertModal
+          alertInfo={alertInfo}
+          heading={
+            isAmendment
+              ? { success: "Amendment submitted!", error: "Amendment failed" }
+              : undefined
+          }
+          buttonLabel={
+            isAmendment ? { success: "Close", error: "Try again" } : undefined
+          }
+          onBack={() => {
+            if (isAmendment && alertInfo.alertType === "success") {
+              setEmployeeAmendmentRequestId(null);
+            } else {
+              setStep(1);
+            }
+          }}
+        />
       )}
 
       {step === 2 && (
         <EmployeeConfirmationModal
           formData={formData}
           hodApproverName={hodLabel(formData.hodApprover)}
+          isAmendment={isAmendment}
+          reason={reason.trim()}
           onBack={() => {
             setStep(1);
             triggerScroll(!scrollTrigger);
@@ -362,13 +485,36 @@ export default function EmployeeRequisitionForm() {
           <header className="mb-8 flex items-end justify-between max-sm:flex-col max-sm:items-start max-sm:gap-5">
             <div>
               <h1 className="m-0 text-2xl font-semibold tracking-[-0.5px] text-[#1e1b1b]">
-                Employee Requisition
+                {isAmendment
+                  ? "Amend Employee Requisition"
+                  : "Employee Requisition"}
               </h1>
               <p className="mt-1 text-[14px] text-[#7c5a5a]">
-                Submit a request to fill one or more open positions.
+                {isAmendment
+                  ? "Update this requisition - the approval workflow will restart from HOD."
+                  : "Submit a request to fill one or more open positions."}
               </p>
             </div>
           </header>
+
+          {isAmendment && (
+            <div className="mb-6 flex items-start gap-2.5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3.5 text-[13px] text-amber-800">
+              <Info className="mt-0.5 h-4 w-4 shrink-0" />
+              <p>
+                Amendments are only possible until HR approves this
+                requisition. Submitting this amendment resets every approval
+                stage, so it will need to be re-approved from the HOD stage
+                onward. Attachments you don&apos;t replace are kept as they
+                are; replaced ones remain viewable in the amendment history.
+              </p>
+            </div>
+          )}
+
+          {isAmendment && !!amendmentContext?.history.length && (
+            <div className="mb-6 rounded-3xl border border-white/85 bg-white/65 px-6 py-6 shadow-[0_24px_48px_rgba(160,60,60,0.10)] sm:px-8">
+              <EmployeeAmendmentHistory amendments={amendmentContext.history} />
+            </div>
+          )}
 
           {/* Form Card */}
           <div className="rounded-3xl border border-white/85 bg-white/65 px-6 py-8 shadow-[0_24px_48px_rgba(160,60,60,0.10)] sm:px-8">
@@ -454,6 +600,25 @@ export default function EmployeeRequisitionForm() {
                 </button>
               </div>
 
+              {/* Reason for Amendment */}
+              {isAmendment && (
+                <div>
+                  <h2 className="mb-4 flex items-center gap-2 text-[13px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
+                    <History size={16} /> Reason for Amendment
+                  </h2>
+                  <textarea
+                    className="h-20 w-full resize-none rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 py-3 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
+                    placeholder="Explain what changed and why..."
+                    maxLength={MAX_AMENDMENT_REASON_LENGTH}
+                    value={reason}
+                    required
+                    onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+                      setReason(e.target.value)
+                    }
+                  />
+                </div>
+              )}
+
               {/* Submit Button */}
               <div className="mt-4">
                 <button
@@ -465,9 +630,9 @@ export default function EmployeeRequisitionForm() {
                   <ArrowRight className="h-4 w-4" />
                 </button>
                 <p className="mt-3 text-center text-xs text-[#7c5a5a]">
-                  All fields are required to proceed. Each position needs a Job
-                  Description, KPIs, and Org Chart document (Word, Excel, or
-                  PDF, max 2MB each).
+                  {isAmendment
+                    ? "All fields are required to proceed, and target fill dates must be today or later. A new position needs a Job Description, KPIs, and Org Chart document (Word, Excel, or PDF, max 2MB each)."
+                    : "All fields are required to proceed. Each position needs a Job Description, KPIs, and Org Chart document (Word, Excel, or PDF, max 2MB each)."}
                 </p>
               </div>
             </form>
@@ -578,6 +743,11 @@ function PositionFieldset({
             onChange={(v) => onChange("dateFilled", v)}
             minDate={today}
           />
+          {position.dateFilled && position.dateFilled < today && (
+            <p className="text-xs font-medium text-red-500">
+              This date has passed - pick a new target date
+            </p>
+          )}
         </div>
         <FormSelect
           label="Replacement/New"
@@ -650,6 +820,7 @@ function PositionFieldset({
         </span>
         {EMPLOYEE_ATTACHMENT_TYPES.map((type) => {
           const file = position.files[type];
+          const existing = position.existingFiles?.[type];
           const error = fileErrors[`${position.clientId}:${type}`];
 
           return (
@@ -660,14 +831,41 @@ function PositionFieldset({
               </label>
               {file ? (
                 <div className="flex items-center justify-between rounded-lg bg-white/80 px-3 py-2 text-[12px] text-[#1e1b1b]">
-                  <span className="max-w-70 truncate">{file.name}</span>
+                  <span className="flex min-w-0 items-center gap-2">
+                    {existing && (
+                      <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
+                        Replacement
+                      </span>
+                    )}
+                    <span className="max-w-70 truncate">{file.name}</span>
+                  </span>
                   <button
                     type="button"
+                    title={existing ? "Keep the current file" : "Remove"}
                     onClick={() => onRemoveFile(type)}
                     className="cursor-pointer text-[#a18080] hover:text-rose-600"
                   >
                     <X className="h-3.5 w-3.5" />
                   </button>
+                </div>
+              ) : existing ? (
+                <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-white/80 px-3 py-2">
+                  <AttachmentLink
+                    attachmentId={existing.attachmentId}
+                    label={existing.originalFilename}
+                  />
+                  <label className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-rose-200 bg-white px-3 py-1.5 text-[12px] font-semibold text-rose-700 transition-all duration-200 hover:bg-rose-50">
+                    <RefreshCw className="h-3.5 w-3.5" />
+                    Replace
+                    <input
+                      type="file"
+                      accept=".doc,.docx,.xls,.xlsx,.pdf"
+                      className="hidden"
+                      onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                        onFileChange(type, e.target.files)
+                      }
+                    />
+                  </label>
                 </div>
               ) : (
                 <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-[rgba(240,180,180,0.8)] bg-white/60 px-3.5 py-4 text-[13px] font-medium text-rose-600 transition-all duration-200 hover:bg-rose-50">

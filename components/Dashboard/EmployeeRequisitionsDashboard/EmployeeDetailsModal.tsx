@@ -8,6 +8,7 @@ import {
   ShieldUser,
   Briefcase,
   Loader2,
+  Pencil,
 } from "lucide-react";
 import { QueryResultRow } from "pg";
 import StatusFormatter from "../StatusFormatter";
@@ -15,6 +16,7 @@ import {
   RETAIL_DEPARTMENT,
   dateFormatter,
   getJobGradeNumber,
+  isEmployeeAmendableHrStatus,
 } from "@/public/assets";
 import ClientPortal from "../../ClientPortal";
 import Link from "next/link";
@@ -23,7 +25,9 @@ import { getEmployeeApproverLink } from "@/serverActions/GetEmployeeApproverLink
 import { getEmployeeRequisitionDetails } from "@/serverActions/GetEmployeeRequisitionDetails";
 import { EmployeeEmailDataValues } from "@/services/EmployeeEmailSender";
 import AttachmentTypeGroups from "@/components/Approvers/EmployeeApprovers/AttachmentTypeGroups";
+import EmployeeAmendmentHistory from "@/components/Approvers/EmployeeApprovers/EmployeeAmendmentHistory";
 import { useLoadingStore } from "@/store/useLoadingStore";
+import { useToggleStore } from "@/store/useToggleStore";
 import { useEffect, useState } from "react";
 
 interface ModalProps {
@@ -53,6 +57,9 @@ export const EmployeeDetailsModal = ({
   dataFlag,
 }: ModalProps) => {
   const setLoadingLine = useLoadingStore((state) => state.setLoadingLine);
+  const setEmployeeAmendmentRequestId = useToggleStore(
+    (state) => state.setEmployeeAmendmentRequestId,
+  );
   const { email } = useUser();
   const [linkLoading, setLinkLoading] = useState(false);
   const [link, setLink] = useState("#");
@@ -169,6 +176,22 @@ export const EmployeeDetailsModal = ({
               </div>
             </div>
             <div className="flex items-center gap-4">
+              {/* Visibility only - the amend form and the amendment route
+                  re-check ownership and the HR status */}
+              {dataFlag === "userData" &&
+                data.submitter_email === email &&
+                isEmployeeAmendableHrStatus(data.employee_hr_approval_status) && (
+                  <button
+                    onClick={() => {
+                      setEmployeeAmendmentRequestId(data.request_id);
+                      onClose();
+                    }}
+                    className="flex items-center gap-1 rounded-full bg-amber-500 px-3 py-1 text-xs font-semibold text-white transition-colors duration-200 hover:bg-amber-600"
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                    Amend
+                  </button>
+                )}
               {stage !== "user" &&
                 data[`employee_${stage}_approval_status`] === "pending" && (
                   <>
@@ -298,6 +321,13 @@ export const EmployeeDetailsModal = ({
                 </div>
               )}
             </div>
+
+            {/* Amendment History */}
+            {details && details.amendments.length > 0 && (
+              <div className="mt-6">
+                <EmployeeAmendmentHistory amendments={details.amendments} />
+              </div>
+            )}
 
             {/* Approvals Section */}
             <div className="mt-6">

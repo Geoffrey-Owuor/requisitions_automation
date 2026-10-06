@@ -18,6 +18,7 @@ import {
   History,
 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { DASHBOARD_SUMMARY_KEY } from "@/hooks/useDashboardSummary";
 import {
   loadHodArray,
   loadBaseDepartments,
@@ -378,6 +379,9 @@ export default function CasualRequisitionForm({
           data.message ||
           "Your Casual requisition has been submitted successfully, you will receive a confirmation email shortly",
       });
+
+      // Home page and tab counts
+      queryClient.invalidateQueries({ queryKey: DASHBOARD_SUMMARY_KEY });
 
       if (isAmendment) {
         queryClient.invalidateQueries({ queryKey: ["CasualRequisitionsData"] });

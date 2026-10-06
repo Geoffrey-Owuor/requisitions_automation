@@ -1,8 +1,6 @@
 "use client";
-import {
-  getEmployeeRequisitionData,
-  EmployeeRequisitionDataProps,
-} from "@/serverActions/GetEmployeeRequisitionData";
+import type { EmployeeRequisitionDataProps } from "@/serverActions/GetEmployeeRequisitionData";
+import { fetchDashboardTable } from "@/lib/dashboardApi";
 import { UserRoundPlus, Info } from "lucide-react";
 import RequisitionTable, { VIOLET_THEME } from "../RequisitionTable";
 import { EmployeeDetailsModal } from "./EmployeeDetailsModal";
@@ -33,10 +31,7 @@ const COLUMNS = [
 
 export default function EmployeeRequisitionsTable({
   dataFlag,
-  onStatusChange,
-}: EmployeeRequisitionDataProps & {
-  onStatusChange?: (hasData: boolean) => void;
-}) {
+}: EmployeeRequisitionDataProps) {
   // Zustand store
   const setShowEmployeeRequisition = useToggleStore(
     (state) => state.setShowEmployeeRequisition,
@@ -53,12 +48,15 @@ export default function EmployeeRequisitionsTable({
       queryKey={["EmployeeRequisitionsData"]}
       params={{ dataFlag }}
       queryFn={({ params, page, pageSize, searchTerm }) =>
-        getEmployeeRequisitionData({ ...params, page, pageSize, searchTerm })
+        fetchDashboardTable("employee", {
+          ...params,
+          page,
+          pageSize,
+          searchTerm,
+        })
       }
-      onStatusChange={onStatusChange}
       emptyState={{
         Icon: UserRoundPlus,
-        body: "Your employee requisition history is currently empty.",
         onNewRequisition:
           dataFlag === "userData"
             ? () => setShowEmployeeRequisition(true)
@@ -67,9 +65,16 @@ export default function EmployeeRequisitionsTable({
       renderRow={(req) => (
         <>
           <td className="px-6 py-5">
-            <span className="text-sm text-[#1e1b1b]">
-              {req.employee_department}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-[#1e1b1b]">
+                {req.employee_department}
+              </span>
+              {req.amendment_count > 0 && (
+                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
+                  Amended ×{req.amendment_count}
+                </span>
+              )}
+            </div>
           </td>
           <td className="px-6 py-5">
             <span className="text-sm text-[#1e1b1b]">

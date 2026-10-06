@@ -4,6 +4,7 @@ import {
   Paperclip,
   UserCircle,
   ShieldCheck,
+  Pencil,
 } from "lucide-react";
 import {
   GeneralNote,
@@ -66,6 +67,32 @@ export default function EmployeeRequisitionGuideline() {
             cost="Applies to every employee requisition"
             approvers={["HOD Approval", "CEO Approval", "HR Approval"]}
             icon={<UserRoundPlus size={22} />}
+          />
+        </div>
+      </section>
+
+      {/* Amendments Section */}
+      <section className="space-y-4">
+        <SectionTitle icon={<Pencil size={17} />}>Amendments</SectionTitle>
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+          <InfoCard
+            icon={<Pencil size={18} />}
+            title="Who & When"
+            items={[
+              "Only the original submitter can amend their own requisition.",
+              "Allowed any time until HR approves it - a decline at any stage can still be amended.",
+              "Once HR has approved, the requisition is locked and can no longer be changed.",
+            ]}
+          />
+          <InfoCard
+            icon={<ShieldCheck size={18} />}
+            title="What Happens on Submission"
+            items={[
+              "The department, HOD approver and any position can be changed, and positions can be added or removed. Every target fill date must be today or later.",
+              "Attachments you don't replace are kept. A new position needs all three documents.",
+              "The approval workflow restarts from HOD, even if later stages had already approved.",
+              "A record of every amendment - what changed, why, and the replaced documents - is kept and visible to approvers.",
+            ]}
           />
         </div>
       </section>
