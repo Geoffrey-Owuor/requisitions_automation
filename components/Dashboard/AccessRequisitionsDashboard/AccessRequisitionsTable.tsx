@@ -26,10 +26,7 @@ const COLUMNS = [
 
 export default function AccessRequisitionsTable({
   dataFlag,
-  onStatusChange,
-}: AccessRequisitionDataProps & {
-  onStatusChange?: (hasData: boolean) => void;
-}) {
+}: AccessRequisitionDataProps) {
   // Zustand store
   const setShowAccessRequisition = useToggleStore(
     (state) => state.setShowAccessRequisition,
@@ -53,7 +50,6 @@ export default function AccessRequisitionsTable({
           searchTerm,
         })
       }
-      onStatusChange={onStatusChange}
       emptyState={{
         Icon: LockKeyhole,
         onNewRequisition:

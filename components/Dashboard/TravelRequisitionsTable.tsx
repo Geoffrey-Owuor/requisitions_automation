@@ -28,10 +28,7 @@ const COLUMNS = [
 
 export default function TravelRequisitionsTable({
   dataFlag,
-  onStatusChange,
-}: TravelRequisitionDataProps & {
-  onStatusChange?: (hasData: boolean) => void;
-}) {
+}: TravelRequisitionDataProps) {
   // Zustand store
   const setShowTravelRequisition = useToggleStore(
     (state) => state.setShowTravelRequisition,
@@ -50,7 +47,6 @@ export default function TravelRequisitionsTable({
       queryFn={({ params, page, pageSize, searchTerm }) =>
         fetchDashboardTable("travel", { ...params, page, pageSize, searchTerm })
       }
-      onStatusChange={onStatusChange}
       emptyState={{
         Icon: PlaneLanding,
         onNewRequisition:
