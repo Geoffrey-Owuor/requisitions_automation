@@ -31,10 +31,7 @@ const COLUMNS = [
 
 export default function EmployeeRequisitionsTable({
   dataFlag,
-  onStatusChange,
-}: EmployeeRequisitionDataProps & {
-  onStatusChange?: (hasData: boolean) => void;
-}) {
+}: EmployeeRequisitionDataProps) {
   // Zustand store
   const setShowEmployeeRequisition = useToggleStore(
     (state) => state.setShowEmployeeRequisition,
@@ -58,7 +55,6 @@ export default function EmployeeRequisitionsTable({
           searchTerm,
         })
       }
-      onStatusChange={onStatusChange}
       emptyState={{
         Icon: UserRoundPlus,
         onNewRequisition:

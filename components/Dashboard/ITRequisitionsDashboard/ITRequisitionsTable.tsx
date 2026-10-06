@@ -29,10 +29,7 @@ const COLUMNS = [
 
 export default function ITRequisitionsTable({
   dataFlag,
-  onStatusChange,
-}: ITRequisitionDataProps & {
-  onStatusChange?: (hasData: boolean) => void;
-}) {
+}: ITRequisitionDataProps) {
   // Zustand store
   const setShowITRequisition = useToggleStore(
     (state) => state.setShowITRequisition,
@@ -51,7 +48,6 @@ export default function ITRequisitionsTable({
       queryFn={({ params, page, pageSize, searchTerm }) =>
         fetchDashboardTable("it", { ...params, page, pageSize, searchTerm })
       }
-      onStatusChange={onStatusChange}
       toolbarSlot={dataFlag === "itAll" ? <ITDataExport /> : undefined}
       emptyState={{
         Icon: Monitor,

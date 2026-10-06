@@ -26,10 +26,7 @@ const COLUMNS = [
 
 export default function CasualRequisitionsTable({
   dataFlag,
-  onStatusChange,
-}: CasualRequisitionDataProps & {
-  onStatusChange?: (hasData: boolean) => void;
-}) {
+}: CasualRequisitionDataProps) {
   // Zustand store
   const setShowCasualRequisition = useToggleStore(
     (state) => state.setShowCasualRequisition,
@@ -48,7 +45,6 @@ export default function CasualRequisitionsTable({
       queryFn={({ params, page, pageSize, searchTerm }) =>
         fetchDashboardTable("casual", { ...params, page, pageSize, searchTerm })
       }
-      onStatusChange={onStatusChange}
       emptyState={{
         Icon: HardHat,
         onNewRequisition:

@@ -1,5 +1,5 @@
 "use client";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useState, useSyncExternalStore } from "react";
 import {
   Search,
   Plus,
@@ -89,6 +89,10 @@ export const VIOLET_THEME: RequisitionTableTheme = {
   clearSearch: "text-violet-600 hover:text-violet-700",
 };
 
+// useSyncExternalStore subscription for a value that never changes after
+// hydration
+const subscribeNothing = () => () => {};
+
 interface Column {
   key: string;
   label: string;
@@ -107,8 +111,8 @@ interface EmptyStateConfig {
 }
 
 interface RequisitionTableProps<TParams> {
-  // Identity used for collapse state and (by convention) the caller's own
-  // onStatusChange/tableStatus bookkeeping — pass the same string used there.
+  // `${type}-${dataFlag}` — the DASHBOARD_TABLES key (lib/dashboardTables.tsx),
+  // used for collapse state and the empty-state copy.
   tableKey: string;
   title: string;
   Icon: LucideIcon;
@@ -128,7 +132,6 @@ interface RequisitionTableProps<TParams> {
     pageSize: number;
     searchTerm: string;
   }) => Promise<PaginatedResult<QueryResultRow>>;
-  onStatusChange?: (hasData: boolean) => void;
   renderModal: (row: QueryResultRow | null, close: () => void) => ReactNode;
 }
 
@@ -145,7 +148,6 @@ export default function RequisitionTable<TParams>({
   queryKey,
   params,
   queryFn,
-  onStatusChange,
   renderModal,
 }: RequisitionTableProps<TParams>) {
   const [selectedRequest, setSelectedRequest] = useState<QueryResultRow | null>(
@@ -162,7 +164,15 @@ export default function RequisitionTable<TParams>({
     (state) => state.collapsed[tableKey] ?? false,
   );
   const toggleCollapsed = useTableCollapseStore((state) => state.toggle);
+  // During hydration the collapse store reports its server snapshot
+  // (everything expanded), so hold the fetch until the persisted state applies
+  const hydrated = useSyncExternalStore(
+    subscribeNothing,
+    () => true,
+    () => false,
+  );
 
+  // A collapsed table doesn't fetch until it's expanded again
   const {
     data: paginatedData,
     totalCount,
@@ -178,7 +188,12 @@ export default function RequisitionTable<TParams>({
     setCurrentPage,
     itemsPerPage,
     setItemsPerPage,
-  } = useServerPagination({ queryKey, params, queryFn });
+  } = useServerPagination({
+    queryKey,
+    params,
+    queryFn,
+    enabled: hydrated && !collapsed,
+  });
 
   // Commit the sticky "has any data" signal during render (not in an effect)
   // whenever an unfiltered totalCount becomes available — only trust
@@ -190,18 +205,9 @@ export default function RequisitionTable<TParams>({
     setHasData(totalCount > 0);
   }
 
-  // Notifying the parent is a side effect on an external system, so it
-  // belongs in an effect rather than during render.
-  useEffect(() => {
-    if (canCommit) onStatusChange?.(totalCount > 0);
-  }, [canCommit, totalCount, onStatusChange]);
-
-  if (loading) return <SkeletonTable />;
-
-  // The legacy single-page dashboard (the only caller passing
-  // onStatusChange) hides tables with no rows; everywhere else an empty
-  // table shows its empty state.
-  if (!hasData && onStatusChange && !isError) return null;
+  // A collapsed table that never fetched is still "loading" — show its
+  // header rather than a skeleton.
+  if (loading && !collapsed) return <SkeletonTable />;
 
   const emptyCopy = tableEmptyCopy(tableKey);
   // A failed fetch with nothing cached to fall back on

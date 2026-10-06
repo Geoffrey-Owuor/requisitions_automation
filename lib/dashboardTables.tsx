@@ -91,9 +91,6 @@ export type DashboardTableEntry = {
   dataFlag: string;
   tab: DashboardTab;
   stage: string;
-  // Chip label for the legacy single-page dashboard's jump nav
-  label: string;
-  Icon: LucideIcon;
   isVisible: (viewer: DashboardViewer) => boolean;
   // Overrides the tab's default empty-state body
   emptyBody?: string;
@@ -111,7 +108,6 @@ function table(
   dataFlag: string,
   tab: DashboardTab,
   stage: string,
-  label: string,
   isVisible: (viewer: DashboardViewer) => boolean,
   emptyBody?: string,
 ): DashboardTableEntry {
@@ -121,8 +117,6 @@ function table(
     dataFlag,
     tab,
     stage,
-    label,
-    Icon: getRequisitionType(type).Icon,
     isVisible,
     emptyBody,
   };
@@ -130,22 +124,14 @@ function table(
 
 export const DASHBOARD_TABLES: DashboardTableEntry[] = [
   // Travel — HR/Director are role-based ("hr-travel"/"director")
-  table("travel", "userData", "mine", "Yours", "Travel · Yours", always),
-  table("travel", "hodPending", "pending", "HOD", "Travel · HOD", isHod),
-  table(
-    "travel",
-    "hrPending",
-    "pending",
-    "HR",
-    "Travel · HR",
-    hasRole("hr-travel"),
-  ),
+  table("travel", "userData", "mine", "Yours", always),
+  table("travel", "hodPending", "pending", "HOD", isHod),
+  table("travel", "hrPending", "pending", "HR", hasRole("hr-travel")),
   table(
     "travel",
     "directorPending",
     "pending",
     "Director",
-    "Travel · Director",
     hasRole("director"),
   ),
   table(
@@ -153,21 +139,19 @@ export const DASHBOARD_TABLES: DashboardTableEntry[] = [
     "history",
     "history",
     "History",
-    "Travel · History",
     (v) => isHod(v) || hasRole("hr-travel")(v) || hasRole("director")(v),
   ),
 
   // IT — IT admins already get the full history (with export) from itAll,
   // so their IT history tab holds that table instead of the HOD history.
-  table("it", "userData", "mine", "Yours", "IT · Yours", always),
-  table("it", "hodPending", "pending", "HOD", "IT · HOD", isHod),
-  table("it", "itPending", "pending", "IT", "IT · Fulfilment", hasRole("it")),
+  table("it", "userData", "mine", "Yours", always),
+  table("it", "hodPending", "pending", "HOD", isHod),
+  table("it", "itPending", "pending", "IT", hasRole("it")),
   table(
     "it",
     "itAll",
     "history",
     "All",
-    "IT · All",
     hasRole("it"),
     "No IT requisitions have been submitted yet.",
   ),
@@ -176,19 +160,17 @@ export const DASHBOARD_TABLES: DashboardTableEntry[] = [
     "history",
     "history",
     "History",
-    "IT · History",
     (v) => isHod(v) && !hasRole("it")(v),
   ),
 
   // Key & Access
-  table("access", "userData", "mine", "Yours", "Access · Yours", always),
-  table("access", "hodPending", "pending", "HOD", "Access · HOD", isHod),
+  table("access", "userData", "mine", "Yours", always),
+  table("access", "hodPending", "pending", "HOD", isHod),
   table(
     "access",
     "securityPending",
     "pending",
     "Security",
-    "Access · Security",
     ({ memberships }) => memberships.isSecurityApprover,
   ),
   table(
@@ -196,40 +178,32 @@ export const DASHBOARD_TABLES: DashboardTableEntry[] = [
     "history",
     "history",
     "History",
-    "Access · History",
     (v) => isHod(v) || v.memberships.isSecurityApprover,
   ),
 
   // Casual — HR is array-based and form-scoped (hr_array.hr_forms)
-  table("casual", "userData", "mine", "Yours", "Casual · Yours", always),
-  table("casual", "hodPending", "pending", "HOD", "Casual · HOD", isHod),
-  table(
-    "casual",
-    "hrPending",
-    "pending",
-    "HR",
-    "Casual · HR",
-    ({ memberships }) => memberships.hrForms.includes("casual"),
+  table("casual", "userData", "mine", "Yours", always),
+  table("casual", "hodPending", "pending", "HOD", isHod),
+  table("casual", "hrPending", "pending", "HR", ({ memberships }) =>
+    memberships.hrForms.includes("casual"),
   ),
   table(
     "casual",
     "history",
     "history",
     "History",
-    "Casual · History",
     (v) => isHod(v) || v.memberships.hrForms.includes("casual"),
   ),
 
   // Employee — Retail Director/Director/HR are array-based; the Director
   // role is labeled "CEO" in the UI
-  table("employee", "userData", "mine", "Yours", "Employee · Yours", always),
-  table("employee", "hodPending", "pending", "HOD", "Employee · HOD", isHod),
+  table("employee", "userData", "mine", "Yours", always),
+  table("employee", "hodPending", "pending", "HOD", isHod),
   table(
     "employee",
     "retailDirectorPending",
     "pending",
     "Retail Director",
-    "Employee · Retail Director",
     ({ memberships }) => memberships.isRetailDirector,
   ),
   table(
@@ -237,23 +211,16 @@ export const DASHBOARD_TABLES: DashboardTableEntry[] = [
     "directorPending",
     "pending",
     "CEO",
-    "Employee · CEO",
     ({ memberships }) => memberships.isDirector,
   ),
-  table(
-    "employee",
-    "hrPending",
-    "pending",
-    "HR",
-    "Employee · HR",
-    ({ memberships }) => memberships.hrForms.includes("employee"),
+  table("employee", "hrPending", "pending", "HR", ({ memberships }) =>
+    memberships.hrForms.includes("employee"),
   ),
   table(
     "employee",
     "history",
     "history",
     "History",
-    "Employee · History",
     ({ memberships }) =>
       memberships.isHodApprover ||
       memberships.isRetailDirector ||

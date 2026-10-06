@@ -2,9 +2,9 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 interface TableCollapseState {
-  // Keyed by the same tableKey strings used in UserDashboard's tableStatus
-  // map (e.g. "travel-userData"). Absent key = expanded, so existing
-  // dashboards default to today's fully-expanded behavior.
+  // Keyed by DASHBOARD_TABLES key (lib/dashboardTables.tsx, e.g.
+  // "travel-userData"). Absent key = expanded. A collapsed table doesn't
+  // fetch until it's expanded.
   collapsed: Record<string, boolean>;
   toggle: (tableKey: string) => void;
   setCollapsed: (tableKey: string, value: boolean) => void;
