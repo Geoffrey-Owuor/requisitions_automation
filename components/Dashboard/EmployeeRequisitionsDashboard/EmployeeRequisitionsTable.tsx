@@ -1,8 +1,6 @@
 "use client";
-import {
-  getEmployeeRequisitionData,
-  EmployeeRequisitionDataProps,
-} from "@/serverActions/GetEmployeeRequisitionData";
+import type { EmployeeRequisitionDataProps } from "@/serverActions/GetEmployeeRequisitionData";
+import { fetchDashboardTable } from "@/lib/dashboardApi";
 import { UserRoundPlus, Info } from "lucide-react";
 import RequisitionTable, { VIOLET_THEME } from "../RequisitionTable";
 import { EmployeeDetailsModal } from "./EmployeeDetailsModal";
@@ -53,7 +51,7 @@ export default function EmployeeRequisitionsTable({
       queryKey={["EmployeeRequisitionsData"]}
       params={{ dataFlag }}
       queryFn={({ params, page, pageSize, searchTerm }) =>
-        getEmployeeRequisitionData({ ...params, page, pageSize, searchTerm })
+        fetchDashboardTable("employee", { ...params, page, pageSize, searchTerm })
       }
       onStatusChange={onStatusChange}
       emptyState={{

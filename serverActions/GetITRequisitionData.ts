@@ -1,4 +1,6 @@
-"use server";
+import "server-only";
+// Served by app/api/dashboard/tables/[type]/route.ts rather than as a server
+// action — see that route for why.
 import { query } from "@/lib/db";
 import { getSession } from "@/lib/session";
 import { getUserRoles } from "@/serverActions/GetUserRoles";
