@@ -35,3 +35,17 @@ export async function fetchDashboardTable(
   }
   return response.json();
 }
+
+// Row counts keyed by table key (`${type}-${dataFlag}`) — the viewer's own
+// submissions and pending queues only; see app/api/dashboard/summary.
+export type DashboardSummary = { counts: Record<string, number> };
+
+export async function fetchDashboardSummary(): Promise<DashboardSummary> {
+  const response = await fetch("/api/dashboard/summary", {
+    cache: "no-store",
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to load dashboard summary (${response.status})`);
+  }
+  return response.json();
+}
