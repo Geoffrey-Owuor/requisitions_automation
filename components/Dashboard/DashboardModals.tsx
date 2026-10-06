@@ -53,6 +53,12 @@ const DashboardModals = () => {
   const showEmployeeRequisition = useToggleStore(
     (state) => state.showEmployeeRequisition,
   );
+  const employeeAmendmentRequestId = useToggleStore(
+    (state) => state.employeeAmendmentRequestId,
+  );
+  const setEmployeeAmendmentRequestId = useToggleStore(
+    (state) => state.setEmployeeAmendmentRequestId,
+  );
   const setShowEmployeeRequisition = useToggleStore(
     (state) => state.setShowEmployeeRequisition,
   );
@@ -99,10 +105,13 @@ const DashboardModals = () => {
 
       {/* Employee Requisition Modal */}
       <ModalWrapper
-        isOpen={showEmployeeRequisition}
-        onClose={() => setShowEmployeeRequisition(false)}
+        isOpen={showEmployeeRequisition || !!employeeAmendmentRequestId}
+        onClose={() => {
+          setShowEmployeeRequisition(false);
+          setEmployeeAmendmentRequestId(null);
+        }}
       >
-        <EmployeeRequisitionForm />
+        <EmployeeRequisitionForm amendRequestId={employeeAmendmentRequestId} />
       </ModalWrapper>
     </>
   );

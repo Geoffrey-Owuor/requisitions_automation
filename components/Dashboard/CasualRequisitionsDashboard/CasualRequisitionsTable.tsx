@@ -1,8 +1,6 @@
 "use client";
-import {
-  getCasualRequisitionData,
-  CasualRequisitionDataProps,
-} from "@/serverActions/GetCasualRequisitionData";
+import type { CasualRequisitionDataProps } from "@/serverActions/GetCasualRequisitionData";
+import { fetchDashboardTable } from "@/lib/dashboardApi";
 import { HardHat, Info } from "lucide-react";
 import RequisitionTable, { EMERALD_THEME } from "../RequisitionTable";
 import { CasualDetailsModal } from "./CasualDetailsModal";
@@ -28,10 +26,7 @@ const COLUMNS = [
 
 export default function CasualRequisitionsTable({
   dataFlag,
-  onStatusChange,
-}: CasualRequisitionDataProps & {
-  onStatusChange?: (hasData: boolean) => void;
-}) {
+}: CasualRequisitionDataProps) {
   // Zustand store
   const setShowCasualRequisition = useToggleStore(
     (state) => state.setShowCasualRequisition,
@@ -48,12 +43,10 @@ export default function CasualRequisitionsTable({
       queryKey={["CasualRequisitionsData"]}
       params={{ dataFlag }}
       queryFn={({ params, page, pageSize, searchTerm }) =>
-        getCasualRequisitionData({ ...params, page, pageSize, searchTerm })
+        fetchDashboardTable("casual", { ...params, page, pageSize, searchTerm })
       }
-      onStatusChange={onStatusChange}
       emptyState={{
         Icon: HardHat,
-        body: "Your casual requisition history is currently empty.",
         onNewRequisition:
           dataFlag === "userData"
             ? () => setShowCasualRequisition(true)

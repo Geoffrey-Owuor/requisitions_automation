@@ -1,8 +1,6 @@
 "use client";
-import {
-  getAccessRequisitionData,
-  AccessRequisitionDataProps,
-} from "@/serverActions/GetAccessRequisitionData";
+import type { AccessRequisitionDataProps } from "@/serverActions/GetAccessRequisitionData";
+import { fetchDashboardTable } from "@/lib/dashboardApi";
 import { LockKeyhole, Info } from "lucide-react";
 import RequisitionTable, { AMBER_THEME } from "../RequisitionTable";
 import { AccessDetailsModal } from "./AccessDetailsModal";
@@ -28,10 +26,7 @@ const COLUMNS = [
 
 export default function AccessRequisitionsTable({
   dataFlag,
-  onStatusChange,
-}: AccessRequisitionDataProps & {
-  onStatusChange?: (hasData: boolean) => void;
-}) {
+}: AccessRequisitionDataProps) {
   // Zustand store
   const setShowAccessRequisition = useToggleStore(
     (state) => state.setShowAccessRequisition,
@@ -48,12 +43,15 @@ export default function AccessRequisitionsTable({
       queryKey={["AccessRequisitionsData"]}
       params={{ dataFlag }}
       queryFn={({ params, page, pageSize, searchTerm }) =>
-        getAccessRequisitionData({ ...params, page, pageSize, searchTerm })
+        fetchDashboardTable("access", {
+          ...params,
+          page,
+          pageSize,
+          searchTerm,
+        })
       }
-      onStatusChange={onStatusChange}
       emptyState={{
         Icon: LockKeyhole,
-        body: "Your key & access requisition history is currently empty.",
         onNewRequisition:
           dataFlag === "userData"
             ? () => setShowAccessRequisition(true)

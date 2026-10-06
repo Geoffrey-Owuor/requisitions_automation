@@ -9,6 +9,7 @@ import {
   EMPLOYEE_ATTACHMENT_TYPE_LABELS,
   RETAIL_DEPARTMENT,
 } from "@/public/assets";
+import { escapeHtml } from "@/utils/escapeHtml";
 
 interface EmployeeRequisitionProps
   extends Omit<EmployeeEmailDataProps, "to"> {
@@ -55,6 +56,16 @@ export function EmployeeRequisitionTemplate({
           <div style="background-color: #ffffff; border-radius: 16px; padding: 18px 20px; margin-bottom: 24px; border: 1px solid #f9e8e8;">
             <p style="margin: 0; font-size: 15px; color: #4a3a3a; line-height: 1.6;">${message}</p>
           </div>
+
+          ${
+            emailData.amendmentcount > 0
+              ? `<div style="background-color: #fff3cd; border: 1px solid #856404; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+                   <p style="margin: 0 0 10px; font-size: 12px; font-weight: 800; color: #856404; text-transform: uppercase; letter-spacing: 1px;">Amended &mdash; Version ${emailData.amendmentcount + 1}</p>
+                   ${emailData.amendments.map((a) => `<p style="margin: 0 0 4px; font-size: 12px; color: #6d5602;">#${a.amendmentnumber} by ${escapeHtml(a.amendedbyname)} (${dateFormatter(a.createdat)}): "${escapeHtml(a.amendmentreason)}"</p>`).join("")}
+                   <p style="margin: 8px 0 0; font-size: 11px; color: #6d5602;">The full change history, including replaced attachments, is on the requisition page.</p>
+                 </div>`
+              : ""
+          }
 
           <div style="margin-bottom: 24px;">
             <p style="font-size: 11px; font-weight: 700; color: #a31d1d; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px;">Primary Information</p>

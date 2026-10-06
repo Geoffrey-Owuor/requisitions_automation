@@ -1,8 +1,6 @@
 "use client";
-import {
-  getTravelRequisitionData,
-  TravelRequisitionDataProps,
-} from "@/serverActions/GetTravelRequisitionData";
+import type { TravelRequisitionDataProps } from "@/serverActions/GetTravelRequisitionData";
+import { fetchDashboardTable } from "@/lib/dashboardApi";
 import { PlaneLanding, Info, BriefcaseBusiness } from "lucide-react";
 import RequisitionTable, { ROSE_THEME } from "./RequisitionTable";
 import { TravelDetailsModal } from "./TravelDetailsModal";
@@ -30,10 +28,7 @@ const COLUMNS = [
 
 export default function TravelRequisitionsTable({
   dataFlag,
-  onStatusChange,
-}: TravelRequisitionDataProps & {
-  onStatusChange?: (hasData: boolean) => void;
-}) {
+}: TravelRequisitionDataProps) {
   // Zustand store
   const setShowTravelRequisition = useToggleStore(
     (state) => state.setShowTravelRequisition,
@@ -50,12 +45,10 @@ export default function TravelRequisitionsTable({
       queryKey={["TravelRequisitionsData"]}
       params={{ dataFlag }}
       queryFn={({ params, page, pageSize, searchTerm }) =>
-        getTravelRequisitionData({ ...params, page, pageSize, searchTerm })
+        fetchDashboardTable("travel", { ...params, page, pageSize, searchTerm })
       }
-      onStatusChange={onStatusChange}
       emptyState={{
         Icon: PlaneLanding,
-        body: "Your travel requisition history is currently empty.",
         onNewRequisition:
           dataFlag === "userData"
             ? () => setShowTravelRequisition(true)
