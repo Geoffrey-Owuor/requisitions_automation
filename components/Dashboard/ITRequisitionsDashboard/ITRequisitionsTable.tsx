@@ -55,7 +55,6 @@ export default function ITRequisitionsTable({
       toolbarSlot={dataFlag === "itAll" ? <ITDataExport /> : undefined}
       emptyState={{
         Icon: Monitor,
-        body: "Your IT requisition history is currently empty.",
         onNewRequisition:
           dataFlag === "userData"
             ? () => setShowITRequisition(true)

@@ -53,7 +53,6 @@ export default function TravelRequisitionsTable({
       onStatusChange={onStatusChange}
       emptyState={{
         Icon: PlaneLanding,
-        body: "Your travel requisition history is currently empty.",
         onNewRequisition:
           dataFlag === "userData"
             ? () => setShowTravelRequisition(true)

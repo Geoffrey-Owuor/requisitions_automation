@@ -51,7 +51,6 @@ export default function CasualRequisitionsTable({
       onStatusChange={onStatusChange}
       emptyState={{
         Icon: HardHat,
-        body: "Your casual requisition history is currently empty.",
         onNewRequisition:
           dataFlag === "userData"
             ? () => setShowCasualRequisition(true)

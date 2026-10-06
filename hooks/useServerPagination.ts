@@ -93,6 +93,8 @@ export function useServerPagination<T, TParams>({
     isLoading: query.isPending,
     // True whenever a request is in flight, including page/search transitions.
     isFetching: query.isFetching,
+    // The last fetch failed (after React Query's retries) — data may be stale or empty.
+    isError: query.isError,
     refetch: query.refetch,
     searchTerm,
     setSearchTerm,
