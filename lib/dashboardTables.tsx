@@ -6,77 +6,292 @@ import {
   UserRoundPlus,
   type LucideIcon,
 } from "lucide-react";
+import type { ApproverMemberships } from "@/lib/approverMemberships";
+import type { DashboardRequisitionType } from "@/lib/dashboardApi";
 
-/**
- * Ordered registry of every table UserDashboard can render, in DOM order.
- *
- * `key` matches the tableKey each *RequisitionsTable component passes to
- * RequisitionTable (`${type}-${dataFlag}`) — the same string used for
- * tableStatus/visibleTableKeys in UserDashboard and for collapse state in
- * useTableCollapseStore. `label` is a short chip label distinct from each
- * table's own (much longer) title.
- */
-export type DashboardTableEntry = {
-  key: string;
+// Who is looking — the same roles/memberships the dashboard layout loads
+// into UserProvider. The server re-derives these for the summary endpoint,
+// and every table loader re-checks its own gate, so this only decides what
+// to render (and what to count).
+export type DashboardViewer = {
+  roles: string[];
+  memberships: ApproverMemberships;
+};
+
+export type DashboardTab = "mine" | "pending" | "history";
+
+export const DASHBOARD_TABS: { tab: DashboardTab; label: string }[] = [
+  { tab: "mine", label: "My Requisitions" },
+  { tab: "pending", label: "Pending Approval" },
+  { tab: "history", label: "History" },
+];
+
+export type RequisitionTypeEntry = {
+  type: DashboardRequisitionType;
   label: string;
+  // Lowercase noun for sentences: "No travel requisitions are waiting…"
+  noun: string;
+  href: string;
   Icon: LucideIcon;
 };
 
-export const DASHBOARD_TABLES: DashboardTableEntry[] = [
-  { key: "travel-userData", label: "Travel · Yours", Icon: BriefcaseBusiness },
-  { key: "travel-hodPending", label: "Travel · HOD", Icon: BriefcaseBusiness },
-  { key: "travel-hrPending", label: "Travel · HR", Icon: BriefcaseBusiness },
+export const REQUISITION_TYPES: RequisitionTypeEntry[] = [
   {
-    key: "travel-directorPending",
-    label: "Travel · Director",
+    type: "travel",
+    label: "Travel",
+    noun: "travel",
+    href: "/dashboard/travel",
     Icon: BriefcaseBusiness,
   },
   {
-    key: "travel-history",
-    label: "Travel · History",
-    Icon: BriefcaseBusiness,
+    type: "it",
+    label: "IT",
+    noun: "IT",
+    href: "/dashboard/it",
+    Icon: Monitor,
   },
-  { key: "it-userData", label: "IT · Yours", Icon: Monitor },
-  { key: "it-hodPending", label: "IT · HOD", Icon: Monitor },
-  { key: "it-itPending", label: "IT · Fulfilment", Icon: Monitor },
-  { key: "it-itAll", label: "IT · All", Icon: Monitor },
-  { key: "it-history", label: "IT · History", Icon: Monitor },
-  { key: "access-userData", label: "Access · Yours", Icon: LockKeyhole },
-  { key: "access-hodPending", label: "Access · HOD", Icon: LockKeyhole },
   {
-    key: "access-securityPending",
-    label: "Access · Security",
+    type: "access",
+    label: "Key & Access",
+    noun: "access",
+    href: "/dashboard/access",
     Icon: LockKeyhole,
   },
-  { key: "access-history", label: "Access · History", Icon: LockKeyhole },
-  { key: "casual-userData", label: "Casual · Yours", Icon: HardHat },
-  { key: "casual-hodPending", label: "Casual · HOD", Icon: HardHat },
-  { key: "casual-hrPending", label: "Casual · HR", Icon: HardHat },
-  { key: "casual-history", label: "Casual · History", Icon: HardHat },
   {
-    key: "employee-userData",
-    label: "Employee · Yours",
-    Icon: UserRoundPlus,
+    type: "casual",
+    label: "Casual",
+    noun: "casual",
+    href: "/dashboard/casual",
+    Icon: HardHat,
   },
   {
-    key: "employee-hodPending",
-    label: "Employee · HOD",
-    Icon: UserRoundPlus,
-  },
-  {
-    key: "employee-retailDirectorPending",
-    label: "Employee · Retail Director",
-    Icon: UserRoundPlus,
-  },
-  {
-    key: "employee-directorPending",
-    label: "Employee · CEO",
-    Icon: UserRoundPlus,
-  },
-  { key: "employee-hrPending", label: "Employee · HR", Icon: UserRoundPlus },
-  {
-    key: "employee-history",
-    label: "Employee · History",
+    type: "employee",
+    label: "Employee",
+    noun: "employee",
+    href: "/dashboard/employee",
     Icon: UserRoundPlus,
   },
 ];
+
+export const getRequisitionType = (type: DashboardRequisitionType) =>
+  REQUISITION_TYPES.find((entry) => entry.type === type)!;
+
+/**
+ * Every table a requisition type page can render, in display order.
+ *
+ * `key` is `${type}-${dataFlag}` — the tableKey each *RequisitionsTable
+ * passes to RequisitionTable, also used for collapse state in
+ * useTableCollapseStore. `stage` is the short label shown in the summary
+ * breakdown ("HOD", "HR"). `isVisible` mirrors the server-side gate in that
+ * type's loader (serverActions/Get{Type}RequisitionData.ts).
+ */
+export type DashboardTableEntry = {
+  key: string;
+  type: DashboardRequisitionType;
+  dataFlag: string;
+  tab: DashboardTab;
+  stage: string;
+  // Chip label for the legacy single-page dashboard's jump nav
+  label: string;
+  Icon: LucideIcon;
+  isVisible: (viewer: DashboardViewer) => boolean;
+  // Overrides the tab's default empty-state body
+  emptyBody?: string;
+};
+
+const always = () => true;
+const isHod = ({ memberships }: DashboardViewer) => memberships.isHodApprover;
+const hasRole =
+  (role: string) =>
+  ({ roles }: DashboardViewer) =>
+    roles.includes(role);
+
+function table(
+  type: DashboardRequisitionType,
+  dataFlag: string,
+  tab: DashboardTab,
+  stage: string,
+  label: string,
+  isVisible: (viewer: DashboardViewer) => boolean,
+  emptyBody?: string,
+): DashboardTableEntry {
+  return {
+    key: `${type}-${dataFlag}`,
+    type,
+    dataFlag,
+    tab,
+    stage,
+    label,
+    Icon: getRequisitionType(type).Icon,
+    isVisible,
+    emptyBody,
+  };
+}
+
+export const DASHBOARD_TABLES: DashboardTableEntry[] = [
+  // Travel — HR/Director are role-based ("hr-travel"/"director")
+  table("travel", "userData", "mine", "Yours", "Travel · Yours", always),
+  table("travel", "hodPending", "pending", "HOD", "Travel · HOD", isHod),
+  table(
+    "travel",
+    "hrPending",
+    "pending",
+    "HR",
+    "Travel · HR",
+    hasRole("hr-travel"),
+  ),
+  table(
+    "travel",
+    "directorPending",
+    "pending",
+    "Director",
+    "Travel · Director",
+    hasRole("director"),
+  ),
+  table(
+    "travel",
+    "history",
+    "history",
+    "History",
+    "Travel · History",
+    (v) => isHod(v) || hasRole("hr-travel")(v) || hasRole("director")(v),
+  ),
+
+  // IT — IT admins already get the full history (with export) from itAll,
+  // so their IT history tab holds that table instead of the HOD history.
+  table("it", "userData", "mine", "Yours", "IT · Yours", always),
+  table("it", "hodPending", "pending", "HOD", "IT · HOD", isHod),
+  table("it", "itPending", "pending", "IT", "IT · Fulfilment", hasRole("it")),
+  table(
+    "it",
+    "itAll",
+    "history",
+    "All",
+    "IT · All",
+    hasRole("it"),
+    "No IT requisitions have been submitted yet.",
+  ),
+  table(
+    "it",
+    "history",
+    "history",
+    "History",
+    "IT · History",
+    (v) => isHod(v) && !hasRole("it")(v),
+  ),
+
+  // Key & Access
+  table("access", "userData", "mine", "Yours", "Access · Yours", always),
+  table("access", "hodPending", "pending", "HOD", "Access · HOD", isHod),
+  table(
+    "access",
+    "securityPending",
+    "pending",
+    "Security",
+    "Access · Security",
+    ({ memberships }) => memberships.isSecurityApprover,
+  ),
+  table(
+    "access",
+    "history",
+    "history",
+    "History",
+    "Access · History",
+    (v) => isHod(v) || v.memberships.isSecurityApprover,
+  ),
+
+  // Casual — HR is array-based and form-scoped (hr_array.hr_forms)
+  table("casual", "userData", "mine", "Yours", "Casual · Yours", always),
+  table("casual", "hodPending", "pending", "HOD", "Casual · HOD", isHod),
+  table(
+    "casual",
+    "hrPending",
+    "pending",
+    "HR",
+    "Casual · HR",
+    ({ memberships }) => memberships.hrForms.includes("casual"),
+  ),
+  table(
+    "casual",
+    "history",
+    "history",
+    "History",
+    "Casual · History",
+    (v) => isHod(v) || v.memberships.hrForms.includes("casual"),
+  ),
+
+  // Employee — Retail Director/Director/HR are array-based; the Director
+  // role is labeled "CEO" in the UI
+  table("employee", "userData", "mine", "Yours", "Employee · Yours", always),
+  table("employee", "hodPending", "pending", "HOD", "Employee · HOD", isHod),
+  table(
+    "employee",
+    "retailDirectorPending",
+    "pending",
+    "Retail Director",
+    "Employee · Retail Director",
+    ({ memberships }) => memberships.isRetailDirector,
+  ),
+  table(
+    "employee",
+    "directorPending",
+    "pending",
+    "CEO",
+    "Employee · CEO",
+    ({ memberships }) => memberships.isDirector,
+  ),
+  table(
+    "employee",
+    "hrPending",
+    "pending",
+    "HR",
+    "Employee · HR",
+    ({ memberships }) => memberships.hrForms.includes("employee"),
+  ),
+  table(
+    "employee",
+    "history",
+    "history",
+    "History",
+    "Employee · History",
+    ({ memberships }) =>
+      memberships.isHodApprover ||
+      memberships.isRetailDirector ||
+      memberships.isDirector ||
+      memberships.hrForms.includes("employee"),
+  ),
+];
+
+export const getVisibleTables = (viewer: DashboardViewer) =>
+  DASHBOARD_TABLES.filter((entry) => entry.isVisible(viewer));
+
+export const getDashboardTable = (key: string) =>
+  DASHBOARD_TABLES.find((entry) => entry.key === key);
+
+// Empty-state copy for a table with no rows at all (not a search miss)
+export function tableEmptyCopy(key: string): {
+  heading: string;
+  body: string;
+} {
+  const entry = getDashboardTable(key);
+  const noun = entry ? getRequisitionType(entry.type).noun : "";
+  switch (entry?.tab) {
+    case "pending":
+      return {
+        heading: "You're all caught up",
+        body: `No ${noun} requisitions are waiting for your approval.`,
+      };
+    case "history":
+      return {
+        heading: "No history yet",
+        body:
+          entry.emptyBody ??
+          `${noun.charAt(0).toUpperCase()}${noun.slice(1)} requisitions you're involved in approving will appear here.`,
+      };
+    default:
+      return {
+        heading: "No requisitions yet",
+        body: `You haven't submitted any ${noun} requisitions yet.`,
+      };
+  }
+}

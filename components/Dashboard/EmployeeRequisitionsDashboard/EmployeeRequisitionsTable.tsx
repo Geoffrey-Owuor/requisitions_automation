@@ -51,12 +51,16 @@ export default function EmployeeRequisitionsTable({
       queryKey={["EmployeeRequisitionsData"]}
       params={{ dataFlag }}
       queryFn={({ params, page, pageSize, searchTerm }) =>
-        fetchDashboardTable("employee", { ...params, page, pageSize, searchTerm })
+        fetchDashboardTable("employee", {
+          ...params,
+          page,
+          pageSize,
+          searchTerm,
+        })
       }
       onStatusChange={onStatusChange}
       emptyState={{
         Icon: UserRoundPlus,
-        body: "Your employee requisition history is currently empty.",
         onNewRequisition:
           dataFlag === "userData"
             ? () => setShowEmployeeRequisition(true)

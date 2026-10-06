@@ -7,8 +7,10 @@ import {
   X,
   ChevronDown,
   ChevronRight,
+  TriangleAlert,
   LucideIcon,
 } from "lucide-react";
+import { tableEmptyCopy } from "@/lib/dashboardTables";
 import { QueryResultRow } from "pg";
 import { TablePagination } from "./TablePagination";
 import { SkeletonTable } from "../Skeletons/SkeletonTable";
@@ -95,10 +97,11 @@ interface Column {
 interface EmptyStateConfig {
   Icon: LucideIcon;
   // Shown when the table has no rows and no search filter is active.
-  // heading defaults to "No requisitions yet" — override only if a type
-  // needs different wording.
+  // heading/body default to the table's tab copy (tableEmptyCopy in
+  // lib/dashboardTables.tsx) — override only if a table needs different
+  // wording.
   heading?: string;
-  body: string;
+  body?: string;
   newRequisitionLabel?: string;
   onNewRequisition?: () => void;
 }
@@ -165,6 +168,7 @@ export default function RequisitionTable<TParams>({
     totalCount,
     isLoading: loading,
     isFetching,
+    isError,
     refetch,
     searchTerm,
     setSearchTerm,
@@ -194,7 +198,14 @@ export default function RequisitionTable<TParams>({
 
   if (loading) return <SkeletonTable />;
 
-  if (!hasData) return null;
+  // The legacy single-page dashboard (the only caller passing
+  // onStatusChange) hides tables with no rows; everywhere else an empty
+  // table shows its empty state.
+  if (!hasData && onStatusChange && !isError) return null;
+
+  const emptyCopy = tableEmptyCopy(tableKey);
+  // A failed fetch with nothing cached to fall back on
+  const showError = isError && totalCount === 0;
 
   return (
     <>
@@ -223,27 +234,30 @@ export default function RequisitionTable<TParams>({
           <div className="mt-2">
             {/* Search Input And Refresh */}
             <div className="mb-6 flex flex-wrap items-center gap-2">
-              <div className="relative w-full max-w-xs">
-                <Search
-                  className="absolute top-1/2 left-4 z-10 -translate-y-1/2 text-gray-400"
-                  size={20}
-                />
-                <input
-                  type="text"
-                  placeholder={searchPlaceholder}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className={`w-full rounded-xl border border-gray-300 bg-white/60 px-3 py-2.5 pr-4 pl-12 text-sm shadow-[0_8px_16px_rgba(60,100,160,0.02)] outline-hidden transition-all ${theme.searchFocus}`}
-                />
-                {searchTerm && (
-                  <button
-                    onClick={clearSearch}
-                    className="absolute top-1/2 right-4 z-10 -translate-y-1/2 rounded-full p-1 hover:bg-gray-200"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                )}
-              </div>
+              {/* Nothing to search until the table has rows */}
+              {hasData && (
+                <div className="relative w-full max-w-xs">
+                  <Search
+                    className="absolute top-1/2 left-4 z-10 -translate-y-1/2 text-gray-400"
+                    size={20}
+                  />
+                  <input
+                    type="text"
+                    placeholder={searchPlaceholder}
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className={`w-full rounded-xl border border-gray-300 bg-white/60 px-3 py-2.5 pr-4 pl-12 text-sm shadow-[0_8px_16px_rgba(60,100,160,0.02)] outline-hidden transition-all ${theme.searchFocus}`}
+                  />
+                  {searchTerm && (
+                    <button
+                      onClick={clearSearch}
+                      className="absolute top-1/2 right-4 z-10 -translate-y-1/2 rounded-full p-1 hover:bg-gray-200"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  )}
+                </div>
+              )}
               <button
                 onClick={() => refetch()}
                 className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-3 py-2.5 text-sm text-white hover:bg-slate-800"
@@ -259,18 +273,21 @@ export default function RequisitionTable<TParams>({
               className={`overflow-x-auto rounded-2xl border border-gray-200 bg-white/50 transition-opacity ${theme.tableShadow} ${isFetching ? "animate-pulse opacity-60" : ""}`}
             >
               <table className="w-full border-collapse text-left">
-                <thead>
-                  <tr className={theme.headerRow}>
-                    {columns.map((col) => (
-                      <th
-                        key={col.key}
-                        className={`px-6 py-4 ${theme.headerCell}`}
-                      >
-                        {col.label}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
+                {/* Column headers only mean something once there are rows */}
+                {hasData && (
+                  <thead>
+                    <tr className={theme.headerRow}>
+                      {columns.map((col) => (
+                        <th
+                          key={col.key}
+                          className={`px-6 py-4 ${theme.headerCell}`}
+                        >
+                          {col.label}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                )}
                 <tbody className={theme.bodyDivide}>
                   {totalCount > 0 ? (
                     paginatedData.map((req) => (
@@ -285,39 +302,64 @@ export default function RequisitionTable<TParams>({
                   ) : (
                     /* --- FALLBACK UI --- */
                     <tr>
-                      <td colSpan={columns.length} className="px-6 py-20">
+                      <td
+                        colSpan={columns.length}
+                        // Compact when the table is empty outright, so a tab
+                        // of several empty queues stays short
+                        className={`px-6 ${hasData ? "py-20" : "py-10"}`}
+                      >
                         <div className="flex flex-col items-center justify-center text-center">
                           {/* Glassmorphic Icon Circle */}
                           <div
                             className={`mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/80 bg-white/40 ${theme.emptyIconWrap}`}
                           >
-                            <emptyState.Icon size={32} strokeWidth={1.5} />
+                            {showError ? (
+                              <TriangleAlert size={32} strokeWidth={1.5} />
+                            ) : (
+                              <emptyState.Icon size={32} strokeWidth={1.5} />
+                            )}
                           </div>
 
                           <h3 className="text-base font-semibold text-[#1e1b1b]">
-                            {searchTerm
-                              ? "No matches found"
-                              : (emptyState.heading ?? "No requisitions yet")}
+                            {showError
+                              ? "Couldn't load requisitions"
+                              : searchTerm
+                                ? "No matches found"
+                                : (emptyState.heading ?? emptyCopy.heading)}
                           </h3>
-                          <p className="mt-1 max-w-60 text-[13px] leading-relaxed text-[#a18080]">
-                            {searchTerm
-                              ? `We couldn't find anything matching "${searchTerm}". Try a different term.`
-                              : emptyState.body}
+                          <p className="mt-1 max-w-72 text-[13px] leading-relaxed text-[#a18080]">
+                            {showError
+                              ? "Something went wrong while fetching this table. Check your connection and try again."
+                              : searchTerm
+                                ? `We couldn't find anything matching "${searchTerm}". Try a different term.`
+                                : (emptyState.body ?? emptyCopy.body)}
                           </p>
 
-                          {/* New Requisition Link, when returned data is empty */}
-                          {!searchTerm && emptyState.onNewRequisition && (
+                          {showError && (
                             <button
-                              onClick={emptyState.onNewRequisition}
+                              onClick={() => refetch()}
                               className="my-2 flex items-center gap-2 rounded-xl bg-slate-900 px-3 py-2 text-sm text-white hover:bg-slate-800"
                             >
-                              <Plus className="h-4 w-4" />
-                              <span>
-                                {emptyState.newRequisitionLabel ??
-                                  "New Requisition"}
-                              </span>
+                              <RotateCcw className="h-4 w-4" />
+                              <span>Try again</span>
                             </button>
                           )}
+
+                          {/* New Requisition Link, when returned data is empty */}
+                          {!showError &&
+                            !searchTerm &&
+                            emptyState.onNewRequisition && (
+                              <button
+                                onClick={emptyState.onNewRequisition}
+                                className="my-2 flex items-center gap-2 rounded-xl bg-slate-900 px-3 py-2 text-sm text-white hover:bg-slate-800"
+                              >
+                                <Plus className="h-4 w-4" />
+                                <span>
+                                  {emptyState.newRequisitionLabel ??
+                                    "New Requisition"}
+                                </span>
+                              </button>
+                            )}
 
                           {/* Optional Action Button for Search Fallback */}
                           {searchTerm && (
@@ -337,13 +379,15 @@ export default function RequisitionTable<TParams>({
             </div>
 
             {/* Pagination */}
-            <TablePagination
-              totalItems={totalCount}
-              itemsPerPage={itemsPerPage}
-              currentPage={currentPage}
-              onPageChange={setCurrentPage}
-              onItemsPerPageChange={setItemsPerPage}
-            />
+            {hasData && (
+              <TablePagination
+                totalItems={totalCount}
+                itemsPerPage={itemsPerPage}
+                currentPage={currentPage}
+                onPageChange={setCurrentPage}
+                onItemsPerPageChange={setItemsPerPage}
+              />
+            )}
           </div>
         )}
 

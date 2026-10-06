@@ -46,12 +46,16 @@ export default function AccessRequisitionsTable({
       queryKey={["AccessRequisitionsData"]}
       params={{ dataFlag }}
       queryFn={({ params, page, pageSize, searchTerm }) =>
-        fetchDashboardTable("access", { ...params, page, pageSize, searchTerm })
+        fetchDashboardTable("access", {
+          ...params,
+          page,
+          pageSize,
+          searchTerm,
+        })
       }
       onStatusChange={onStatusChange}
       emptyState={{
         Icon: LockKeyhole,
-        body: "Your key & access requisition history is currently empty.",
         onNewRequisition:
           dataFlag === "userData"
             ? () => setShowAccessRequisition(true)
