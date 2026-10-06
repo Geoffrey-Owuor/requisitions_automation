@@ -1,9 +1,11 @@
 import {
+  BriefcaseBusiness,
   CircleDollarSign,
   FileChartColumn,
   HardHat,
   LockKeyhole,
   Monitor,
+  UserRoundPlus,
   type LucideIcon,
 } from "lucide-react";
 
@@ -21,9 +23,11 @@ export const REPORTS_PAGE = {
 };
 
 export type ReportType =
+  | "travel"
   | "it"
   | "access"
   | "casual"
+  | "employee"
   | "advance";
 
 export type ReportDefinition = {
@@ -37,6 +41,15 @@ export type ReportDefinition = {
 };
 
 export const REPORTS: ReportDefinition[] = [
+  {
+    type: "travel",
+    label: "Travel Requisitions",
+    description:
+      "Trip details, costs, approval tier, every approval stage, HR push-backs and amendments.",
+    rowUnit: "One row per requisition",
+    role: "reports-travel",
+    Icon: BriefcaseBusiness,
+  },
   {
     type: "it",
     label: "IT Requisitions",
@@ -63,6 +76,15 @@ export const REPORTS: ReportDefinition[] = [
     rowUnit: "One row per section",
     role: "reports-casual",
     Icon: HardHat,
+  },
+  {
+    type: "employee",
+    label: "Employee Requisitions",
+    description:
+      "Positions requested, grades and salary ranges, every approval stage and amendment history.",
+    rowUnit: "One row per position",
+    role: "reports-employee",
+    Icon: UserRoundPlus,
   },
   {
     type: "advance",
