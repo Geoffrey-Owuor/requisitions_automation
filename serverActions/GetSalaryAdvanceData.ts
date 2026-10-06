@@ -1,6 +1,6 @@
 "use server";
 import { query } from "@/lib/db";
-import { getSession } from "@/lib/session";
+import { getHrAdvanceSession } from "@/lib/salaryAdvanceAccess";
 import { alterationsJsonLateral } from "@/lib/salaryAdvanceRules";
 import {
   PaginatedResult,
@@ -72,7 +72,7 @@ export async function GetSalaryAdvanceData({
   exportedFilter = "all",
   alteredFilter = "all",
 }: GetSalaryAdvanceDataProps = {}): Promise<PaginatedResult<SalaryAdvanceData>> {
-  const user = await getSession();
+  const user = await getHrAdvanceSession();
   if (!user) return emptyPaginatedResult(page, pageSize);
 
   const baseParams: (string | number)[] = [];

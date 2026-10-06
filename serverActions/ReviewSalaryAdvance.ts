@@ -2,16 +2,16 @@
 import { pool } from "@/lib/db";
 import { PoolClient } from "pg";
 import { AdvanceEmailSender } from "@/services/AdvanceEmailSender";
-import { getSession } from "@/lib/session";
+import { getHrAdvanceSession } from "@/lib/salaryAdvanceAccess";
 
 export async function ReviewSalaryAdvance(
   request_id: string,
   status: "approved" | "declined",
   comments: string,
 ) {
-  const user = await getSession();
+  const user = await getHrAdvanceSession();
   if (!user)
-    return { success: false, message: "Failed to authenticate the user" };
+    return { success: false, message: "You are not authorized to review salary advances" };
 
   let client: PoolClient | undefined;
 
