@@ -1,20 +1,143 @@
 "use client";
 
+import Link from "next/link";
+import { useEffect } from "react";
+import { ArrowRight, CircleCheck, RotateCcw } from "lucide-react";
 import { useUser } from "@/context/UserContext";
-import TravelRequisitionsTable from "./TravelRequisitionsTable";
-import ITRequisitionsTable from "./ITRequisitionsDashboard/ITRequisitionsTable";
-import AccessRequisitionsTable from "./AccessRequisitionsDashboard/AccessRequisitionsTable";
-import CasualRequisitionsTable from "./CasualRequisitionsDashboard/CasualRequisitionsTable";
-import EmployeeRequisitionsTable from "./EmployeeRequisitionsDashboard/EmployeeRequisitionsTable";
+import { useDashboardSummary } from "@/hooks/useDashboardSummary";
+import {
+  REQUISITION_TYPES,
+  getVisibleTables,
+  type DashboardTableEntry,
+  type RequisitionTypeEntry,
+} from "@/lib/dashboardTables";
 import DashboardWatermark from "../Modules/DashboardWaterMark";
-import DashboardWelcome from "./DashboardWelcome";
-import { useEffect, useMemo, useState } from "react";
 import DashboardAlert from "./DashboardAlert";
-import DashboardTableNav from "./DashboardTableNav";
-import { DASHBOARD_TABLES } from "@/lib/dashboardTables";
+import DashboardQuickActions from "./DashboardQuickActions";
 
+const CARD_CLASS =
+  "group flex flex-col gap-3 rounded-2xl border bg-white/50 p-4 shadow-[0_12px_24px_rgba(160,60,60,0.05)] transition-all hover:bg-white/80";
+const GRID_CLASS =
+  "grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5";
+
+// A count from the summary, a pulsing placeholder while it loads, or a
+// dash if the summary failed to load
+function Count({ value, className }: { value?: number; className: string }) {
+  const failed = useDashboardSummary().isError;
+  if (value === undefined && failed) {
+    return <span className={className}>–</span>;
+  }
+  if (value === undefined) {
+    return (
+      <span
+        className={`inline-block h-7 w-8 animate-pulse rounded-md bg-neutral-200/80 ${className}`}
+      />
+    );
+  }
+  return <span className={className}>{value}</span>;
+}
+
+function SectionHeading({ children }: { children: React.ReactNode }) {
+  return (
+    <h2 className="mb-3 text-xs font-bold tracking-widest text-neutral-500 uppercase">
+      {children}
+    </h2>
+  );
+}
+
+function ApprovalCard({
+  type,
+  queues,
+  counts,
+}: {
+  type: RequisitionTypeEntry;
+  queues: DashboardTableEntry[];
+  counts?: Record<string, number>;
+}) {
+  const total = counts
+    ? queues.reduce((sum, entry) => sum + (counts[entry.key] ?? 0), 0)
+    : undefined;
+  const hasWaiting = !!total;
+
+  return (
+    <Link
+      href={`${type.href}?tab=pending`}
+      className={`${CARD_CLASS} ${hasWaiting ? "border-red-200 hover:border-red-300" : "border-gray-200 hover:border-red-200"}`}
+    >
+      <div className="flex items-center gap-2 text-sm font-semibold text-[#1e1b1b]">
+        <type.Icon className="h-4 w-4 text-neutral-500" />
+        <span className="flex-1">{type.label}</span>
+        <ArrowRight className="h-4 w-4 text-gray-300 transition-transform group-hover:translate-x-0.5 group-hover:text-red-400" />
+      </div>
+
+      <div className="flex items-baseline gap-2">
+        <Count
+          value={total}
+          className={`text-2xl font-semibold ${hasWaiting ? "text-red-600" : "text-neutral-400"}`}
+        />
+        <span className="text-xs text-[#a18080]">
+          {total === 0 ? "All caught up" : "waiting"}
+        </span>
+      </div>
+
+      {/* Per-stage breakdown, only worth showing for multi-stage approvers */}
+      {queues.length > 1 && (
+        <div className="flex flex-wrap gap-1.5">
+          {queues.map((entry) => {
+            const count = counts?.[entry.key];
+            return (
+              <span
+                key={entry.key}
+                className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${count ? "bg-red-50 text-red-700" : "bg-neutral-100 text-neutral-500"}`}
+              >
+                {entry.stage} {count ?? "–"}
+              </span>
+            );
+          })}
+        </div>
+      )}
+    </Link>
+  );
+}
+
+function MineCard({
+  type,
+  count,
+}: {
+  type: RequisitionTypeEntry;
+  count?: number;
+}) {
+  return (
+    <Link
+      href={`${type.href}?tab=mine`}
+      className={`${CARD_CLASS} border-gray-200 hover:border-red-200`}
+    >
+      <div className="flex items-center gap-2 text-sm font-semibold text-[#1e1b1b]">
+        <type.Icon className="h-4 w-4 text-neutral-500" />
+        <span className="flex-1">{type.label}</span>
+        <ArrowRight className="h-4 w-4 text-gray-300 transition-transform group-hover:translate-x-0.5 group-hover:text-red-400" />
+      </div>
+      <div className="flex items-baseline gap-2">
+        <Count
+          value={count}
+          className="text-2xl font-semibold text-neutral-700"
+        />
+        <span className="text-xs text-[#a18080]">
+          {count === 0 ? "None yet" : "submitted"}
+        </span>
+      </div>
+    </Link>
+  );
+}
+
+// Dashboard home: what's waiting for the viewer's approval, their own
+// submissions, and shortcuts to every form. Each count links to that
+// requisition type's page (components/Dashboard/RequisitionTypeDashboard.tsx),
+// where the tables live — so the home page makes one summary request
+// instead of loading every table.
 const UserDashboard = () => {
   const { username, email: userEmail, roles, memberships } = useUser();
+  const firstName = username?.split(" ")[0];
 
   // --- CACHE USER FOR QUICK SIGN-IN ---
   useEffect(() => {
@@ -26,117 +149,36 @@ const UserDashboard = () => {
     }
   }, [username, userEmail]);
 
-  // Check user active roles
-  const isITAdmin = roles.includes("it");
-  const isHr = roles.includes("hr-travel");
-  const isDirector = roles.includes("director");
+  const { data, isError, refetch } = useDashboardSummary();
+  const counts = data?.counts;
 
-  // Array-based approval-stage membership (Security/IT/Director/Retail
-  // Director/HR) — see serverActions/GetApproverMemberships.ts. Distinct
-  // from `isDirector` above, which is Travel's role-based director gate.
-  // HOD tables render for anyone in hod_array (assigned HODs and alternate
-  // HODs alike) rather than the manual "hod" role.
-  const isHod = memberships.isHodApprover;
-  const isSecurityApprover = memberships.isSecurityApprover;
-  const isCasualHrApprover = memberships.hrForms.includes("casual");
-  const isRetailDirectorApprover = memberships.isRetailDirector;
-  const isEmployeeDirectorApprover = memberships.isDirector;
-  const isEmployeeHrApprover = memberships.hrForms.includes("employee");
+  const visibleTables = getVisibleTables({ roles, memberships });
+  const approvalTypes = REQUISITION_TYPES.map((type) => ({
+    type,
+    queues: visibleTables.filter(
+      (entry) => entry.type === type.type && entry.tab === "pending",
+    ),
+  })).filter(({ queues }) => queues.length > 0);
 
-  // Approval-history tables — one per requisition type, covering every
-  // stage the user is involved in (scoped server-side). IT admins already
-  // see the full IT history via "IT · All", so IT history is HOD-only.
-  const showTravelHistory = isHod || isHr || isDirector;
-  const showITHistory = isHod && !isITAdmin;
-  const showAccessHistory = isHod || isSecurityApprover;
-  const showCasualHistory = isHod || isCasualHrApprover;
-  const showEmployeeHistory =
-    isHod ||
-    isRetailDirectorApprover ||
-    isEmployeeDirectorApprover ||
-    isEmployeeHrApprover;
+  const totalPending = counts
+    ? approvalTypes.reduce(
+        (sum, { queues }) =>
+          sum +
+          queues.reduce(
+            (typeSum, entry) => typeSum + (counts[entry.key] ?? 0),
+            0,
+          ),
+        0,
+      )
+    : undefined;
 
-  // --- TRACK WHETHER THE CURRENTLY RENDERED TABLES HAVE ANY DATA ---
-  // Each table reports its own load state once fetched; once every table
-  // relevant to this user's roles has reported and none has data, we know
-  // the dashboard is empty and can show a welcoming UI instead.
-  const [tableStatus, setTableStatus] = useState<Record<string, boolean>>({});
-
-  // One stable callback per tableKey. The full set of possible keys is
-  // static regardless of role/membership (only which ones get *rendered*
-  // varies), so they can all be built once up front rather than lazily.
-  const ALL_TABLE_KEYS = DASHBOARD_TABLES.map((table) => table.key);
-  const statusSetters = useMemo(() => {
-    const build = (key: string) => (hasData: boolean) =>
-      setTableStatus((prev) =>
-        prev[key] === hasData ? prev : { ...prev, [key]: hasData },
-      );
-    return Object.fromEntries(ALL_TABLE_KEYS.map((key) => [key, build(key)]));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const visibleTableKeys = useMemo(() => {
-    const keys = [
-      "travel-userData",
-      "it-userData",
-      "access-userData",
-      "casual-userData",
-      "employee-userData",
-    ];
-    if (isHod)
-      keys.push(
-        "travel-hodPending",
-        "it-hodPending",
-        "access-hodPending",
-        "casual-hodPending",
-        "employee-hodPending",
-      );
-    if (isHr) keys.push("travel-hrPending");
-    if (isDirector) keys.push("travel-directorPending");
-    if (isITAdmin) keys.push("it-itPending", "it-itAll");
-    if (isSecurityApprover) keys.push("access-securityPending");
-    if (isCasualHrApprover) keys.push("casual-hrPending");
-    if (isRetailDirectorApprover) keys.push("employee-retailDirectorPending");
-    if (isEmployeeDirectorApprover) keys.push("employee-directorPending");
-    if (isEmployeeHrApprover) keys.push("employee-hrPending");
-    if (showTravelHistory) keys.push("travel-history");
-    if (showITHistory) keys.push("it-history");
-    if (showAccessHistory) keys.push("access-history");
-    if (showCasualHistory) keys.push("casual-history");
-    if (showEmployeeHistory) keys.push("employee-history");
-    return keys;
-  }, [
-    isHod,
-    isHr,
-    isDirector,
-    isITAdmin,
-    isSecurityApprover,
-    isCasualHrApprover,
-    isRetailDirectorApprover,
-    isEmployeeDirectorApprover,
-    isEmployeeHrApprover,
-    showTravelHistory,
-    showITHistory,
-    showAccessHistory,
-    showCasualHistory,
-    showEmployeeHistory,
-  ]);
-
-  const allTablesReported = visibleTableKeys.every((key) => key in tableStatus);
-  const hasAnyData = visibleTableKeys.some((key) => tableStatus[key]);
-  const showWelcome = allTablesReported && !hasAnyData;
-
-  // Tables to list in the jump nav: role/membership-visible AND actually
-  // rendering data (RequisitionTable returns null otherwise), kept in DOM
-  // order via DASHBOARD_TABLES rather than visibleTableKeys' grouping order.
-  const navItems = useMemo(
-    () =>
-      DASHBOARD_TABLES.filter(
-        (table) =>
-          visibleTableKeys.includes(table.key) && tableStatus[table.key],
-      ),
-    [visibleTableKeys, tableStatus],
-  );
+  let subtitle = "Here's an overview of your requisitions.";
+  if (approvalTypes.length > 0 && totalPending !== undefined) {
+    subtitle =
+      totalPending > 0
+        ? `${totalPending} ${totalPending === 1 ? "request is" : "requests are"} waiting for your approval.`
+        : "Nothing is waiting for your approval.";
+  }
 
   return (
     <div className="relative h-full p-2">
@@ -147,208 +189,67 @@ const UserDashboard = () => {
         <DashboardWatermark />
       </div>
 
-      {/* 3. THE CONTENT LAYER */}
+      <div className="relative z-10 space-y-8 py-2">
+        <header>
+          <h1 className="text-xl font-semibold text-[#1e1b1b]">
+            Welcome{firstName ? `, ${firstName}` : ""}
+          </h1>
+          <p className="mt-1 flex items-center gap-1.5 text-[13px] text-[#a18080]">
+            {totalPending === 0 && approvalTypes.length > 0 && (
+              <CircleCheck className="h-4 w-4 text-emerald-500" />
+            )}
+            {subtitle}
+          </p>
+        </header>
 
-      <div className="relative z-10 space-y-4">
-        {/* ----------JUMP NAV (shown once enough tables render)------------ */}
-        <DashboardTableNav items={navItems} />
-
-        {/* ----------WELCOME STATE (shown when no tables have data)------------ */}
-        {showWelcome && <DashboardWelcome />}
-
-        {/* ----------DATA TABLES------------ */}
-
-        {/* TRAVEL REQUISITIONS */}
-
-        {/* User Travel Requisitions */}
-        <TravelRequisitionsTable
-          dataFlag="userData"
-          onStatusChange={statusSetters["travel-userData"]}
-        />
-
-        {/* Travel Requisitions Pending HOD Approval */}
-        {isHod && (
-          <TravelRequisitionsTable
-            dataFlag="hodPending"
-            onStatusChange={statusSetters["travel-hodPending"]}
-          />
+        {isError && !data && (
+          <div className="flex flex-wrap items-center gap-3 rounded-xl border border-red-200 bg-red-50/60 px-4 py-3 text-sm text-red-700">
+            <span className="flex-1">
+              Couldn&apos;t load your requisition counts.
+            </span>
+            <button
+              onClick={() => refetch()}
+              className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-3 py-1.5 text-xs text-white hover:bg-slate-800"
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+              Try again
+            </button>
+          </div>
         )}
 
-        {/* Travel Requisitions Pending HR Approval */}
-        {isHr && (
-          <TravelRequisitionsTable
-            dataFlag="hrPending"
-            onStatusChange={statusSetters["travel-hrPending"]}
-          />
+        {approvalTypes.length > 0 && (
+          <section>
+            <SectionHeading>Needs your approval</SectionHeading>
+            <div className={GRID_CLASS}>
+              {approvalTypes.map(({ type, queues }) => (
+                <ApprovalCard
+                  key={type.type}
+                  type={type}
+                  queues={queues}
+                  counts={counts}
+                />
+              ))}
+            </div>
+          </section>
         )}
 
-        {/* Travel Requisitions Pending Director Approval */}
-        {isDirector && (
-          <TravelRequisitionsTable
-            dataFlag="directorPending"
-            onStatusChange={statusSetters["travel-directorPending"]}
-          />
-        )}
+        <section>
+          <SectionHeading>Your requisitions</SectionHeading>
+          <div className={GRID_CLASS}>
+            {REQUISITION_TYPES.map((type) => (
+              <MineCard
+                key={type.type}
+                type={type}
+                count={counts?.[`${type.type}-userData`]}
+              />
+            ))}
+          </div>
+        </section>
 
-        {/* Travel Requisitions Approval History */}
-        {showTravelHistory && (
-          <TravelRequisitionsTable
-            dataFlag="history"
-            onStatusChange={statusSetters["travel-history"]}
-          />
-        )}
-
-        {/* IT REQUISITIONS */}
-
-        {/* User IT Requisitions */}
-        <ITRequisitionsTable
-          dataFlag="userData"
-          onStatusChange={statusSetters["it-userData"]}
-        />
-
-        {/* IT Requisitions Pending HOD Approval */}
-        {isHod && (
-          <ITRequisitionsTable
-            dataFlag="hodPending"
-            onStatusChange={statusSetters["it-hodPending"]}
-          />
-        )}
-
-        {/* IT Requisitions Pending IT Approval */}
-        {isITAdmin && (
-          <ITRequisitionsTable
-            dataFlag="itPending"
-            onStatusChange={statusSetters["it-itPending"]}
-          />
-        )}
-
-        {/* All IT Requisitions */}
-        {isITAdmin && (
-          <ITRequisitionsTable
-            dataFlag="itAll"
-            onStatusChange={statusSetters["it-itAll"]}
-          />
-        )}
-
-        {/* IT Requisitions Approval History */}
-        {showITHistory && (
-          <ITRequisitionsTable
-            dataFlag="history"
-            onStatusChange={statusSetters["it-history"]}
-          />
-        )}
-
-        {/* KEY & ACCESS REQUISITIONS */}
-
-        {/* User Access Requisitions */}
-        <AccessRequisitionsTable
-          dataFlag="userData"
-          onStatusChange={statusSetters["access-userData"]}
-        />
-
-        {/* Access Requisitions Pending HOD Approval */}
-        {isHod && (
-          <AccessRequisitionsTable
-            dataFlag="hodPending"
-            onStatusChange={statusSetters["access-hodPending"]}
-          />
-        )}
-
-        {/* Access Requisitions Pending Security Approval */}
-        {isSecurityApprover && (
-          <AccessRequisitionsTable
-            dataFlag="securityPending"
-            onStatusChange={statusSetters["access-securityPending"]}
-          />
-        )}
-
-        {/* Access Requisitions Approval History */}
-        {showAccessHistory && (
-          <AccessRequisitionsTable
-            dataFlag="history"
-            onStatusChange={statusSetters["access-history"]}
-          />
-        )}
-
-        {/* CASUAL REQUISITIONS */}
-
-        {/* User Casual Requisitions */}
-        <CasualRequisitionsTable
-          dataFlag="userData"
-          onStatusChange={statusSetters["casual-userData"]}
-        />
-
-        {/* Casual Requisitions Pending HOD Approval */}
-        {isHod && (
-          <CasualRequisitionsTable
-            dataFlag="hodPending"
-            onStatusChange={statusSetters["casual-hodPending"]}
-          />
-        )}
-
-        {/* Casual Requisitions Pending HR Approval */}
-        {isCasualHrApprover && (
-          <CasualRequisitionsTable
-            dataFlag="hrPending"
-            onStatusChange={statusSetters["casual-hrPending"]}
-          />
-        )}
-
-        {/* Casual Requisitions Approval History */}
-        {showCasualHistory && (
-          <CasualRequisitionsTable
-            dataFlag="history"
-            onStatusChange={statusSetters["casual-history"]}
-          />
-        )}
-
-        {/* EMPLOYEE REQUISITIONS */}
-
-        {/* User Employee Requisitions */}
-        <EmployeeRequisitionsTable
-          dataFlag="userData"
-          onStatusChange={statusSetters["employee-userData"]}
-        />
-
-        {/* Employee Requisitions Pending HOD Approval */}
-        {isHod && (
-          <EmployeeRequisitionsTable
-            dataFlag="hodPending"
-            onStatusChange={statusSetters["employee-hodPending"]}
-          />
-        )}
-
-        {/* Employee Requisitions Pending Retail Director Approval */}
-        {isRetailDirectorApprover && (
-          <EmployeeRequisitionsTable
-            dataFlag="retailDirectorPending"
-            onStatusChange={statusSetters["employee-retailDirectorPending"]}
-          />
-        )}
-
-        {/* Employee Requisitions Pending CEO Approval */}
-        {isEmployeeDirectorApprover && (
-          <EmployeeRequisitionsTable
-            dataFlag="directorPending"
-            onStatusChange={statusSetters["employee-directorPending"]}
-          />
-        )}
-
-        {/* Employee Requisitions Pending HR Approval */}
-        {isEmployeeHrApprover && (
-          <EmployeeRequisitionsTable
-            dataFlag="hrPending"
-            onStatusChange={statusSetters["employee-hrPending"]}
-          />
-        )}
-
-        {/* Employee Requisitions Approval History */}
-        {showEmployeeHistory && (
-          <EmployeeRequisitionsTable
-            dataFlag="history"
-            onStatusChange={statusSetters["employee-history"]}
-          />
-        )}
+        <section>
+          <SectionHeading>Start a new request</SectionHeading>
+          <DashboardQuickActions />
+        </section>
       </div>
     </div>
   );

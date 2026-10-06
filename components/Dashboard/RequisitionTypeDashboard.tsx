@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Plus } from "lucide-react";
 import { useUser } from "@/context/UserContext";
 import { useToggleStore } from "@/store/useToggleStore";
+import { useDashboardSummary } from "@/hooks/useDashboardSummary";
 import type { DashboardRequisitionType } from "@/lib/dashboardApi";
 import {
   DASHBOARD_TABS,
@@ -101,6 +102,12 @@ export default function RequisitionTypeDashboard({
       : "mine";
   const activeTables = tables.filter((entry) => entry.tab === activeTab);
 
+  // Badge on the Pending tab: everything waiting across this type's queues
+  const counts = useDashboardSummary().data?.counts;
+  const pendingCount = tables
+    .filter((entry) => entry.tab === "pending")
+    .reduce((sum, entry) => sum + (counts?.[entry.key] ?? 0), 0);
+
   return (
     <div className="relative h-full p-2">
       <div className="pointer-events-none fixed inset-y-0 left-1/2 z-0 flex -translate-x-1/2 items-center justify-center overflow-hidden lg:left-[calc(80px+(100vw-80px)/2)]">
@@ -166,13 +173,18 @@ export default function RequisitionTypeDashboard({
                   scroll={false}
                   role="tab"
                   aria-selected={isActive}
-                  className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+                  className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
                     isActive
                       ? "bg-slate-900 text-white"
                       : "text-neutral-600 hover:bg-neutral-200/70 hover:text-neutral-900"
                   }`}
                 >
                   {tabLabel}
+                  {tab === "pending" && pendingCount > 0 && (
+                    <span className="rounded-full bg-red-600 px-1.5 text-[11px] leading-4.5 font-semibold text-white">
+                      {pendingCount}
+                    </span>
+                  )}
                 </Link>
               );
             })}
