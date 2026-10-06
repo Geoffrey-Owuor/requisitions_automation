@@ -3,6 +3,8 @@ import { query } from "@/lib/db";
 import { Workbook } from "exceljs";
 import { getSession } from "@/lib/session";
 import { addSheet } from "@/lib/excelExport";
+import { getUserRoles } from "@/serverActions/GetUserRoles";
+import { HR_ADVANCE_ROLE } from "@/lib/salaryAdvanceAccess";
 
 // Explicit column lists (rather than deriving from the first row, like the
 // cron export can) so both sheets always render with headers even when a
@@ -46,6 +48,15 @@ export async function GET(request: NextRequest) {
 
   if (!user) {
     return NextResponse.json({ message: "Invalid user" }, { status: 401 });
+  }
+
+  // Every salary advance is in this export — HR reviewers only
+  const roles = await getUserRoles(user.email);
+  if (!roles.includes(HR_ADVANCE_ROLE)) {
+    return NextResponse.json(
+      { message: "You are not authorized to export salary advances" },
+      { status: 403 },
+    );
   }
   // Get the search parameters
   const searchParams = request.nextUrl.searchParams;

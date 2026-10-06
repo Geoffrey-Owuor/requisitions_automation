@@ -2,7 +2,7 @@
 import { pool } from "@/lib/db";
 import { PoolClient } from "pg";
 import { AdvanceEmailSender } from "@/services/AdvanceEmailSender";
-import { getSession } from "@/lib/session";
+import { getHrAdvanceSession } from "@/lib/salaryAdvanceAccess";
 
 // Microsoft Graph throttles at ~3 simultaneous sends, so emails are staggered
 const EMAIL_SEND_DELAY_MS = 3000;
@@ -44,9 +44,9 @@ export async function BatchReviewSalaryAdvance(
   requestIds: string[],
   status: "approved" | "declined",
 ) {
-  const user = await getSession();
+  const user = await getHrAdvanceSession();
   if (!user)
-    return { success: false, message: "Failed to authenticate the user" };
+    return { success: false, message: "You are not authorized to review salary advances" };
 
   if (!requestIds || requestIds.length === 0)
     return { success: false, message: "No requests were selected" };
