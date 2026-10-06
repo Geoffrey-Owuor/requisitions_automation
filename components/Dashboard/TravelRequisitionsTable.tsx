@@ -1,8 +1,6 @@
 "use client";
-import {
-  getTravelRequisitionData,
-  TravelRequisitionDataProps,
-} from "@/serverActions/GetTravelRequisitionData";
+import type { TravelRequisitionDataProps } from "@/serverActions/GetTravelRequisitionData";
+import { fetchDashboardTable } from "@/lib/dashboardApi";
 import { PlaneLanding, Info, BriefcaseBusiness } from "lucide-react";
 import RequisitionTable, { ROSE_THEME } from "./RequisitionTable";
 import { TravelDetailsModal } from "./TravelDetailsModal";
@@ -50,7 +48,7 @@ export default function TravelRequisitionsTable({
       queryKey={["TravelRequisitionsData"]}
       params={{ dataFlag }}
       queryFn={({ params, page, pageSize, searchTerm }) =>
-        getTravelRequisitionData({ ...params, page, pageSize, searchTerm })
+        fetchDashboardTable("travel", { ...params, page, pageSize, searchTerm })
       }
       onStatusChange={onStatusChange}
       emptyState={{

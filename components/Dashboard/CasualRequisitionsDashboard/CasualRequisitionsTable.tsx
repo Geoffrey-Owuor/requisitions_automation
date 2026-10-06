@@ -1,8 +1,6 @@
 "use client";
-import {
-  getCasualRequisitionData,
-  CasualRequisitionDataProps,
-} from "@/serverActions/GetCasualRequisitionData";
+import type { CasualRequisitionDataProps } from "@/serverActions/GetCasualRequisitionData";
+import { fetchDashboardTable } from "@/lib/dashboardApi";
 import { HardHat, Info } from "lucide-react";
 import RequisitionTable, { EMERALD_THEME } from "../RequisitionTable";
 import { CasualDetailsModal } from "./CasualDetailsModal";
@@ -48,7 +46,7 @@ export default function CasualRequisitionsTable({
       queryKey={["CasualRequisitionsData"]}
       params={{ dataFlag }}
       queryFn={({ params, page, pageSize, searchTerm }) =>
-        getCasualRequisitionData({ ...params, page, pageSize, searchTerm })
+        fetchDashboardTable("casual", { ...params, page, pageSize, searchTerm })
       }
       onStatusChange={onStatusChange}
       emptyState={{

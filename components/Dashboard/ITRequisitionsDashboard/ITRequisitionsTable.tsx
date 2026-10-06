@@ -1,8 +1,6 @@
 "use client";
-import {
-  getITRequisitionData,
-  ITRequisitionDataProps,
-} from "@/serverActions/GetITRequisitionData";
+import type { ITRequisitionDataProps } from "@/serverActions/GetITRequisitionData";
+import { fetchDashboardTable } from "@/lib/dashboardApi";
 import { Monitor, Info } from "lucide-react";
 import RequisitionTable, { NEUTRAL_THEME } from "../RequisitionTable";
 import { ITRequisitionModal } from "./ITRequisitionsModal";
@@ -51,7 +49,7 @@ export default function ITRequisitionsTable({
       queryKey={["ITRequisitionsData"]}
       params={{ dataFlag }}
       queryFn={({ params, page, pageSize, searchTerm }) =>
-        getITRequisitionData({ ...params, page, pageSize, searchTerm })
+        fetchDashboardTable("it", { ...params, page, pageSize, searchTerm })
       }
       onStatusChange={onStatusChange}
       toolbarSlot={dataFlag === "itAll" ? <ITDataExport /> : undefined}
