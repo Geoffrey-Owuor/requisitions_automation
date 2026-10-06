@@ -5,6 +5,8 @@ import Link from "next/link";
 import { assets } from "@/public/assets";
 import { useState, useEffect, useRef } from "react";
 import { useToggleStore } from "@/store/useToggleStore";
+import { useUser } from "@/context/UserContext";
+import { REPORTS_PAGE, canViewReports } from "@/lib/reports/definitions";
 import {
   Brain,
   BriefcaseBusiness,
@@ -121,6 +123,7 @@ const AppMenu = ({ onClose }: { onClose: () => void }) => {
   );
 
   const [query, setQuery] = useState("");
+  const { roles } = useUser();
 
   // Internal apps + online forms - navigate within the app (Link/modal), never a new tab
   const internalApps: LauncherApp[] = [
@@ -155,6 +158,16 @@ const AppMenu = ({ onClose }: { onClose: () => void }) => {
       icon: CircleDollarSign,
       href: "/dashboard/advance",
     },
+    // Report role holders only
+    ...(canViewReports(roles)
+      ? [
+          {
+            name: REPORTS_PAGE.label,
+            icon: REPORTS_PAGE.Icon,
+            href: REPORTS_PAGE.href,
+          },
+        ]
+      : []),
     {
       name: "Staff Purchase",
       icon: ShoppingBag,

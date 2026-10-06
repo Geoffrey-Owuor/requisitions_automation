@@ -23,6 +23,8 @@ import {
 import { usePathname } from "next/navigation";
 import { useToggleStore } from "@/store/useToggleStore";
 import MoreMenuModal from "./Modules/MoreMenuModal";
+import { useUser } from "@/context/UserContext";
+import { REPORTS_PAGE, canViewReports } from "@/lib/reports/definitions";
 
 const links = [
   {
@@ -43,6 +45,8 @@ const MobileHeader = () => {
 
   const isHomeActive = pathname === "/dashboard";
   const isAdvanceActive = pathname === "/dashboard/advance";
+  const isReportsActive = pathname === REPORTS_PAGE.href;
+  const showReports = canViewReports(useUser().roles);
 
   // Zustand stores (the modals themselves live in Dashboard/DashboardModals)
   const setShowITRequisition = useToggleStore(
@@ -191,6 +195,29 @@ const MobileHeader = () => {
               />
               Salary Advance
             </Link>
+
+            {/* Reports - report role holders only */}
+            {showReports && (
+              <Link
+                href={REPORTS_PAGE.href}
+                onClick={() => setSidebarOpen(false)}
+                className={`group flex items-center gap-3 rounded-xl px-4 py-3 text-[14px] font-semibold transition-all ${
+                  isReportsActive
+                    ? "bg-red-950 text-white shadow-md"
+                    : "text-slate-600 hover:bg-red-50 hover:text-red-950"
+                }`}
+              >
+                <REPORTS_PAGE.Icon
+                  size={18}
+                  className={`transition-colors ${
+                    isReportsActive
+                      ? "text-white"
+                      : "text-slate-500 group-hover:text-red-950"
+                  }`}
+                />
+                {REPORTS_PAGE.label}
+              </Link>
+            )}
 
             {/* More menu - holds secondary links (Guidelines, future additions) */}
             <MoreMenuModal

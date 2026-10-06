@@ -24,6 +24,8 @@ import ClientPortal from "./ClientPortal";
 import { useRef, useState } from "react";
 import MoreMenuModal from "./Modules/MoreMenuModal";
 import { useToggleStore } from "@/store/useToggleStore";
+import { useUser } from "@/context/UserContext";
+import { REPORTS_PAGE, canViewReports } from "@/lib/reports/definitions";
 
 // Summarized labels for tight vertical sidebar space
 const links = [
@@ -47,6 +49,8 @@ const DashboardSidebar = () => {
   const pathname = usePathname();
 
   const router = useRouter();
+
+  const showReports = canViewReports(useUser().roles);
 
   // Zustand stores (the modals themselves live in Dashboard/DashboardModals)
   const setShowITRequisition = useToggleStore(
@@ -127,6 +131,19 @@ const DashboardSidebar = () => {
             isActive={pathname === "/dashboard/advance"}
             showToolTip={true}
           />
+
+          {/* Reports - report role holders only */}
+          {showReports && (
+            <SideBarLink
+              href={REPORTS_PAGE.href}
+              key={REPORTS_PAGE.href}
+              label={REPORTS_PAGE.label}
+              Icon={REPORTS_PAGE.Icon}
+              tooltip={REPORTS_PAGE.label}
+              isActive={pathname === REPORTS_PAGE.href}
+              showToolTip={true}
+            />
+          )}
         </nav>
 
         {/* User Dropdown at the Bottom */}
