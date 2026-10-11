@@ -20,6 +20,8 @@ import SubmittingOverlay from "../SubmittingOverlay";
 import AlertModal from "../AlertModal";
 import { AlertInfo } from "../TravelRequisitionPage";
 import { useToggleStore } from "@/store/useToggleStore";
+import { useReportUnsavedChanges } from "../Modules/ModalWrapper";
+import { isSameFormValue } from "@/lib/formChanges";
 import {
   FormSelect,
   findHodForDepartment,
@@ -110,6 +112,10 @@ export default function ITRequisitionPage() {
     alertMessage: "",
   });
   const [submitting, setSubmitting] = useState(false);
+
+  // Closing the modal asks first while the form differs from a blank one
+  // (a successful submission clears it)
+  useReportUnsavedChanges(!isSameFormValue(formData, InitialFormState));
 
   // Required fields for button disable check (otherRequirements is optional)
   const requiredFields: (keyof ITFormData)[] = [

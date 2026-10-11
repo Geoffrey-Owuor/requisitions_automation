@@ -45,6 +45,8 @@ import {
   excludeSubmitterFromHodArray,
 } from "./CasualRequisitionForm";
 import Image from "next/image";
+import { useReportUnsavedChanges } from "../ModalWrapper";
+import { isSameFormValue } from "@/lib/formChanges";
 
 // ---- Client-side attachment constraints (mirrors lib/attachmentStorage.ts) ----
 export const ALLOWED_ATTACHMENT_EXTENSIONS = [
@@ -166,6 +168,21 @@ export default function EmployeeRequisitionForm({
     alertMessage: "",
   });
   const [submitting, setSubmitting] = useState(false);
+
+  // Closing the modal asks first while there's input it would lose: anything
+  // changed from the blank form - or, when amending, from the requisition as
+  // loaded - until the amendment has gone through
+  const savedFormData = isAmendment
+    ? amendmentContext?.initialData
+    : InitialFormState;
+  const amendmentSubmitted =
+    isAmendment && step === 3 && alertInfo.alertType === "success";
+  useReportUnsavedChanges(
+    !!savedFormData &&
+      !amendmentSubmitted &&
+      (reason.trim() !== "" || !isSameFormValue(formData, savedFormData)),
+  );
+
   const [fileErrors, setFileErrors] = useState<Record<string, string>>({});
 
   // Seed the form once the amendment context loads (runs at most once per

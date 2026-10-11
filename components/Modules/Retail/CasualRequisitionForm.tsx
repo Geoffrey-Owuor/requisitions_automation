@@ -42,6 +42,8 @@ import { useToggleStore } from "@/store/useToggleStore";
 import Image from "next/image";
 import { getCasualAmendmentContext } from "@/serverActions/GetCasualAmendmentContext";
 import CasualAmendmentHistory from "@/components/Approvers/CasualApprovers/CasualAmendmentHistory";
+import { useReportUnsavedChanges } from "../ModalWrapper";
+import { isSameFormValue } from "@/lib/formChanges";
 
 // ---- Types ----
 export interface CasualSectionFormData {
@@ -184,6 +186,20 @@ export default function CasualRequisitionForm({
     alertMessage: "",
   });
   const [submitting, setSubmitting] = useState(false);
+
+  // Closing the modal asks first while there's input it would lose: anything
+  // changed from the blank form - or, when amending, from the requisition as
+  // loaded - until the amendment has gone through
+  const savedFormData = amendRequestId
+    ? amendmentContext?.initialData
+    : InitialFormState;
+  const amendmentSubmitted =
+    !!amendRequestId && step === 3 && alertInfo.alertType === "success";
+  useReportUnsavedChanges(
+    !!savedFormData &&
+      !amendmentSubmitted &&
+      (reason.trim() !== "" || !isSameFormValue(formData, savedFormData)),
+  );
 
   // Seed the form once the amendment context loads (runs at most once per
   // mount - the modal remounts this component fresh each time it opens, so
