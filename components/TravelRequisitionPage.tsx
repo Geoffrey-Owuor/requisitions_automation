@@ -41,6 +41,8 @@ import {
 import { getTravelAmendmentContext } from "@/serverActions/GetTravelAmendmentContext";
 import TravelAmendmentHistory from "./Approvers/TravelApprovers/TravelAmendmentHistory";
 import { MAX_AMENDMENT_REASON_LENGTH } from "@/lib/travelAmendment";
+import { useReportUnsavedChanges } from "./Modules/ModalWrapper";
+import { isSameFormValue } from "@/lib/formChanges";
 
 export interface TravelFormData {
   employeeName: string;
@@ -172,6 +174,20 @@ export default function TravelRequisitionPage({
 
   // Submitting state
   const [submitting, setSubmitting] = useState(false);
+
+  // Closing the modal asks first while there's input it would lose: anything
+  // changed from the blank form - or, when amending, from the requisition as
+  // loaded - until the amendment has gone through
+  const savedFormData = isAmendment
+    ? amendmentContext?.initialData
+    : InitialFormState;
+  const amendmentSubmitted =
+    isAmendment && step === 3 && alertInfo.alertType === "success";
+  useReportUnsavedChanges(
+    !!savedFormData &&
+      !amendmentSubmitted &&
+      (reason.trim() !== "" || !isSameFormValue(formData, savedFormData)),
+  );
 
   // Check if department is engineering
   const isEngineering = formData.department === "Engineering & HVAC";

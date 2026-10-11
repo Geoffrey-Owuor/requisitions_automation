@@ -23,6 +23,8 @@ import AlertModal from "@/components/AlertModal";
 import { AlertInfo } from "@/components/TravelRequisitionPage";
 import KeyConfirmationModal from "./KeyConfirmationModal";
 import { useToggleStore } from "@/store/useToggleStore";
+import { useReportUnsavedChanges } from "../ModalWrapper";
+import { isSameFormValue } from "@/lib/formChanges";
 import {
   FormSelect,
   findHodForDepartment,
@@ -89,6 +91,12 @@ export default function KeyAccessRequisitionForm() {
     alertMessage: "",
   });
   const [submitting, setSubmitting] = useState(false);
+
+  // Closing the modal asks first while the form differs from a blank one
+  // (a successful submission clears it)
+  useReportUnsavedChanges(
+    agreedToTerms || !isSameFormValue(formData, InitialFormState),
+  );
 
   // Required fields for button disable check
   const requiredFields: (keyof KeyAccessFormData)[] = [
