@@ -3,6 +3,7 @@
 import { randomUUID } from "crypto";
 import { query } from "@/lib/db";
 import { getSession } from "@/lib/session";
+import { isUuid } from "@/lib/uuid";
 import { sameEmail } from "@/lib/hodAssignment";
 import {
   EmployeeAttachmentType,
@@ -29,6 +30,9 @@ export interface EmployeeAmendmentContext {
 export async function getEmployeeAmendmentContext(
   requestId: string,
 ): Promise<EmployeeAmendmentContext | null> {
+  // A malformed id (e.g. a hand-edited amend URL) would make Postgres throw
+  if (!isUuid(requestId)) return null;
+
   const session = await getSession();
   if (!session) return null;
 

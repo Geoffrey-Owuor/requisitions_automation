@@ -3,6 +3,7 @@ import { randomUUID } from "crypto";
 import { PoolClient } from "pg";
 import { pool, query } from "@/lib/db";
 import { getSession } from "@/lib/session";
+import { isUuid } from "@/lib/uuid";
 import { assignedHodNameSql, resolveHod, sameEmail } from "@/lib/hodAssignment";
 import {
   writePositionAttachments,
@@ -164,7 +165,7 @@ export async function POST(request: NextRequest) {
     } = JSON.parse(metadataRaw) as AmendmentMetadata;
 
     if (
-      !requestId ||
+      !isUuid(requestId) ||
       typeof expectedAmendmentCount !== "number" ||
       typeof reason !== "string" ||
       !reason.trim() ||

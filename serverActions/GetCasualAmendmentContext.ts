@@ -2,6 +2,7 @@
 
 import { query } from "@/lib/db";
 import { getSession } from "@/lib/session";
+import { isUuid } from "@/lib/uuid";
 import { sameEmail } from "@/lib/hodAssignment";
 import { CasualCategory, isCasualAmendableHrStatus } from "@/public/assets";
 import { CasualFormData } from "@/components/Modules/Retail/CasualRequisitionForm";
@@ -24,6 +25,9 @@ export interface CasualAmendmentContext {
 export async function getCasualAmendmentContext(
   requestId: string,
 ): Promise<CasualAmendmentContext | null> {
+  // A malformed id (e.g. a hand-edited amend URL) would make Postgres throw
+  if (!isUuid(requestId)) return null;
+
   const session = await getSession();
   if (!session) return null;
 
