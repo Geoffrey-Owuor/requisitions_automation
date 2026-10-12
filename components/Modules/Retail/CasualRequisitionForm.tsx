@@ -13,10 +13,10 @@ import {
   Trash2,
   Search,
   X,
-  Loader2,
   Info,
   History,
 } from "lucide-react";
+import { RequisitionFormSkeleton } from "@/components/Skeletons/RequisitionFormSkeleton";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { DASHBOARD_SUMMARY_KEY } from "@/hooks/useDashboardSummary";
 import {
@@ -416,9 +416,12 @@ export default function CasualRequisitionForm({
 
   if (amendRequestId && amendmentLoading) {
     return (
-      <div className="flex items-center justify-center py-24">
-        <Loader2 className="h-6 w-6 animate-spin text-rose-500" />
-      </div>
+      <RequisitionFormSkeleton
+        image={assets.casual_form_image}
+        title="Amend Casual Requisition"
+        subtitle="Update this requisition - the approval workflow will restart from HOD."
+        sections={[3, 4]}
+      />
     );
   }
 

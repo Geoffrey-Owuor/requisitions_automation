@@ -11,11 +11,11 @@ import {
   Plus,
   Paperclip,
   X,
-  Loader2,
   Info,
   History,
   RefreshCw,
 } from "lucide-react";
+import { RequisitionFormSkeleton } from "@/components/Skeletons/RequisitionFormSkeleton";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { DASHBOARD_SUMMARY_KEY } from "@/hooks/useDashboardSummary";
 import { loadHodArray, loadBaseDepartments } from "@/lib/loadAppDataV2";
@@ -433,9 +433,12 @@ export default function EmployeeRequisitionForm({
 
   if (amendRequestId && amendmentLoading) {
     return (
-      <div className="flex items-center justify-center py-24">
-        <Loader2 className="h-6 w-6 animate-spin text-rose-500" />
-      </div>
+      <RequisitionFormSkeleton
+        image={assets.employee_form_image}
+        title="Amend Employee Requisition"
+        subtitle="Update this requisition - the approval workflow will restart from HOD."
+        sections={[2, 5]}
+      />
     );
   }
 

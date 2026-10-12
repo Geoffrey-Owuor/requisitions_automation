@@ -9,7 +9,7 @@ import {
   useState,
 } from "react";
 import { useRouter } from "next/navigation";
-import ClientPortal from "../ClientPortal";
+import { AlertDialog } from "../Modal";
 
 type UnsavedChangesGuard = {
   report: (hasUnsavedChanges: boolean) => void;
@@ -111,17 +111,6 @@ export function UnsavedChangesProvider({
     return () => document.removeEventListener("click", handleClick, true);
   }, [router]);
 
-  useEffect(() => {
-    if (!pendingLeave) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setPendingLeave(null);
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [pendingLeave]);
-
   const discardAndLeave = () => {
     const leave = pendingLeave;
     setPendingLeave(null);
@@ -132,52 +121,43 @@ export function UnsavedChangesProvider({
     <UnsavedChangesContext.Provider value={{ report, confirmLeave }}>
       {children}
 
-      {pendingLeave && (
-        <ClientPortal>
-          <div
+      {/* Stays mounted so its close transition can play */}
+      <AlertDialog
+        open={!!pendingLeave}
+        onClose={() => setPendingLeave(null)}
+        labelledBy="discard-form-title"
+        describedBy="discard-form-message"
+      >
+        <h2
+          id="discard-form-title"
+          className="text-lg font-semibold tracking-[-0.3px] text-[#1e1b1b]"
+        >
+          Discard this form?
+        </h2>
+        <p
+          id="discard-form-message"
+          className="mt-2 text-[13px] leading-relaxed text-[#7c5a5a]"
+        >
+          You have unsaved changes. If you leave now, everything you&apos;ve
+          entered will be lost.
+        </p>
+        <div className="mt-6 flex gap-3">
+          <button
+            type="button"
             onClick={() => setPendingLeave(null)}
-            className="fixed inset-0 z-9999 flex items-center justify-center bg-black/30 p-5"
+            className="flex-1 cursor-pointer rounded-[14px] bg-slate-900 py-3 text-[14px] font-semibold text-white transition-colors hover:bg-slate-800"
           >
-            <div
-              role="alertdialog"
-              aria-modal="true"
-              aria-labelledby="discard-form-title"
-              aria-describedby="discard-form-message"
-              onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-sm rounded-3xl border border-gray-100 bg-white p-6 shadow-2xl"
-            >
-              <h2
-                id="discard-form-title"
-                className="text-lg font-semibold tracking-[-0.3px] text-[#1e1b1b]"
-              >
-                Discard this form?
-              </h2>
-              <p
-                id="discard-form-message"
-                className="mt-2 text-[13px] leading-relaxed text-[#7c5a5a]"
-              >
-                You have unsaved changes. If you leave now, everything
-                you&apos;ve entered will be lost.
-              </p>
-              <div className="mt-6 flex gap-3">
-                <button
-                  autoFocus
-                  onClick={() => setPendingLeave(null)}
-                  className="flex-1 cursor-pointer rounded-[14px] bg-slate-900 py-3 text-[14px] font-semibold text-white transition-colors hover:bg-slate-800"
-                >
-                  Keep editing
-                </button>
-                <button
-                  onClick={discardAndLeave}
-                  className="flex-1 cursor-pointer rounded-[14px] border border-rose-200 bg-rose-50 py-3 text-[14px] font-semibold text-rose-700 transition-colors hover:bg-rose-100"
-                >
-                  Discard
-                </button>
-              </div>
-            </div>
-          </div>
-        </ClientPortal>
-      )}
+            Keep editing
+          </button>
+          <button
+            type="button"
+            onClick={discardAndLeave}
+            className="flex-1 cursor-pointer rounded-[14px] border border-rose-200 bg-rose-50 py-3 text-[14px] font-semibold text-rose-700 transition-colors hover:bg-rose-100"
+          >
+            Discard
+          </button>
+        </div>
+      </AlertDialog>
     </UnsavedChangesContext.Provider>
   );
 }
