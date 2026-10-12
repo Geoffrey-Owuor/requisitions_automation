@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import ApproverShell from "@/components/Approvers/ApproverShell";
 import { query } from "@/lib/db";
+import { isUuid } from "@/lib/uuid";
 import TravelApprovalModal from "@/components/Approvers/TravelApprovers/TravelApprovalModal";
 import { PreviousApproval } from "@/components/Approvers/PreviousApprovalsSection";
 import AlreadyProcessed from "@/components/Approvers/TravelApprovers/AlreadyProcessed";
@@ -54,8 +55,12 @@ const ApprovalPageContent = async ({
   const { uuid } = await params;
   const { token, stage, mode } = await searchParams;
 
-  // First fallback - one of our props is missing/falsy
-  if (!uuid || !token || !isValidTravelStage(stage)) return <NotFoundRequest />;
+  // First fallback - one of our props is missing, or an id is malformed: both
+  // are uuid columns, and Postgres throws on a malformed uuid rather than
+  // matching nothing. A malformed token gets the same screen as an unknown one.
+  if (!isUuid(uuid) || !token || !isValidTravelStage(stage))
+    return <NotFoundRequest />;
+  if (!isUuid(token)) return <InvalidToken />;
 
   // Push-back mode (HR reversing its own recorded decision) only exists on
   // the HR stage. It only changes what this page shows - the rules are
