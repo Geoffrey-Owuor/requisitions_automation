@@ -13,8 +13,8 @@ import {
   Globe,
   CheckCircle2,
   History,
-  Loader2,
 } from "lucide-react";
+import { RequisitionFormSkeleton } from "@/components/Skeletons/RequisitionFormSkeleton";
 import Image from "next/image";
 import { assets } from "@/public/assets";
 import {
@@ -329,9 +329,12 @@ export default function TravelRequisitionPage({
 
   if (amendRequestId && amendmentLoading) {
     return (
-      <div className="flex items-center justify-center py-24">
-        <Loader2 className="h-6 w-6 animate-spin text-rose-500" />
-      </div>
+      <RequisitionFormSkeleton
+        image={assets.form_image}
+        title="Amend Travel Requisition"
+        subtitle="Update this requisition - the approval workflow will restart from HOD."
+        sections={[5, 4, 3]}
+      />
     );
   }
 
