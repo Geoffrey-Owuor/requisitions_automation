@@ -128,10 +128,13 @@ const ModalWrapper = ({ isOpen, onClose, children }: ModalWrapperProps) => {
         }`}
       >
         {/* Modal Panel - on desktop it covers exactly the #dashboard-wrapper
-            area (see DashboardWrapper), leaving only the sidebar outside it */}
+            area (see DashboardWrapper), leaving only the sidebar outside it.
+            Both are placed by the --*-dashboard-* tokens in globals.css. No
+            shadow: the panel is flush with the frame (or full screen on
+            mobile), so one would only show outside the rounded corners. */}
         <div
           onClick={(e) => e.stopPropagation()}
-          className="custom:absolute custom:inset-y-2 custom:right-2 custom:left-20 custom:h-auto custom:w-auto custom:rounded-2xl relative flex h-full w-full flex-col overflow-hidden bg-white shadow-[0_35px_60px_-15px_rgba(0,0,0,0.4)]"
+          className="custom:absolute custom:top-dashboard-gap custom:right-dashboard-gap custom:bottom-dashboard-gap custom:left-dashboard-sidebar custom:h-auto custom:w-auto custom:rounded-dashboard relative flex h-full w-full flex-col overflow-hidden bg-white"
         >
           <div className="flex items-center justify-between border-b border-gray-200 px-4 py-2">
             <Brand showText={true} />
@@ -144,9 +147,14 @@ const ModalWrapper = ({ isOpen, onClose, children }: ModalWrapperProps) => {
             </button>
           </div>
 
+          {/* No background here - the panel's white shows through. Chrome can
+              paint an opaque scroller's background on its own layer that
+              ignores the panel's rounded clip (seen with the Key & Access
+              form, whose terms box is a nested scroller), squaring the
+              bottom corners. */}
           <div
             ref={modalWrapperRef}
-            className="normal-scrollbar min-h-0 w-full flex-1 overflow-y-auto bg-white p-2"
+            className="normal-scrollbar min-h-0 w-full flex-1 overflow-y-auto p-2"
           >
             <UnsavedChangesContext.Provider value={reportUnsavedChanges}>
               {children}

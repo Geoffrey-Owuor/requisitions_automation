@@ -71,7 +71,7 @@ const DashboardSidebar = () => {
 
   return (
     <>
-      <aside className="custom:flex fixed top-1 bottom-1 left-0 z-50 hidden w-20 flex-col items-center pt-0 pb-2">
+      <aside className="custom:flex fixed top-1 bottom-1 left-0 z-50 hidden w-dashboard-sidebar flex-col items-center pt-0 pb-2">
         {/* Brand (Icon Only) */}
         <DashboardBrand showText={false} />
         <div className="mx-auto mt-1 mb-2 w-full px-2">

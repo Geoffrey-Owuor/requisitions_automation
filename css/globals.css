@@ -46,6 +46,14 @@
   --animate-rise: rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
 
   --breakpoint-custom: 1200px;
+
+  /* Desktop dashboard frame: the sidebar column, the gap around the page
+     area, and the page area's corner radius. The sidebar, DashboardWrapper
+     (page area and corner overlays) and the requisition form modal all size
+     themselves from these, so they can't drift apart. */
+  --spacing-dashboard-sidebar: 5rem;
+  --spacing-dashboard-gap: 0.5rem;
+  --radius-dashboard: 1rem;
 }
 
 html {
