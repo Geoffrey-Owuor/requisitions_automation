@@ -2,6 +2,7 @@ import { NextResponse, NextRequest } from "next/server";
 import { pool } from "@/lib/db";
 import { PoolClient } from "pg";
 import { getSession } from "@/lib/session";
+import { isUuid } from "@/lib/uuid";
 import { assignedHodNameSql, resolveHod, sameEmail } from "@/lib/hodAssignment";
 import {
   TravelFormDataInput,
@@ -44,7 +45,7 @@ export async function POST(request: NextRequest) {
     const trimmedReason = typeof reason === "string" ? reason.trim() : "";
 
     if (
-      !requestId ||
+      !isUuid(requestId) ||
       typeof expectedAmendmentCount !== "number" ||
       !trimmedReason
     ) {
