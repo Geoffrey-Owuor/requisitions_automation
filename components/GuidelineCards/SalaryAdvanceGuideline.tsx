@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import {
   GeneralNote,
+  GuidelineActionCard,
   GuidelineHeading,
   InfoCard,
   SectionTitle,
@@ -17,6 +18,7 @@ export default function SalaryAdvanceGuideline() {
   return (
     <div className="max-w-4xl space-y-7 pb-10">
       <GuidelineHeading
+        slug="advance"
         icon={<CircleDollarSign size={13} />}
         title="Salary Advance"
       >
@@ -80,6 +82,8 @@ export default function SalaryAdvanceGuideline() {
           />
         </div>
       </section>
+
+      <GuidelineActionCard slug="advance" />
     </div>
   );
 }

@@ -28,7 +28,10 @@ export async function proxy(request: NextRequest) {
   // 2. HANDLE REDIRECT PAGES (Redirect logged-in users away)
   if (redirectPaths.includes(pathname)) {
     if (session) {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
+      // Signed-in staff use the salary advance form inside the dashboard
+      const target =
+        pathname === "/advance" ? "/dashboard/advance" : "/dashboard";
+      return NextResponse.redirect(new URL(target, request.url));
     }
   }
 
