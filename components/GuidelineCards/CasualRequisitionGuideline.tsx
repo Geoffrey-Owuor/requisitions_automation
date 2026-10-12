@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import {
   GeneralNote,
+  GuidelineActionCard,
   GuidelineHeading,
   InfoCard,
   SectionTitle,
@@ -18,7 +19,11 @@ import {
 export default function CasualRequisitionGuideline() {
   return (
     <div className="max-w-4xl space-y-7 pb-10">
-      <GuidelineHeading icon={<HardHat size={13} />} title="Casual Requisition">
+      <GuidelineHeading
+        slug="casual"
+        icon={<HardHat size={13} />}
+        title="Casual Requisition"
+      >
         Procedures for requesting casual staff engagements, including engagement
         period, PPE requirements, and the automated approval workflow.
       </GuidelineHeading>
@@ -110,6 +115,8 @@ export default function CasualRequisitionGuideline() {
           />
         </div>
       </section>
+
+      <GuidelineActionCard slug="casual" />
     </div>
   );
 }

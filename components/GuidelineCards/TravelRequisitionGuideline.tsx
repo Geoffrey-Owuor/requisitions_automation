@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import {
   GeneralNote,
+  GuidelineActionCard,
   GuidelineHeading,
   InfoCard,
   SectionTitle,
@@ -20,7 +21,11 @@ import {
 export default function TravelRequisitionGuideline() {
   return (
     <div className="max-w-4xl space-y-7 pb-10">
-      <GuidelineHeading icon={<Plane size={13} />} title="Travel Requisition">
+      <GuidelineHeading
+        slug="travel"
+        icon={<Plane size={13} />}
+        title="Travel Requisition"
+      >
         Essential requirements and approval tiers for site visits, local
         flights, and international business travel.
       </GuidelineHeading>
@@ -106,6 +111,8 @@ export default function TravelRequisitionGuideline() {
           />
         </div>
       </section>
+
+      <GuidelineActionCard slug="travel" />
     </div>
   );
 }

@@ -8,6 +8,7 @@ import {
 import {
   Callout,
   GeneralNote,
+  GuidelineActionCard,
   GuidelineHeading,
   InfoCard,
   SectionTitle,
@@ -16,7 +17,11 @@ import {
 export default function ITRequisitionGuideline() {
   return (
     <div className="max-w-4xl space-y-7 pb-10">
-      <GuidelineHeading icon={<Monitor size={13} />} title="IT Requisition">
+      <GuidelineHeading
+        slug="it"
+        icon={<Monitor size={13} />}
+        title="IT Requisition"
+      >
         Procedures for requesting hardware, software, and technical peripherals
         for staff members.
       </GuidelineHeading>
@@ -59,6 +64,8 @@ export default function ITRequisitionGuideline() {
           />
         </div>
       </section>
+
+      <GuidelineActionCard slug="it" />
     </div>
   );
 }
