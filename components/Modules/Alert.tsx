@@ -1,7 +1,7 @@
 "use client";
 
 import { X, BadgeCheck, AlertOctagon } from "lucide-react";
-import { useEffect, useCallback, useState } from "react";
+import { useEffect, useCallback, useRef, useState } from "react";
 import { useAlertStore } from "@/store/useAlertStore";
 
 const Alert = () => {
@@ -12,6 +12,17 @@ const Alert = () => {
   const alertMessage = useAlertStore((state) => state.alertMessage);
 
   const [isClosing, setIsClosing] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Shown as a manual popover so it sits in the top layer, above any open
+  // <dialog> modal (which a plain z-index can't beat). Re-raised for every
+  // new alert, since the top layer stacks in the order things were shown.
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!showAlert || !el) return;
+    if (el.matches(":popover-open")) el.hidePopover();
+    el.showPopover();
+  }, [showAlert, alertType, alertMessage]);
 
   const handleClose = useCallback(() => {
     setIsClosing(true);
@@ -47,7 +58,9 @@ const Alert = () => {
   return (
     // Container: Floating bottom right with responsive widths
     <div
-      className={`fixed right-4 bottom-4 left-4 z-9999 transition-all duration-200 sm:right-6 sm:bottom-6 sm:left-auto sm:w-auto sm:max-w-md sm:min-w-[320px] ${
+      ref={containerRef}
+      popover="manual"
+      className={`fixed inset-auto right-4 bottom-4 left-4 z-9999 m-0 w-auto overflow-visible border-0 bg-transparent p-0 transition-all duration-200 sm:right-6 sm:bottom-6 sm:left-auto sm:w-auto sm:max-w-md sm:min-w-[320px] ${
         isClosing
           ? "animate-slideDown opacity-0"
           : "animate-slideUp opacity-100"

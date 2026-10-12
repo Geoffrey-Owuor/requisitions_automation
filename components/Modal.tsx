@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useEffect, useId, useRef } from "react";
+import { ReactNode, useEffect, useId, useRef, useState } from "react";
 import { X } from "lucide-react";
 
 // Shared modal shells on the native <dialog> element (styles: "Modals" in
@@ -9,6 +9,14 @@ import { X } from "lucide-react";
 // inert page behind it. The dialog stays mounted while closed so its exit
 // transition can play: keep rendering the last content after `open` turns
 // false rather than returning null.
+
+// For a modal whose parent clears its data on close (`request={null}`): keeps
+// returning the last non-null value so the exit transition still has content
+export function useLastDefined<T>(value: T | null): T | null {
+  const [last, setLast] = useState(value);
+  if (value !== null && value !== last) setLast(value);
+  return value ?? last;
+}
 
 function useModalDialog(open: boolean, focusDialog: boolean) {
   const ref = useRef<HTMLDialogElement>(null);
@@ -59,9 +67,15 @@ interface ModalProps {
   // Links/buttons shown in the header on desktop and in a bottom bar on
   // phones. Style them with modalActionClass.
   actions?: ReactNode;
+  // Full-width bar under the body, e.g. a form's Cancel/Submit buttons
+  footer?: ReactNode;
   // Max width from sm up, as a utility class
   widthClassName?: string;
   bodyClassName?: string;
+  // From sm up, let popovers (date pickers, dropdowns) extend past the card
+  // instead of scrolling inside it. Only for short modals that never need to
+  // scroll on desktop.
+  overflowVisible?: boolean;
   children: ReactNode;
 }
 
@@ -73,8 +87,10 @@ export function Modal({
   subtitle,
   icon,
   actions,
+  footer,
   widthClassName = "sm:max-w-2xl",
   bodyClassName = "space-y-4 p-5 sm:p-6",
+  overflowVisible = false,
   children,
 }: ModalProps) {
   const ref = useModalDialog(open, true);
@@ -87,7 +103,7 @@ export function Modal({
       aria-labelledby={titleId}
       onCancel={cancelHandler(onClose)}
       onClick={backdropClickHandler(onClose)}
-      className={`modal modal-sheet ${widthClassName}`}
+      className={`modal modal-sheet ${widthClassName} ${overflowVisible ? "sm:overflow-visible" : ""}`}
     >
       <div className="modal-sheet-head flex min-w-0 items-center gap-3 py-4 pl-5 sm:pl-8">
         {icon && (
@@ -126,10 +142,16 @@ export function Modal({
       </div>
 
       <div
-        className={`modal-sheet-body layout-scrollbar border-t border-neutral-100 ${bodyClassName}`}
+        className={`modal-sheet-body layout-scrollbar border-t border-neutral-100 ${overflowVisible ? "sm:overflow-visible" : ""} ${bodyClassName}`}
       >
         {children}
       </div>
+
+      {footer && (
+        <div className="modal-sheet-foot flex items-center justify-end gap-3 border-t border-gray-100 bg-gray-50 px-5 py-4 max-sm:pb-[max(1rem,env(safe-area-inset-bottom))] sm:rounded-b-[20px] sm:px-6">
+          {footer}
+        </div>
+      )}
     </dialog>
   );
 }
