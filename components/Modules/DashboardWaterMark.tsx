@@ -7,9 +7,9 @@ const DashboardWatermark = () => {
       {/* 
         Image Container: 
         - Enlarged to h-40/w-40 (or larger on sm screens)
-        - opacity-10 and grayscale to make colored logos look like watermarks
+        - opacity-5 and grayscale so the logo stays a faint backdrop behind content
       */}
-      <div className="relative h-40 w-40 shrink-0 opacity-10 grayscale sm:h-56 sm:w-56">
+      <div className="relative h-40 w-40 shrink-0 opacity-5 grayscale sm:h-56 sm:w-56">
         <Image
           src={assets.hotpoint_logo}
           alt="Apps Hub Watermark"
@@ -25,7 +25,7 @@ const DashboardWatermark = () => {
         Text Container: 
         - matches the faint styling (text-neutral-200 + opacity) 
       */}
-      <div className="flex flex-col items-center gap-1 text-center opacity-60">
+      <div className="flex flex-col items-center gap-1 text-center opacity-35">
         <span className="text-3xl font-bold tracking-tight text-neutral-200 sm:text-5xl">
           Apps Hub
         </span>

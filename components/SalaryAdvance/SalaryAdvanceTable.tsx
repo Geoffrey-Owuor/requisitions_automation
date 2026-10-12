@@ -73,8 +73,15 @@ function FilterChipGroup<T extends string>({
 }
 
 export default function SalaryAdvanceTable() {
+  // The selected row stays set after the modal closes so its exit
+  // transition still has content to show
   const [selectedRequest, setSelectedRequest] =
     useState<SalaryAdvanceData | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const openRequest = (req: SalaryAdvanceData) => {
+    setSelectedRequest(req);
+    setModalOpen(true);
+  };
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [batchStatus, setBatchStatus] = useState<
@@ -232,184 +239,208 @@ export default function SalaryAdvanceTable() {
         </div>
 
         {/* Table Container */}
-        <div
-          className={`overflow-x-auto rounded-2xl border border-gray-200 bg-white/50 shadow-[0_24px_48px_rgba(160,60,60,0.08)] transition-opacity ${isFetching ? "animate-pulse opacity-60" : ""}`}
-        >
-          <table className="w-full border-collapse text-left">
-            <thead>
-              <tr className="border-b border-neutral-200/50 bg-neutral-100/30">
-                <th className="w-10 px-6 py-4">
-                  <Checkbox
-                    checked={isPageFullySelected}
-                    disabled={selectablePageIds.length === 0}
-                    onChange={togglePageSelection}
-                  />
-                </th>
-                {[
-                  "Employee",
-                  "Department",
-                  "Amount",
-                  "Installments",
-                  "Type",
-                  "Exported",
-                  "Altered",
-                  "Date Submitted",
-                  "Status",
-                ].map((col) => (
-                  <th
-                    key={col}
-                    className="px-6 py-4 text-[11px] font-bold tracking-widest text-neutral-500 uppercase"
-                  >
-                    {col}
+        <div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white/50 shadow-[0_24px_48px_rgba(160,60,60,0.08)]">
+          {/* Refetch in progress: a thin bar, and the stale rows dim */}
+          {isFetching && (
+            <div
+              role="progressbar"
+              aria-label="Refreshing"
+              className="absolute inset-x-0 top-0 z-10 h-0.5 overflow-hidden"
+            >
+              <div className="progress-indeterminate h-full w-1/3 rounded-full bg-slate-500/70" />
+            </div>
+          )}
+          <div
+            className={`overflow-x-auto transition-opacity duration-300 ${isFetching ? "opacity-70" : ""}`}
+          >
+            <table className="w-full border-collapse text-left">
+              <thead>
+                <tr className="border-b border-neutral-200/50 bg-neutral-100/30">
+                  <th className="w-10 px-6 py-4">
+                    <Checkbox
+                      checked={isPageFullySelected}
+                      disabled={selectablePageIds.length === 0}
+                      onChange={togglePageSelection}
+                    />
                   </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-red-50">
-              {totalCount > 0 ? (
-                paginatedData.map((req, idx) => {
-                  const isPending =
-                    req.approval_status?.toLowerCase() === "pending";
-                  return (
-                    <tr
-                      key={`${req.staff_number}-${idx}`} // Assuming combo key if no ID
-                      onClick={() => setSelectedRequest(req)}
-                      className="group cursor-pointer transition-colors hover:bg-gray-200/30"
+                  {[
+                    "Employee",
+                    "Department",
+                    "Amount",
+                    "Installments",
+                    "Type",
+                    "Exported",
+                    "Altered",
+                    "Date Submitted",
+                    "Status",
+                  ].map((col) => (
+                    <th
+                      key={col}
+                      className="px-6 py-4 text-[11px] font-bold tracking-widest text-neutral-500 uppercase"
                     >
-                      {/* Select */}
-                      <td
-                        className="px-6 py-5"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        {isPending && (
-                          <Checkbox
-                            checked={selectedIds.has(req.request_id)}
-                            onChange={() => toggleRowSelection(req.request_id)}
-                          />
-                        )}
-                      </td>
-
-                      {/* Employee */}
-                      <td className="px-6 py-5">
-                        <div className="flex flex-col">
-                          <span className="text-sm font-medium text-[#1e1b1b]">
-                            {req.staff_name}
-                          </span>
-                          <span className="text-[11px] text-gray-400">
-                            #{req.staff_number}
-                          </span>
-                        </div>
-                      </td>
-
-                      {/* Department */}
-                      <td className="px-6 py-5">
-                        <span className="text-sm text-[#1e1b1b]">
-                          {req.staff_department}
-                        </span>
-                      </td>
-
-                      {/* Amount */}
-                      <td className="px-6 py-5">
-                        <span className="text-sm font-semibold text-[#1e1b1b]">
-                          {Number(req.request_amount).toLocaleString()}
-                        </span>
-                      </td>
-
-                      {/* Installments */}
-                      <td className="px-6 py-5">
-                        <span className="text-sm text-[#1e1b1b]">
-                          {req.no_of_installments}
-                        </span>
-                      </td>
-
-                      {/* Type */}
-                      <td className="px-6 py-5">
-                        <span
-                          className={`inline-flex items-center rounded-full ${req.request_type === "oneoff" ? "bg-slate-100 text-slate-700" : "bg-cyan-100 text-cyan-700"} px-2.5 py-0.5 text-[11px] font-semibold capitalize`}
-                        >
-                          {req.request_type}
-                        </span>
-                      </td>
-
-                      {/* Exported */}
-                      <td className="px-6 py-5">
-                        <FlagBadge
-                          value={req.exported}
-                          trueLabel="Exported"
-                          falseLabel="Pending"
-                        />
-                      </td>
-
-                      {/* Altered */}
-                      <td className="px-6 py-5">
-                        <FlagBadge
-                          value={req.altered}
-                          trueLabel="Altered"
-                          falseLabel="—"
-                          tone="violet"
-                        />
-                      </td>
-
-                      {/* Requisition Date */}
-                      <td className="px-6 py-5">
-                        <span className="text-sm text-[#a18080]">
-                          {new Date(
-                            req.request_created_at,
-                          ).toLocaleDateString()}
-                        </span>
-                      </td>
-
-                      {/* Status */}
-                      <td className="px-6 py-5">
-                        <div className="flex items-center justify-between gap-4">
-                          <StatusFormatter status={req.approval_status} />
-                          <Info
-                            size={14}
-                            className={`${
-                              req.approval_status === "approved"
-                                ? "text-emerald-200 group-hover:text-emerald-400"
-                                : req.approval_status === "declined"
-                                  ? "text-red-200 group-hover:text-red-400"
-                                  : "text-amber-200 group-hover:text-amber-400"
-                            } transition-colors`}
-                          />
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              ) : (
-                /* Fallback UI */
-                <tr>
-                  <td colSpan={10} className="px-6 py-20">
-                    <div className="flex flex-col items-center justify-center text-center">
-                      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/80 bg-white/40 text-red-300 shadow-[0_8px_16px_rgba(60,100,160,0.05)]">
-                        <CircleDollarSign size={32} strokeWidth={1.5} />
-                      </div>
-                      <h3 className="text-base font-semibold text-[#1e1b1b]">
-                        {searchTerm
-                          ? "No matches found"
-                          : "No requisitions yet"}
-                      </h3>
-                      <p className="mt-1 max-w-60 text-[13px] leading-relaxed text-[#a18080]">
-                        {searchTerm
-                          ? `We couldn't find anything matching "${searchTerm}". Try a different term.`
-                          : "There are currently no salary advance requests to display."}
-                      </p>
-                      {searchTerm && (
-                        <button
-                          onClick={clearSearch}
-                          className="mt-5 text-[12px] font-bold tracking-wider text-red-600 uppercase transition-colors hover:text-red-700"
-                        >
-                          Clear search
-                        </button>
-                      )}
-                    </div>
-                  </td>
+                      {col}
+                    </th>
+                  ))}
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-red-50">
+                {totalCount > 0 ? (
+                  paginatedData.map((req, idx) => {
+                    const isPending =
+                      req.approval_status?.toLowerCase() === "pending";
+                    return (
+                      <tr
+                        key={`${req.staff_number}-${idx}`} // Assuming combo key if no ID
+                        tabIndex={0}
+                        onClick={() => openRequest(req)}
+                        onKeyDown={(e) => {
+                          // Only the row itself - Space on its checkbox toggles
+                          // the selection instead
+                          if (e.target !== e.currentTarget) return;
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            openRequest(req);
+                          }
+                        }}
+                        className="group cursor-pointer transition-colors outline-none hover:bg-gray-200/30 focus-visible:bg-neutral-100 focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-inset"
+                      >
+                        {/* Select */}
+                        <td
+                          className="px-6 py-5"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {isPending && (
+                            <Checkbox
+                              checked={selectedIds.has(req.request_id)}
+                              onChange={() =>
+                                toggleRowSelection(req.request_id)
+                              }
+                            />
+                          )}
+                        </td>
+
+                        {/* Employee */}
+                        <td className="px-6 py-5">
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium text-[#1e1b1b]">
+                              {req.staff_name}
+                            </span>
+                            <span className="text-[11px] text-gray-400">
+                              #{req.staff_number}
+                            </span>
+                          </div>
+                        </td>
+
+                        {/* Department */}
+                        <td className="px-6 py-5">
+                          <span className="text-sm text-[#1e1b1b]">
+                            {req.staff_department}
+                          </span>
+                        </td>
+
+                        {/* Amount */}
+                        <td className="px-6 py-5">
+                          <span className="text-sm font-semibold text-[#1e1b1b]">
+                            {Number(req.request_amount).toLocaleString()}
+                          </span>
+                        </td>
+
+                        {/* Installments */}
+                        <td className="px-6 py-5">
+                          <span className="text-sm text-[#1e1b1b]">
+                            {req.no_of_installments}
+                          </span>
+                        </td>
+
+                        {/* Type */}
+                        <td className="px-6 py-5">
+                          <span
+                            className={`inline-flex items-center rounded-full ${req.request_type === "oneoff" ? "bg-slate-100 text-slate-700" : "bg-cyan-100 text-cyan-700"} px-2.5 py-0.5 text-[11px] font-semibold capitalize`}
+                          >
+                            {req.request_type}
+                          </span>
+                        </td>
+
+                        {/* Exported */}
+                        <td className="px-6 py-5">
+                          <FlagBadge
+                            value={req.exported}
+                            trueLabel="Exported"
+                            falseLabel="Pending"
+                          />
+                        </td>
+
+                        {/* Altered */}
+                        <td className="px-6 py-5">
+                          <FlagBadge
+                            value={req.altered}
+                            trueLabel="Altered"
+                            falseLabel="—"
+                            tone="violet"
+                          />
+                        </td>
+
+                        {/* Requisition Date */}
+                        <td className="px-6 py-5">
+                          <span className="text-sm text-[#a18080]">
+                            {new Date(
+                              req.request_created_at,
+                            ).toLocaleDateString()}
+                          </span>
+                        </td>
+
+                        {/* Status */}
+                        <td className="px-6 py-5">
+                          <div className="flex items-center justify-between gap-4">
+                            <StatusFormatter status={req.approval_status} />
+                            <Info
+                              size={14}
+                              className={`${
+                                req.approval_status === "approved"
+                                  ? "text-emerald-200 group-hover:text-emerald-400"
+                                  : req.approval_status === "declined"
+                                    ? "text-red-200 group-hover:text-red-400"
+                                    : "text-amber-200 group-hover:text-amber-400"
+                              } transition-colors`}
+                            />
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  /* Fallback UI */
+                  <tr>
+                    <td colSpan={10} className="px-6 py-20">
+                      <div className="flex flex-col items-center justify-center text-center">
+                        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/80 bg-white/40 text-red-300 shadow-[0_8px_16px_rgba(60,100,160,0.05)]">
+                          <CircleDollarSign size={32} strokeWidth={1.5} />
+                        </div>
+                        <h3 className="text-base font-semibold text-[#1e1b1b]">
+                          {searchTerm
+                            ? "No matches found"
+                            : "No requisitions yet"}
+                        </h3>
+                        <p className="mt-1 max-w-60 text-[13px] leading-relaxed text-[#a18080]">
+                          {searchTerm
+                            ? `We couldn't find anything matching "${searchTerm}". Try a different term.`
+                            : "There are currently no salary advance requests to display."}
+                        </p>
+                        {searchTerm && (
+                          <button
+                            onClick={clearSearch}
+                            className="mt-5 text-[12px] font-bold tracking-wider text-red-600 uppercase transition-colors hover:text-red-700"
+                          >
+                            Clear search
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Export Modal */}
@@ -430,9 +461,12 @@ export default function SalaryAdvanceTable() {
 
         {/* Details & Review Modal */}
         <SalaryAdvanceModal
-          isOpen={!!selectedRequest}
+          // Remount per request so a half-typed review comment doesn't
+          // carry over to the next one
+          key={selectedRequest?.request_id}
+          isOpen={modalOpen}
           data={selectedRequest}
-          onClose={() => setSelectedRequest(null)}
+          onClose={() => setModalOpen(false)}
           onSuccess={() => refetch()}
         />
 
