@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import ApproverShell from "@/components/Approvers/ApproverShell";
 import { query } from "@/lib/db";
+import { isUuid } from "@/lib/uuid";
 import EmployeeApprovalModal from "@/components/Approvers/EmployeeApprovers/EmployeeApprovalModal";
 import { PreviousApproval } from "@/components/Approvers/PreviousApprovalsSection";
 import AlreadyProcessed from "@/components/Approvers/TravelApprovers/AlreadyProcessed";
@@ -51,9 +52,12 @@ const ApprovalPageContent = async ({
   const { uuid } = await params;
   const { token, stage } = await searchParams;
 
-  // First fallback - one of our props is missing/falsy
-  if (!uuid || !token || !isValidEmployeeStage(stage))
+  // First fallback - one of our props is missing, or an id is malformed: both
+  // are uuid columns, and Postgres throws on a malformed uuid rather than
+  // matching nothing. A malformed token gets the same screen as an unknown one.
+  if (!isUuid(uuid) || !token || !isValidEmployeeStage(stage))
     return <NotFoundRequest />;
+  if (!isUuid(token)) return <InvalidToken />;
 
   // HR approvers are additionally scoped to the forms in their hr_forms
   // allow-list - an approver not permitted for this form is treated the

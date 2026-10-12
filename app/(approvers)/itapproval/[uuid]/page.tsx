@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import { query } from "@/lib/db";
+import { isUuid } from "@/lib/uuid";
 import ApproverShell from "@/components/Approvers/ApproverShell";
 import InvalidToken from "@/components/Approvers/TravelApprovers/InvalidToken";
 import AlreadyProcessed from "@/components/Approvers/TravelApprovers/AlreadyProcessed";
@@ -46,8 +47,12 @@ const ApprovalPageContent = async ({
   const { uuid } = await params;
   const { token, stage } = await searchParams;
 
-  // First fallback - one of our props is missing/falsy
-  if (!uuid || !token || !isValidItStage(stage)) return <NotFoundRequest />;
+  // First fallback - one of our props is missing, or an id is malformed: both
+  // are uuid columns, and Postgres throws on a malformed uuid rather than
+  // matching nothing. A malformed token gets the same screen as an unknown one.
+  if (!isUuid(uuid) || !token || !isValidItStage(stage))
+    return <NotFoundRequest />;
+  if (!isUuid(token)) return <InvalidToken />;
 
   const validApprover = await query(
     `SELECT ${stage}_email AS email, 
