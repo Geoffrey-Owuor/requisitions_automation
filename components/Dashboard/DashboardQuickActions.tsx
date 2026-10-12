@@ -13,63 +13,47 @@ import {
   HardHat,
   UserRoundPlus,
 } from "lucide-react";
-import { useToggleStore } from "@/store/useToggleStore";
+import { newRequisitionHref } from "@/lib/dashboardTables";
 
 type QuickAction = {
   label: string;
   description: string;
   Icon: LucideIcon;
-} & ({ href: string; onClick?: never } | { href?: never; onClick: () => void });
+  href: string;
+};
 
 // Shortcuts to every requisition form and portal, shown on the dashboard home.
 const DashboardQuickActions = () => {
-  // Zustand store — same modal toggles used by DashboardSidebar
-  const setShowITRequisition = useToggleStore(
-    (state) => state.setShowITRequisition,
-  );
-  const setShowTravelRequisition = useToggleStore(
-    (state) => state.setShowTravelRequisition,
-  );
-  const setShowAccessRequisition = useToggleStore(
-    (state) => state.setShowAccessRequisition,
-  );
-  const setShowCasualRequisition = useToggleStore(
-    (state) => state.setShowCasualRequisition,
-  );
-  const setShowEmployeeRequisition = useToggleStore(
-    (state) => state.setShowEmployeeRequisition,
-  );
-
   const actions: QuickAction[] = [
     {
       label: "IT Requisition",
       description: "Submit an IT Requisition",
       Icon: Monitor,
-      onClick: () => setShowITRequisition(true),
+      href: newRequisitionHref("it"),
     },
     {
       label: "Travel Requisition",
       description: "Submit a travel request",
       Icon: BriefcaseBusiness,
-      onClick: () => setShowTravelRequisition(true),
+      href: newRequisitionHref("travel"),
     },
     {
       label: "Access / Key Requisition",
       description: "Request physical access or keys",
       Icon: LockKeyhole,
-      onClick: () => setShowAccessRequisition(true),
+      href: newRequisitionHref("access"),
     },
     {
       label: "Casual Requisition",
       description: "Request casual labor",
       Icon: HardHat,
-      onClick: () => setShowCasualRequisition(true),
+      href: newRequisitionHref("casual"),
     },
     {
       label: "Employee Requisition",
       description: "Request new or replacement headcount",
       Icon: UserRoundPlus,
-      onClick: () => setShowEmployeeRequisition(true),
+      href: newRequisitionHref("employee"),
     },
     {
       label: "Salary Advance",
@@ -93,7 +77,7 @@ const DashboardQuickActions = () => {
 
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-      {actions.map(({ label, description, Icon, href, onClick }) => {
+      {actions.map(({ label, description, Icon, href }) => {
         const content = (
           <>
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-500 transition-colors group-hover:bg-red-100">
@@ -114,14 +98,10 @@ const DashboardQuickActions = () => {
         const className =
           "group flex items-center gap-3 rounded-2xl border border-gray-200 bg-white/50 p-4 text-left shadow-[0_12px_24px_rgba(160,60,60,0.05)] transition-all hover:border-red-200 hover:bg-white/80";
 
-        return href ? (
+        return (
           <Link key={label} href={href} className={className}>
             {content}
           </Link>
-        ) : (
-          <button key={label} onClick={onClick} className={className}>
-            {content}
-          </button>
         );
       })}
     </div>

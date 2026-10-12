@@ -1,6 +1,7 @@
 import "server-only";
 import { PoolClient } from "pg";
 import type { HrForm } from "@/public/assets";
+import { isUuid } from "@/lib/uuid";
 
 // The approver acting on an emailed approval link is resolved from the
 // link's token ({stage}_array.{stage}_uuid), never from a client-supplied
@@ -11,9 +12,6 @@ import type { HrForm } from "@/public/assets";
 export type TokenApproverResult =
   | { ok: true; name: string; email: string }
   | { ok: false; message: string };
-
-const UUID_PATTERN =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const INVALID_APPROVER_MESSAGE =
   "Could not verify the current approver, please contact your admin for support";
@@ -27,7 +25,7 @@ export async function resolveApproverByToken(
   token: string,
   hrForm?: HrForm,
 ): Promise<TokenApproverResult> {
-  if (typeof token !== "string" || !UUID_PATTERN.test(token)) {
+  if (!isUuid(token)) {
     return { ok: false, message: INVALID_APPROVER_MESSAGE };
   }
 

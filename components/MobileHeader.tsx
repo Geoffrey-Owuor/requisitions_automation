@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import DashboardBrand from "./DashboardBrand";
 import Brand from "./Brand";
@@ -21,7 +21,7 @@ import {
   UserRoundPlus,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { useToggleStore } from "@/store/useToggleStore";
+import { newRequisitionHref } from "@/lib/dashboardTables";
 import MoreMenuModal from "./Modules/MoreMenuModal";
 import { useUser } from "@/context/UserContext";
 import { REPORTS_PAGE, canViewReports } from "@/lib/reports/definitions";
@@ -48,42 +48,43 @@ const MobileHeader = () => {
   const isReportsActive = pathname === REPORTS_PAGE.href;
   const showReports = canViewReports(useUser().roles);
 
-  // Zustand stores (the modals themselves live in Dashboard/DashboardModals)
-  const setShowITRequisition = useToggleStore(
-    (state) => state.setShowITRequisition,
-  );
-  const setShowTravelRequisition = useToggleStore(
-    (state) => state.setShowTravelRequisition,
-  );
-  const setShowAccessRequisition = useToggleStore(
-    (state) => state.setShowAccessRequisition,
-  );
-  const setShowCasualRequisition = useToggleStore(
-    (state) => state.setShowCasualRequisition,
-  );
-  const setShowEmployeeRequisition = useToggleStore(
-    (state) => state.setShowEmployeeRequisition,
-  );
+  const closeSidebar = () => setSidebarOpen(false);
 
-  const handleButtonClick = (
-    setAction: (value: boolean) => void,
-    value: boolean,
-  ) => {
-    setAction(value);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const wasOpenRef = useRef(false);
 
-    setSidebarOpen(false);
-  };
+  // Move focus into the drawer when it opens and back to the menu button when
+  // it closes (keyboard and screen-reader users), and close it on Escape
+  useEffect(() => {
+    if (sidebarOpen) {
+      wasOpenRef.current = true;
+      closeButtonRef.current?.focus();
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === "Escape") setSidebarOpen(false);
+      };
+      window.addEventListener("keydown", handleKeyDown);
+      return () => window.removeEventListener("keydown", handleKeyDown);
+    }
+    if (wasOpenRef.current) {
+      wasOpenRef.current = false;
+      menuButtonRef.current?.focus();
+    }
+  }, [sidebarOpen]);
+
   return (
     <>
       {/* Overlay & Sliding Mobile Sidebar */}
+      {/* inert while closed so the off-screen links can't be tabbed to */}
       <div
+        inert={!sidebarOpen}
         className={`fixed inset-0 z-70 ${
           sidebarOpen ? "pointer-events-auto" : "pointer-events-none"
         }`}
       >
         {/* Backdrop */}
         <div
-          className={`fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-200 ${
+          className={`fixed inset-0 bg-black/40 transition-opacity duration-200 ${
             sidebarOpen ? "opacity-100" : "opacity-0"
           }`}
           onClick={() => setSidebarOpen(false)}
@@ -91,6 +92,9 @@ const MobileHeader = () => {
 
         {/* Sliding Panel */}
         <aside
+          role="dialog"
+          aria-modal="true"
+          aria-label="Navigation"
           className={`relative z-10 h-full ${
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
           } custom:hidden layout-scrollbar flex w-80 flex-col bg-white shadow-2xl transition-transform duration-200`}
@@ -98,7 +102,10 @@ const MobileHeader = () => {
           <div className="flex h-16 items-center justify-between border-b border-slate-100 px-6">
             <Brand showText={true} />
             <button
+              ref={closeButtonRef}
+              type="button"
               onClick={() => setSidebarOpen(false)}
+              aria-label="Close menu"
               className="rounded-full p-1.5 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-950"
             >
               <X size={20} />
@@ -128,27 +135,45 @@ const MobileHeader = () => {
             </Link>
 
             {/* IT Requisition */}
-            <button
-              onClick={() => handleButtonClick(setShowITRequisition, true)}
-              className="group flex items-center gap-3 rounded-xl px-4 py-3 text-[14px] font-semibold text-slate-600 transition-all hover:bg-red-50 hover:text-red-950"
+            <Link
+              href={newRequisitionHref("it")}
+              onClick={closeSidebar}
+              className={`group flex items-center gap-3 rounded-xl px-4 py-3 text-[14px] font-semibold transition-all ${
+                pathname === newRequisitionHref("it")
+                  ? "bg-red-950 text-white shadow-md"
+                  : "text-slate-600 hover:bg-red-50 hover:text-red-950"
+              }`}
             >
               <Monitor
                 size={18}
-                className="text-slate-500 transition-colors group-hover:text-red-950"
+                className={`transition-colors ${
+                  pathname === newRequisitionHref("it")
+                    ? "text-white"
+                    : "text-slate-500 group-hover:text-red-950"
+                }`}
               />
               IT Requisition
-            </button>
+            </Link>
             {/* Travel Requisition */}
-            <button
-              onClick={() => handleButtonClick(setShowTravelRequisition, true)}
-              className="group flex items-center gap-3 rounded-xl px-4 py-3 text-[14px] font-semibold text-slate-600 transition-all hover:bg-red-50 hover:text-red-950"
+            <Link
+              href={newRequisitionHref("travel")}
+              onClick={closeSidebar}
+              className={`group flex items-center gap-3 rounded-xl px-4 py-3 text-[14px] font-semibold transition-all ${
+                pathname === newRequisitionHref("travel")
+                  ? "bg-red-950 text-white shadow-md"
+                  : "text-slate-600 hover:bg-red-50 hover:text-red-950"
+              }`}
             >
               <Briefcase
                 size={18}
-                className="text-slate-500 transition-colors group-hover:text-red-950"
+                className={`transition-colors ${
+                  pathname === newRequisitionHref("travel")
+                    ? "text-white"
+                    : "text-slate-500 group-hover:text-red-950"
+                }`}
               />
               Travel Requisition
-            </button>
+            </Link>
             {links.map(({ href, label, Icon }) => {
               const isActive = pathname === href;
               return (
@@ -237,28 +262,28 @@ const MobileHeader = () => {
                   key: "casual",
                   label: "Casual Requisition",
                   Icon: HardHat,
-                  onClick: () =>
-                    handleButtonClick(setShowCasualRequisition, true),
+                  href: newRequisitionHref("casual"),
+                  onClick: closeSidebar,
                 },
                 {
                   key: "employee",
                   label: "Employee Requisition",
                   Icon: UserRoundPlus,
-                  onClick: () =>
-                    handleButtonClick(setShowEmployeeRequisition, true),
+                  href: newRequisitionHref("employee"),
+                  onClick: closeSidebar,
                 },
                 {
                   key: "access",
                   label: "Key & Access",
                   Icon: LockKeyhole,
-                  onClick: () =>
-                    handleButtonClick(setShowAccessRequisition, true),
+                  href: newRequisitionHref("access"),
+                  onClick: closeSidebar,
                 },
                 {
                   key: "guidelines",
                   label: "Guidelines",
                   Icon: CircleQuestionMark,
-                  onClick: () => setSidebarOpen(false),
+                  onClick: closeSidebar,
                   href: "/guidelines",
                   external: true,
                 },
@@ -273,7 +298,11 @@ const MobileHeader = () => {
         {/* Left Side: Menu Toggle + Icon Brand */}
         <div className="flex items-center gap-4">
           <button
+            ref={menuButtonRef}
+            type="button"
             onClick={() => setSidebarOpen(true)}
+            aria-label="Open menu"
+            aria-expanded={sidebarOpen}
             className="rounded-full p-1.5 text-white/80 transition-all hover:bg-white/10 hover:text-white active:scale-95"
           >
             <Menu size={24} />
@@ -285,6 +314,7 @@ const MobileHeader = () => {
         <div className="flex items-center gap-4">
           <Link
             href="/guidelines"
+            aria-label="Guidelines"
             target="_blank"
             rel="noopener noreferrer"
             className="rounded-full p-1.5 text-white/80 transition-all hover:bg-white/10 hover:text-white"

@@ -5,7 +5,7 @@ import UserSessionWrapper from "./UserSessionWrapper";
 import { getUserRoles } from "@/serverActions/GetUserRoles";
 import { getApproverMemberships } from "@/serverActions/GetApproverMemberships";
 
-// The signed-in dashboard shell (sidebar, header, requisition form modals),
+// The signed-in dashboard shell (sidebar, header, unsaved-form guard),
 // driven by the real session - shared by the dashboard layout and the
 // approval pages, so the forms always show the identity the submission
 // routes will record.

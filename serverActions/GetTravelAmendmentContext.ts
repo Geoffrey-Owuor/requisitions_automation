@@ -2,6 +2,7 @@
 
 import { query } from "@/lib/db";
 import { getSession } from "@/lib/session";
+import { isUuid } from "@/lib/uuid";
 import { sameEmail } from "@/lib/hodAssignment";
 import { TravelFormData } from "@/components/TravelRequisitionPage";
 import { PUSHBACK_WINDOW_SQL } from "@/lib/travelPushback";
@@ -26,6 +27,9 @@ export interface TravelAmendmentContext {
 export async function getTravelAmendmentContext(
   requestId: string,
 ): Promise<TravelAmendmentContext | null> {
+  // A malformed id (e.g. a hand-edited amend URL) would make Postgres throw
+  if (!isUuid(requestId)) return null;
+
   const session = await getSession();
   if (!session) return null;
 

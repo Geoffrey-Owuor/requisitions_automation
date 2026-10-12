@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { Suspense } from "react";
 import { getEmployeeEmailData } from "@/services/EmployeeEmailSender";
 import NotFoundRequest from "@/components/Approvers/TravelApprovers/NotFoundRequest";
+import { isUuid } from "@/lib/uuid";
 import EmployeeRequisitionViewModal from "@/components/Approvers/EmployeeApprovers/EmployeeRequisitionViewModal";
 import RequisitionPdfSkeleton from "@/components/Skeletons/RequisitionPdfSkeleton";
 import RequisitionPagesWrapper from "@/components/Dashboard/RequisitionPagesWrapper";
@@ -20,7 +21,8 @@ export const metadata: Metadata = {
 const page = async ({ params }: ViewRequisitionProps) => {
   const { uuid } = await params;
 
-  if (!uuid) return <NotFoundRequest />;
+  // request_id is a uuid column: Postgres throws on malformed input
+  if (!isUuid(uuid)) return <NotFoundRequest />;
 
   const viewData = await getEmployeeEmailData(uuid);
 

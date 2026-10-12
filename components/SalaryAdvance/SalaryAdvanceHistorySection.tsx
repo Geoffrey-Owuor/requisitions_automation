@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CalendarClock, Info, Loader2, ChevronRight } from "lucide-react";
+import { CalendarClock, Info, ChevronRight } from "lucide-react";
+import { AdvanceRequestsSkeleton } from "../Skeletons/AdvanceRequestsSkeleton";
 import StatusFormatter from "@/components/Dashboard/StatusFormatter";
 import {
   GetMyAdvanceRequests,
@@ -49,10 +50,10 @@ export default function SalaryAdvanceHistorySection() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white py-16 text-sm text-slate-500">
-        <Loader2 size={16} className="animate-spin" />
-        Loading your request history...
-      </div>
+      <AdvanceRequestsSkeleton
+        variant="history"
+        label="Loading your request history..."
+      />
     );
   }
 

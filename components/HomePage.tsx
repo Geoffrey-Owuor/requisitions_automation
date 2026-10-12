@@ -3,6 +3,7 @@ import Link from "next/link";
 import {
   ArrowRight,
   BookText,
+  BriefcaseBusiness,
   ChevronDown,
   ChevronRight,
   CircleDollarSign,
@@ -10,6 +11,7 @@ import {
   KeyRound,
   LaptopMinimalCheck,
   MailCheck,
+  Monitor,
   ShieldAlert,
   ShoppingBag,
   Workflow,
@@ -18,6 +20,7 @@ import {
 import PageShell from "./PageShell";
 import QuickSignIn from "./QuickSignIn";
 import { appsByGroup, type AppEntry, type Owner } from "@/lib/appDirectory";
+import { newRequisitionHref } from "@/lib/dashboardTables";
 
 /** The owning team is the only taxonomy on this page that carries meaning, so
  *  it is the only thing that gets a colour. */
@@ -32,7 +35,7 @@ export default function HomePage() {
     <PageShell>
       <QuickSignIn />
 
-      <section className="grid grid-cols-1 items-start gap-6 py-8 sm:py-10 lg:grid-cols-[minmax(0,1fr)_30rem] lg:gap-10">
+      <section className="grid grid-cols-1 items-center gap-6 py-8 sm:py-10 lg:grid-cols-[minmax(0,1fr)_30rem] lg:gap-10">
         <div>
           <h1 className="text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl">
             Hotpoint <span className="text-brand-600">Apps</span> Hub
@@ -99,7 +102,7 @@ const howItWorksSteps: Step[] = [
     number: "01",
     title: "Sign in with Microsoft",
     description:
-      "Use your work account to reach the dashboard. Salary Advance is the one form reachable without signing in at all.",
+      "Use your work account - a form's Open form link asks you to sign in first if you haven't, then takes you straight to it. Salary Advance is the one form that needs no sign-in at all.",
   },
   {
     number: "02",
@@ -222,7 +225,7 @@ const faqItems: FAQItem[] = [
   {
     question: "Do I need to sign in for every request?",
     answer:
-      "No. Salary Advance is built to be submitted without signing in - every other form and portal needs a Microsoft sign-in to reach the dashboard.",
+      "No. Once you sign in with Microsoft you stay signed in on that browser for a week, and any form or portal link opens directly. Salary Advance is built to be submitted without signing in at all.",
   },
   {
     question: "How do I find out what happened to my request?",
@@ -314,33 +317,46 @@ function ComplianceSection() {
 type QuickLink = {
   href: string;
   label: string;
-  description: string;
   icon: LucideIcon;
+  /** Shown under the label; only the link that behaves differently has one. */
+  note?: string;
 };
 
-/** The three destinations people land on most, reachable without going through
- *  the guidelines first. Ordered as the two portals, then the public form. */
+/** The destinations people land on most, reachable without going through the
+ *  guidelines first. Ordered as the two most-used forms, the two portals, then
+ *  the public form, which takes the full last row so its note fits. */
 const quickLinks: QuickLink[] = [
+  {
+    href: newRequisitionHref("travel"),
+    label: "Travel Requisition",
+    icon: BriefcaseBusiness,
+  },
+  {
+    href: newRequisitionHref("it"),
+    label: "IT Requisition",
+    icon: Monitor,
+  },
   {
     href: "/dashboard/helpdesk",
     label: "HelpDesk",
-    description: "Log an IT ticket and track it to resolution.",
     icon: LaptopMinimalCheck,
   },
   {
     href: "/dashboard/staffproductpurchase",
-    label: "Staff Product Purchase",
-    description: "Purchase products at discounted staff prices.",
+    label: "Staff Purchase",
     icon: ShoppingBag,
   },
   {
     href: "/advance",
     label: "Salary Advance",
-    description: "Request an advance - no sign-in needed.",
     icon: CircleDollarSign,
+    note: "No sign-in needed",
   },
 ];
 
+/** From `sm` up, two columns of compact tiles keep five links about as tall as
+ *  the intro beside them, with an odd last link spanning both columns. Phones
+ *  stack the panel under the intro, so it stays a single readable column. */
 function QuickLinksCard() {
   return (
     <aside
@@ -354,27 +370,27 @@ function QuickLinksCard() {
         Quick links
       </h2>
 
-      <ul className="mt-3 flex flex-col gap-1">
-        {quickLinks.map(({ href, label, description, icon: Icon }) => (
-          <li key={href}>
+      <ul className="mt-3 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+        {quickLinks.map(({ href, label, icon: Icon, note }) => (
+          <li key={href} className="sm:last:odd:col-span-2">
             <Link
               href={href}
-              className="rounded-control hover:bg-brand-50/60 focus-visible:outline-brand-600 group flex items-start gap-3 p-2 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
+              className="rounded-control hover:border-brand-200 hover:bg-brand-50/60 focus-visible:outline-brand-600 group flex h-full items-center gap-2.5 border border-slate-100 p-2 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
             >
-              <span className="group-hover:bg-brand-600 mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-colors group-hover:text-white">
-                <Icon size={18} />
+              <span className="group-hover:bg-brand-600 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-colors group-hover:text-white">
+                <Icon size={16} />
               </span>
 
               <span className="min-w-0 flex-1">
-                <span className="group-hover:text-brand-700 block text-sm font-semibold tracking-tight text-slate-900 transition-colors">
+                <span className="group-hover:text-brand-700 block text-sm leading-snug font-semibold tracking-tight text-slate-900 transition-colors">
                   {label}
                 </span>
-                <span className="mt-0.5 block text-xs leading-relaxed text-slate-500">
-                  {description}
-                </span>
+                {note && (
+                  <span className="block text-xs text-slate-500">{note}</span>
+                )}
               </span>
 
-              <ChevronRight className="group-hover:text-brand-600 mt-2 h-4 w-4 shrink-0 text-slate-300 transition-[color,transform] group-hover:translate-x-0.5" />
+              <ChevronRight className="group-hover:text-brand-600 h-4 w-4 shrink-0 text-slate-300 transition-[color,transform] group-hover:translate-x-0.5" />
             </Link>
           </li>
         ))}

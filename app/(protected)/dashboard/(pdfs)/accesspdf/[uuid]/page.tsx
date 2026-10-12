@@ -6,6 +6,7 @@ import { Metadata } from "next";
 import { Suspense } from "react";
 import { query } from "@/lib/db";
 import NotFoundRequest from "@/components/Approvers/TravelApprovers/NotFoundRequest";
+import { isUuid } from "@/lib/uuid";
 import RequisitionPagesWrapper from "@/components/Dashboard/RequisitionPagesWrapper";
 import AccessPdfSkeleton from "@/components/Skeletons/AccessPdfSkeleton";
 import AccessPdfModal from "@/components/Approvers/AccessApprovers/AccessPdfModal";
@@ -19,7 +20,8 @@ export const metadata: Metadata = {
 const page = async ({ params }: PdfDownloadProps) => {
   const { uuid } = await params;
 
-  if (!uuid) return <NotFoundRequest />;
+  // request_id is a uuid column: Postgres throws on malformed input
+  if (!isUuid(uuid)) return <NotFoundRequest />;
 
   // Our query
   const result = await query<PdfDataValues>(AccessDataQuery, [uuid]);
