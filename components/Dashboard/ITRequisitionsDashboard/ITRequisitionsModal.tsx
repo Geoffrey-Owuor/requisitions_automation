@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 import StatusFormatter from "../StatusFormatter";
 import { dateFormatter } from "@/public/assets";
-import { useLoadingStore } from "@/store/useLoadingStore";
 import { useQuery } from "@tanstack/react-query";
 import {
   Modal,
@@ -94,14 +93,8 @@ export function ITRequisitionModal({
   onClose,
   dataFlag,
 }: ITRequisitionModalProps) {
-  const setLoadingLine = useLoadingStore((state) => state.setLoadingLine);
 
   const { email } = useUser();
-
-  const handleLinkClick = () => {
-    onClose();
-    setLoadingLine(true);
-  };
 
   const formatRequirements = (val: unknown) => {
     if (!val) return "—";
@@ -155,7 +148,7 @@ export function ITRequisitionModal({
               linkQuery.data && (
                 <Link
                   href={linkQuery.data}
-                  onClick={handleLinkClick}
+                  onClick={onClose}
                   className={modalActionClass.dark}
                 >
                   <ShieldUser className="h-3.5 w-3.5" />
@@ -165,7 +158,7 @@ export function ITRequisitionModal({
             ))}
           <Link
             href={`/dashboard/itpdf/${data.request_id}`}
-            onClick={handleLinkClick}
+            onClick={onClose}
             className={modalActionClass.dark}
           >
             Pdf

@@ -23,7 +23,6 @@ import { getEmployeeApproverLink } from "@/serverActions/GetEmployeeApproverLink
 import { getEmployeeRequisitionDetails } from "@/serverActions/GetEmployeeRequisitionDetails";
 import AttachmentTypeGroups from "@/components/Approvers/EmployeeApprovers/AttachmentTypeGroups";
 import EmployeeAmendmentHistory from "@/components/Approvers/EmployeeApprovers/EmployeeAmendmentHistory";
-import { useLoadingStore } from "@/store/useLoadingStore";
 import { amendRequisitionHref } from "@/lib/dashboardTables";
 import { Modal, ModalActionSkeleton, modalActionClass } from "../../Modal";
 import { DetailCardsSkeleton } from "../../Skeletons/DetailCardsSkeleton";
@@ -55,13 +54,7 @@ export const EmployeeDetailsModal = ({
   onClose,
   dataFlag,
 }: ModalProps) => {
-  const setLoadingLine = useLoadingStore((state) => state.setLoadingLine);
   const { email } = useUser();
-
-  const handleLinkClick = () => {
-    setLoadingLine(true);
-    onClose();
-  };
 
   const STAGE_LEVELS: Record<typeof dataFlag, EmployeeStageLevels> = {
     hodPending: "hod",
@@ -148,7 +141,7 @@ export const EmployeeDetailsModal = ({
               linkQuery.data && (
                 <Link
                   href={linkQuery.data}
-                  onClick={handleLinkClick}
+                  onClick={onClose}
                   className={modalActionClass.dark}
                 >
                   <ShieldUser className="h-3.5 w-3.5" />
@@ -158,7 +151,7 @@ export const EmployeeDetailsModal = ({
             ))}
           <Link
             href={`/dashboard/employeeview/${data.request_id}`}
-            onClick={handleLinkClick}
+            onClick={onClose}
             className={modalActionClass.dark}
           >
             Full Details

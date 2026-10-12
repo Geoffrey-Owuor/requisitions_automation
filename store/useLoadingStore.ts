@@ -1,17 +1,15 @@
 import { create } from "zustand";
 
-// Defining types
+// Route-change progress for LoadingLine. Navigations start it from
+// instrumentation-client.ts; LoadingLine finishes it when the path changes.
 interface LoadingLineState {
-  loadingLine: boolean;
-
-  // The setter to just take a boolean directly
-  setLoadingLine: (status: boolean) => void;
+  navigating: boolean;
+  startNavigation: () => void;
+  finishNavigation: () => void;
 }
 
-// Creating the store
 export const useLoadingStore = create<LoadingLineState>()((set) => ({
-  // Initial state
-  loadingLine: false,
-  // Action
-  setLoadingLine: (status) => set({ loadingLine: status }),
+  navigating: false,
+  startNavigation: () => set({ navigating: true }),
+  finishNavigation: () => set({ navigating: false }),
 }));
