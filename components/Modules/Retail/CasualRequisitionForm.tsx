@@ -38,11 +38,13 @@ import SubmittingOverlay from "@/components/SubmittingOverlay";
 import AlertModal from "@/components/AlertModal";
 import { AlertInfo } from "@/components/TravelRequisitionPage";
 import CasualConfirmationModal from "./CasualConfirmationModal";
-import { useToggleStore } from "@/store/useToggleStore";
 import Image from "next/image";
 import { getCasualAmendmentContext } from "@/serverActions/GetCasualAmendmentContext";
 import CasualAmendmentHistory from "@/components/Approvers/CasualApprovers/CasualAmendmentHistory";
-import { useReportUnsavedChanges } from "../ModalWrapper";
+import { useRouter } from "next/navigation";
+import { useReportUnsavedChanges } from "@/components/Dashboard/UnsavedChangesGuard";
+import { scrollPageToTop } from "@/utils/scrollPageToTop";
+import { myRequisitionsHref } from "@/lib/dashboardTables";
 import { isSameFormValue } from "@/lib/formChanges";
 
 // ---- Types ----
@@ -143,12 +145,7 @@ export default function CasualRequisitionForm({
 }) {
   const { email } = useUser();
   const queryClient = useQueryClient();
-  const setCasualAmendmentRequestId = useToggleStore(
-    (state) => state.setCasualAmendmentRequestId,
-  );
-
-  const scrollTrigger = useToggleStore((state) => state.scrollTrigger);
-  const triggerScroll = useToggleStore((state) => state.triggerScroll);
+  const router = useRouter();
 
   // Load departments
   const { data: DEPARTMENTS = [], isLoading: departmentsLoading } = useQuery({
@@ -166,14 +163,15 @@ export default function CasualRequisitionForm({
   const hodLabel = hodNameLabel(hodArray);
 
   // Amend mode: fetch the eligibility check + pre-fill data for this
-  // requisition. Re-checked server-side every time the modal opens.
-  const {
-    data: amendmentContext,
-    isLoading: amendmentLoading,
-  } = useQuery({
+  // requisition. Re-checked server-side every time the amend page mounts.
+  const { data: amendmentContext, isLoading: amendmentLoading } = useQuery({
     queryKey: ["CasualAmendmentContext", amendRequestId],
     queryFn: () => getCasualAmendmentContext(amendRequestId!),
     enabled: !!amendRequestId,
+    // Never seed the form from a cached copy - it could predate an
+    // amendment made since
+    staleTime: 0,
+    gcTime: 0,
   });
   const amendmentNotEligible =
     !!amendRequestId && !amendmentLoading && !amendmentContext;
@@ -187,7 +185,7 @@ export default function CasualRequisitionForm({
   });
   const [submitting, setSubmitting] = useState(false);
 
-  // Closing the modal asks first while there's input it would lose: anything
+  // Leaving the page asks first while there's input it would lose: anything
   // changed from the blank form - or, when amending, from the requisition as
   // loaded - until the amendment has gone through
   const savedFormData = amendRequestId
@@ -202,7 +200,7 @@ export default function CasualRequisitionForm({
   );
 
   // Seed the form once the amendment context loads (runs at most once per
-  // mount - the modal remounts this component fresh each time it opens, so
+  // mount - the amend page mounts this component fresh for each requisition, so
   // there's no risk of clobbering later user edits).
   const [seededFromAmendment, setSeededFromAmendment] = useState(false);
   if (!seededFromAmendment && amendmentContext?.initialData) {
@@ -427,8 +425,8 @@ export default function CasualRequisitionForm({
   if (amendmentNotEligible) {
     return (
       <div className="mx-auto max-w-md rounded-2xl border border-rose-200 bg-rose-50 p-6 text-center text-sm text-rose-700">
-        This requisition can no longer be amended. It may have already
-        been approved by HR, or you may not be its original submitter.
+        This requisition can no longer be amended. It may have already been
+        approved by HR, or you may not be its original submitter.
       </div>
     );
   }
@@ -440,6 +438,14 @@ export default function CasualRequisitionForm({
       {step === 3 && (
         <AlertModal
           alertInfo={alertInfo}
+          successLink={
+            isAmendment
+              ? undefined
+              : {
+                  href: myRequisitionsHref("casual"),
+                  label: "View my requisitions",
+                }
+          }
           heading={
             isAmendment
               ? { success: "Amendment submitted!", error: "Amendment failed" }
@@ -447,12 +453,12 @@ export default function CasualRequisitionForm({
           }
           buttonLabel={
             isAmendment
-              ? { success: "Close", error: "Try again" }
+              ? { success: "View my requisitions", error: "Try again" }
               : undefined
           }
           onBack={() => {
             if (isAmendment && alertInfo.alertType === "success") {
-              setCasualAmendmentRequestId(null);
+              router.push(myRequisitionsHref("casual"));
             } else {
               setStep(1);
             }
@@ -472,7 +478,7 @@ export default function CasualRequisitionForm({
           reason={reason}
           onBack={() => {
             setStep(1);
-            triggerScroll(!scrollTrigger);
+            scrollPageToTop();
           }}
           onSubmit={handleSubmit}
           submitting={submitting}
@@ -495,7 +501,9 @@ export default function CasualRequisitionForm({
           <header className="mb-8 flex items-end justify-between max-sm:flex-col max-sm:items-start max-sm:gap-5">
             <div>
               <h1 className="m-0 text-2xl font-semibold tracking-[-0.5px] text-[#1e1b1b]">
-                {isAmendment ? "Amend Casual Requisition" : "Casual Requisition"}
+                {isAmendment
+                  ? "Amend Casual Requisition"
+                  : "Casual Requisition"}
               </h1>
               <p className="mt-1 text-[14px] text-[#7c5a5a]">
                 {isAmendment
@@ -509,25 +517,22 @@ export default function CasualRequisitionForm({
             <div className="mb-6 flex items-start gap-2.5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3.5 text-[13px] text-amber-800">
               <Info className="mt-0.5 h-4 w-4 shrink-0" />
               <p>
-                Amendments are only possible until HR approves this
-                requisition. Submitting this amendment resets both the HOD and HR approval
-                stages, so this requisition will need to be re-approved from
-                the HOD stage onward.
+                Amendments are only possible until HR approves this requisition.
+                Submitting this amendment resets both the HOD and HR approval
+                stages, so this requisition will need to be re-approved from the
+                HOD stage onward.
               </p>
             </div>
           )}
 
-          {isAmendment &&
-            !!amendmentContext?.history.length && (
-              <div className="mb-6 rounded-3xl border border-white/85 bg-white/65 px-6 py-6 shadow-[0_24px_48px_rgba(160,60,60,0.10)] sm:px-8">
-                <h2 className="mb-2 flex items-center gap-2 text-[13px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
-                  <History size={16} /> Previous Amendments
-                </h2>
-                <CasualAmendmentHistory
-                  amendments={amendmentContext.history}
-                />
-              </div>
-            )}
+          {isAmendment && !!amendmentContext?.history.length && (
+            <div className="mb-6 rounded-3xl border border-white/85 bg-white/65 px-6 py-6 shadow-[0_24px_48px_rgba(160,60,60,0.10)] sm:px-8">
+              <h2 className="mb-2 flex items-center gap-2 text-[13px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
+                <History size={16} /> Previous Amendments
+              </h2>
+              <CasualAmendmentHistory amendments={amendmentContext.history} />
+            </div>
+          )}
 
           {/* Form Card */}
           <div className="rounded-3xl border border-white/85 bg-white/65 px-6 py-8 shadow-[0_24px_48px_rgba(160,60,60,0.10)] sm:px-8">
@@ -536,7 +541,7 @@ export default function CasualRequisitionForm({
               onSubmit={(e) => {
                 e.preventDefault();
                 setStep(2);
-                triggerScroll(!scrollTrigger);
+                scrollPageToTop();
               }}
             >
               {/* Section 1: Requisition Details */}

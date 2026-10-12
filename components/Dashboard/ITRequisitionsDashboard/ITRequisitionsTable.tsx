@@ -6,7 +6,7 @@ import RequisitionTable, { NEUTRAL_THEME } from "../RequisitionTable";
 import { ITRequisitionModal } from "./ITRequisitionsModal";
 import StatusFormatter from "../StatusFormatter";
 import ITDataExport from "./ITDataExport";
-import { useToggleStore } from "@/store/useToggleStore";
+import { newRequisitionHref } from "@/lib/dashboardTables";
 
 const dynamicTitles: Record<ITRequisitionDataProps["dataFlag"], string> = {
   userData: "Your Submitted IT Requisitions",
@@ -30,11 +30,6 @@ const COLUMNS = [
 export default function ITRequisitionsTable({
   dataFlag,
 }: ITRequisitionDataProps) {
-  // Zustand store
-  const setShowITRequisition = useToggleStore(
-    (state) => state.setShowITRequisition,
-  );
-
   return (
     <RequisitionTable
       tableKey={`it-${dataFlag}`}
@@ -51,10 +46,8 @@ export default function ITRequisitionsTable({
       toolbarSlot={dataFlag === "itAll" ? <ITDataExport /> : undefined}
       emptyState={{
         Icon: Monitor,
-        onNewRequisition:
-          dataFlag === "userData"
-            ? () => setShowITRequisition(true)
-            : undefined,
+        newRequisitionHref:
+          dataFlag === "userData" ? newRequisitionHref("it") : undefined,
       }}
       renderRow={(req) => (
         <>

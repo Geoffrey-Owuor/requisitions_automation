@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { assets } from "@/public/assets";
 import { useState, useEffect, useRef } from "react";
-import { useToggleStore } from "@/store/useToggleStore";
+import { newRequisitionHref } from "@/lib/dashboardTables";
 import { useUser } from "@/context/UserContext";
 import { REPORTS_PAGE, canViewReports } from "@/lib/reports/definitions";
 import {
@@ -36,9 +36,8 @@ import {
 type LauncherApp = {
   name: string;
   icon: LucideIcon;
-  href?: string;
+  href: string;
   external?: boolean;
-  onClick?: () => void;
 };
 
 // TODO: Ensure your assets.hotpoint_logo points to a valid image path
@@ -106,52 +105,36 @@ const DashboardBrand = ({ showText = false }: { showText?: boolean }) => {
 
 // App Menu Launcher - position should be fixed just below the logo icon
 const AppMenu = ({ onClose }: { onClose: () => void }) => {
-  const setShowITRequisition = useToggleStore(
-    (state) => state.setShowITRequisition,
-  );
-  const setShowTravelRequisition = useToggleStore(
-    (state) => state.setShowTravelRequisition,
-  );
-  const setShowAccessRequisition = useToggleStore(
-    (state) => state.setShowAccessRequisition,
-  );
-  const setShowCasualRequisition = useToggleStore(
-    (state) => state.setShowCasualRequisition,
-  );
-  const setShowEmployeeRequisition = useToggleStore(
-    (state) => state.setShowEmployeeRequisition,
-  );
-
   const [query, setQuery] = useState("");
   const { roles } = useUser();
 
-  // Internal apps + online forms - navigate within the app (Link/modal), never a new tab
+  // Internal apps + online forms - navigate within the app, never a new tab
   const internalApps: LauncherApp[] = [
     { name: "Home", icon: HousePlug, href: "/dashboard" },
     {
       name: "IT Requisition",
       icon: Monitor,
-      onClick: () => setShowITRequisition(true),
+      href: newRequisitionHref("it"),
     },
     {
       name: "Travel Requisition",
       icon: BriefcaseBusiness,
-      onClick: () => setShowTravelRequisition(true),
+      href: newRequisitionHref("travel"),
     },
     {
       name: "Casual Requisition",
       icon: HardHat,
-      onClick: () => setShowCasualRequisition(true),
+      href: newRequisitionHref("casual"),
     },
     {
       name: "Employee Requisition",
       icon: UserRoundPlus,
-      onClick: () => setShowEmployeeRequisition(true),
+      href: newRequisitionHref("employee"),
     },
     {
       name: "Key & Access",
       icon: LockKeyhole,
-      onClick: () => setShowAccessRequisition(true),
+      href: newRequisitionHref("access"),
     },
     {
       name: "Salary Advance",
@@ -319,7 +302,7 @@ const AppMenu = ({ onClose }: { onClose: () => void }) => {
   );
 };
 
-// Single app/form tile - renders as an internal Link, an external anchor, or an action button
+// Single app/form tile - renders as an internal Link or an external anchor
 const AppTile = ({
   app,
   onSelect,
@@ -348,7 +331,7 @@ const AppTile = ({
     </>
   );
 
-  if (app.href && app.external) {
+  if (app.external) {
     return (
       <a
         href={app.href}
@@ -362,25 +345,10 @@ const AppTile = ({
     );
   }
 
-  if (app.href) {
-    return (
-      <Link href={app.href} onClick={onSelect} className={className}>
-        {tileContent}
-      </Link>
-    );
-  }
-
   return (
-    <button
-      type="button"
-      onClick={() => {
-        app.onClick?.();
-        onSelect();
-      }}
-      className={className}
-    >
+    <Link href={app.href} onClick={onSelect} className={className}>
       {tileContent}
-    </button>
+    </Link>
   );
 };
 

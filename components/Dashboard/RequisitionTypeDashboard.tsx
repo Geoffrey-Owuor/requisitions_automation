@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { useUser } from "@/context/UserContext";
-import { useToggleStore } from "@/store/useToggleStore";
 import { useDashboardSummary } from "@/hooks/useDashboardSummary";
 import type { DashboardRequisitionType } from "@/lib/dashboardApi";
 import {
@@ -11,6 +10,7 @@ import {
   REQUISITION_TYPES,
   getRequisitionType,
   getVisibleTables,
+  newRequisitionHref,
   type DashboardTab,
   type DashboardTableEntry,
 } from "@/lib/dashboardTables";
@@ -76,18 +76,6 @@ export default function RequisitionTypeDashboard({
   const { roles, memberships } = useUser();
   const { label, href, Icon } = getRequisitionType(type);
 
-  // Same modal toggles the sidebar and the "Mine" empty state use
-  const openForm = useToggleStore(
-    (state) =>
-      ({
-        travel: state.setShowTravelRequisition,
-        it: state.setShowITRequisition,
-        access: state.setShowAccessRequisition,
-        casual: state.setShowCasualRequisition,
-        employee: state.setShowEmployeeRequisition,
-      })[type],
-  );
-
   const tables = getVisibleTables({ roles, memberships }).filter(
     (entry) => entry.type === type,
   );
@@ -147,13 +135,13 @@ export default function RequisitionTypeDashboard({
             <Icon className="h-5 w-5 text-neutral-500" />
             {label} Requisitions
           </h1>
-          <button
-            onClick={() => openForm(true)}
+          <Link
+            href={newRequisitionHref(type)}
             className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-3 py-2 text-sm text-white hover:bg-slate-800"
           >
             <Plus className="h-4 w-4" />
             New {label} Requisition
-          </button>
+          </Link>
         </div>
 
         {/* Tabs — hidden when the viewer only has their own submissions */}

@@ -1,7 +1,8 @@
 "use client";
 import { CheckCircle2, XCircle } from "lucide-react";
+import Link from "next/link";
 import { AlertInfo } from "./TravelRequisitionPage";
-import { useToggleStore } from "@/store/useToggleStore";
+import { scrollPageToTop } from "@/utils/scrollPageToTop";
 
 interface AlertModalProps {
   alertInfo: AlertInfo;
@@ -9,6 +10,8 @@ interface AlertModalProps {
   hideButton?: boolean;
   heading?: { success: string; error: string };
   buttonLabel?: { success: string; error: string };
+  // Shown under the button after a success, e.g. back to the type's tables
+  successLink?: { href: string; label: string };
 }
 
 export default function AlertModal({
@@ -17,10 +20,8 @@ export default function AlertModal({
   hideButton = false,
   heading,
   buttonLabel,
+  successLink,
 }: AlertModalProps) {
-  const triggerScroll = useToggleStore((state) => state.triggerScroll);
-  const scrollTrigger = useToggleStore((state) => state.scrollTrigger);
-
   const isSuccess = alertInfo.alertType === "success";
 
   const config = {
@@ -76,12 +77,21 @@ export default function AlertModal({
           <button
             onClick={() => {
               onBack();
-              triggerScroll(!scrollTrigger);
+              scrollPageToTop();
             }}
             className={`mt-8 mb-3 flex w-full cursor-pointer items-center justify-center gap-2 rounded-[14px] border-none py-4 text-[14px] font-semibold transition-all duration-200 hover:-translate-y-0.5 ${config.buttonStyle}`}
           >
             {config.buttonLabel}
           </button>
+        )}
+
+        {isSuccess && successLink && (
+          <Link
+            href={successLink.href}
+            className="block py-2 text-[13px] font-semibold text-[#7c5a5a] transition-colors hover:text-[#1e1b1b]"
+          >
+            {successLink.label}
+          </Link>
         )}
       </div>
     </div>

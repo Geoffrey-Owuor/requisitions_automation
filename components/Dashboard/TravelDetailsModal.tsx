@@ -23,7 +23,7 @@ import Link from "next/link";
 import { useUser } from "@/context/UserContext";
 import { getTravelApproverLink } from "@/serverActions/GetTravelApproverLink";
 import { useLoadingStore } from "@/store/useLoadingStore";
-import { useToggleStore } from "@/store/useToggleStore";
+import { amendRequisitionHref } from "@/lib/dashboardTables";
 import { useEffect, useState } from "react";
 import {
   getTravelAuditTrail,
@@ -55,9 +55,6 @@ export const TravelDetailsModal = ({
   dataFlag,
 }: ModalProps) => {
   const setLoadingLine = useLoadingStore((state) => state.setLoadingLine);
-  const setTravelAmendmentRequestId = useToggleStore(
-    (state) => state.setTravelAmendmentRequestId,
-  );
   const { memberships } = useUser();
   const [loading, setLoading] = useState(false);
   const [link, setLink] = useState("#");
@@ -198,16 +195,14 @@ export const TravelDetailsModal = ({
             </div>
             <div className="flex items-center gap-4">
               {canAmend && (
-                <button
-                  onClick={() => {
-                    setTravelAmendmentRequestId(data.request_id);
-                    onClose();
-                  }}
+                <Link
+                  href={amendRequisitionHref("travel", data.request_id)}
+                  onClick={onClose}
                   className="flex items-center gap-1 rounded-full bg-amber-500 px-3 py-1 text-xs font-semibold text-white transition-colors duration-200 hover:bg-amber-600"
                 >
                   <Pencil className="h-3.5 w-3.5" />
                   Amend
-                </button>
+                </Link>
               )}
               {stage !== "user" &&
                 data[`travel_${stage}_approval_status`] === "pending" && (
