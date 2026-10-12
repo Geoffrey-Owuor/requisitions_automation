@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import DashboardBrand from "./DashboardBrand";
 import Brand from "./Brand";
@@ -50,17 +50,41 @@ const MobileHeader = () => {
 
   const closeSidebar = () => setSidebarOpen(false);
 
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const wasOpenRef = useRef(false);
+
+  // Move focus into the drawer when it opens and back to the menu button when
+  // it closes (keyboard and screen-reader users), and close it on Escape
+  useEffect(() => {
+    if (sidebarOpen) {
+      wasOpenRef.current = true;
+      closeButtonRef.current?.focus();
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === "Escape") setSidebarOpen(false);
+      };
+      window.addEventListener("keydown", handleKeyDown);
+      return () => window.removeEventListener("keydown", handleKeyDown);
+    }
+    if (wasOpenRef.current) {
+      wasOpenRef.current = false;
+      menuButtonRef.current?.focus();
+    }
+  }, [sidebarOpen]);
+
   return (
     <>
       {/* Overlay & Sliding Mobile Sidebar */}
+      {/* inert while closed so the off-screen links can't be tabbed to */}
       <div
+        inert={!sidebarOpen}
         className={`fixed inset-0 z-70 ${
           sidebarOpen ? "pointer-events-auto" : "pointer-events-none"
         }`}
       >
         {/* Backdrop */}
         <div
-          className={`fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-200 ${
+          className={`fixed inset-0 bg-black/40 transition-opacity duration-200 ${
             sidebarOpen ? "opacity-100" : "opacity-0"
           }`}
           onClick={() => setSidebarOpen(false)}
@@ -68,6 +92,9 @@ const MobileHeader = () => {
 
         {/* Sliding Panel */}
         <aside
+          role="dialog"
+          aria-modal="true"
+          aria-label="Navigation"
           className={`relative z-10 h-full ${
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
           } custom:hidden layout-scrollbar flex w-80 flex-col bg-white shadow-2xl transition-transform duration-200`}
@@ -75,7 +102,10 @@ const MobileHeader = () => {
           <div className="flex h-16 items-center justify-between border-b border-slate-100 px-6">
             <Brand showText={true} />
             <button
+              ref={closeButtonRef}
+              type="button"
               onClick={() => setSidebarOpen(false)}
+              aria-label="Close menu"
               className="rounded-full p-1.5 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-950"
             >
               <X size={20} />
@@ -268,7 +298,11 @@ const MobileHeader = () => {
         {/* Left Side: Menu Toggle + Icon Brand */}
         <div className="flex items-center gap-4">
           <button
+            ref={menuButtonRef}
+            type="button"
             onClick={() => setSidebarOpen(true)}
+            aria-label="Open menu"
+            aria-expanded={sidebarOpen}
             className="rounded-full p-1.5 text-white/80 transition-all hover:bg-white/10 hover:text-white active:scale-95"
           >
             <Menu size={24} />
@@ -280,6 +314,7 @@ const MobileHeader = () => {
         <div className="flex items-center gap-4">
           <Link
             href="/guidelines"
+            aria-label="Guidelines"
             target="_blank"
             rel="noopener noreferrer"
             className="rounded-full p-1.5 text-white/80 transition-all hover:bg-white/10 hover:text-white"

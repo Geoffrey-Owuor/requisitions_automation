@@ -1,10 +1,8 @@
 import { Metadata } from "next";
-import { Suspense } from "react";
 import { query } from "@/lib/db";
 import ApproverShell from "@/components/Approvers/ApproverShell";
 import InvalidToken from "@/components/Approvers/TravelApprovers/InvalidToken";
 import AlreadyProcessed from "@/components/Approvers/TravelApprovers/AlreadyProcessed";
-import AccessApprovalSkeleton from "@/components/Skeletons/AccessApprovalSkeleton";
 import AccessApprovalModal, {
   AccessRequisitionData,
 } from "@/components/Approvers/AccessApprovers/AccessApprovalModal";
@@ -136,11 +134,7 @@ const ApprovalPageContent = async ({
     previousApprovals,
   };
 
-  return (
-    <Suspense fallback={<AccessApprovalSkeleton />}>
-      <AccessApprovalModal data={modalData} />
-    </Suspense>
-  );
+  return <AccessApprovalModal data={modalData} />;
 };
 
 // Every outcome - the approval modal and each status screen - renders inside

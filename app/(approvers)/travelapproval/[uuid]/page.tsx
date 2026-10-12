@@ -1,10 +1,8 @@
 import { Metadata } from "next";
-import { Suspense } from "react";
 import ApproverShell from "@/components/Approvers/ApproverShell";
 import { query } from "@/lib/db";
 import TravelApprovalModal from "@/components/Approvers/TravelApprovers/TravelApprovalModal";
 import { PreviousApproval } from "@/components/Approvers/PreviousApprovalsSection";
-import TravelApprovalSkeleton from "@/components/Skeletons/TravelApprovalSkeleton";
 import AlreadyProcessed from "@/components/Approvers/TravelApprovers/AlreadyProcessed";
 import InvalidToken from "@/components/Approvers/TravelApprovers/InvalidToken";
 import NotFoundRequest from "@/components/Approvers/TravelApprovers/NotFoundRequest";
@@ -178,47 +176,45 @@ const ApprovalPageContent = async ({
   }
 
   return (
-    <Suspense fallback={<TravelApprovalSkeleton />}>
-      <TravelApprovalModal
-        uuid={uuid}
-        stage={stage}
-        token={token}
-        approverName={currentApprover}
-        employeeName={requestData.employee_name}
-        employeeDepartment={requestData.employee_department}
-        employeeDesignation={requestData.employee_designation}
-        travelDestination={requestData.travel_destination}
-        travelDepartureDate={requestData.travel_departure_date}
-        travelReturnDate={requestData.travel_return_date}
-        travelCategory={requestData.travel_category}
-        travelBusinessJustification={requestData.travel_business_justification}
-        travelMode={requestData.travel_mode}
-        travelTransportCost={requestData.travel_transport_cost}
-        travelOtherCosts={requestData.travel_other_costs}
-        travelPerDiem={requestData.travel_per_diem}
-        travelTotalCost={requestData.travel_total_cost}
-        travelCostCenter={requestData.travel_cost_center}
-        travelWithinBudget={requestData.travel_within_budget}
-        travelApprovalTier={requestData.travel_approval_tier}
-        requestCreatedAt={requestData.request_created_at}
-        engineeringJobs={requestData.engineering_jobs}
-        previousApprovals={previousApprovals}
-        pushbacks={pushbacks}
-        amendments={amendments}
-        amendmentCount={Number(requestData.amendment_count)}
-        pushback={
-          isPushback
-            ? {
-                token,
-                currentStatus: approvalStatus,
-                currentApprover: requestData.travel_hr_approver,
-                currentComments: requestData.travel_hr_comments,
-                pushbackCount: Number(requestData.travel_hr_pushback_count),
-              }
-            : undefined
-        }
-      />
-    </Suspense>
+    <TravelApprovalModal
+      uuid={uuid}
+      stage={stage}
+      token={token}
+      approverName={currentApprover}
+      employeeName={requestData.employee_name}
+      employeeDepartment={requestData.employee_department}
+      employeeDesignation={requestData.employee_designation}
+      travelDestination={requestData.travel_destination}
+      travelDepartureDate={requestData.travel_departure_date}
+      travelReturnDate={requestData.travel_return_date}
+      travelCategory={requestData.travel_category}
+      travelBusinessJustification={requestData.travel_business_justification}
+      travelMode={requestData.travel_mode}
+      travelTransportCost={requestData.travel_transport_cost}
+      travelOtherCosts={requestData.travel_other_costs}
+      travelPerDiem={requestData.travel_per_diem}
+      travelTotalCost={requestData.travel_total_cost}
+      travelCostCenter={requestData.travel_cost_center}
+      travelWithinBudget={requestData.travel_within_budget}
+      travelApprovalTier={requestData.travel_approval_tier}
+      requestCreatedAt={requestData.request_created_at}
+      engineeringJobs={requestData.engineering_jobs}
+      previousApprovals={previousApprovals}
+      pushbacks={pushbacks}
+      amendments={amendments}
+      amendmentCount={Number(requestData.amendment_count)}
+      pushback={
+        isPushback
+          ? {
+              token,
+              currentStatus: approvalStatus,
+              currentApprover: requestData.travel_hr_approver,
+              currentComments: requestData.travel_hr_comments,
+              pushbackCount: Number(requestData.travel_hr_pushback_count),
+            }
+          : undefined
+      }
+    />
   );
 };
 

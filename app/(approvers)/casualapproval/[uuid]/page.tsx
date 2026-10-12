@@ -1,5 +1,4 @@
 import { Metadata } from "next";
-import { Suspense } from "react";
 import ApproverShell from "@/components/Approvers/ApproverShell";
 import { query } from "@/lib/db";
 import CasualApprovalModal from "@/components/Approvers/CasualApprovers/CasualApprovalModal";
@@ -8,7 +7,6 @@ import {
   casualAmendmentsQuery,
   CasualAmendmentValues,
 } from "@/services/CasualEmailSender";
-import TravelApprovalSkeleton from "@/components/Skeletons/TravelApprovalSkeleton";
 import AlreadyProcessed from "@/components/Approvers/TravelApprovers/AlreadyProcessed";
 import InvalidToken from "@/components/Approvers/TravelApprovers/InvalidToken";
 import NotFoundRequest from "@/components/Approvers/TravelApprovers/NotFoundRequest";
@@ -149,34 +147,32 @@ const ApprovalPageContent = async ({
       : [];
 
   return (
-    <Suspense fallback={<TravelApprovalSkeleton />}>
-      <CasualApprovalModal
-        uuid={uuid}
-        stage={stage}
-        token={token}
-        approverName={currentApprover}
-        submitterName={requestData.submitter_name}
-        submitterEmail={requestData.submitter_email}
-        department={requestData.employee_department}
-        location={requestData.casual_location}
-        requestCreatedAt={requestData.request_created_at}
-        previousApprovals={previousApprovals}
-        amendments={amendmentsResult}
-        amendmentCount={requestData.amendment_count}
-        sections={sectionsResult.map((section) => ({
-          sectionId: section.section_id,
-          sectionName: section.section_name,
-          justification: section.casual_justification,
-          numberOfCasuals: section.number_of_casuals,
-          ppesRequired: section.ppes_required,
-          periodFrom: section.engagement_period_from,
-          periodTo: section.engagement_period_to,
-          engagementDays: section.engagement_days,
-          ratePerDay: section.casual_rate_per_day,
-          totalAmount: section.casual_total_amount,
-        }))}
-      />
-    </Suspense>
+    <CasualApprovalModal
+      uuid={uuid}
+      stage={stage}
+      token={token}
+      approverName={currentApprover}
+      submitterName={requestData.submitter_name}
+      submitterEmail={requestData.submitter_email}
+      department={requestData.employee_department}
+      location={requestData.casual_location}
+      requestCreatedAt={requestData.request_created_at}
+      previousApprovals={previousApprovals}
+      amendments={amendmentsResult}
+      amendmentCount={requestData.amendment_count}
+      sections={sectionsResult.map((section) => ({
+        sectionId: section.section_id,
+        sectionName: section.section_name,
+        justification: section.casual_justification,
+        numberOfCasuals: section.number_of_casuals,
+        ppesRequired: section.ppes_required,
+        periodFrom: section.engagement_period_from,
+        periodTo: section.engagement_period_to,
+        engagementDays: section.engagement_days,
+        ratePerDay: section.casual_rate_per_day,
+        totalAmount: section.casual_total_amount,
+      }))}
+    />
   );
 };
 
