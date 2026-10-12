@@ -1,10 +1,9 @@
 import { Metadata } from "next";
-import { Suspense } from "react";
 import { query } from "@/lib/db";
+import { isUuid } from "@/lib/uuid";
 import ApproverShell from "@/components/Approvers/ApproverShell";
 import InvalidToken from "@/components/Approvers/TravelApprovers/InvalidToken";
 import AlreadyProcessed from "@/components/Approvers/TravelApprovers/AlreadyProcessed";
-import ITApprovalSkeleton from "@/components/Skeletons/ITApprovalSkeleton";
 import NotFoundRequest from "@/components/Approvers/TravelApprovers/NotFoundRequest";
 import NotAssignedHod from "@/components/Approvers/NotAssignedHod";
 import { getHodPageAccess } from "@/lib/hodAssignment";
@@ -48,8 +47,12 @@ const ApprovalPageContent = async ({
   const { uuid } = await params;
   const { token, stage } = await searchParams;
 
-  // First fallback - one of our props is missing/falsy
-  if (!uuid || !token || !isValidItStage(stage)) return <NotFoundRequest />;
+  // First fallback - one of our props is missing, or an id is malformed: both
+  // are uuid columns, and Postgres throws on a malformed uuid rather than
+  // matching nothing. A malformed token gets the same screen as an unknown one.
+  if (!isUuid(uuid) || !token || !isValidItStage(stage))
+    return <NotFoundRequest />;
+  if (!isUuid(token)) return <InvalidToken />;
 
   const validApprover = await query(
     `SELECT ${stage}_email AS email, 
@@ -139,11 +142,7 @@ const ApprovalPageContent = async ({
     previousApprovals,
   };
 
-  return (
-    <Suspense fallback={<ITApprovalSkeleton />}>
-      <ITApprovalModal data={modalData} />
-    </Suspense>
-  );
+  return <ITApprovalModal data={modalData} />;
 };
 
 // Every outcome - the approval modal and each status screen - renders inside

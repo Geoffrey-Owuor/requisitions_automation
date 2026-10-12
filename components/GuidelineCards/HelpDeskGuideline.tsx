@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import {
   Callout,
+  GuidelineActionCard,
   GuidelineHeading,
   InfoCard,
   SectionTitle,
@@ -17,6 +18,7 @@ export default function HelpdeskGuideline() {
   return (
     <div className="max-w-4xl space-y-7 pb-10">
       <GuidelineHeading
+        slug="desk"
         icon={<LaptopMinimalCheck size={13} />}
         title="HelpDesk"
       >
@@ -69,6 +71,8 @@ export default function HelpdeskGuideline() {
           />
         </div>
       </section>
+
+      <GuidelineActionCard slug="desk" />
     </div>
   );
 }

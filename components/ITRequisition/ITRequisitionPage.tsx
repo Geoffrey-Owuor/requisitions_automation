@@ -19,7 +19,10 @@ import { ApiHandler } from "@/utils/ApiHandler";
 import SubmittingOverlay from "../SubmittingOverlay";
 import AlertModal from "../AlertModal";
 import { AlertInfo } from "../TravelRequisitionPage";
-import { useToggleStore } from "@/store/useToggleStore";
+import { useReportUnsavedChanges } from "@/components/Dashboard/UnsavedChangesGuard";
+import { scrollPageToTop } from "@/utils/scrollPageToTop";
+import { myRequisitionsHref } from "@/lib/dashboardTables";
+import { isSameFormValue } from "@/lib/formChanges";
 import {
   FormSelect,
   findHodForDepartment,
@@ -85,9 +88,6 @@ interface CheckboxGroupProps {
 export default function ITRequisitionPage() {
   const { email } = useUser();
 
-  const triggerScroll = useToggleStore((state) => state.triggerScroll);
-  const scrollTrigger = useToggleStore((state) => state.scrollTrigger);
-
   // Load departments
   const { data: DEPARTMENTS = [], isLoading: departmentsLoading } = useQuery({
     queryKey: ["BaseDepartmentsData"],
@@ -110,6 +110,10 @@ export default function ITRequisitionPage() {
     alertMessage: "",
   });
   const [submitting, setSubmitting] = useState(false);
+
+  // Leaving the page asks first while the form differs from a blank one
+  // (a successful submission clears it)
+  useReportUnsavedChanges(!isSameFormValue(formData, InitialFormState));
 
   // Required fields for button disable check (otherRequirements is optional)
   const requiredFields: (keyof ITFormData)[] = [
@@ -195,7 +199,14 @@ export default function ITRequisitionPage() {
       {submitting && <SubmittingOverlay />}
 
       {step === 3 && (
-        <AlertModal alertInfo={alertInfo} onBack={() => setStep(1)} />
+        <AlertModal
+          alertInfo={alertInfo}
+          onBack={() => setStep(1)}
+          successLink={{
+            href: myRequisitionsHref("it"),
+            label: "View my requisitions",
+          }}
+        />
       )}
 
       {step === 2 && (
@@ -204,7 +215,7 @@ export default function ITRequisitionPage() {
           hodApproverName={hodLabel(formData.hodApprover)}
           onBack={() => {
             setStep(1);
-            triggerScroll(!scrollTrigger);
+            scrollPageToTop();
           }}
           onSubmit={handleSubmit}
           submitting={submitting}
@@ -260,7 +271,7 @@ export default function ITRequisitionPage() {
               onSubmit={(e) => {
                 e.preventDefault();
                 setStep(2);
-                triggerScroll(!scrollTrigger);
+                scrollPageToTop();
               }}
             >
               {/* Section 1: Employee Details */}

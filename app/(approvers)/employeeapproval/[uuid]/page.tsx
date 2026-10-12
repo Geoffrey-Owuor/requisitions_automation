@@ -1,10 +1,9 @@
 import { Metadata } from "next";
-import { Suspense } from "react";
 import ApproverShell from "@/components/Approvers/ApproverShell";
 import { query } from "@/lib/db";
+import { isUuid } from "@/lib/uuid";
 import EmployeeApprovalModal from "@/components/Approvers/EmployeeApprovers/EmployeeApprovalModal";
 import { PreviousApproval } from "@/components/Approvers/PreviousApprovalsSection";
-import TravelApprovalSkeleton from "@/components/Skeletons/TravelApprovalSkeleton";
 import AlreadyProcessed from "@/components/Approvers/TravelApprovers/AlreadyProcessed";
 import InvalidToken from "@/components/Approvers/TravelApprovers/InvalidToken";
 import NotFoundRequest from "@/components/Approvers/TravelApprovers/NotFoundRequest";
@@ -53,9 +52,12 @@ const ApprovalPageContent = async ({
   const { uuid } = await params;
   const { token, stage } = await searchParams;
 
-  // First fallback - one of our props is missing/falsy
-  if (!uuid || !token || !isValidEmployeeStage(stage))
+  // First fallback - one of our props is missing, or an id is malformed: both
+  // are uuid columns, and Postgres throws on a malformed uuid rather than
+  // matching nothing. A malformed token gets the same screen as an unknown one.
+  if (!isUuid(uuid) || !token || !isValidEmployeeStage(stage))
     return <NotFoundRequest />;
+  if (!isUuid(token)) return <InvalidToken />;
 
   // HR approvers are additionally scoped to the forms in their hr_forms
   // allow-list - an approver not permitted for this form is treated the
@@ -195,41 +197,39 @@ const ApprovalPageContent = async ({
   const currentApprover = approverDetails.name;
 
   return (
-    <Suspense fallback={<TravelApprovalSkeleton />}>
-      <EmployeeApprovalModal
-        uuid={uuid}
-        stage={stage}
-        token={token}
-        approverName={currentApprover}
-        submitterName={requestData.submitter_name}
-        submitterEmail={requestData.submitter_email}
-        department={requestData.employee_department}
-        requestCreatedAt={requestData.request_created_at}
-        previousApprovals={previousApprovals}
-        amendmentCount={requestData.amendment_count}
-        amendments={amendments}
-        positions={positionsResult.map((position) => ({
-          positionId: position.position_id,
-          positionTitle: position.position_title,
-          numberRequired: position.number_required,
-          replacementOrNew: position.position_replacement_or_new,
-          jobGrade: position.position_job_grade,
-          salaryRange: position.position_salary_range,
-          justification: position.position_justification,
-          reportingTo: position.position_reporting_to,
-          dateFilled: position.date_position_filled,
-          attachments: attachmentsResult
-            .filter(
-              (attachment) => attachment.position_id === position.position_id,
-            )
-            .map((attachment) => ({
-              attachmentId: attachment.attachment_id,
-              originalFilename: attachment.original_filename,
-              attachmentType: attachment.attachment_type,
-            })),
-        }))}
-      />
-    </Suspense>
+    <EmployeeApprovalModal
+      uuid={uuid}
+      stage={stage}
+      token={token}
+      approverName={currentApprover}
+      submitterName={requestData.submitter_name}
+      submitterEmail={requestData.submitter_email}
+      department={requestData.employee_department}
+      requestCreatedAt={requestData.request_created_at}
+      previousApprovals={previousApprovals}
+      amendmentCount={requestData.amendment_count}
+      amendments={amendments}
+      positions={positionsResult.map((position) => ({
+        positionId: position.position_id,
+        positionTitle: position.position_title,
+        numberRequired: position.number_required,
+        replacementOrNew: position.position_replacement_or_new,
+        jobGrade: position.position_job_grade,
+        salaryRange: position.position_salary_range,
+        justification: position.position_justification,
+        reportingTo: position.position_reporting_to,
+        dateFilled: position.date_position_filled,
+        attachments: attachmentsResult
+          .filter(
+            (attachment) => attachment.position_id === position.position_id,
+          )
+          .map((attachment) => ({
+            attachmentId: attachment.attachment_id,
+            originalFilename: attachment.original_filename,
+            attachmentType: attachment.attachment_type,
+          })),
+      }))}
+    />
   );
 };
 

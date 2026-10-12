@@ -76,6 +76,21 @@ export const REQUISITION_TYPES: RequisitionTypeEntry[] = [
 export const getRequisitionType = (type: DashboardRequisitionType) =>
   REQUISITION_TYPES.find((entry) => entry.type === type)!;
 
+// Each form is its own page under its type's dashboard page
+export type AmendableRequisitionType = "travel" | "casual" | "employee";
+
+export const newRequisitionHref = (type: DashboardRequisitionType) =>
+  `${getRequisitionType(type).href}/new`;
+
+export const amendRequisitionHref = (
+  type: AmendableRequisitionType,
+  requestId: string,
+) => `${getRequisitionType(type).href}/${encodeURIComponent(requestId)}/amend`;
+
+// Where a form sends the user once they're done: their own submissions
+export const myRequisitionsHref = (type: DashboardRequisitionType) =>
+  `${getRequisitionType(type).href}?tab=mine`;
+
 /**
  * Every table a requisition type page can render, in display order.
  *

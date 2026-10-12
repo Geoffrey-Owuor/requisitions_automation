@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import {
   GeneralNote,
+  GuidelineActionCard,
   GuidelineHeading,
   InfoCard,
   SectionTitle,
@@ -18,6 +19,7 @@ export default function EmployeeRequisitionGuideline() {
   return (
     <div className="max-w-4xl space-y-7 pb-10">
       <GuidelineHeading
+        slug="employee"
         icon={<UserRoundPlus size={13} />}
         title="Employee Requisition"
       >
@@ -96,6 +98,8 @@ export default function EmployeeRequisitionGuideline() {
           />
         </div>
       </section>
+
+      <GuidelineActionCard slug="employee" />
     </div>
   );
 }

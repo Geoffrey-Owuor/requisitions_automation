@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import {
   GeneralNote,
+  GuidelineActionCard,
   GuidelineHeading,
   InfoCard,
   SectionTitle,
@@ -15,6 +16,7 @@ export default function AccessRequisitionGuideline() {
   return (
     <div className="max-w-4xl space-y-7 pb-10">
       <GuidelineHeading
+        slug="access"
         icon={<LockKeyhole size={13} />}
         title="Key(s) & Access Code Issuance"
       >
@@ -49,6 +51,8 @@ export default function AccessRequisitionGuideline() {
           />
         </div>
       </section>
+
+      <GuidelineActionCard slug="access" />
     </div>
   );
 }

@@ -13,16 +13,16 @@ import {
 import Image from "next/image";
 import { assets } from "@/public/assets";
 import { useQuery } from "@tanstack/react-query";
-import {
-  loadHodArray,
-  loadBaseDepartments,
-} from "@/lib/loadAppDataV2";
+import { loadHodArray, loadBaseDepartments } from "@/lib/loadAppDataV2";
 import { ApiHandler } from "@/utils/ApiHandler";
 import SubmittingOverlay from "@/components/SubmittingOverlay";
 import AlertModal from "@/components/AlertModal";
 import { AlertInfo } from "@/components/TravelRequisitionPage";
 import KeyConfirmationModal from "./KeyConfirmationModal";
-import { useToggleStore } from "@/store/useToggleStore";
+import { useReportUnsavedChanges } from "@/components/Dashboard/UnsavedChangesGuard";
+import { scrollPageToTop } from "@/utils/scrollPageToTop";
+import { myRequisitionsHref } from "@/lib/dashboardTables";
+import { isSameFormValue } from "@/lib/formChanges";
 import {
   FormSelect,
   findHodForDepartment,
@@ -63,9 +63,6 @@ interface FormInputProps {
 export default function KeyAccessRequisitionForm() {
   const { email } = useUser();
 
-  const scrollTrigger = useToggleStore((state) => state.scrollTrigger);
-  const triggerScroll = useToggleStore((state) => state.triggerScroll);
-
   // Load departments
   const { data: DEPARTMENTS = [], isLoading: departmentsLoading } = useQuery({
     queryKey: ["BaseDepartmentsData"],
@@ -89,6 +86,12 @@ export default function KeyAccessRequisitionForm() {
     alertMessage: "",
   });
   const [submitting, setSubmitting] = useState(false);
+
+  // Leaving the page asks first while the form differs from a blank one
+  // (a successful submission clears it)
+  useReportUnsavedChanges(
+    agreedToTerms || !isSameFormValue(formData, InitialFormState),
+  );
 
   // Required fields for button disable check
   const requiredFields: (keyof KeyAccessFormData)[] = [
@@ -174,7 +177,14 @@ export default function KeyAccessRequisitionForm() {
       {submitting && <SubmittingOverlay />}
 
       {step === 3 && (
-        <AlertModal alertInfo={alertInfo} onBack={() => setStep(1)} />
+        <AlertModal
+          alertInfo={alertInfo}
+          onBack={() => setStep(1)}
+          successLink={{
+            href: myRequisitionsHref("access"),
+            label: "View my requisitions",
+          }}
+        />
       )}
 
       {step === 2 && (
@@ -183,7 +193,7 @@ export default function KeyAccessRequisitionForm() {
           hodApproverName={hodLabel(formData.hodApprover)}
           onBack={() => {
             setStep(1);
-            triggerScroll(!scrollTrigger);
+            scrollPageToTop();
           }}
           onSubmit={handleSubmit}
           submitting={submitting}
@@ -222,7 +232,7 @@ export default function KeyAccessRequisitionForm() {
               onSubmit={(e) => {
                 e.preventDefault();
                 setStep(2);
-                triggerScroll(!scrollTrigger);
+                scrollPageToTop();
               }}
             >
               {/* Section 1: Staff Details */}

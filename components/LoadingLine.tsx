@@ -4,27 +4,39 @@ import { useLoadingStore } from "@/store/useLoadingStore";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 
+// Only show the line for navigations that take a moment, so prefetched routes
+// don't flash it.
+const SHOW_DELAY_MS = 150;
+// Fill to 100%, then fade out.
+const FILL_MS = 200;
+const FADE_MS = 200;
+// Recover if a navigation never lands on a new path (network error, redirect
+// back to the current page).
+const GIVE_UP_MS = 15_000;
+
 const LoadingLine = () => {
   const pathname = usePathname();
   const [progress, setProgress] = useState(0);
+  const [visible, setVisible] = useState(false);
 
-  // Loading store data
-  const loadingLine = useLoadingStore((state) => state.loadingLine);
-  const setLoadingLine = useLoadingStore((state) => state.setLoadingLine);
+  const navigating = useLoadingStore((state) => state.navigating);
+  const finishNavigation = useLoadingStore((state) => state.finishNavigation);
 
-  // 1. Reset on route change
+  // 1. The navigation has landed once the path changes
   useEffect(() => {
-    setLoadingLine(false);
-    Promise.resolve().then(() => setProgress(0));
-  }, [pathname, setLoadingLine]);
+    finishNavigation();
+  }, [pathname, finishNavigation]);
 
-  // 2. Handle the progress animation
+  // 2. While navigating: appear after the delay, then trickle towards 95%
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    if (!navigating) return;
 
-    if (loadingLine) {
-      // Jump start to 10% immediately so user sees something happened
-      Promise.resolve().then(() => setProgress(10));
+    let interval: NodeJS.Timeout | undefined;
+
+    const show = setTimeout(() => {
+      // Jump start to 10% so the user sees something happened
+      setProgress(10);
+      setVisible(true);
 
       interval = setInterval(() => {
         setProgress((prev) => {
@@ -41,21 +53,47 @@ const LoadingLine = () => {
           return prev + jump;
         });
       }, 100); // Update every 100ms
-    } else {
-      Promise.resolve().then(() => setProgress(0));
-    }
+    }, SHOW_DELAY_MS);
 
-    return () => clearInterval(interval);
-  }, [loadingLine]);
+    const giveUp = setTimeout(finishNavigation, GIVE_UP_MS);
 
-  // If not loading, render nothing
-  if (!loadingLine) return null;
+    return () => {
+      clearTimeout(show);
+      clearTimeout(giveUp);
+      clearInterval(interval);
+    };
+  }, [navigating, finishNavigation]);
+
+  // 3. Once finished: let the fill and fade play, then unmount
+  const finishing = visible && !navigating;
+
+  useEffect(() => {
+    if (!finishing) return;
+
+    const hide = setTimeout(() => {
+      setVisible(false);
+      setProgress(0);
+    }, FILL_MS + FADE_MS);
+
+    return () => clearTimeout(hide);
+  }, [finishing]);
+
+  if (!visible) return null;
 
   return (
-    <div className="fixed top-0 left-0 z-100 h-[2.5px] w-full bg-transparent">
+    <div
+      aria-hidden
+      className="pointer-events-none fixed top-0 left-0 z-100 h-[2.5px] w-full bg-transparent"
+    >
       <div
-        className="h-full bg-linear-to-r from-rose-500 via-rose-600 to-rose-700 transition-all duration-300 ease-out"
-        style={{ width: `${progress}%` }}
+        className="h-full bg-linear-to-r from-rose-500 via-rose-600 to-rose-700"
+        style={{
+          width: `${finishing ? 100 : progress}%`,
+          opacity: finishing ? 0 : 1,
+          transition: finishing
+            ? `width ${FILL_MS}ms ease-out, opacity ${FADE_MS}ms ease-out ${FILL_MS}ms`
+            : "width 300ms ease-out",
+        }}
       />
     </div>
   );

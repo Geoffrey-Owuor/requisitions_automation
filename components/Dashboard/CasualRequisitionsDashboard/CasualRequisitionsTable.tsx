@@ -5,7 +5,7 @@ import { HardHat, Info } from "lucide-react";
 import RequisitionTable, { EMERALD_THEME } from "../RequisitionTable";
 import { CasualDetailsModal } from "./CasualDetailsModal";
 import StatusFormatter from "../StatusFormatter";
-import { useToggleStore } from "@/store/useToggleStore";
+import { newRequisitionHref } from "@/lib/dashboardTables";
 
 const dynamicTitles: Record<CasualRequisitionDataProps["dataFlag"], string> = {
   userData: "Your Submitted Casual Requisitions",
@@ -27,11 +27,6 @@ const COLUMNS = [
 export default function CasualRequisitionsTable({
   dataFlag,
 }: CasualRequisitionDataProps) {
-  // Zustand store
-  const setShowCasualRequisition = useToggleStore(
-    (state) => state.setShowCasualRequisition,
-  );
-
   return (
     <RequisitionTable
       tableKey={`casual-${dataFlag}`}
@@ -47,10 +42,8 @@ export default function CasualRequisitionsTable({
       }
       emptyState={{
         Icon: HardHat,
-        onNewRequisition:
-          dataFlag === "userData"
-            ? () => setShowCasualRequisition(true)
-            : undefined,
+        newRequisitionHref:
+          dataFlag === "userData" ? newRequisitionHref("casual") : undefined,
       }}
       renderRow={(req) => (
         <>
@@ -100,9 +93,9 @@ export default function CasualRequisitionsTable({
           </td>
         </>
       )}
-      renderModal={(data, close) => (
+      renderModal={(data, isOpen, close) => (
         <CasualDetailsModal
-          isOpen={!!data}
+          isOpen={isOpen}
           data={data}
           dataFlag={dataFlag}
           onClose={close}

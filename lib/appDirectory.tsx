@@ -9,6 +9,7 @@ import {
   UserRoundPlus,
   type LucideIcon,
 } from "lucide-react";
+import { newRequisitionHref } from "@/lib/dashboardTables";
 
 /**
  * Single source of truth for the apps and forms the hub exposes.
@@ -38,8 +39,12 @@ export type AppEntry = {
   chain: string[];
   /** Qualifier shown after the chain, e.g. tiering rules. */
   chainNote?: string;
-  /** Where the form itself lives, when it is reachable without signing in. */
-  action?: { href: string; label: string };
+  /**
+   * Where the form or portal itself lives. `signInRequired` is true for
+   * everything under the dashboard: the proxy sends a signed-out visitor to
+   * sign in and back here afterwards.
+   */
+  action?: { href: string; label: string; signInRequired: boolean };
 };
 
 /** Ordered as the guidelines navigation lists them. */
@@ -54,6 +59,11 @@ export const appDirectory: AppEntry[] = [
     group: "form",
     chain: ["HOD", "HR"],
     chainNote: "Director also approves above KES 100k",
+    action: {
+      href: newRequisitionHref("travel"),
+      label: "Open form",
+      signInRequired: true,
+    },
   },
   {
     slug: "it",
@@ -64,6 +74,11 @@ export const appDirectory: AppEntry[] = [
     owner: "IT",
     group: "form",
     chain: ["HOD", "IT Fulfilment"],
+    action: {
+      href: newRequisitionHref("it"),
+      label: "Open form",
+      signInRequired: true,
+    },
   },
   {
     slug: "casual",
@@ -74,6 +89,11 @@ export const appDirectory: AppEntry[] = [
     owner: "HR",
     group: "form",
     chain: ["HOD", "HR"],
+    action: {
+      href: newRequisitionHref("casual"),
+      label: "Open form",
+      signInRequired: true,
+    },
   },
   {
     slug: "employee",
@@ -84,6 +104,11 @@ export const appDirectory: AppEntry[] = [
     owner: "HR",
     group: "form",
     chain: ["HOD", "CEO", "HR"],
+    action: {
+      href: newRequisitionHref("employee"),
+      label: "Open form",
+      signInRequired: true,
+    },
   },
   {
     slug: "access",
@@ -94,6 +119,11 @@ export const appDirectory: AppEntry[] = [
     owner: "Retail",
     group: "form",
     chain: ["HOD", "Security"],
+    action: {
+      href: newRequisitionHref("access"),
+      label: "Open form",
+      signInRequired: true,
+    },
   },
   {
     slug: "advance",
@@ -104,7 +134,7 @@ export const appDirectory: AppEntry[] = [
     owner: "HR",
     group: "form",
     chain: ["HR", "Finance"],
-    action: { href: "/advance", label: "Open form" },
+    action: { href: "/advance", label: "Open form", signInRequired: false },
   },
   {
     slug: "desk",
@@ -115,6 +145,11 @@ export const appDirectory: AppEntry[] = [
     owner: "IT",
     group: "portal",
     chain: [],
+    action: {
+      href: "/dashboard/helpdesk",
+      label: "Open portal",
+      signInRequired: true,
+    },
   },
   {
     slug: "purchase",
@@ -125,6 +160,11 @@ export const appDirectory: AppEntry[] = [
     owner: "HR",
     group: "portal",
     chain: ["Payroll", "HR", "Credit Control", "Invoicing"],
+    action: {
+      href: "/dashboard/staffproductpurchase",
+      label: "Open portal",
+      signInRequired: true,
+    },
   },
 ];
 

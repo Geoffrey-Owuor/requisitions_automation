@@ -5,7 +5,7 @@ import { PlaneLanding, Info, BriefcaseBusiness } from "lucide-react";
 import RequisitionTable, { ROSE_THEME } from "./RequisitionTable";
 import { TravelDetailsModal } from "./TravelDetailsModal";
 import StatusFormatter from "./StatusFormatter";
-import { useToggleStore } from "@/store/useToggleStore";
+import { newRequisitionHref } from "@/lib/dashboardTables";
 
 const dynamicTitles: Record<TravelRequisitionDataProps["dataFlag"], string> = {
   userData: "Your Submitted Travel Requisitions",
@@ -29,11 +29,6 @@ const COLUMNS = [
 export default function TravelRequisitionsTable({
   dataFlag,
 }: TravelRequisitionDataProps) {
-  // Zustand store
-  const setShowTravelRequisition = useToggleStore(
-    (state) => state.setShowTravelRequisition,
-  );
-
   return (
     <RequisitionTable
       tableKey={`travel-${dataFlag}`}
@@ -49,10 +44,8 @@ export default function TravelRequisitionsTable({
       }
       emptyState={{
         Icon: PlaneLanding,
-        onNewRequisition:
-          dataFlag === "userData"
-            ? () => setShowTravelRequisition(true)
-            : undefined,
+        newRequisitionHref:
+          dataFlag === "userData" ? newRequisitionHref("travel") : undefined,
       }}
       renderRow={(req) => (
         <>
@@ -110,9 +103,9 @@ export default function TravelRequisitionsTable({
           </td>
         </>
       )}
-      renderModal={(data, close) => (
+      renderModal={(data, isOpen, close) => (
         <TravelDetailsModal
-          isOpen={!!data}
+          isOpen={isOpen}
           data={data}
           dataFlag={dataFlag}
           onClose={close}

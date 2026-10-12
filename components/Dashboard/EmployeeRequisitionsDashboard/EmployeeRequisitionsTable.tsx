@@ -5,20 +5,18 @@ import { UserRoundPlus, Info } from "lucide-react";
 import RequisitionTable, { VIOLET_THEME } from "../RequisitionTable";
 import { EmployeeDetailsModal } from "./EmployeeDetailsModal";
 import StatusFormatter from "../StatusFormatter";
-import { useToggleStore } from "@/store/useToggleStore";
+import { newRequisitionHref } from "@/lib/dashboardTables";
 
-const dynamicTitles: Record<
-  EmployeeRequisitionDataProps["dataFlag"],
-  string
-> = {
-  userData: "Your Submitted Employee Requisitions",
-  hodPending: "Employee Requisitions Pending Your Approval (HOD)",
-  retailDirectorPending:
-    "Employee Requisitions Pending Your Approval (Retail Director)",
-  directorPending: "Employee Requisitions Pending Your Approval (CEO)",
-  hrPending: "Employee Requisitions Pending Your Approval (HR)",
-  history: "Employee Requisitions Approval History",
-};
+const dynamicTitles: Record<EmployeeRequisitionDataProps["dataFlag"], string> =
+  {
+    userData: "Your Submitted Employee Requisitions",
+    hodPending: "Employee Requisitions Pending Your Approval (HOD)",
+    retailDirectorPending:
+      "Employee Requisitions Pending Your Approval (Retail Director)",
+    directorPending: "Employee Requisitions Pending Your Approval (CEO)",
+    hrPending: "Employee Requisitions Pending Your Approval (HR)",
+    history: "Employee Requisitions Approval History",
+  };
 
 const COLUMNS = [
   { key: "department", label: "Department" },
@@ -32,11 +30,6 @@ const COLUMNS = [
 export default function EmployeeRequisitionsTable({
   dataFlag,
 }: EmployeeRequisitionDataProps) {
-  // Zustand store
-  const setShowEmployeeRequisition = useToggleStore(
-    (state) => state.setShowEmployeeRequisition,
-  );
-
   return (
     <RequisitionTable
       tableKey={`employee-${dataFlag}`}
@@ -57,10 +50,8 @@ export default function EmployeeRequisitionsTable({
       }
       emptyState={{
         Icon: UserRoundPlus,
-        onNewRequisition:
-          dataFlag === "userData"
-            ? () => setShowEmployeeRequisition(true)
-            : undefined,
+        newRequisitionHref:
+          dataFlag === "userData" ? newRequisitionHref("employee") : undefined,
       }}
       renderRow={(req) => (
         <>
@@ -103,9 +94,9 @@ export default function EmployeeRequisitionsTable({
           </td>
         </>
       )}
-      renderModal={(data, close) => (
+      renderModal={(data, isOpen, close) => (
         <EmployeeDetailsModal
-          isOpen={!!data}
+          isOpen={isOpen}
           data={data}
           dataFlag={dataFlag}
           onClose={close}

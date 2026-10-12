@@ -5,13 +5,12 @@ import { LockKeyhole, Info } from "lucide-react";
 import RequisitionTable, { AMBER_THEME } from "../RequisitionTable";
 import { AccessDetailsModal } from "./AccessDetailsModal";
 import StatusFormatter from "../StatusFormatter";
-import { useToggleStore } from "@/store/useToggleStore";
+import { newRequisitionHref } from "@/lib/dashboardTables";
 
 const dynamicTitles: Record<AccessRequisitionDataProps["dataFlag"], string> = {
   userData: "Your Submitted Key & Access Requisitions",
   hodPending: "Key & Access Requisitions Pending Your Approval (HOD)",
-  securityPending:
-    "Key & Access Requisitions Pending Your Approval (Security)",
+  securityPending: "Key & Access Requisitions Pending Your Approval (Security)",
   history: "Key & Access Requisitions Approval History",
 };
 
@@ -27,11 +26,6 @@ const COLUMNS = [
 export default function AccessRequisitionsTable({
   dataFlag,
 }: AccessRequisitionDataProps) {
-  // Zustand store
-  const setShowAccessRequisition = useToggleStore(
-    (state) => state.setShowAccessRequisition,
-  );
-
   return (
     <RequisitionTable
       tableKey={`access-${dataFlag}`}
@@ -52,10 +46,8 @@ export default function AccessRequisitionsTable({
       }
       emptyState={{
         Icon: LockKeyhole,
-        onNewRequisition:
-          dataFlag === "userData"
-            ? () => setShowAccessRequisition(true)
-            : undefined,
+        newRequisitionHref:
+          dataFlag === "userData" ? newRequisitionHref("access") : undefined,
       }}
       renderRow={(req) => (
         <>
@@ -98,9 +90,9 @@ export default function AccessRequisitionsTable({
           </td>
         </>
       )}
-      renderModal={(data, close) => (
+      renderModal={(data, isOpen, close) => (
         <AccessDetailsModal
-          isOpen={!!data}
+          isOpen={isOpen}
           data={data}
           dataFlag={dataFlag}
           onClose={close}

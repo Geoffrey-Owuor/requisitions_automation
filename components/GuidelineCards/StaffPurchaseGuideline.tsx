@@ -9,6 +9,7 @@ import {
 import Link from "next/link";
 import {
   Callout,
+  GuidelineActionCard,
   GuidelineHeading,
   InfoCard,
   SectionTitle,
@@ -18,6 +19,7 @@ export default function StaffPurchaseGuideline() {
   return (
     <div className="max-w-4xl space-y-7 pb-10">
       <GuidelineHeading
+        slug="purchase"
         icon={<ShoppingBag size={13} />}
         title="Staff Product Purchase"
       >
@@ -85,6 +87,8 @@ export default function StaffPurchaseGuideline() {
           />
         </div>
       </section>
+
+      <GuidelineActionCard slug="purchase" />
     </div>
   );
 }
