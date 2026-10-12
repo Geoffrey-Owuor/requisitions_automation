@@ -1,7 +1,6 @@
 "use client";
 import { QueryResultRow } from "pg";
 import {
-  X,
   Monitor,
   Building2,
   Calendar,
@@ -14,13 +13,17 @@ import {
 import StatusFormatter from "../StatusFormatter";
 import { dateFormatter } from "@/public/assets";
 import { useLoadingStore } from "@/store/useLoadingStore";
-import ClientPortal from "@/components/ClientPortal";
+import { useQuery } from "@tanstack/react-query";
+import {
+  Modal,
+  ModalActionSkeleton,
+  modalActionClass,
+} from "@/components/Modal";
 import {
   getITApproverLink,
   ITStageLevels,
 } from "@/serverActions/GetITApproverLink";
 import { useUser } from "@/context/UserContext";
-import { useEffect, useState } from "react";
 import Link from "next/link";
 
 interface ITRequisitionModalProps {
@@ -94,8 +97,6 @@ export function ITRequisitionModal({
   const setLoadingLine = useLoadingStore((state) => state.setLoadingLine);
 
   const { email } = useUser();
-  const [loading, setLoading] = useState(false);
-  const [link, setLink] = useState("#");
 
   const handleLinkClick = () => {
     onClose();
@@ -119,220 +120,169 @@ export function ITRequisitionModal({
   };
 
   const stage = STAGE_LEVELS[dataFlag];
+  const requestId: string | undefined = data?.request_id;
 
-  useEffect(() => {
-    const getApprovalLink = async () => {
-      try {
-        if (!data) return; //do not run when data is not available
-        if (stage === "user" || data[`${stage}_approver_status`] !== "pending")
-          return; //do not run when we are viewing user data or approver status is not pending
+  // Only resolved when the viewer is at a pending approval stage
+  const needsReviewLink =
+    stage !== "user" && data?.[`${stage}_approver_status`] === "pending";
+  const linkQuery = useQuery({
+    queryKey: ["itApproverLink", stage, requestId],
+    queryFn: () => getITApproverLink({ email, stage, uuid: requestId! }),
+    enabled: isOpen && needsReviewLink,
+  });
 
-        setLoading(true);
-
-        const uuid = data.request_id;
-        const resolvedLink = await getITApproverLink({
-          email,
-          stage,
-          uuid,
-        });
-
-        setLink(resolvedLink);
-      } catch (error) {
-        console.error("Error fetching approver link:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    getApprovalLink();
-  }, [data, stage, email]);
-
-  if (!isOpen || !data) return null;
+  if (!data) return null;
 
   return (
-    <ClientPortal>
-      {/* Backdrop */}
-      <div
-        onClick={onClose}
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-      >
-        {/* Modal Panel */}
-        <div
-          onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-2xl rounded-[20px] border border-b border-gray-200 bg-white shadow-[0_32px_64px_rgba(60,100,160,0.15)]"
-        >
-          {/* Header */}
-          <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-2 rounded-t-[20px] border-b border-neutral-100/50 bg-white px-6 py-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-red-400 shadow-sm">
-                <Monitor size={18} />
-              </div>
-              <div>
-                <h2 className="text-sm font-semibold text-[#1e1b1b]">
-                  IT Requisition
-                </h2>
-                <p className="text-[11px] text-gray-400">
-                  ID: {data.request_id} &middot;{" "}
-                  {dateFormatter(data.request_created_at)}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4">
-              {stage !== "user" &&
-                data[`${stage}_approver_status`] === "pending" && (
-                  <>
-                    {loading ? (
-                      <div className="h-5 w-20 animate-pulse rounded-full bg-gray-300" />
-                    ) : (
-                      <Link
-                        href={link}
-                        onClick={handleLinkClick}
-                        className="flex items-center gap-1 rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white transition-colors duration-200 hover:bg-slate-800"
-                      >
-                        <ShieldUser className="h-3.5 w-3.5" />
-                        Review
-                      </Link>
-                    )}
-                  </>
-                )}
-              <Link
-                href={`/dashboard/itpdf/${data.request_id}`}
-                onClick={handleLinkClick}
-                className="flex items-center gap-1 rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white transition-colors duration-200 hover:bg-slate-800"
-              >
-                Pdf
-                <ArrowUpRight className="h-3.5 w-3.5" />
-              </Link>
-              <button
-                onClick={onClose}
-                className="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-neutral-200 hover:text-gray-700"
-              >
-                <X size={18} />
-              </button>
-            </div>
-          </div>
-
-          {/* Body */}
-          <div className="layout-scrollbar max-h-[80vh] space-y-6 px-6 py-6">
-            {/* — Submitter Info — */}
-            <section>
-              <SectionHeader icon={UserRound} title="Submitted By" />
-              <div className="grid grid-cols-2 gap-4 rounded-2xl border border-gray-100 bg-neutral-50 p-4">
-                <Field label="Name" value={data.submitter_name} />
-                <Field label="Email" value={data.submitter_email} />
-              </div>
-            </section>
-
-            {/* — Employee Info — */}
-            <section>
-              <SectionHeader icon={Building2} title="Employee Details" />
-              <div className="grid grid-cols-2 gap-4 rounded-2xl border border-gray-100 bg-neutral-50 p-4">
-                <Field label="Employee Name" value={data.employee_name} />
-                <Field
-                  label="Staff Number"
-                  value={data.employee_staff_number}
-                />
-                <Field label="Department" value={data.employee_department} />
-                <Field
-                  label="Replacement / New"
-                  value={
-                    <span
-                      className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold ${
-                        data.replacement_new === "New"
-                          ? "bg-emerald-50 text-emerald-600"
-                          : "bg-amber-50 text-amber-600"
-                      }`}
-                    >
-                      {data.replacement_new}
-                    </span>
-                  }
-                />
-              </div>
-            </section>
-
-            {/* — Requisition Details — */}
-            <section>
-              <SectionHeader icon={ClipboardList} title="Requisition Details" />
-              <div className="grid grid-cols-1 gap-4 rounded-2xl border border-gray-100 bg-neutral-50 p-4">
-                <Field
-                  label="Requirements"
-                  value={formatRequirements(data.requirements)}
-                />
-                {data.other_requirements && (
-                  <Field
-                    label="Other Requirements"
-                    value={data.other_requirements}
-                  />
-                )}
-              </div>
-            </section>
-
-            {/* — Dates — */}
-            <section>
-              <SectionHeader icon={Calendar} title="Key Dates" />
-              <div className="grid grid-cols-2 gap-4 rounded-2xl border border-gray-100 bg-neutral-50 p-4">
-                <Field
-                  label="Requisition Date"
-                  value={dateFormatter(data.requisition_date)}
-                />
-                <Field
-                  label="Date of Joining"
-                  value={dateFormatter(data.date_joining)}
-                />
-              </div>
-            </section>
-
-            {/* — HOD Approval — */}
-            <section>
-              <SectionHeader icon={CheckCircle2} title="HOD Approval" />
-              <div className="grid grid-cols-2 gap-4 rounded-2xl border border-gray-100 bg-neutral-50 p-4">
-                <Field label="Approver" value={data.hod_approver_name} />
-                <Field
-                  label="Status"
-                  value={<StatusFormatter status={data.hod_approver_status} />}
-                />
-                <Field
-                  label="Approval Date"
-                  value={dateFormatter(data.hod_approval_date)}
-                />
-                {data.hod_approver_comments && (
-                  <Field label="Comments" value={data.hod_approver_comments} />
-                )}
-              </div>
-            </section>
-
-            {/* — IT Approval — */}
-            <section>
-              <SectionHeader icon={CheckCircle2} title="IT Approval" />
-              <div className="grid grid-cols-2 gap-4 rounded-2xl border border-gray-100 bg-neutral-50 p-4">
-                <Field label="Approver" value={data.it_approver_name} />
-                <Field
-                  label="Status"
-                  value={<StatusFormatter status={data.it_approver_status} />}
-                />
-                <Field
-                  label="Approval Date"
-                  value={dateFormatter(data.it_approval_date)}
-                />
-                {data.it_approver_comments && (
-                  <Field label="Comments" value={data.it_approver_comments} />
-                )}
-              </div>
-            </section>
-
-            {/* — Completion — */}
-            <section>
-              <div className="flex items-center justify-between rounded-2xl border border-gray-100 bg-neutral-50 px-4 py-3">
-                <span className="text-[11px] font-bold tracking-widest text-gray-400 uppercase">
-                  Completion Status
-                </span>
-                <StatusFormatter status={data.completion_status} />
-              </div>
-            </section>
-          </div>
+    <Modal
+      open={isOpen}
+      onClose={onClose}
+      icon={<Monitor size={18} className="text-red-400" />}
+      title="IT Requisition"
+      subtitle={
+        <>
+          ID: {data.request_id} &middot;{" "}
+          {dateFormatter(data.request_created_at)}
+        </>
+      }
+      bodyClassName="space-y-6 p-5 sm:p-6"
+      actions={
+        <>
+          {needsReviewLink &&
+            (linkQuery.isPending ? (
+              <ModalActionSkeleton />
+            ) : (
+              linkQuery.data && (
+                <Link
+                  href={linkQuery.data}
+                  onClick={handleLinkClick}
+                  className={modalActionClass.dark}
+                >
+                  <ShieldUser className="h-3.5 w-3.5" />
+                  Review
+                </Link>
+              )
+            ))}
+          <Link
+            href={`/dashboard/itpdf/${data.request_id}`}
+            onClick={handleLinkClick}
+            className={modalActionClass.dark}
+          >
+            Pdf
+            <ArrowUpRight className="h-3.5 w-3.5" />
+          </Link>
+        </>
+      }
+    >
+      {/* — Submitter Info — */}
+      <section>
+        <SectionHeader icon={UserRound} title="Submitted By" />
+        <div className="grid grid-cols-2 gap-4 rounded-2xl border border-gray-100 bg-neutral-50 p-4">
+          <Field label="Name" value={data.submitter_name} />
+          <Field label="Email" value={data.submitter_email} />
         </div>
-      </div>
-    </ClientPortal>
+      </section>
+
+      {/* — Employee Info — */}
+      <section>
+        <SectionHeader icon={Building2} title="Employee Details" />
+        <div className="grid grid-cols-2 gap-4 rounded-2xl border border-gray-100 bg-neutral-50 p-4">
+          <Field label="Employee Name" value={data.employee_name} />
+          <Field label="Staff Number" value={data.employee_staff_number} />
+          <Field label="Department" value={data.employee_department} />
+          <Field
+            label="Replacement / New"
+            value={
+              <span
+                className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+                  data.replacement_new === "New"
+                    ? "bg-emerald-50 text-emerald-600"
+                    : "bg-amber-50 text-amber-600"
+                }`}
+              >
+                {data.replacement_new}
+              </span>
+            }
+          />
+        </div>
+      </section>
+
+      {/* — Requisition Details — */}
+      <section>
+        <SectionHeader icon={ClipboardList} title="Requisition Details" />
+        <div className="grid grid-cols-1 gap-4 rounded-2xl border border-gray-100 bg-neutral-50 p-4">
+          <Field
+            label="Requirements"
+            value={formatRequirements(data.requirements)}
+          />
+          {data.other_requirements && (
+            <Field label="Other Requirements" value={data.other_requirements} />
+          )}
+        </div>
+      </section>
+
+      {/* — Dates — */}
+      <section>
+        <SectionHeader icon={Calendar} title="Key Dates" />
+        <div className="grid grid-cols-2 gap-4 rounded-2xl border border-gray-100 bg-neutral-50 p-4">
+          <Field
+            label="Requisition Date"
+            value={dateFormatter(data.requisition_date)}
+          />
+          <Field
+            label="Date of Joining"
+            value={dateFormatter(data.date_joining)}
+          />
+        </div>
+      </section>
+
+      {/* — HOD Approval — */}
+      <section>
+        <SectionHeader icon={CheckCircle2} title="HOD Approval" />
+        <div className="grid grid-cols-2 gap-4 rounded-2xl border border-gray-100 bg-neutral-50 p-4">
+          <Field label="Approver" value={data.hod_approver_name} />
+          <Field
+            label="Status"
+            value={<StatusFormatter status={data.hod_approver_status} />}
+          />
+          <Field
+            label="Approval Date"
+            value={dateFormatter(data.hod_approval_date)}
+          />
+          {data.hod_approver_comments && (
+            <Field label="Comments" value={data.hod_approver_comments} />
+          )}
+        </div>
+      </section>
+
+      {/* — IT Approval — */}
+      <section>
+        <SectionHeader icon={CheckCircle2} title="IT Approval" />
+        <div className="grid grid-cols-2 gap-4 rounded-2xl border border-gray-100 bg-neutral-50 p-4">
+          <Field label="Approver" value={data.it_approver_name} />
+          <Field
+            label="Status"
+            value={<StatusFormatter status={data.it_approver_status} />}
+          />
+          <Field
+            label="Approval Date"
+            value={dateFormatter(data.it_approval_date)}
+          />
+          {data.it_approver_comments && (
+            <Field label="Comments" value={data.it_approver_comments} />
+          )}
+        </div>
+      </section>
+
+      {/* — Completion — */}
+      <section>
+        <div className="flex items-center justify-between rounded-2xl border border-gray-100 bg-neutral-50 px-4 py-3">
+          <span className="text-[11px] font-bold tracking-widest text-gray-400 uppercase">
+            Completion Status
+          </span>
+          <StatusFormatter status={data.completion_status} />
+        </div>
+      </section>
+    </Modal>
   );
 }

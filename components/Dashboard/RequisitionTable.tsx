@@ -134,7 +134,13 @@ interface RequisitionTableProps<TParams> {
     pageSize: number;
     searchTerm: string;
   }) => Promise<PaginatedResult<QueryResultRow>>;
-  renderModal: (row: QueryResultRow | null, close: () => void) => ReactNode;
+  // The selected row stays set after the modal closes so its exit
+  // transition still has content to show; `isOpen` says whether it's open.
+  renderModal: (
+    row: QueryResultRow | null,
+    isOpen: boolean,
+    close: () => void,
+  ) => ReactNode;
 }
 
 export default function RequisitionTable<TParams>({
@@ -155,6 +161,11 @@ export default function RequisitionTable<TParams>({
   const [selectedRequest, setSelectedRequest] = useState<QueryResultRow | null>(
     null,
   );
+  const [modalOpen, setModalOpen] = useState(false);
+  const openRequest = (req: QueryResultRow) => {
+    setSelectedRequest(req);
+    setModalOpen(true);
+  };
   // Sticky "does this dataFlag have any data at all" signal — distinct from
   // totalCount, which reflects the current (possibly search-filtered) count.
   const [hasData, setHasData] = useState(false);
@@ -278,112 +289,133 @@ export default function RequisitionTable<TParams>({
 
             {/* Table Container */}
             <div
-              className={`overflow-x-auto rounded-2xl border border-gray-200 bg-white/50 transition-opacity ${theme.tableShadow} ${isFetching ? "animate-pulse opacity-60" : ""}`}
+              className={`relative overflow-hidden rounded-2xl border border-gray-200 bg-white/50 ${theme.tableShadow}`}
             >
-              <table className="w-full border-collapse text-left">
-                {/* Column headers only mean something once there are rows */}
-                {hasData && (
-                  <thead>
-                    <tr className={theme.headerRow}>
-                      {columns.map((col) => (
-                        <th
-                          key={col.key}
-                          className={`px-6 py-4 ${theme.headerCell}`}
-                        >
-                          {col.label}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                )}
-                <tbody className={theme.bodyDivide}>
-                  {totalCount > 0 ? (
-                    paginatedData.map((req) => (
-                      <tr
-                        key={req.request_id}
-                        onClick={() => setSelectedRequest(req)}
-                        className={`group cursor-pointer transition-colors ${theme.rowHover}`}
-                      >
-                        {renderRow(req)}
-                      </tr>
-                    ))
-                  ) : (
-                    /* --- FALLBACK UI --- */
-                    <tr>
-                      <td
-                        colSpan={columns.length}
-                        // Compact when the table is empty outright, so a tab
-                        // of several empty queues stays short
-                        className={`px-6 ${hasData ? "py-20" : "py-10"}`}
-                      >
-                        <div className="flex flex-col items-center justify-center text-center">
-                          {/* Glassmorphic Icon Circle */}
-                          <div
-                            className={`mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/80 bg-white/40 ${theme.emptyIconWrap}`}
+              {/* Refetch in progress: a thin bar, and the stale rows dim */}
+              {isFetching && (
+                <div
+                  role="progressbar"
+                  aria-label="Refreshing"
+                  className="absolute inset-x-0 top-0 z-10 h-0.5 overflow-hidden"
+                >
+                  <div className="progress-indeterminate h-full w-1/3 rounded-full bg-slate-500/70" />
+                </div>
+              )}
+              <div
+                className={`overflow-x-auto transition-opacity duration-300 ${isFetching ? "opacity-70" : ""}`}
+              >
+                <table className="w-full border-collapse text-left">
+                  {/* Column headers only mean something once there are rows */}
+                  {hasData && (
+                    <thead>
+                      <tr className={theme.headerRow}>
+                        {columns.map((col) => (
+                          <th
+                            key={col.key}
+                            className={`px-6 py-4 ${theme.headerCell}`}
                           >
-                            {showError ? (
-                              <TriangleAlert size={32} strokeWidth={1.5} />
-                            ) : (
-                              <emptyState.Icon size={32} strokeWidth={1.5} />
-                            )}
-                          </div>
-
-                          <h3 className="text-base font-semibold text-[#1e1b1b]">
-                            {showError
-                              ? "Couldn't load requisitions"
-                              : searchTerm
-                                ? "No matches found"
-                                : (emptyState.heading ?? emptyCopy.heading)}
-                          </h3>
-                          <p className="mt-1 max-w-72 text-[13px] leading-relaxed text-[#a18080]">
-                            {showError
-                              ? "Something went wrong while fetching this table. Check your connection and try again."
-                              : searchTerm
-                                ? `We couldn't find anything matching "${searchTerm}". Try a different term.`
-                                : (emptyState.body ?? emptyCopy.body)}
-                          </p>
-
-                          {showError && (
-                            <button
-                              onClick={() => refetch()}
-                              className="my-2 flex items-center gap-2 rounded-xl bg-slate-900 px-3 py-2 text-sm text-white hover:bg-slate-800"
+                            {col.label}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                  )}
+                  <tbody className={theme.bodyDivide}>
+                    {totalCount > 0 ? (
+                      paginatedData.map((req) => (
+                        <tr
+                          key={req.request_id}
+                          tabIndex={0}
+                          onClick={() => openRequest(req)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              openRequest(req);
+                            }
+                          }}
+                          className={`group cursor-pointer transition-colors outline-none focus-visible:bg-neutral-100 focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-inset ${theme.rowHover}`}
+                        >
+                          {renderRow(req)}
+                        </tr>
+                      ))
+                    ) : (
+                      /* --- FALLBACK UI --- */
+                      <tr>
+                        <td
+                          colSpan={columns.length}
+                          // Compact when the table is empty outright, so a tab
+                          // of several empty queues stays short
+                          className={`px-6 ${hasData ? "py-20" : "py-10"}`}
+                        >
+                          <div className="flex flex-col items-center justify-center text-center">
+                            {/* Glassmorphic Icon Circle */}
+                            <div
+                              className={`mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/80 bg-white/40 ${theme.emptyIconWrap}`}
                             >
-                              <RotateCcw className="h-4 w-4" />
-                              <span>Try again</span>
-                            </button>
-                          )}
+                              {showError ? (
+                                <TriangleAlert size={32} strokeWidth={1.5} />
+                              ) : (
+                                <emptyState.Icon size={32} strokeWidth={1.5} />
+                              )}
+                            </div>
 
-                          {/* New Requisition Link, when returned data is empty */}
-                          {!showError &&
-                            !searchTerm &&
-                            emptyState.newRequisitionHref && (
-                              <Link
-                                href={emptyState.newRequisitionHref}
+                            <h3 className="text-base font-semibold text-[#1e1b1b]">
+                              {showError
+                                ? "Couldn't load requisitions"
+                                : searchTerm
+                                  ? "No matches found"
+                                  : (emptyState.heading ?? emptyCopy.heading)}
+                            </h3>
+                            <p className="mt-1 max-w-72 text-[13px] leading-relaxed text-[#a18080]">
+                              {showError
+                                ? "Something went wrong while fetching this table. Check your connection and try again."
+                                : searchTerm
+                                  ? `We couldn't find anything matching "${searchTerm}". Try a different term.`
+                                  : (emptyState.body ?? emptyCopy.body)}
+                            </p>
+
+                            {showError && (
+                              <button
+                                onClick={() => refetch()}
                                 className="my-2 flex items-center gap-2 rounded-xl bg-slate-900 px-3 py-2 text-sm text-white hover:bg-slate-800"
                               >
-                                <Plus className="h-4 w-4" />
-                                <span>
-                                  {emptyState.newRequisitionLabel ??
-                                    "New Requisition"}
-                                </span>
-                              </Link>
+                                <RotateCcw className="h-4 w-4" />
+                                <span>Try again</span>
+                              </button>
                             )}
 
-                          {/* Optional Action Button for Search Fallback */}
-                          {searchTerm && (
-                            <button
-                              onClick={clearSearch}
-                              className={`mt-5 text-[12px] font-bold tracking-wider uppercase transition-colors ${theme.clearSearch}`}
-                            >
-                              Clear search
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+                            {/* New Requisition Link, when returned data is empty */}
+                            {!showError &&
+                              !searchTerm &&
+                              emptyState.newRequisitionHref && (
+                                <Link
+                                  href={emptyState.newRequisitionHref}
+                                  className="my-2 flex items-center gap-2 rounded-xl bg-slate-900 px-3 py-2 text-sm text-white hover:bg-slate-800"
+                                >
+                                  <Plus className="h-4 w-4" />
+                                  <span>
+                                    {emptyState.newRequisitionLabel ??
+                                      "New Requisition"}
+                                  </span>
+                                </Link>
+                              )}
+
+                            {/* Optional Action Button for Search Fallback */}
+                            {searchTerm && (
+                              <button
+                                onClick={clearSearch}
+                                className={`mt-5 text-[12px] font-bold tracking-wider uppercase transition-colors ${theme.clearSearch}`}
+                              >
+                                Clear search
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
 
             {/* Pagination */}
@@ -399,7 +431,7 @@ export default function RequisitionTable<TParams>({
           </div>
         )}
 
-        {renderModal(selectedRequest, () => setSelectedRequest(null))}
+        {renderModal(selectedRequest, modalOpen, () => setModalOpen(false))}
       </div>
     </>
   );

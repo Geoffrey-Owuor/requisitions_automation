@@ -1,28 +1,27 @@
 "use client";
 import {
-  X,
   MapPin,
   Users,
   ArrowUpRight,
   Workflow,
   HardHat,
   ShieldUser,
-  Loader2,
   Pencil,
 } from "lucide-react";
 import { QueryResultRow } from "pg";
+import { useQuery } from "@tanstack/react-query";
 import StatusFormatter from "../StatusFormatter";
 import { dateFormatter, isCasualAmendableHrStatus } from "@/public/assets";
-import ClientPortal from "../../ClientPortal";
 import Link from "next/link";
 import { useUser } from "@/context/UserContext";
 import { getCasualApproverLink } from "@/serverActions/GetCasualApproverLink";
 import { getCasualRequisitionDetails } from "@/serverActions/GetCasualRequisitionDetails";
-import { CasualEmailDataValues } from "@/services/CasualEmailSender";
 import { useLoadingStore } from "@/store/useLoadingStore";
 import { amendRequisitionHref } from "@/lib/dashboardTables";
 import CasualAmendmentHistory from "../../Approvers/CasualApprovers/CasualAmendmentHistory";
-import { useEffect, useState } from "react";
+import { Modal, ModalActionSkeleton, modalActionClass } from "../../Modal";
+import { DetailCardsSkeleton } from "../../Skeletons/DetailCardsSkeleton";
+import { DetailsLoadError } from "../DetailsLoadError";
 
 interface ModalProps {
   data: QueryResultRow | null;
@@ -41,10 +40,6 @@ export const CasualDetailsModal = ({
 }: ModalProps) => {
   const setLoadingLine = useLoadingStore((state) => state.setLoadingLine);
   const { email } = useUser();
-  const [linkLoading, setLinkLoading] = useState(false);
-  const [link, setLink] = useState("#");
-  const [details, setDetails] = useState<CasualEmailDataValues | null>(null);
-  const [detailsLoading, setDetailsLoading] = useState(false);
 
   const handleLinkClick = () => {
     setLoadingLine(true);
@@ -59,248 +54,205 @@ export const CasualDetailsModal = ({
   };
 
   const stage = STAGE_LEVELS[dataFlag];
+  const requestId: string | undefined = data?.request_id;
 
   // Section-level breakdown is only available once fetched — the list row
-  // only carries the rolled-up totals used for the table columns.
-  useEffect(() => {
-    const fetchDetails = async () => {
-      if (!data) {
-        setDetails(null);
-        return;
-      }
-      setDetailsLoading(true);
-      try {
-        const result = await getCasualRequisitionDetails(data.request_id);
-        setDetails(result);
-      } finally {
-        setDetailsLoading(false);
-      }
-    };
+  // only carries the rolled-up totals used for the table columns. Refetched
+  // on every open (staleTime 0) so an amendment shows up; a cached copy stays
+  // on screen meanwhile.
+  const detailsQuery = useQuery({
+    queryKey: ["casualRequisitionDetails", requestId],
+    queryFn: () => getCasualRequisitionDetails(requestId!),
+    enabled: isOpen && !!requestId,
+    staleTime: 0,
+  });
+  const details = detailsQuery.data;
 
-    fetchDetails();
-  }, [data]);
+  // Only resolved when the viewer is at a pending approval stage
+  const needsReviewLink =
+    stage !== "user" && data?.[`casual_${stage}_approval_status`] === "pending";
+  const linkQuery = useQuery({
+    queryKey: ["casualApproverLink", stage, requestId],
+    queryFn: () => getCasualApproverLink({ email, stage, uuid: requestId! }),
+    enabled: isOpen && needsReviewLink,
+  });
 
-  useEffect(() => {
-    const getApprovalLink = async () => {
-      try {
-        if (!data) return; //do not run when data is not available
-        if (
-          stage === "user" ||
-          data[`casual_${stage}_approval_status`] !== "pending"
-        )
-          return; //do not run when we are viewing user data or approver status is not pending
+  if (!data) return null;
 
-        setLinkLoading(true);
-
-        const uuid = data.request_id;
-        const resolvedLink = await getCasualApproverLink({
-          email,
-          stage,
-          uuid,
-        });
-
-        setLink(resolvedLink);
-      } catch (error) {
-        console.error("Error fetching approver link:", error);
-      } finally {
-        setLinkLoading(false);
-      }
-    };
-
-    getApprovalLink();
-  }, [data, stage, email]);
-
-  if (!isOpen || !data) return null;
+  const canAmend =
+    dataFlag === "userData" &&
+    data.submitter_email === email &&
+    isCasualAmendableHrStatus(data.casual_hr_approval_status);
 
   return (
-    <ClientPortal>
-      <div
-        onClick={onClose}
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-      >
-        <div
-          onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-2xl rounded-[20px] border border-white/80 bg-white shadow-[0_32px_64px_rgba(20,140,100,0.15)]"
-        >
-          {/* Header */}
-          <div className="flex flex-wrap items-center justify-between gap-2 overflow-hidden rounded-t-[20px] bg-white px-8 py-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-emerald-400 shadow-sm">
-                <HardHat size={18} />
-              </div>
-              <div>
-                <h2 className="text-sm font-semibold text-[#1e1b1b]">
-                  Casual Requisition
-                </h2>
-                <p className="text-[11px] text-neutral-500">
-                  ID: {data.request_id} &middot;{" "}
-                  {dateFormatter(data.request_created_at)}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              {dataFlag === "userData" &&
-                data.submitter_email === email &&
-                isCasualAmendableHrStatus(data.casual_hr_approval_status) && (
-                  <Link
-                    href={amendRequisitionHref("casual", data.request_id)}
-                    onClick={onClose}
-                    className="flex items-center gap-1 rounded-full bg-amber-500 px-3 py-1 text-xs font-semibold text-white transition-colors duration-200 hover:bg-amber-600"
-                  >
-                    <Pencil className="h-3.5 w-3.5" />
-                    Amend
-                  </Link>
-                )}
-              {stage !== "user" &&
-                data[`casual_${stage}_approval_status`] === "pending" && (
-                  <>
-                    {linkLoading ? (
-                      <div className="h-5 w-20 animate-pulse rounded-full bg-gray-300" />
-                    ) : (
-                      <Link
-                        href={link}
-                        onClick={handleLinkClick}
-                        className="flex items-center gap-1 rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white transition-colors duration-200 hover:bg-slate-800"
-                      >
-                        <ShieldUser className="h-3.5 w-3.5" />
-                        Review
-                      </Link>
-                    )}
-                  </>
-                )}
-              <Link
-                href={`/dashboard/casualpdf/${data.request_id}`}
-                onClick={handleLinkClick}
-                className="flex items-center gap-1 rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white transition-colors duration-200 hover:bg-slate-800"
-              >
-                Pdf
-                <ArrowUpRight className="h-3.5 w-3.5" />
-              </Link>
-              <button
-                onClick={onClose}
-                className="rounded-full p-2 text-gray-600 transition-colors hover:bg-gray-200 hover:text-gray-900"
-              >
-                <X size={18} />
-              </button>
-            </div>
+    <Modal
+      open={isOpen}
+      onClose={onClose}
+      icon={<HardHat size={18} className="text-emerald-400" />}
+      title="Casual Requisition"
+      subtitle={
+        <>
+          ID: {data.request_id} &middot;{" "}
+          {dateFormatter(data.request_created_at)}
+        </>
+      }
+      actions={
+        <>
+          {canAmend && (
+            <Link
+              href={amendRequisitionHref("casual", data.request_id)}
+              onClick={onClose}
+              className={modalActionClass.amber}
+            >
+              <Pencil className="h-3.5 w-3.5" />
+              Amend
+            </Link>
+          )}
+          {needsReviewLink &&
+            (linkQuery.isPending ? (
+              <ModalActionSkeleton />
+            ) : (
+              linkQuery.data && (
+                <Link
+                  href={linkQuery.data}
+                  onClick={handleLinkClick}
+                  className={modalActionClass.dark}
+                >
+                  <ShieldUser className="h-3.5 w-3.5" />
+                  Review
+                </Link>
+              )
+            ))}
+          <Link
+            href={`/dashboard/casualpdf/${data.request_id}`}
+            onClick={handleLinkClick}
+            className={modalActionClass.dark}
+          >
+            Pdf
+            <ArrowUpRight className="h-3.5 w-3.5" />
+          </Link>
+        </>
+      }
+    >
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="flex items-start gap-3 rounded-xl bg-neutral-50 p-3">
+          <MapPin size={16} className="mt-1 shrink-0 text-emerald-500" />
+          <div>
+            <p className="text-[10px] font-bold tracking-wider text-emerald-500 uppercase">
+              Location
+            </p>
+            <p className="text-sm font-medium text-[#1e1b1b]">
+              {data.casual_location}
+            </p>
           </div>
-
-          <div className="layout-scrollbar max-h-[80vh] space-y-4 p-6">
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div className="flex items-start gap-3 rounded-xl bg-neutral-50 p-3">
-                <MapPin size={16} className="mt-1 shrink-0 text-emerald-500" />
-                <div>
-                  <p className="text-[10px] font-bold tracking-wider text-emerald-500 uppercase">
-                    Location
-                  </p>
-                  <p className="text-sm font-medium text-[#1e1b1b]">
-                    {data.casual_location}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3 rounded-xl bg-neutral-50 p-3">
-                <Users size={16} className="mt-1 shrink-0 text-emerald-500" />
-                <div>
-                  <p className="text-[10px] font-bold tracking-wider text-emerald-500 uppercase">
-                    Department
-                  </p>
-                  <p className="text-sm font-medium text-[#1e1b1b]">
-                    {data.employee_department}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Sections breakdown */}
-            <div className="mt-4">
-              <div className="mb-2 flex items-center gap-2 text-xs font-bold tracking-tighter text-emerald-500 uppercase">
-                <Users size={14} />
-                Sections
-              </div>
-              {detailsLoading ? (
-                <div className="flex items-center justify-center py-8 text-emerald-400">
-                  <Loader2 size={20} className="animate-spin" />
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {details?.sections.map((section) => (
-                    <div
-                      key={section.sectionname}
-                      className="rounded-xl bg-neutral-50 p-3"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-semibold text-[#1e1b1b]">
-                          {section.sectionname}
-                        </span>
-                        <span className="text-[11px] text-neutral-500">
-                          {dateFormatter(section.periodfrom)} &ndash;{" "}
-                          {dateFormatter(section.periodto)}
-                        </span>
-                      </div>
-                      <p className="mt-1 text-[13px] leading-relaxed text-neutral-600">
-                        {section.justification}
-                      </p>
-                      <div className="mt-2 flex flex-wrap gap-4 text-[12px] text-neutral-500">
-                        <span>
-                          Casuals:{" "}
-                          <strong className="text-[#1e1b1b]">
-                            {section.numberofcasuals}
-                          </strong>
-                        </span>
-                        <span>
-                          Total:{" "}
-                          <strong className="text-[#1e1b1b]">
-                            KES {section.totalamount}
-                          </strong>
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                  {details && (
-                    <div className="flex items-center justify-between rounded-xl bg-emerald-50 p-3 text-sm">
-                      <span className="font-semibold text-[#1e1b1b]">
-                        Total ({details.totalcasuals} casuals)
-                      </span>
-                      <span className="font-semibold text-[#1e1b1b]">
-                        KES {details.totalamount}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Approvals Section */}
-            <div className="mt-6">
-              <div className="mb-4 flex items-center gap-1 text-sm font-semibold text-slate-800">
-                <Workflow size={16} />
-                Approval Chain
-              </div>
-              <div className="space-y-3">
-                {[
-                  { label: "HOD", status: data.casual_hod_approval_status },
-                  { label: "HR", status: data.casual_hr_approval_status },
-                ].map((step, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center justify-between rounded-xl bg-neutral-50 p-3"
-                  >
-                    <span className="text-sm text-[#1e1b1b]">
-                      {step.label} Status
-                    </span>
-                    <StatusFormatter status={step.status} />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Amendment History */}
-            {details && details.amendments.length > 0 && (
-              <CasualAmendmentHistory amendments={details.amendments} />
-            )}
+        </div>
+        <div className="flex items-start gap-3 rounded-xl bg-neutral-50 p-3">
+          <Users size={16} className="mt-1 shrink-0 text-emerald-500" />
+          <div>
+            <p className="text-[10px] font-bold tracking-wider text-emerald-500 uppercase">
+              Department
+            </p>
+            <p className="text-sm font-medium text-[#1e1b1b]">
+              {data.employee_department}
+            </p>
           </div>
         </div>
       </div>
-    </ClientPortal>
+
+      {/* Sections breakdown */}
+      <div className="mt-4">
+        <div className="mb-2 flex items-center gap-2 text-xs font-bold tracking-tighter text-emerald-500 uppercase">
+          <Users size={14} />
+          Sections
+        </div>
+        {detailsQuery.isPending ? (
+          <DetailCardsSkeleton
+            count={Math.min(Math.max(Number(data.section_count) || 1, 1), 3)}
+          />
+        ) : !details ? (
+          <DetailsLoadError
+            message={
+              detailsQuery.isError
+                ? "Couldn't load the sections."
+                : "The sections aren't available."
+            }
+            onRetry={() => detailsQuery.refetch()}
+          />
+        ) : (
+          <div className="space-y-2">
+            {details.sections.map((section) => (
+              <div
+                key={section.sectionname}
+                className="rounded-xl bg-neutral-50 p-3"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+                  <span className="text-sm font-semibold text-[#1e1b1b]">
+                    {section.sectionname}
+                  </span>
+                  <span className="text-[11px] text-neutral-500">
+                    {dateFormatter(section.periodfrom)} &ndash;{" "}
+                    {dateFormatter(section.periodto)}
+                  </span>
+                </div>
+                <p className="mt-1 text-[13px] leading-relaxed text-neutral-600">
+                  {section.justification}
+                </p>
+                <div className="mt-2 flex flex-wrap gap-4 text-[12px] text-neutral-500">
+                  <span>
+                    Casuals:{" "}
+                    <strong className="text-[#1e1b1b]">
+                      {section.numberofcasuals}
+                    </strong>
+                  </span>
+                  <span>
+                    Total:{" "}
+                    <strong className="text-[#1e1b1b]">
+                      KES {section.totalamount}
+                    </strong>
+                  </span>
+                </div>
+              </div>
+            ))}
+            <div className="flex items-center justify-between rounded-xl bg-emerald-50 p-3 text-sm">
+              <span className="font-semibold text-[#1e1b1b]">
+                Total ({details.totalcasuals} casuals)
+              </span>
+              <span className="font-semibold text-[#1e1b1b]">
+                KES {details.totalamount}
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Approvals Section */}
+      <div className="mt-6">
+        <div className="mb-4 flex items-center gap-1 text-sm font-semibold text-slate-800">
+          <Workflow size={16} />
+          Approval Chain
+        </div>
+        <div className="space-y-3">
+          {[
+            { label: "HOD", status: data.casual_hod_approval_status },
+            { label: "HR", status: data.casual_hr_approval_status },
+          ].map((step, idx) => (
+            <div
+              key={idx}
+              className="flex items-center justify-between rounded-xl bg-neutral-50 p-3"
+            >
+              <span className="text-sm text-[#1e1b1b]">
+                {step.label} Status
+              </span>
+              <StatusFormatter status={step.status} />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Amendment History */}
+      {details && details.amendments.length > 0 && (
+        <CasualAmendmentHistory amendments={details.amendments} />
+      )}
+    </Modal>
   );
 };
