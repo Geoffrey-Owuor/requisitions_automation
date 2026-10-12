@@ -1,10 +1,8 @@
 import { Metadata } from "next";
-import { Suspense } from "react";
 import { query } from "@/lib/db";
 import ApproverShell from "@/components/Approvers/ApproverShell";
 import InvalidToken from "@/components/Approvers/TravelApprovers/InvalidToken";
 import AlreadyProcessed from "@/components/Approvers/TravelApprovers/AlreadyProcessed";
-import ITApprovalSkeleton from "@/components/Skeletons/ITApprovalSkeleton";
 import NotFoundRequest from "@/components/Approvers/TravelApprovers/NotFoundRequest";
 import NotAssignedHod from "@/components/Approvers/NotAssignedHod";
 import { getHodPageAccess } from "@/lib/hodAssignment";
@@ -139,11 +137,7 @@ const ApprovalPageContent = async ({
     previousApprovals,
   };
 
-  return (
-    <Suspense fallback={<ITApprovalSkeleton />}>
-      <ITApprovalModal data={modalData} />
-    </Suspense>
-  );
+  return <ITApprovalModal data={modalData} />;
 };
 
 // Every outcome - the approval modal and each status screen - renders inside

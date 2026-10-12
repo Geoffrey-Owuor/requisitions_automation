@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Repeat, CalendarClock, Info, Loader2, Trash2 } from "lucide-react";
+import { AdvanceRequestsSkeleton } from "../Skeletons/AdvanceRequestsSkeleton";
 import type {
   AlterationCandidate,
   AlterationType,
@@ -229,10 +230,10 @@ export default function SalaryAdvanceAlterationSection() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white py-16 text-sm text-slate-500">
-        <Loader2 size={16} className="animate-spin" />
-        Checking your active requests...
-      </div>
+      <AdvanceRequestsSkeleton
+        variant="alteration"
+        label="Checking your active requests..."
+      />
     );
   }
 
