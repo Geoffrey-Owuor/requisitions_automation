@@ -236,6 +236,187 @@ html {
   }
 }
 
+/* Indeterminate progress: a short bar sweeping across its track */
+@keyframes progress-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(300%);
+  }
+}
+
+.progress-indeterminate {
+  animation: progress-sweep 1.1s ease-in-out infinite;
+}
+
+/* ── Modals (components/Modal.tsx) ──
+   Native <dialog> opened with showModal(), so Escape, focus containment and
+   the inert page behind come from the browser. Enter/exit are CSS
+   transitions: @starting-style gives the entry frame, and transitioning
+   display/overlay with allow-discrete keeps a closing dialog painted (and in
+   the top layer) until the exit finishes. The base rules are the closed
+   state, [open] the open one. In @layer components so utility classes passed
+   in can still override them. The panel and scroll body stay opaque, with no
+   backdrop-filter (see the 4K render notes). */
+@layer components {
+  .modal {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    max-width: none;
+    max-height: none;
+    background: #fff;
+    color: #1e1b1b;
+    outline: none;
+    opacity: 0;
+    transition:
+      opacity 0.2s ease,
+      transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+      overlay 0.25s allow-discrete,
+      display 0.25s allow-discrete;
+  }
+
+  .modal[open] {
+    opacity: 1;
+    transform: none;
+  }
+
+  .modal::backdrop {
+    background-color: rgb(0 0 0 / 0);
+    transition:
+      background-color 0.2s ease,
+      overlay 0.25s allow-discrete,
+      display 0.25s allow-discrete;
+  }
+
+  .modal[open]::backdrop {
+    background-color: rgb(0 0 0 / 0.5);
+  }
+
+  @starting-style {
+    .modal[open] {
+      opacity: 0;
+    }
+    .modal[open]::backdrop {
+      background-color: rgb(0 0 0 / 0);
+    }
+  }
+
+  /* Content modal: full screen on phones, a centred card from sm up. The
+     header, close button, actions and body are grid areas, so the actions
+     sit in the header on desktop and in a bottom bar on phones without
+     rendering twice. */
+  .modal-sheet {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100dvh;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      "head close"
+      "body body"
+      "actions actions";
+    transform: translateY(1.5rem);
+  }
+
+  .modal-sheet[open] {
+    display: grid;
+    transform: none;
+  }
+
+  @starting-style {
+    .modal-sheet[open] {
+      transform: translateY(1.5rem);
+    }
+  }
+
+  .modal-sheet-head {
+    grid-area: head;
+  }
+  .modal-sheet-close {
+    grid-area: close;
+  }
+  .modal-sheet-actions {
+    grid-area: actions;
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+  .modal-sheet-body {
+    grid-area: body;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: #fff;
+  }
+
+  /* Confirmation: a bottom sheet on phones, a small centred card from sm up */
+  .modal-alert {
+    position: fixed;
+    inset: auto 0 0 0;
+    width: 100%;
+    max-height: 90dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border-radius: 1.5rem 1.5rem 0 0;
+    padding-bottom: env(safe-area-inset-bottom);
+    transform: translateY(100%);
+  }
+
+  .modal-alert[open] {
+    transform: none;
+  }
+
+  @starting-style {
+    .modal-alert[open] {
+      transform: translateY(100%);
+    }
+  }
+
+  @media (width >= 40rem) {
+    .modal-sheet {
+      margin: auto;
+      width: calc(100% - 2rem);
+      height: fit-content;
+      max-height: min(88dvh, 60rem);
+      border-radius: 20px;
+      box-shadow: 0 32px 64px rgb(0 0 0 / 0.15);
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      grid-template-rows: auto minmax(0, 1fr);
+      grid-template-areas:
+        "head actions close"
+        "body body body";
+      transform: scale(0.97);
+    }
+
+    @starting-style {
+      .modal-sheet[open] {
+        transform: scale(0.97);
+      }
+    }
+
+    .modal-sheet-actions {
+      padding-bottom: 0;
+    }
+
+    .modal-alert {
+      inset: 0;
+      margin: auto;
+      width: calc(100% - 2.5rem);
+      max-width: 24rem;
+      height: fit-content;
+      border-radius: 1.5rem;
+      padding-bottom: 0;
+      transform: scale(0.96);
+    }
+
+    @starting-style {
+      .modal-alert[open] {
+        transform: scale(0.96);
+      }
+    }
+  }
+}
+
 /* Alert styles */
 @keyframes slideDown {
   from {

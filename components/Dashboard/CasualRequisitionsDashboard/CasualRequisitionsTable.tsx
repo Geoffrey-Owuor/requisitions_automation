@@ -93,9 +93,9 @@ export default function CasualRequisitionsTable({
           </td>
         </>
       )}
-      renderModal={(data, close) => (
+      renderModal={(data, isOpen, close) => (
         <CasualDetailsModal
-          isOpen={!!data}
+          isOpen={isOpen}
           data={data}
           dataFlag={dataFlag}
           onClose={close}

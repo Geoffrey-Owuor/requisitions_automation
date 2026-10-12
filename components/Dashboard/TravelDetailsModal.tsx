@@ -1,6 +1,5 @@
 "use client";
 import {
-  X,
   Calendar,
   MapPin,
   CreditCard,
@@ -18,17 +17,14 @@ import {
 import { QueryResultRow } from "pg";
 import StatusFormatter from "./StatusFormatter";
 import { dateFormatter } from "@/public/assets";
-import ClientPortal from "../ClientPortal";
 import Link from "next/link";
 import { useUser } from "@/context/UserContext";
 import { getTravelApproverLink } from "@/serverActions/GetTravelApproverLink";
 import { useLoadingStore } from "@/store/useLoadingStore";
 import { amendRequisitionHref } from "@/lib/dashboardTables";
-import { useEffect, useState } from "react";
-import {
-  getTravelAuditTrail,
-  TravelAuditTrail,
-} from "@/serverActions/GetTravelAuditTrail";
+import { useQuery } from "@tanstack/react-query";
+import { getTravelAuditTrail } from "@/serverActions/GetTravelAuditTrail";
+import { Modal, ModalActionSkeleton, modalActionClass } from "../Modal";
 import { getTravelPushbackBlocker } from "@/lib/travelPushback";
 import { getTravelAmendmentBlocker } from "@/lib/travelAmendment";
 import TravelPushbackHistory from "@/components/Approvers/TravelApprovers/TravelPushbackHistory";
@@ -56,14 +52,6 @@ export const TravelDetailsModal = ({
 }: ModalProps) => {
   const setLoadingLine = useLoadingStore((state) => state.setLoadingLine);
   const { memberships } = useUser();
-  const [loading, setLoading] = useState(false);
-  const [link, setLink] = useState("#");
-  // Keyed by request_id so a result fetched for a previously opened row is
-  // never shown against the current one.
-  const [pushbackLink, setPushbackLink] = useState({ uuid: "", link: "#" });
-  const [auditTrail, setAuditTrail] = useState<
-    { uuid: string } & TravelAuditTrail
-  >({ uuid: "", pushbacks: [], amendments: [] });
 
   const handleLinkClick = () => {
     setLoadingLine(true);
@@ -81,35 +69,16 @@ export const TravelDetailsModal = ({
   };
 
   const stage = STAGE_LEVELS[dataFlag];
+  const requestId: string | undefined = data?.request_id;
 
-  useEffect(() => {
-    const getApprovalLink = async () => {
-      try {
-        if (!data) return; //do not run when data is not available
-        if (
-          stage === "user" ||
-          data[`travel_${stage}_approval_status`] !== "pending"
-        )
-          return; //do not run when we are viewing user data or approver status is not pending
-
-        setLoading(true);
-
-        const uuid = data.request_id;
-        const resolvedLink = await getTravelApproverLink({
-          stage,
-          uuid,
-        });
-
-        setLink(resolvedLink);
-      } catch (error) {
-        console.error("Error fetching approver link:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    getApprovalLink();
-  }, [data, stage]);
+  // Only resolved when the viewer is at a pending approval stage
+  const needsReviewLink =
+    stage !== "user" && data?.[`travel_${stage}_approval_status`] === "pending";
+  const linkQuery = useQuery({
+    queryKey: ["travelApproverLink", stage, requestId],
+    queryFn: () => getTravelApproverLink({ stage, uuid: requestId! }),
+    enabled: isOpen && needsReviewLink,
+  });
 
   // HR push-back is offered from the read-only history table to travel-HR
   // members. This only decides whether to show the button - the approval
@@ -125,13 +94,16 @@ export const TravelDetailsModal = ({
       withinWindow: data.within_pushback_window,
     }) === null;
 
-  useEffect(() => {
-    if (!data || !canPushback) return;
-    const uuid = data.request_id;
-    getTravelApproverLink({ stage: "hr", uuid, mode: "pushback" })
-      .then((link) => setPushbackLink({ uuid, link }))
-      .catch((error) => console.error("Error fetching push-back link:", error));
-  }, [data, canPushback]);
+  const pushbackLinkQuery = useQuery({
+    queryKey: ["travelPushbackLink", requestId],
+    queryFn: () =>
+      getTravelApproverLink({
+        stage: "hr",
+        uuid: requestId!,
+        mode: "pushback",
+      }),
+    enabled: isOpen && canPushback,
+  });
 
   // Only the submitter's own table offers Amend. This only decides whether to
   // show the button - the amend form and the amendment route re-check it.
@@ -144,207 +116,177 @@ export const TravelDetailsModal = ({
     }) === null;
 
   // Only fetch the history when the requisition has actually been pushed
-  // back or amended
-  useEffect(() => {
-    if (
-      !data ||
-      (Number(data.travel_hr_pushback_count) === 0 &&
-        Number(data.amendment_count) === 0)
-    )
-      return;
-    const uuid = data.request_id;
-    getTravelAuditTrail(uuid)
-      .then((trail) => setAuditTrail({ uuid, ...trail }))
-      .catch((error) => console.error("Error fetching audit trail:", error));
-  }, [data]);
+  // back or amended. Refetched on every open (staleTime 0).
+  const hasAuditTrail =
+    !!data &&
+    (Number(data.travel_hr_pushback_count) > 0 ||
+      Number(data.amendment_count) > 0);
+  const auditTrailQuery = useQuery({
+    queryKey: ["travelAuditTrail", requestId],
+    queryFn: () => getTravelAuditTrail(requestId!),
+    enabled: isOpen && hasAuditTrail,
+    staleTime: 0,
+  });
+  const pushbacks = auditTrailQuery.data?.pushbacks ?? [];
+  const amendments = auditTrailQuery.data?.amendments ?? [];
 
-  const resolvedPushbackLink =
-    data && pushbackLink.uuid === data.request_id ? pushbackLink.link : "#";
-  const currentTrail =
-    data && auditTrail.uuid === data.request_id ? auditTrail : null;
-  const pushbacks = currentTrail?.pushbacks ?? [];
-  const amendments = currentTrail?.amendments ?? [];
-
-  if (!isOpen || !data) return null;
+  if (!data) return null;
 
   return (
-    <ClientPortal>
-      <div
-        onClick={onClose}
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-      >
-        <div
-          onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-2xl rounded-[20px] border border-white/80 bg-white shadow-[0_32px_64px_rgba(160,60,60,0.15)]"
-        >
-          {/* Header */}
-          <div className="flex flex-wrap items-center justify-between gap-2 overflow-hidden rounded-t-[20px] bg-white px-8 py-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-red-400 shadow-sm">
-                <BriefcaseBusiness size={18} />
-              </div>
-              <div>
-                <h2 className="text-sm font-semibold text-[#1e1b1b]">
-                  Travel Requisition
-                </h2>
-                <p className="text-[11px] text-neutral-500">
-                  ID: {data.request_id} &middot;{" "}
-                  {dateFormatter(data.request_created_at)}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              {canAmend && (
+    <Modal
+      open={isOpen}
+      onClose={onClose}
+      icon={<BriefcaseBusiness size={18} className="text-red-400" />}
+      title="Travel Requisition"
+      subtitle={
+        <>
+          ID: {data.request_id} &middot;{" "}
+          {dateFormatter(data.request_created_at)}
+        </>
+      }
+      actions={
+        <>
+          {canAmend && (
+            <Link
+              href={amendRequisitionHref("travel", data.request_id)}
+              onClick={onClose}
+              className={modalActionClass.amber}
+            >
+              <Pencil className="h-3.5 w-3.5" />
+              Amend
+            </Link>
+          )}
+          {needsReviewLink &&
+            (linkQuery.isPending ? (
+              <ModalActionSkeleton />
+            ) : (
+              linkQuery.data && (
                 <Link
-                  href={amendRequisitionHref("travel", data.request_id)}
-                  onClick={onClose}
-                  className="flex items-center gap-1 rounded-full bg-amber-500 px-3 py-1 text-xs font-semibold text-white transition-colors duration-200 hover:bg-amber-600"
-                >
-                  <Pencil className="h-3.5 w-3.5" />
-                  Amend
-                </Link>
-              )}
-              {stage !== "user" &&
-                data[`travel_${stage}_approval_status`] === "pending" && (
-                  <>
-                    {loading ? (
-                      <div className="h-5 w-20 animate-pulse rounded-full bg-gray-300" />
-                    ) : (
-                      <Link
-                        href={link}
-                        onClick={handleLinkClick}
-                        className="flex items-center gap-1 rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white transition-colors duration-200 hover:bg-slate-800"
-                      >
-                        <ShieldUser className="h-3.5 w-3.5" />
-                        Review
-                      </Link>
-                    )}
-                  </>
-                )}
-              {canPushback && resolvedPushbackLink !== "#" && (
-                <Link
-                  href={resolvedPushbackLink}
+                  href={linkQuery.data}
                   onClick={handleLinkClick}
-                  title="Change the recorded HR decision on this requisition"
-                  className="flex items-center gap-1 rounded-full bg-amber-500 px-3 py-1 text-xs font-semibold text-white transition-colors duration-200 hover:bg-amber-600"
+                  className={modalActionClass.dark}
                 >
-                  <Undo2 className="h-3.5 w-3.5" />
-                  Push-back
+                  <ShieldUser className="h-3.5 w-3.5" />
+                  Review
                 </Link>
-              )}
-              <Link
-                href={`/dashboard/travelpdf/${data.request_id}`}
-                onClick={handleLinkClick}
-                className="flex items-center gap-1 rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white transition-colors duration-200 hover:bg-slate-800"
-              >
-                Pdf
-                <ArrowUpRight className="h-3.5 w-3.5" />
-              </Link>
-              <button
-                onClick={onClose}
-                className="rounded-full p-2 text-gray-600 transition-colors hover:bg-gray-200 hover:text-gray-900"
-              >
-                <X size={18} />
-              </button>
-            </div>
+              )
+            ))}
+          {canPushback && pushbackLinkQuery.data && (
+            <Link
+              href={pushbackLinkQuery.data}
+              onClick={handleLinkClick}
+              title="Change the recorded HR decision on this requisition"
+              className={modalActionClass.amber}
+            >
+              <Undo2 className="h-3.5 w-3.5" />
+              Push-back
+            </Link>
+          )}
+          <Link
+            href={`/dashboard/travelpdf/${data.request_id}`}
+            onClick={handleLinkClick}
+            className={modalActionClass.dark}
+          >
+            Pdf
+            <ArrowUpRight className="h-3.5 w-3.5" />
+          </Link>
+        </>
+      }
+    >
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <DetailItem
+          icon={UserRound}
+          label="Employee"
+          value={data.employee_name}
+        />
+        <DetailItem
+          icon={MapPin}
+          label="Destination"
+          value={data.travel_destination}
+        />
+        <DetailItem
+          icon={Calendar}
+          label="Departure"
+          value={dateFormatter(data.travel_departure_date)}
+        />
+        <DetailItem
+          icon={Calendar}
+          label="Return"
+          value={dateFormatter(data.travel_return_date)}
+        />
+        <DetailItem
+          icon={CreditCard}
+          label="Total Budget"
+          value={`KES ${data.travel_total_cost}`}
+        />
+        <DetailItem
+          icon={CheckCircle2}
+          label="Cost Center"
+          value={data.travel_cost_center}
+        />
+
+        <div className="col-span-full mt-4 rounded-2xl bg-neutral-50 p-4 text-black">
+          <div className="mb-2 flex items-center gap-2 text-rose-400">
+            <MessageSquare size={16} className="text-rose-500" />
+            <span className="text-xs font-bold tracking-tighter uppercase">
+              Business Justification
+            </span>
           </div>
+          <p className="text-sm leading-relaxed opacity-90">
+            {data.travel_business_justification}
+          </p>
+        </div>
 
-          <div className="layout-scrollbar grid max-h-[80vh] grid-cols-1 gap-4 p-6 md:grid-cols-2">
-            <DetailItem
-              icon={UserRound}
-              label="Employee"
-              value={data.employee_name}
-            />
-            <DetailItem
-              icon={MapPin}
-              label="Destination"
-              value={data.travel_destination}
-            />
-            <DetailItem
-              icon={Calendar}
-              label="Departure"
-              value={dateFormatter(data.travel_departure_date)}
-            />
-            <DetailItem
-              icon={Calendar}
-              label="Return"
-              value={dateFormatter(data.travel_return_date)}
-            />
-            <DetailItem
-              icon={CreditCard}
-              label="Total Budget"
-              value={`KES ${data.travel_total_cost}`}
-            />
-            <DetailItem
-              icon={CheckCircle2}
-              label="Cost Center"
-              value={data.travel_cost_center}
-            />
-
-            <div className="col-span-full mt-4 rounded-2xl bg-neutral-50 p-4 text-black">
-              <div className="mb-2 flex items-center gap-2 text-rose-400">
-                <MessageSquare size={16} className="text-rose-500" />
-                <span className="text-xs font-bold tracking-tighter uppercase">
-                  Business Justification
+        {/* Approvals Section */}
+        <div className="col-span-full mt-6">
+          <div className="mb-4 flex items-center gap-1 text-sm font-semibold text-slate-800">
+            <Workflow size={16} />
+            Approval Chain
+          </div>
+          <div className="space-y-3">
+            {[
+              {
+                label: "HOD",
+                status: data.travel_hod_approval_status,
+                comment: data.travel_hod_comments,
+              },
+              {
+                label: "HR",
+                status: data.travel_hr_approval_status,
+                comment: data.travel_hr_comments,
+              },
+              {
+                label: "Director",
+                status: data.travel_director_approval_status,
+                comment: data.travel_director_comments,
+              },
+            ].map((step, idx) => (
+              <div
+                key={idx}
+                className="flex items-center justify-between rounded-xl bg-neutral-50 p-3"
+              >
+                <span className="text-sm text-[#1e1b1b]">
+                  {step.label} Status
                 </span>
+                <StatusFormatter status={step.status} />
               </div>
-              <p className="text-sm leading-relaxed opacity-90">
-                {data.travel_business_justification}
-              </p>
-            </div>
-
-            {/* Approvals Section */}
-            <div className="col-span-full mt-6">
-              <div className="mb-4 flex items-center gap-1 text-sm font-semibold text-slate-800">
-                <Workflow size={16} />
-                Approval Chain
-              </div>
-              <div className="space-y-3">
-                {[
-                  {
-                    label: "HOD",
-                    status: data.travel_hod_approval_status,
-                    comment: data.travel_hod_comments,
-                  },
-                  {
-                    label: "HR",
-                    status: data.travel_hr_approval_status,
-                    comment: data.travel_hr_comments,
-                  },
-                  {
-                    label: "Director",
-                    status: data.travel_director_approval_status,
-                    comment: data.travel_director_comments,
-                  },
-                ].map((step, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center justify-between rounded-xl bg-neutral-50 p-3"
-                  >
-                    <span className="text-sm text-[#1e1b1b]">
-                      {step.label} Status
-                    </span>
-                    <StatusFormatter status={step.status} />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {amendments.length > 0 && (
-              <div className="col-span-full">
-                <TravelAmendmentHistory amendments={amendments} />
-              </div>
-            )}
-
-            {pushbacks.length > 0 && (
-              <div className="col-span-full">
-                <TravelPushbackHistory pushbacks={pushbacks} />
-              </div>
-            )}
+            ))}
           </div>
         </div>
+
+        {amendments.length > 0 && (
+          <div className="col-span-full">
+            <TravelAmendmentHistory amendments={amendments} />
+          </div>
+        )}
+
+        {pushbacks.length > 0 && (
+          <div className="col-span-full">
+            <TravelPushbackHistory pushbacks={pushbacks} />
+          </div>
+        )}
       </div>
-    </ClientPortal>
+    </Modal>
   );
 };
 
