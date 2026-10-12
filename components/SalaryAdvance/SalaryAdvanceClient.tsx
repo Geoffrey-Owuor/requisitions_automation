@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import SubmittingOverlay from "../SubmittingOverlay";
 import { useAlertStore } from "@/store/useAlertStore";
-import { useToggleStore } from "@/store/useToggleStore";
+import { scrollPageToTop } from "@/utils/scrollPageToTop";
 import SalaryAdvanceConfirmationModal from "./SalaryAdvanceConfirmationModal";
 import Image from "next/image";
 import { assets } from "@/public/assets";
@@ -138,9 +138,6 @@ function StaffInfoField({ label, value }: { label: string; value: string }) {
 }
 
 export default function SalaryAdvanceClient() {
-  const triggerScroll = useToggleStore((state) => state.triggerScroll);
-  const scrollTrigger = useToggleStore((state) => state.scrollTrigger);
-
   const [step, setStep] = useState(1);
   const [mode, setMode] = useState<"submit" | "alter" | "history">("submit");
   const [checkingSession, setCheckingSession] = useState(true);
@@ -240,24 +237,6 @@ export default function SalaryAdvanceClient() {
     }, 1000);
     return () => clearInterval(timer);
   }, [resendSecondsLeft]);
-
-  // Listen for the Zustand trigger change
-  useEffect(() => {
-    const executeScroll = () => {
-      requestAnimationFrame(() => {
-        // Find all elements with the specific class
-        const scrollableElements =
-          document.querySelectorAll(".layout-scrollbar");
-
-        // Scroll each one to the top
-        scrollableElements.forEach((element) => {
-          element.scrollTo({ top: 0, behavior: "instant" });
-        });
-      });
-    };
-
-    executeScroll();
-  }, [scrollTrigger]);
 
   const requiredFields: (keyof SalaryAdvanceFormData)[] = [
     "staffNumber",
@@ -513,7 +492,7 @@ export default function SalaryAdvanceClient() {
           formData={formData}
           onBack={() => {
             setStep(2);
-            triggerScroll(!scrollTrigger);
+            scrollPageToTop();
           }}
           onSubmit={handleSubmit}
           submitting={submitting}
@@ -861,7 +840,7 @@ export default function SalaryAdvanceClient() {
                 onSubmit={(e) => {
                   e.preventDefault();
                   setStep(3);
-                  triggerScroll(!scrollTrigger);
+                  scrollPageToTop();
                 }}
               >
                 {/* Employee Information */}

@@ -20,7 +20,7 @@ import { getCasualApproverLink } from "@/serverActions/GetCasualApproverLink";
 import { getCasualRequisitionDetails } from "@/serverActions/GetCasualRequisitionDetails";
 import { CasualEmailDataValues } from "@/services/CasualEmailSender";
 import { useLoadingStore } from "@/store/useLoadingStore";
-import { useToggleStore } from "@/store/useToggleStore";
+import { amendRequisitionHref } from "@/lib/dashboardTables";
 import CasualAmendmentHistory from "../../Approvers/CasualApprovers/CasualAmendmentHistory";
 import { useEffect, useState } from "react";
 
@@ -40,9 +40,6 @@ export const CasualDetailsModal = ({
   dataFlag,
 }: ModalProps) => {
   const setLoadingLine = useLoadingStore((state) => state.setLoadingLine);
-  const setCasualAmendmentRequestId = useToggleStore(
-    (state) => state.setCasualAmendmentRequestId,
-  );
   const { email } = useUser();
   const [linkLoading, setLinkLoading] = useState(false);
   const [link, setLink] = useState("#");
@@ -145,16 +142,14 @@ export const CasualDetailsModal = ({
               {dataFlag === "userData" &&
                 data.submitter_email === email &&
                 isCasualAmendableHrStatus(data.casual_hr_approval_status) && (
-                  <button
-                    onClick={() => {
-                      setCasualAmendmentRequestId(data.request_id);
-                      onClose();
-                    }}
+                  <Link
+                    href={amendRequisitionHref("casual", data.request_id)}
+                    onClick={onClose}
                     className="flex items-center gap-1 rounded-full bg-amber-500 px-3 py-1 text-xs font-semibold text-white transition-colors duration-200 hover:bg-amber-600"
                   >
                     <Pencil className="h-3.5 w-3.5" />
                     Amend
-                  </button>
+                  </Link>
                 )}
               {stage !== "user" &&
                 data[`casual_${stage}_approval_status`] === "pending" && (

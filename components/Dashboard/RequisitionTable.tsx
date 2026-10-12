@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { ReactNode, useState, useSyncExternalStore } from "react";
 import {
   Search,
@@ -107,7 +108,8 @@ interface EmptyStateConfig {
   heading?: string;
   body?: string;
   newRequisitionLabel?: string;
-  onNewRequisition?: () => void;
+  // The type's new-requisition page, linked from the empty state
+  newRequisitionHref?: string;
 }
 
 interface RequisitionTableProps<TParams> {
@@ -354,9 +356,9 @@ export default function RequisitionTable<TParams>({
                           {/* New Requisition Link, when returned data is empty */}
                           {!showError &&
                             !searchTerm &&
-                            emptyState.onNewRequisition && (
-                              <button
-                                onClick={emptyState.onNewRequisition}
+                            emptyState.newRequisitionHref && (
+                              <Link
+                                href={emptyState.newRequisitionHref}
                                 className="my-2 flex items-center gap-2 rounded-xl bg-slate-900 px-3 py-2 text-sm text-white hover:bg-slate-800"
                               >
                                 <Plus className="h-4 w-4" />
@@ -364,7 +366,7 @@ export default function RequisitionTable<TParams>({
                                   {emptyState.newRequisitionLabel ??
                                     "New Requisition"}
                                 </span>
-                              </button>
+                              </Link>
                             )}
 
                           {/* Optional Action Button for Search Fallback */}

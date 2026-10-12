@@ -23,7 +23,8 @@ import { usePathname, useRouter } from "next/navigation";
 import ClientPortal from "./ClientPortal";
 import { useRef, useState } from "react";
 import MoreMenuModal from "./Modules/MoreMenuModal";
-import { useToggleStore } from "@/store/useToggleStore";
+import { newRequisitionHref } from "@/lib/dashboardTables";
+import { useConfirmLeave } from "./Dashboard/UnsavedChangesGuard";
 import { useUser } from "@/context/UserContext";
 import { REPORTS_PAGE, canViewReports } from "@/lib/reports/definitions";
 
@@ -52,26 +53,12 @@ const DashboardSidebar = () => {
 
   const showReports = canViewReports(useUser().roles);
 
-  // Zustand stores (the modals themselves live in Dashboard/DashboardModals)
-  const setShowITRequisition = useToggleStore(
-    (state) => state.setShowITRequisition,
-  );
-  const setShowTravelRequisition = useToggleStore(
-    (state) => state.setShowTravelRequisition,
-  );
-  const setShowAccessRequisition = useToggleStore(
-    (state) => state.setShowAccessRequisition,
-  );
-  const setShowCasualRequisition = useToggleStore(
-    (state) => state.setShowCasualRequisition,
-  );
-  const setShowEmployeeRequisition = useToggleStore(
-    (state) => state.setShowEmployeeRequisition,
-  );
+  // The browser's own Back button isn't guarded, but this one is
+  const confirmLeave = useConfirmLeave();
 
   return (
     <>
-      <aside className="custom:flex fixed top-1 bottom-1 left-0 z-50 hidden w-dashboard-sidebar flex-col items-center pt-0 pb-2">
+      <aside className="custom:flex w-dashboard-sidebar fixed top-1 bottom-1 left-0 z-50 hidden flex-col items-center pt-0 pb-2">
         {/* Brand (Icon Only) */}
         <DashboardBrand showText={false} />
         <div className="mx-auto mt-1 mb-2 w-full px-2">
@@ -90,20 +77,22 @@ const DashboardSidebar = () => {
         {/* Vertical Navigation */}
         <nav className="sidebar-nav mb-2 flex w-full flex-1 flex-col items-center gap-1.5 overflow-y-auto px-2">
           {/* IT Requisition */}
-          <SideBarButton
+          <SideBarLink
+            href={newRequisitionHref("it")}
             label="IT Req"
-            handleClick={() => setShowITRequisition(true)}
             Icon={Monitor}
+            tooltip="IT Requisition"
+            isActive={pathname === newRequisitionHref("it")}
             showToolTip={true}
-            toolTipMessage="IT Requisition"
           />
           {/* Travel Requisition */}
-          <SideBarButton
+          <SideBarLink
+            href={newRequisitionHref("travel")}
             label="Travel"
-            handleClick={() => setShowTravelRequisition(true)}
             Icon={BriefcaseBusiness}
+            tooltip="Travel Requisition"
+            isActive={pathname === newRequisitionHref("travel")}
             showToolTip={true}
-            toolTipMessage="Travel Requisition"
           />
           {/* Home Link */}
           {links.map(({ href, label, Icon, tooltip }) => {
@@ -152,7 +141,7 @@ const DashboardSidebar = () => {
             {/* Go back button */}
             <SideBarButton
               label="Back"
-              handleClick={() => router.back()}
+              handleClick={() => confirmLeave(() => router.back())}
               Icon={ChevronLeft}
               showToolTip={true}
               toolTipMessage="Go Back"
@@ -172,19 +161,19 @@ const DashboardSidebar = () => {
                   key: "casual",
                   label: "Casual Requisition",
                   Icon: HardHat,
-                  onClick: () => setShowCasualRequisition(true),
+                  href: newRequisitionHref("casual"),
                 },
                 {
                   key: "employee",
                   label: "Employee Requisition",
                   Icon: UserRoundPlus,
-                  onClick: () => setShowEmployeeRequisition(true),
+                  href: newRequisitionHref("employee"),
                 },
                 {
                   key: "access",
                   label: "Key & Access",
                   Icon: LockKeyhole,
-                  onClick: () => setShowAccessRequisition(true),
+                  href: newRequisitionHref("access"),
                 },
                 {
                   key: "guidelines",

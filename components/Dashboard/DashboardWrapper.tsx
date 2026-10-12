@@ -1,6 +1,6 @@
 import DashboardSidebar from "../DashboardSidebar";
 import MobileHeader from "../MobileHeader";
-import DashboardModals from "./DashboardModals";
+import { UnsavedChangesProvider } from "./UnsavedChangesGuard";
 
 // The page area is square; these overlays paint the frame color around a
 // quarter-circle of radius --radius-dashboard at each corner, so it still
@@ -16,29 +16,31 @@ const CORNER_OVERLAYS = [
 
 const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="min-h-screen bg-red-950">
-      {/* Mobile header handles screens below lg */}
-      <MobileHeader />
+    // The guard wraps the navs too, so their links and Back button ask
+    // before leaving a requisition form with unsaved input
+    <UnsavedChangesProvider>
+      <div className="min-h-screen bg-red-950">
+        {/* Mobile header handles screens below lg */}
+        <MobileHeader />
 
-      {/* Desktop sidebar handles lg screens */}
-      <DashboardSidebar />
+        {/* Desktop sidebar handles lg screens */}
+        <DashboardSidebar />
 
-      {/* Requisition form modals, shared by both navs */}
-      <DashboardModals />
-      <div
-        id="dashboard-wrapper"
-        className="layout-scrollbar custom:top-dashboard-gap custom:right-dashboard-gap custom:bottom-dashboard-gap custom:left-dashboard-sidebar fixed top-16 right-0 bottom-0 left-0 bg-white"
-      >
-        <div className="flex h-full w-full flex-col">{children}</div>
-      </div>
-      {CORNER_OVERLAYS.map((corner) => (
         <div
-          key={corner}
-          aria-hidden="true"
-          className={`pointer-events-none fixed size-(--radius-dashboard) ${corner}`}
-        />
-      ))}
-    </div>
+          id="dashboard-wrapper"
+          className="layout-scrollbar custom:top-dashboard-gap custom:right-dashboard-gap custom:bottom-dashboard-gap custom:left-dashboard-sidebar fixed top-16 right-0 bottom-0 left-0 bg-white"
+        >
+          <div className="flex h-full w-full flex-col">{children}</div>
+        </div>
+        {CORNER_OVERLAYS.map((corner) => (
+          <div
+            key={corner}
+            aria-hidden="true"
+            className={`pointer-events-none fixed size-(--radius-dashboard) ${corner}`}
+          />
+        ))}
+      </div>
+    </UnsavedChangesProvider>
   );
 };
 

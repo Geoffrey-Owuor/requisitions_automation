@@ -27,7 +27,7 @@ import { EmployeeEmailDataValues } from "@/services/EmployeeEmailSender";
 import AttachmentTypeGroups from "@/components/Approvers/EmployeeApprovers/AttachmentTypeGroups";
 import EmployeeAmendmentHistory from "@/components/Approvers/EmployeeApprovers/EmployeeAmendmentHistory";
 import { useLoadingStore } from "@/store/useLoadingStore";
-import { useToggleStore } from "@/store/useToggleStore";
+import { amendRequisitionHref } from "@/lib/dashboardTables";
 import { useEffect, useState } from "react";
 
 interface ModalProps {
@@ -57,9 +57,6 @@ export const EmployeeDetailsModal = ({
   dataFlag,
 }: ModalProps) => {
   const setLoadingLine = useLoadingStore((state) => state.setLoadingLine);
-  const setEmployeeAmendmentRequestId = useToggleStore(
-    (state) => state.setEmployeeAmendmentRequestId,
-  );
   const { email } = useUser();
   const [linkLoading, setLinkLoading] = useState(false);
   const [link, setLink] = useState("#");
@@ -180,17 +177,17 @@ export const EmployeeDetailsModal = ({
                   re-check ownership and the HR status */}
               {dataFlag === "userData" &&
                 data.submitter_email === email &&
-                isEmployeeAmendableHrStatus(data.employee_hr_approval_status) && (
-                  <button
-                    onClick={() => {
-                      setEmployeeAmendmentRequestId(data.request_id);
-                      onClose();
-                    }}
+                isEmployeeAmendableHrStatus(
+                  data.employee_hr_approval_status,
+                ) && (
+                  <Link
+                    href={amendRequisitionHref("employee", data.request_id)}
+                    onClick={onClose}
                     className="flex items-center gap-1 rounded-full bg-amber-500 px-3 py-1 text-xs font-semibold text-white transition-colors duration-200 hover:bg-amber-600"
                   >
                     <Pencil className="h-3.5 w-3.5" />
                     Amend
-                  </button>
+                  </Link>
                 )}
               {stage !== "user" &&
                 data[`employee_${stage}_approval_status`] === "pending" && (

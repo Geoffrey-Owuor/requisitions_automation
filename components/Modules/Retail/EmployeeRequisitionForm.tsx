@@ -37,7 +37,6 @@ import SubmittingOverlay from "@/components/SubmittingOverlay";
 import AlertModal from "@/components/AlertModal";
 import { AlertInfo } from "@/components/TravelRequisitionPage";
 import EmployeeConfirmationModal from "./EmployeeConfirmationModal";
-import { useToggleStore } from "@/store/useToggleStore";
 import {
   FormSelect,
   findHodForDepartment,
@@ -45,7 +44,10 @@ import {
   excludeSubmitterFromHodArray,
 } from "./CasualRequisitionForm";
 import Image from "next/image";
-import { useReportUnsavedChanges } from "../ModalWrapper";
+import { useRouter } from "next/navigation";
+import { useReportUnsavedChanges } from "@/components/Dashboard/UnsavedChangesGuard";
+import { scrollPageToTop } from "@/utils/scrollPageToTop";
+import { myRequisitionsHref } from "@/lib/dashboardTables";
 import { isSameFormValue } from "@/lib/formChanges";
 
 // ---- Client-side attachment constraints (mirrors lib/attachmentStorage.ts) ----
@@ -129,12 +131,7 @@ export default function EmployeeRequisitionForm({
 }) {
   const { email } = useUser();
   const queryClient = useQueryClient();
-  const setEmployeeAmendmentRequestId = useToggleStore(
-    (state) => state.setEmployeeAmendmentRequestId,
-  );
-
-  const scrollTrigger = useToggleStore((state) => state.scrollTrigger);
-  const triggerScroll = useToggleStore((state) => state.triggerScroll);
+  const router = useRouter();
 
   const { data: DEPARTMENTS = [], isLoading: departmentsLoading } = useQuery({
     queryKey: ["BaseDepartmentsData"],
@@ -150,11 +147,15 @@ export default function EmployeeRequisitionForm({
   const hodLabel = hodNameLabel(hodArray);
 
   // Amend mode: fetch the eligibility check + pre-fill data for this
-  // requisition. Re-checked server-side every time the modal opens.
+  // requisition. Re-checked server-side every time the amend page mounts.
   const { data: amendmentContext, isLoading: amendmentLoading } = useQuery({
     queryKey: ["EmployeeAmendmentContext", amendRequestId],
     queryFn: () => getEmployeeAmendmentContext(amendRequestId!),
     enabled: !!amendRequestId,
+    // Never seed the form from a cached copy - it could predate an
+    // amendment made since
+    staleTime: 0,
+    gcTime: 0,
   });
   const amendmentNotEligible =
     !!amendRequestId && !amendmentLoading && !amendmentContext;
@@ -169,7 +170,7 @@ export default function EmployeeRequisitionForm({
   });
   const [submitting, setSubmitting] = useState(false);
 
-  // Closing the modal asks first while there's input it would lose: anything
+  // Leaving the page asks first while there's input it would lose: anything
   // changed from the blank form - or, when amending, from the requisition as
   // loaded - until the amendment has gone through
   const savedFormData = isAmendment
@@ -186,7 +187,7 @@ export default function EmployeeRequisitionForm({
   const [fileErrors, setFileErrors] = useState<Record<string, string>>({});
 
   // Seed the form once the amendment context loads (runs at most once per
-  // mount - the modal remounts this component fresh each time it opens, so
+  // mount - the amend page mounts this component fresh for each requisition, so
   // there's no risk of clobbering later user edits).
   const [seededFromAmendment, setSeededFromAmendment] = useState(false);
   if (!seededFromAmendment && amendmentContext?.initialData) {
@@ -454,17 +455,27 @@ export default function EmployeeRequisitionForm({
       {step === 3 && (
         <AlertModal
           alertInfo={alertInfo}
+          successLink={
+            isAmendment
+              ? undefined
+              : {
+                  href: myRequisitionsHref("employee"),
+                  label: "View my requisitions",
+                }
+          }
           heading={
             isAmendment
               ? { success: "Amendment submitted!", error: "Amendment failed" }
               : undefined
           }
           buttonLabel={
-            isAmendment ? { success: "Close", error: "Try again" } : undefined
+            isAmendment
+              ? { success: "View my requisitions", error: "Try again" }
+              : undefined
           }
           onBack={() => {
             if (isAmendment && alertInfo.alertType === "success") {
-              setEmployeeAmendmentRequestId(null);
+              router.push(myRequisitionsHref("employee"));
             } else {
               setStep(1);
             }
@@ -480,7 +491,7 @@ export default function EmployeeRequisitionForm({
           reason={reason.trim()}
           onBack={() => {
             setStep(1);
-            triggerScroll(!scrollTrigger);
+            scrollPageToTop();
           }}
           onSubmit={handleSubmit}
           submitting={submitting}
@@ -518,11 +529,11 @@ export default function EmployeeRequisitionForm({
             <div className="mb-6 flex items-start gap-2.5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3.5 text-[13px] text-amber-800">
               <Info className="mt-0.5 h-4 w-4 shrink-0" />
               <p>
-                Amendments are only possible until HR approves this
-                requisition. Submitting this amendment resets every approval
-                stage, so it will need to be re-approved from the HOD stage
-                onward. Attachments you don&apos;t replace are kept as they
-                are; replaced ones remain viewable in the amendment history.
+                Amendments are only possible until HR approves this requisition.
+                Submitting this amendment resets every approval stage, so it
+                will need to be re-approved from the HOD stage onward.
+                Attachments you don&apos;t replace are kept as they are;
+                replaced ones remain viewable in the amendment history.
               </p>
             </div>
           )}
@@ -540,7 +551,7 @@ export default function EmployeeRequisitionForm({
               onSubmit={(e) => {
                 e.preventDefault();
                 setStep(2);
-                triggerScroll(!scrollTrigger);
+                scrollPageToTop();
               }}
             >
               {/* Section 1: Requisition Details */}
