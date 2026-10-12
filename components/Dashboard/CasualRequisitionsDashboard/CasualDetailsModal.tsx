@@ -16,7 +16,6 @@ import Link from "next/link";
 import { useUser } from "@/context/UserContext";
 import { getCasualApproverLink } from "@/serverActions/GetCasualApproverLink";
 import { getCasualRequisitionDetails } from "@/serverActions/GetCasualRequisitionDetails";
-import { useLoadingStore } from "@/store/useLoadingStore";
 import { amendRequisitionHref } from "@/lib/dashboardTables";
 import CasualAmendmentHistory from "../../Approvers/CasualApprovers/CasualAmendmentHistory";
 import { Modal, ModalActionSkeleton, modalActionClass } from "../../Modal";
@@ -38,13 +37,7 @@ export const CasualDetailsModal = ({
   onClose,
   dataFlag,
 }: ModalProps) => {
-  const setLoadingLine = useLoadingStore((state) => state.setLoadingLine);
   const { email } = useUser();
-
-  const handleLinkClick = () => {
-    setLoadingLine(true);
-    onClose();
-  };
 
   const STAGE_LEVELS: Record<typeof dataFlag, CasualStageLevels> = {
     hodPending: "hod",
@@ -115,7 +108,7 @@ export const CasualDetailsModal = ({
               linkQuery.data && (
                 <Link
                   href={linkQuery.data}
-                  onClick={handleLinkClick}
+                  onClick={onClose}
                   className={modalActionClass.dark}
                 >
                   <ShieldUser className="h-3.5 w-3.5" />
@@ -125,7 +118,7 @@ export const CasualDetailsModal = ({
             ))}
           <Link
             href={`/dashboard/casualpdf/${data.request_id}`}
-            onClick={handleLinkClick}
+            onClick={onClose}
             className={modalActionClass.dark}
           >
             Pdf

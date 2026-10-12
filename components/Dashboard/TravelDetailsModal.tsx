@@ -20,7 +20,6 @@ import { dateFormatter } from "@/public/assets";
 import Link from "next/link";
 import { useUser } from "@/context/UserContext";
 import { getTravelApproverLink } from "@/serverActions/GetTravelApproverLink";
-import { useLoadingStore } from "@/store/useLoadingStore";
 import { amendRequisitionHref } from "@/lib/dashboardTables";
 import { useQuery } from "@tanstack/react-query";
 import { getTravelAuditTrail } from "@/serverActions/GetTravelAuditTrail";
@@ -50,13 +49,7 @@ export const TravelDetailsModal = ({
   onClose,
   dataFlag,
 }: ModalProps) => {
-  const setLoadingLine = useLoadingStore((state) => state.setLoadingLine);
   const { memberships } = useUser();
-
-  const handleLinkClick = () => {
-    setLoadingLine(true);
-    onClose();
-  };
 
   // Get token based on the data flag
 
@@ -163,7 +156,7 @@ export const TravelDetailsModal = ({
               linkQuery.data && (
                 <Link
                   href={linkQuery.data}
-                  onClick={handleLinkClick}
+                  onClick={onClose}
                   className={modalActionClass.dark}
                 >
                   <ShieldUser className="h-3.5 w-3.5" />
@@ -174,7 +167,7 @@ export const TravelDetailsModal = ({
           {canPushback && pushbackLinkQuery.data && (
             <Link
               href={pushbackLinkQuery.data}
-              onClick={handleLinkClick}
+              onClick={onClose}
               title="Change the recorded HR decision on this requisition"
               className={modalActionClass.amber}
             >
@@ -184,7 +177,7 @@ export const TravelDetailsModal = ({
           )}
           <Link
             href={`/dashboard/travelpdf/${data.request_id}`}
-            onClick={handleLinkClick}
+            onClick={onClose}
             className={modalActionClass.dark}
           >
             Pdf

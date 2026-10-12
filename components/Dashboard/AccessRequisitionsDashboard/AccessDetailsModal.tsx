@@ -19,7 +19,6 @@ import { Modal, ModalActionSkeleton, modalActionClass } from "../../Modal";
 import Link from "next/link";
 import { useUser } from "@/context/UserContext";
 import { getAccessApproverLink } from "@/serverActions/GetAccessApproverLink";
-import { useLoadingStore } from "@/store/useLoadingStore";
 
 interface ModalProps {
   data: QueryResultRow | null;
@@ -36,13 +35,7 @@ export const AccessDetailsModal = ({
   onClose,
   dataFlag,
 }: ModalProps) => {
-  const setLoadingLine = useLoadingStore((state) => state.setLoadingLine);
   const { email } = useUser();
-
-  const handleLinkClick = () => {
-    setLoadingLine(true);
-    onClose();
-  };
 
   const STAGE_LEVELS: Record<typeof dataFlag, AccessStageLevels> = {
     hodPending: "hod",
@@ -86,7 +79,7 @@ export const AccessDetailsModal = ({
               linkQuery.data && (
                 <Link
                   href={linkQuery.data}
-                  onClick={handleLinkClick}
+                  onClick={onClose}
                   className={modalActionClass.dark}
                 >
                   <ShieldUser className="h-3.5 w-3.5" />
@@ -96,7 +89,7 @@ export const AccessDetailsModal = ({
             ))}
           <Link
             href={`/dashboard/accesspdf/${data.request_id}`}
-            onClick={handleLinkClick}
+            onClick={onClose}
             className={modalActionClass.dark}
           >
             Pdf
