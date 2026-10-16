@@ -128,6 +128,9 @@ Instead of waiting out that lock, a staff member can request a self-service **al
 
 The HelpDesk and Staff Product Purchase dashboard pages render an iframe against an internally reverse-proxied SSO URL (`SSO_SHARED_SECRET`) — they're portals into separate internal systems, not requisition forms, and don't follow the requisition/approval patterns above.
 
+- The iframe `src` is `/api/embed/<app>` (`app/api/embed/[app]/route.ts`), which signs the hand-off when the iframe requests it and redirects (`no-store`) to the app's SSO endpoint. Never render a signed URL into the page itself: back/forward navigation reuses the rendered page and would replay a timestamp past the embedded apps' 2-minute window.
+- Each embedded app verifies its own signing format, configured per app in that route: Staff Product Purchase signs `email:timestamp`; HelpDesk signs `JSON.stringify([email, name, timestamp])` (it uses `name` to seed new-user registration). Changing either format means deploying the host and that app together.
+
 ### Path alias
 
 `@/*` maps to the repo root (`tsconfig.json`), e.g. `@/lib/session`, `@/serverActions/GetUserRoles`.
