@@ -204,6 +204,8 @@ export const ALL_CASUAL_LOCATIONS = [
   "Nyali",
   "Sarit",
   "Yaya",
+  "Mega",
+  "Gitanga",
 ];
 
 export const RETAIL_DEPARTMENT = "Retail";
