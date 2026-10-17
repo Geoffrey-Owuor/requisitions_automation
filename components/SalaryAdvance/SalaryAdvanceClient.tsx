@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { DatePicker } from "../DatePicker";
 import {
   ArrowRight,
@@ -14,7 +14,8 @@ import {
   CircleAlert,
   RotateCw,
   PencilLine,
-  UserX,
+  CalendarClock,
+  UserRoundX,
 } from "lucide-react";
 import SubmittingOverlay from "../SubmittingOverlay";
 import { useAlertStore } from "@/store/useAlertStore";
@@ -29,6 +30,8 @@ import { VerifyAdvanceCode } from "@/serverActions/PublicServerActions/VerifyAdv
 import { GetAdvanceFormSession } from "@/serverActions/GetAdvanceFormSession";
 import { EndAdvanceFormSession } from "@/serverActions/EndAdvanceFormSession";
 import { SubmitAdvanceForm } from "@/serverActions/PublicServerActions/SubmitAdvanceForm";
+import { GetAdvanceSubmissionWindow } from "@/serverActions/PublicServerActions/GetAdvanceSubmissionWindow";
+import type { AdvanceSubmissionWindow } from "@/lib/salaryAdvanceWindow";
 import SalaryAdvanceFormSkeleton from "../Skeletons/SalaryAdvanceFormSkeleton";
 import SalaryAdvanceAlterationSection from "./SalaryAdvanceAlterationSection";
 import SalaryAdvanceHistorySection from "./SalaryAdvanceHistorySection";
@@ -100,10 +103,6 @@ const MODE_OPTIONS: { value: "submit" | "alter" | "history"; label: string }[] =
     { value: "history", label: "My Request History" },
   ];
 
-function toISODate(date: Date): string {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-}
-
 function applyStaffSession(
   staff: {
     staffNumber: string;
@@ -122,6 +121,70 @@ function applyStaffSession(
   updateField("staffEmail", staff.staffEmail);
   updateField("department", staff.department);
   updateField("location", staff.location);
+}
+
+// Shown in place of the form outside the monthly submission window, or if
+// the window couldn't be loaded. Never mentions extensions.
+function SubmissionsClosedNotice({
+  reopensOn,
+  loadFailed,
+  onShowHistory,
+  onShowAlter,
+}: {
+  reopensOn?: string;
+  loadFailed: boolean;
+  onShowHistory: () => void;
+  onShowAlter: () => void;
+}) {
+  if (loadFailed) {
+    return (
+      <div className="flex items-start gap-3 rounded-3xl border border-rose-200 bg-rose-50 px-6 py-6 text-rose-700">
+        <CircleAlert size={18} className="mt-0.5 shrink-0" />
+        <p className="text-sm leading-relaxed">
+          We couldn&apos;t load the request form. Refresh the page to try again,
+          or contact HR if this keeps happening.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-3xl border border-white/85 bg-white/65 px-6 py-10 text-center shadow-[0_24px_48px_rgba(160,60,60,0.10)] sm:px-8">
+      <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-50 text-rose-600">
+        <CalendarClock size={22} />
+      </div>
+      <h2 className="mb-2 text-lg font-semibold text-slate-900">
+        Submissions for this month have closed
+      </h2>
+      <p className="mx-auto mb-6 max-w-md text-sm leading-relaxed text-slate-500">
+        New salary advance requests can be submitted from the 1st to the 10th of
+        each month.
+        {reopensOn && (
+          <>
+            {" "}
+            You can submit your next request from{" "}
+            <span className="font-semibold text-slate-800">{reopensOn}</span>.
+          </>
+        )}
+      </p>
+      <div className="flex flex-wrap items-center justify-center gap-2">
+        <button
+          type="button"
+          onClick={onShowHistory}
+          className="cursor-pointer rounded-xl bg-slate-900 px-4 py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-slate-800"
+        >
+          View my request history
+        </button>
+        <button
+          type="button"
+          onClick={onShowAlter}
+          className="cursor-pointer rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-[13px] font-semibold text-slate-700 transition-colors hover:bg-slate-50"
+        >
+          Modify an existing request
+        </button>
+      </div>
+    </div>
+  );
 }
 
 function StaffInfoField({ label, value }: { label: string; value: string }) {
@@ -169,17 +232,23 @@ export default function SalaryAdvanceClient() {
     setCode(next);
   };
 
-  // Repayment may start any day from the submission date through the last
-  // day of the month following the one the form is submitted in.
-  const { repaymentMinDate, repaymentMaxDate } = useMemo(() => {
-    const now = new Date();
-    const min = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const max = new Date(now.getFullYear(), now.getMonth() + 2, 0);
-    return {
-      repaymentMinDate: toISODate(min),
-      repaymentMaxDate: toISODate(max),
-    };
-  }, []);
+  // Whether new requests are open this month, and the allowed repayment
+  // start dates — both decided on the server in Nairobi time and re-checked
+  // by SubmitAdvanceForm. null until loaded, or if loading failed.
+  const [submissionWindow, setSubmissionWindow] =
+    useState<AdvanceSubmissionWindow | null>(null);
+  const [windowLoadFailed, setWindowLoadFailed] = useState(false);
+
+  const loadSubmissionWindow = async () => {
+    try {
+      setSubmissionWindow(await GetAdvanceSubmissionWindow());
+      setWindowLoadFailed(false);
+    } catch (error) {
+      console.error("Error loading the salary advance window:", error);
+      setSubmissionWindow(null);
+      setWindowLoadFailed(true);
+    }
+  };
 
   const updateField = <K extends keyof SalaryAdvanceFormData>(
     field: K,
@@ -220,7 +289,10 @@ export default function SalaryAdvanceClient() {
   // so they don't have to re-verify their email if they refresh mid-form.
   useEffect(() => {
     (async () => {
-      const session = await GetAdvanceFormSession();
+      const [session] = await Promise.all([
+        GetAdvanceFormSession(),
+        loadSubmissionWindow(),
+      ]);
       if (session) {
         applyStaffSession(session, updateField);
         setStep(2);
@@ -439,6 +511,10 @@ export default function SalaryAdvanceClient() {
           location: prev.location,
         }));
         setPhoneNumberConfirm("");
+      } else {
+        // The deadline may have passed since the form loaded; swap the form
+        // for the closed notice if so
+        await loadSubmissionWindow();
       }
 
       setStep(2);
@@ -555,6 +631,18 @@ export default function SalaryAdvanceClient() {
                     before requesting a salary advance.
                   </p>
                 </div>
+
+                {submissionWindow && !submissionWindow.isOpen && (
+                  <div className="mt-3 flex max-w-md items-start gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-700">
+                    <CalendarClock size={16} className="mt-0.5 shrink-0" />
+                    <p className="text-xs leading-relaxed">
+                      New requests can be submitted from the 1st to the 10th of
+                      each month, and open again on {submissionWindow.reopensOn}
+                      . You can still verify to view your request history or
+                      modify an existing request.
+                    </p>
+                  </div>
+                )}
 
                 <button
                   type="button"
@@ -833,7 +921,16 @@ export default function SalaryAdvanceClient() {
 
           {mode === "history" && <SalaryAdvanceHistorySection />}
 
-          {mode === "submit" && (
+          {mode === "submit" && !submissionWindow?.isOpen && (
+            <SubmissionsClosedNotice
+              reopensOn={submissionWindow?.reopensOn}
+              loadFailed={windowLoadFailed}
+              onShowHistory={() => setMode("history")}
+              onShowAlter={() => setMode("alter")}
+            />
+          )}
+
+          {mode === "submit" && submissionWindow?.isOpen && (
             <div className="rounded-3xl border border-white/85 bg-white/65 px-6 py-8 shadow-[0_24px_48px_rgba(160,60,60,0.10)] sm:px-8">
               <form
                 className="flex flex-col gap-8"
@@ -865,7 +962,7 @@ export default function SalaryAdvanceClient() {
                           : "text-slate-500 hover:bg-slate-100 hover:text-slate-800"
                       }`}
                     >
-                      <UserX size={13} />
+                      <UserRoundX size={13} />
                       {confirmingEndSession
                         ? "End session and start over?"
                         : "Not you?"}
@@ -940,8 +1037,8 @@ export default function SalaryAdvanceClient() {
                       <DatePicker
                         value={formData.repaymentStartDate}
                         onChange={(v) => updateField("repaymentStartDate", v)}
-                        minDate={repaymentMinDate}
-                        maxDate={repaymentMaxDate}
+                        minDate={submissionWindow?.repaymentMinDate}
+                        maxDate={submissionWindow?.repaymentMaxDate}
                       />
                     </div>
 
@@ -1051,9 +1148,15 @@ export default function SalaryAdvanceClient() {
                       the 15th of each month.
                     </li>
                     <li>
-                      <strong>Submission Timing:</strong> Requests may be
-                      submitted at any time and are picked up in the next
-                      monthly processing run.
+                      <strong>Submission Deadline:</strong> Requests must be
+                      submitted between the 1st and the 10th of the month.
+                      Submissions close after the 10th and reopen on the 1st of
+                      the following month.
+                    </li>
+                    <li>
+                      <strong>Repayment Start:</strong> Repayment can start from
+                      the 15th of the month of submission up to the end of the
+                      following month.
                     </li>
                     <li>
                       <strong>Legal Compliance:</strong> All salary advances

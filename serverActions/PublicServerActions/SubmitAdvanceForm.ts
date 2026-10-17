@@ -7,6 +7,10 @@ import {
   getBlockingActiveAdvance,
   getInstallmentCompletionDate,
 } from "@/lib/salaryAdvanceRules";
+import {
+  getAdvanceSubmissionWindow,
+  isRepaymentStartDateAllowed,
+} from "@/lib/salaryAdvanceWindow";
 import { isAdvancePhoneRequired, normalizeKenyanPhone } from "@/public/assets";
 
 export interface MessageResponse {
@@ -32,6 +36,27 @@ export async function SubmitAdvanceForm(
       verifiedStaff;
     const { requestAmount, repaymentStartDate, requestType, phoneNumber } =
       formData;
+
+    // RULE 1: New requests are only accepted inside the monthly submission
+    // window. Checked here, not just by hiding the form, since the form may
+    // have been loaded before the deadline passed. The message must not
+    // mention extensions.
+    const submissionWindow = await getAdvanceSubmissionWindow();
+
+    if (!submissionWindow.isOpen) {
+      return {
+        type: "error",
+        message: `Salary advance submissions for this month closed on the 10th. You can submit a new request from ${submissionWindow.reopensOn}.`,
+      };
+    }
+
+    if (!isRepaymentStartDateAllowed(repaymentStartDate, submissionWindow)) {
+      return {
+        type: "error",
+        message:
+          "Choose a repayment start date from the 15th of this month (or today, if later) to the end of next month.",
+      };
+    }
 
     // Continuous requests are always repaid in a single installment —
     // enforced here too, not just on the client.
