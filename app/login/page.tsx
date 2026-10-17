@@ -42,121 +42,128 @@ export default async function LoginPage({ searchParams }: Props) {
   }
 
   return (
-    <div className="layout-scrollbar bg-canvas relative h-screen w-full selection:bg-rose-100 selection:text-rose-900">
-      {/* ── AMBIENT BACKGROUND ── */}
-      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
-        <div className="absolute top-[-20%] left-1/2 h-[70%] w-[80%] -translate-x-1/2 rounded-full bg-rose-200/50 blur-[120px]" />
-        <div className="absolute bottom-[-15%] left-[-10%] h-[50%] w-[50%] rounded-full bg-orange-100/50 blur-[110px]" />
-        <div className="absolute right-[-10%] bottom-[-5%] h-[45%] w-[45%] rounded-full bg-blue-100/40 blur-[110px]" />
-        <div className="hero-grid absolute inset-x-0 top-0 h-[80vh]" />
-      </div>
+    <div className="layout-scrollbar bg-canvas h-screen w-full selection:bg-rose-100 selection:text-rose-900">
+      {/* Positioning context spans the scrolled content, not just the
+          viewport-tall scroller, so the ambient layer reaches the footer. */}
+      <div className="relative min-h-full">
+        {/* ── AMBIENT BACKGROUND ── */}
+        <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+          <div className="absolute top-[-20%] left-1/2 h-[70%] w-[80%] -translate-x-1/2 rounded-full bg-rose-200/50 blur-[120px]" />
+          <div className="absolute bottom-[-15%] left-[-10%] h-[50%] w-[50%] rounded-full bg-orange-100/50 blur-[110px]" />
+          <div className="absolute right-[-10%] bottom-[-5%] h-[45%] w-[45%] rounded-full bg-blue-100/40 blur-[110px]" />
+          <div className="hero-grid absolute inset-x-0 top-0 h-[80vh]" />
+        </div>
 
-      {/* Structural Central Container */}
-      <div className="relative z-10 mx-auto flex min-h-screen max-w-6xl flex-col px-4">
-        {/* ── ENTERPRISE HEADER ── */}
-        <header className="flex h-18 items-center justify-between">
-          <Brand showText={true} />
+        {/* Structural Central Container */}
+        <div className="relative z-10 mx-auto flex min-h-screen max-w-6xl flex-col px-4">
+          {/* ── ENTERPRISE HEADER ── */}
+          <header className="flex h-18 items-center justify-between">
+            <Brand showText={true} />
 
-          <Link
-            href="/guidelines/travel"
-            className="rounded-control bg-brand-600 hover:bg-brand-700 flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold text-white transition-colors"
-          >
-            <FileText
-              size={14}
-              className="transition-colors group-hover:text-rose-500"
-            />
-            <span className="hidden sm:inline">Requisition Guidelines</span>
-            <span className="sm:hidden">Guidelines</span>
-          </Link>
-        </header>
+            <Link
+              href="/guidelines/travel"
+              className="rounded-control bg-brand-600 hover:bg-brand-700 flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold text-white transition-colors"
+            >
+              <FileText
+                size={14}
+                className="transition-colors group-hover:text-rose-500"
+              />
+              <span className="hidden sm:inline">Requisition Guidelines</span>
+              <span className="sm:hidden">Guidelines</span>
+            </Link>
+          </header>
 
-        {/* ── MAIN CONTENT LAYER ── */}
-        <main className="flex flex-1 items-center justify-center py-6">
-          <div className="animate-rise relative w-full max-w-sm">
-            {/* Neomorphic Enterprise Card */}
-            <div className="relative overflow-hidden rounded-3xl border border-white/80 bg-white/90 p-8 shadow-[0_2px_4px_rgba(140,40,60,0.03),0_28px_56px_-24px_rgba(140,40,60,0.35),inset_0_1px_0_rgba(255,255,255,1)] sm:p-9">
-              {/* Top gradient hairline */}
-              <div className="absolute inset-x-10 top-0 h-px bg-linear-to-r from-transparent via-rose-400/60 to-transparent" />
+          {/* ── MAIN CONTENT LAYER ── */}
+          <main className="flex flex-1 items-center justify-center py-6">
+            <div className="animate-rise relative w-full max-w-sm">
+              {/* Neomorphic Enterprise Card */}
+              <div className="relative overflow-hidden rounded-3xl border border-white/80 bg-white/90 p-8 shadow-[0_2px_4px_rgba(140,40,60,0.03),0_28px_56px_-24px_rgba(140,40,60,0.35),inset_0_1px_0_rgba(255,255,255,1)] sm:p-9">
+                {/* Top gradient hairline */}
+                <div className="absolute inset-x-10 top-0 h-px bg-linear-to-r from-transparent via-rose-400/60 to-transparent" />
 
-              {/* Embedded Logo Core */}
-              <div className="mb-6 flex justify-center">
-                <div className="relative flex h-16 w-16 items-center justify-center rounded-full border border-rose-100 bg-linear-to-br from-white to-rose-50 shadow-[inset_0_1.5px_0_rgba(255,255,255,1),0_10px_24px_-10px_rgba(225,29,72,0.45)]">
-                  <div className="absolute inset-0 rounded-full ring-8 ring-rose-50/60" />
-                  <div className="relative h-7 w-7">
-                    <Image
-                      src={assets.hotpoint_logo}
-                      alt="Hotpoint Apps Hub"
-                      sizes="32px"
-                      className="object-contain"
-                      fill
-                      priority
-                    />
+                {/* Embedded Logo Core */}
+                <div className="mb-6 flex justify-center">
+                  <div className="relative flex h-16 w-16 items-center justify-center rounded-full border border-rose-100 bg-linear-to-br from-white to-rose-50 shadow-[inset_0_1.5px_0_rgba(255,255,255,1),0_10px_24px_-10px_rgba(225,29,72,0.45)]">
+                    <div className="absolute inset-0 rounded-full ring-8 ring-rose-50/60" />
+                    <div className="relative h-7 w-7">
+                      <Image
+                        src={assets.hotpoint_logo}
+                        alt="Hotpoint Apps Hub"
+                        sizes="32px"
+                        className="object-contain"
+                        fill
+                        priority
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Typography Header Group */}
-              <div className="mb-6 text-center">
-                <span className="mb-3 inline-flex items-center gap-1.5 rounded-lg border border-rose-100 bg-rose-50/70 px-3 py-1 text-[10px] font-bold tracking-[0.14em] text-rose-600 uppercase">
-                  <Lock size={10} />
-                  Secure Sign In
-                </span>
-                <h1 className="mb-2 text-[26px] leading-tight font-semibold tracking-tight text-slate-900">
-                  Welcome Back
-                </h1>
-                <p className="px-1 text-[13.5px] leading-relaxed font-normal text-slate-500">
-                  Valid work account required. Login using your Microsoft 365
-                  account to proceed.
-                </p>
-              </div>
+                {/* Typography Header Group */}
+                <div className="mb-6 text-center">
+                  <span className="mb-3 inline-flex items-center gap-1.5 rounded-lg border border-rose-100 bg-rose-50/70 px-3 py-1 text-[10px] font-bold tracking-[0.14em] text-rose-600 uppercase">
+                    <Lock size={10} />
+                    Secure Sign In
+                  </span>
+                  <h1 className="mb-2 text-[26px] leading-tight font-semibold tracking-tight text-slate-900">
+                    Welcome Back
+                  </h1>
+                  <p className="px-1 text-[13.5px] leading-relaxed font-normal text-slate-500">
+                    Valid work account required. Login using your Microsoft 365
+                    account to proceed.
+                  </p>
+                </div>
 
-              {/* Linear Segment Divider */}
-              <div className="mb-6 flex items-center gap-3">
-                <div className="h-px flex-1 bg-linear-to-r from-transparent to-rose-100" />
-                <span className="text-[10px] font-semibold tracking-[0.16em] text-slate-500 uppercase">
-                  Continue with
-                </span>
-                <div className="h-px flex-1 bg-linear-to-l from-transparent to-rose-100" />
-              </div>
+                {/* Linear Segment Divider */}
+                <div className="mb-6 flex items-center gap-3">
+                  <div className="h-px flex-1 bg-linear-to-r from-transparent to-rose-100" />
+                  <span className="text-[10px] font-semibold tracking-[0.16em] text-slate-500 uppercase">
+                    Continue with
+                  </span>
+                  <div className="h-px flex-1 bg-linear-to-l from-transparent to-rose-100" />
+                </div>
 
-              {error && SSO_ERROR_MESSAGES[error] && (
-                <p
-                  role="alert"
-                  className="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-center text-[12.5px] text-rose-700"
-                >
-                  {SSO_ERROR_MESSAGES[error]}
-                </p>
-              )}
+                {error && SSO_ERROR_MESSAGES[error] && (
+                  <p
+                    role="alert"
+                    className="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-center text-[12.5px] text-rose-700"
+                  >
+                    {SSO_ERROR_MESSAGES[error]}
+                  </p>
+                )}
 
-              {/* Dynamic Handshake Interface Trigger */}
-              <LoginWrapper />
+                {/* Dynamic Handshake Interface Trigger */}
+                <LoginWrapper />
 
-              {/* Trust strip */}
-              <div className="mt-6 flex items-center justify-center gap-2 px-4 py-2">
-                <ShieldCheck size={13} className="shrink-0 text-emerald-500" />
-                <p className="text-[11.5px] text-slate-500">
-                  Protected by Microsoft Entra ID
-                </p>
-              </div>
-
-              {/* Fallback Utility Link */}
-              <div className="mt-5 text-center">
-                <Link
-                  href="/"
-                  className="group inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12.5px] font-medium text-slate-500 transition-colors hover:bg-rose-50/70 hover:text-rose-600"
-                >
-                  <ArrowLeft
+                {/* Trust strip */}
+                <div className="mt-6 flex items-center justify-center gap-2 px-4 py-2">
+                  <ShieldCheck
                     size={13}
-                    className="transition-transform duration-200 group-hover:-translate-x-0.5"
+                    className="shrink-0 text-emerald-500"
                   />
-                  Back to Homepage
-                </Link>
+                  <p className="text-[11.5px] text-slate-500">
+                    Protected by Microsoft Entra ID
+                  </p>
+                </div>
+
+                {/* Fallback Utility Link */}
+                <div className="mt-5 text-center">
+                  <Link
+                    href="/"
+                    className="group inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12.5px] font-medium text-slate-500 transition-colors hover:bg-rose-50/70 hover:text-rose-600"
+                  >
+                    <ArrowLeft
+                      size={13}
+                      className="transition-transform duration-200 group-hover:-translate-x-0.5"
+                    />
+                    Back to Homepage
+                  </Link>
+                </div>
               </div>
             </div>
-          </div>
-        </main>
+          </main>
 
-        <Footer />
+          <Footer />
+        </div>
       </div>
     </div>
   );
