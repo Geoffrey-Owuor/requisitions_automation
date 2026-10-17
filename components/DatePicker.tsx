@@ -1,6 +1,12 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  useLayoutEffect,
+} from "react";
 import {
   CalendarDays,
   ChevronLeft,
@@ -128,6 +134,8 @@ export function DatePicker({
   });
 
   const ref = useRef<HTMLDivElement>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
+  const [shift, setShift] = useState(0);
   const today = new Date();
 
   // Calculate position (Top vs Bottom) based on remaining screen height
@@ -148,9 +156,32 @@ export function DatePicker({
   const toggleOpen = () => {
     if (!open) {
       updatePlacement();
+      setShift(0);
     }
     setOpen((prev) => !prev);
   };
+
+  // When the calendar fits neither above nor below the input (a short
+  // window, or a centred modal), slide it back inside the viewport rather
+  // than letting its header run off-screen. It may then cover the input.
+  // Measured once per open/placement with the shift cleared, so it can't
+  // feed back into itself.
+  useLayoutEffect(() => {
+    const popover = popoverRef.current;
+    if (!open || !popover) return;
+    const margin = 8;
+    popover.style.transform = "";
+    const { top, bottom } = popover.getBoundingClientRect();
+    let next = 0;
+    if (top < margin) next = margin - top;
+    else if (bottom > window.innerHeight - margin)
+      next = Math.max(window.innerHeight - margin - bottom, margin - top);
+    next = Math.round(next);
+    // Re-applied by hand too: if the value didn't change, React won't
+    // rewrite the style it rendered
+    popover.style.transform = next ? `translateY(${next}px)` : "";
+    setShift(next);
+  }, [open, placement]);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -259,6 +290,8 @@ export function DatePicker({
 
       {open && (
         <div
+          ref={popoverRef}
+          style={shift ? { transform: `translateY(${shift}px)` } : undefined}
           className={`absolute left-0 z-50 w-full rounded-2xl border border-neutral-200 bg-white p-4 shadow-xl ${
             placement === "top" ? "bottom-full mb-2" : "top-full mt-2"
           }`}

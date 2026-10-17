@@ -142,7 +142,7 @@ export function Modal({
       </div>
 
       <div
-        className={`modal-sheet-body layout-scrollbar border-t border-neutral-100 ${overflowVisible ? "sm:overflow-visible" : ""} ${bodyClassName}`}
+        className={`modal-sheet-body border-t border-neutral-100 ${overflowVisible ? "sm:overflow-visible" : ""} ${bodyClassName}`}
       >
         {children}
       </div>

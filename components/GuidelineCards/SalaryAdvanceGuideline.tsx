@@ -39,8 +39,9 @@ export default function SalaryAdvanceGuideline() {
             icon={<CalendarClock size={18} />}
             title="Schedules & Deadlines"
             items={[
-              "Submission Timing: Requests may be submitted at any time and are picked up in the next monthly processing run.",
+              "Submission Deadline: Requests must be submitted between the 1st and the 10th of the month. Submissions close after the 10th and reopen on the 1st of the following month.",
               "Processing Schedule: Advances are processed once per month, specifically by the 15th.",
+              "Repayment Start: Repayment can start from the 15th of the month of submission up to the end of the following month.",
             ]}
           />
           <InfoCard
@@ -68,7 +69,7 @@ export default function SalaryAdvanceGuideline() {
             items={[
               "Staff Number (automatically retrieves your associated Name and Email).",
               "Current Department and specific Location are also retrieved automatically from the staff number.",
-              "Phone Number (only when repaying over more than one installment): entered and confirmed by you — HR and Finance use it to follow up on your repayments, so it must be correct and belong to you.",
+              "Phone Number (only when repaying over more than one installment): entered and confirmed by you — HR and Finance use it to follow up on your repayments and may use it to disburse your advance via M-Pesa, so it must be correct and belong to you.",
             ]}
           />
           <InfoCard
