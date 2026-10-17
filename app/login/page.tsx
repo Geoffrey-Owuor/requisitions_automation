@@ -17,7 +17,15 @@ export const metadata: Metadata = {
 };
 
 type Props = {
-  searchParams: Promise<{ returnTo?: string }>;
+  searchParams: Promise<{ returnTo?: string; error?: string }>;
+};
+
+// Set by app/api/auth/callback when Microsoft sign-in doesn't complete.
+const SSO_ERROR_MESSAGES: Record<string, string> = {
+  sso_unreachable:
+    "We couldn't reach Microsoft to complete your sign-in. Please try again in a moment.",
+  auth_failed: "Microsoft sign-in didn't complete. Please try again.",
+  invalid_state: "Your sign-in session expired. Please try again.",
 };
 
 export default async function LoginPage({ searchParams }: Props) {
@@ -28,7 +36,7 @@ export default async function LoginPage({ searchParams }: Props) {
   }
 
   // Handle auto-redirect if requested by middleware
-  const { returnTo } = await searchParams;
+  const { returnTo, error } = await searchParams;
   if (returnTo) {
     return <HardRedirect url="/api/auth/login" returnTo={returnTo} />;
   }
@@ -110,6 +118,15 @@ export default async function LoginPage({ searchParams }: Props) {
                 </span>
                 <div className="h-px flex-1 bg-linear-to-l from-transparent to-rose-100" />
               </div>
+
+              {error && SSO_ERROR_MESSAGES[error] && (
+                <p
+                  role="alert"
+                  className="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-center text-[12.5px] text-rose-700"
+                >
+                  {SSO_ERROR_MESSAGES[error]}
+                </p>
+              )}
 
               {/* Dynamic Handshake Interface Trigger */}
               <LoginWrapper />
