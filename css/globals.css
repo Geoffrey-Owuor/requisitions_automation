@@ -348,12 +348,15 @@ html {
   }
   /* Positioned so absolutely placed content (sr-only fields, popovers) is laid
      out against the body, not the dialog, where it would make the whole
-     dialog scroll */
+     dialog scroll. Not .layout-scrollbar: that rule is unlayered, so its
+     overflow-y would beat Modal's sm:overflow-visible utility and clip
+     popovers inside the body. */
   .modal-sheet-body {
     position: relative;
     grid-area: body;
     overflow-y: auto;
     overscroll-behavior: contain;
+    scrollbar-color: #737373 transparent;
     background: #fff;
   }
 
