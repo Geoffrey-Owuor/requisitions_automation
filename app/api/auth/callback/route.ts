@@ -3,6 +3,11 @@ import { MicrosoftEntraId } from "arctic";
 import { cookies } from "next/headers";
 import { createSession } from "@/lib/session";
 import { getRequestOrigin } from "@/lib/getRequestOrigin";
+import {
+  fetchMicrosoftProfile,
+  isMicrosoftUnreachable,
+  retryOnConnectFailure,
+} from "@/lib/microsoftSso";
 
 export async function GET(req: Request) {
   const origin = await getRequestOrigin(req);
@@ -39,9 +44,10 @@ export async function GET(req: Request) {
   }
 
   try {
-    const tokens = await entraId.validateAuthorizationCode(
-      code,
-      storedCodeVerifier,
+    // Retried once only if the connection to Microsoft never opened - the
+    // code is single-use, so anything that may have reached Microsoft isn't.
+    const tokens = await retryOnConnectFailure("SSO code exchange", () =>
+      entraId.validateAuthorizationCode(code, storedCodeVerifier),
     );
 
     // Fallback checks for handling across Arctic version updates safely
@@ -50,16 +56,17 @@ export async function GET(req: Request) {
         ? tokens.accessToken()
         : tokens.accessToken;
 
-    const response = await fetch("https://graph.microsoft.com/oidc/userinfo", {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-
-    const profile = await response.json();
+    const profile = await fetchMicrosoftProfile(accessToken as string);
+    const email = profile.email || profile.preferred_username;
+    if (!email) {
+      console.error("Authentication handshake error: profile has no email");
+      return Response.redirect(new URL("/login?error=auth_failed", origin));
+    }
 
     // Store user data in the secure cookie using our jose helper
     await createSession({
       name: profile.name || "Microsoft User",
-      email: profile.email || profile.preferred_username,
+      email,
     });
 
     // Cleanup state tracking cookies
@@ -76,6 +83,10 @@ export async function GET(req: Request) {
     return Response.redirect(new URL(safeReturnTo, origin));
   } catch (error) {
     console.error("Authentication handshake error:", error);
-    return Response.redirect(new URL("/login?error=auth_failed", origin));
+    // Couldn't reach Microsoft at all (network) vs. Microsoft rejected it.
+    const reason = isMicrosoftUnreachable(error)
+      ? "sso_unreachable"
+      : "auth_failed";
+    return Response.redirect(new URL(`/login?error=${reason}`, origin));
   }
 }

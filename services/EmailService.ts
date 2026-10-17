@@ -87,15 +87,8 @@
 // };
 
 // --- THE NEW WAY, DIRECTLY USING THE MICROSOFT GRAPH API---
-import { ConfidentialClientApplication, Configuration } from "@azure/msal-node";
-
-const msalConfig: Configuration = {
-  auth: {
-    clientId: process.env.AUTH_MICROSOFT_ENTRA_ID_ID!,
-    authority: `https://login.microsoftonline.com/${process.env.AUTH_MICROSOFT_ENTRA_ID_TENANT_ID}`,
-    clientSecret: process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET!,
-  },
-};
+import { sendGraphMail } from "./GraphMailClient";
+import { withNoReplyNotice } from "@/utils/templates/NoReplyNotice";
 
 interface EmailOptions {
   from: string;
@@ -109,8 +102,6 @@ interface EmailOptions {
     content: string | Buffer; // Expecting Base64 string or Buffer
   }[];
 }
-
-const cca = new ConfidentialClientApplication(msalConfig);
 
 // Kill switch for every notification email - all mail goes through sendEmail.
 // Only an explicit NOTIFICATION_EMAILS_ENABLED=false (any case) disables it;
@@ -135,14 +126,6 @@ function notificationEmailsEnabled(): boolean {
     );
   }
   return true;
-}
-
-async function getAccessToken() {
-  const result = await cca.acquireTokenByClientCredential({
-    // Using Graph scope now
-    scopes: ["https://graph.microsoft.com/.default"],
-  });
-  return result?.accessToken;
 }
 
 export const sendEmail = async ({
@@ -170,9 +153,6 @@ export const sendEmail = async ({
   }
 
   try {
-    const accessToken = await getAccessToken();
-    if (!accessToken) throw new Error("Failed to retrieve access token");
-
     // Format recipients for Graph API
     const toRecipients = (Array.isArray(to) ? to : [to]).map((email) => ({
       emailAddress: { address: email },
@@ -207,7 +187,11 @@ export const sendEmail = async ({
         subject: subject,
         body: {
           contentType: "HTML",
-          content: html,
+          // Unmonitored-mailbox notice on every email, except ones that set
+          // replyTo - replies to those go somewhere real.
+          content: replyToRecipients.length
+            ? html
+            : withNoReplyNotice(html, subject),
         },
         toRecipients: toRecipients,
         ccRecipients: ccRecipients,
@@ -217,62 +201,17 @@ export const sendEmail = async ({
       saveToSentItems: "true",
     };
 
-    // --- NEW RETRY LOGIC FOR CONCURRENCY & RATE LIMITS ---
-    let attempts = 0;
-    const maxRetries = 3;
-
-    while (attempts < maxRetries) {
-      attempts++;
-
-      const response = await fetch(
-        `https://graph.microsoft.com/v1.0/users/${from}/sendMail`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(emailPayload),
-        },
-      );
-
-      if (response.ok) {
-        return { success: true };
-      }
-
-      // Handle 429 Too Many Requests (Concurrency / Rate Limiting)
-      if (response.status === 429) {
-        const retryAfter = response.headers.get("Retry-After");
-
-        // Use Microsoft's requested wait time, or fallback to an escalating delay (e.g., 2s, 4s, 6s)
-        const waitTime = retryAfter
-          ? parseInt(retryAfter, 10) * 1000
-          : 2000 * attempts;
-
-        console.warn(
-          `Graph API limit hit (429). Retrying in ${waitTime / 1000}s... (Attempt ${attempts} of ${maxRetries})`,
-        );
-
-        await new Promise((resolve) => setTimeout(resolve, waitTime));
-        continue; // Restart the loop for the next attempt
-      }
-
-      // If it's a different error (like 400 Bad Request), fail immediately
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(
-        errorData.error?.message ||
-          `Failed to send email via Graph (Status: ${response.status})`,
-      );
-    }
-
-    // If the loop finishes without returning success, we exhausted our retries
-    throw new Error(
-      "Max retries reached. Failed to send email due to persistent throttling.",
-    );
+    // Retries throttling, network failures and 5xx - see GraphMailClient.ts
+    await sendGraphMail(from, emailPayload, subject);
+    return { success: true };
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error";
-    console.error("Graph Email failed:", errorMessage);
+    // Sender, recipients and subject (never the body) so a dropped email
+    // can be identified and resent by hand.
+    console.error(
+      `Graph Email failed: from: ${from}, to: ${[to].flat().join(", ")}, subject: "${subject}": ${errorMessage}`,
+    );
     return { success: false, error: errorMessage };
   }
 };
