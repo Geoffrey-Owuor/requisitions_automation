@@ -87,6 +87,8 @@ IT, Travel, Access/Key, Casual, and Employee requisition forms auto-select a dep
 
 The actual Graph call lives in `services/GraphMailClient.ts` (`sendGraphMail`): one shared MSAL client, at most 2 concurrent sends per PM2 worker (Exchange caps ~4 concurrent requests per mailbox), a 30s per-attempt timeout, and up to 4 attempts with backoff for 429 (honouring `Retry-After`), 5xx, network failures and token-acquisition failures; other 4xx fail immediately. A timed-out attempt may still have been delivered, so a retry can rarely duplicate an email. Callers that `await` a send can now wait noticeably longer during an outage (worst case ~2 minutes) before getting `{ success: false }`. Don't add another direct `fetch` to `sendMail`.
 
+`sendEmail` wraps every email with `withNoReplyNotice` (`utils/templates/NoReplyNotice.ts`): a slim "automated, don't reply" line at the top (after a hidden subject preheader so inbox previews stay useful) and an "unmonitored mailbox - open Hotpoint Apps Hub" footer linking `NEXT_PUBLIC_BASE_URL`. Emails that set `replyTo` are skipped, since replies to those go somewhere real. Templates must not add their own do-not-reply text.
+
 ### State management split
 
 - Server data: TanStack React Query (`components/QueryProvider.tsx`), fed by `serverActions/`.

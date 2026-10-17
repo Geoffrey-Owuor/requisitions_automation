@@ -88,6 +88,7 @@
 
 // --- THE NEW WAY, DIRECTLY USING THE MICROSOFT GRAPH API---
 import { sendGraphMail } from "./GraphMailClient";
+import { withNoReplyNotice } from "@/utils/templates/NoReplyNotice";
 
 interface EmailOptions {
   from: string;
@@ -186,7 +187,11 @@ export const sendEmail = async ({
         subject: subject,
         body: {
           contentType: "HTML",
-          content: html,
+          // Unmonitored-mailbox notice on every email, except ones that set
+          // replyTo - replies to those go somewhere real.
+          content: replyToRecipients.length
+            ? html
+            : withNoReplyNotice(html, subject),
         },
         toRecipients: toRecipients,
         ccRecipients: ccRecipients,
