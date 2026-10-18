@@ -4,336 +4,238 @@ import Link from "next/link";
 
 import DashboardBrand from "./DashboardBrand";
 import UserDropdown from "./UserDropDown";
-import {
-  BriefcaseBusiness,
-  ChevronLeft,
-  CircleDollarSign,
-  CircleQuestionMark,
-  Ellipsis,
-  HardHat,
-  HousePlug,
-  LaptopMinimalCheck,
-  LockKeyhole,
-  LucideIcon,
-  Monitor,
-  ShoppingBag,
-  UserRoundPlus,
-} from "lucide-react";
+import { ChevronLeft, LucideIcon } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import ClientPortal from "./ClientPortal";
-import { useRef, useState } from "react";
-import MoreMenuModal from "./Modules/MoreMenuModal";
-import { newRequisitionHref } from "@/lib/dashboardTables";
+import { useLayoutEffect, useRef, useState } from "react";
+import SidebarMoreMenu from "./SidebarMoreMenu";
 import { useConfirmLeave } from "./Dashboard/UnsavedChangesGuard";
 import { useUser } from "@/context/UserContext";
-import { REPORTS_PAGE, canViewReports } from "@/lib/reports/definitions";
+import {
+  DashboardNavItem,
+  GUIDELINES_NAV_ITEM,
+  HOME_NAV_ITEM,
+  getDashboardNavGroups,
+  isNavItemActive,
+} from "@/lib/dashboardNav";
 
-// Summarized labels for tight vertical sidebar space
-const links = [
-  {
-    href: "/dashboard/staffproductpurchase",
-    label: "Purchase",
-    Icon: ShoppingBag,
-    tooltip: "Staff Purchase",
-    showTooltip: true,
-  },
-  {
-    href: "/dashboard/helpdesk",
-    label: "Helpdesk",
-    Icon: LaptopMinimalCheck,
-    tooltip: "HelpDesk",
-    showTooltip: true,
-  },
-];
+const RAIL_ITEM_CLASS =
+  "group flex w-full shrink-0 flex-col items-center justify-center gap-1 rounded-2xl py-2 text-[11px] leading-tight font-semibold transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-white/80 active:scale-95";
+
+const railItemClass = (highlighted: boolean) =>
+  `${RAIL_ITEM_CLASS} ${
+    highlighted
+      ? "bg-white text-red-950 shadow-md"
+      : "text-white/75 hover:bg-white/10 hover:text-white"
+  }`;
+
+// Matches the list's gap-1.5
+const RAIL_GAP_PX = 6;
 
 const DashboardSidebar = () => {
   const pathname = usePathname();
 
   const router = useRouter();
 
-  const showReports = canViewReports(useUser().roles);
+  const roles = useUser().roles;
 
   // The browser's own Back button isn't guarded, but this one is
   const confirmLeave = useConfirmLeave();
 
+  // Every page in the rail, Guidelines last as the first to overflow
+  const items = [
+    ...getDashboardNavGroups(roles).flatMap((group) => group.items),
+    GUIDELINES_NAV_ITEM,
+  ];
+
+  // How many items fit the rail's height; the rest go into More, which takes
+  // the next slot. All items render until the first measurement.
+  const [visibleCount, setVisibleCount] = useState(items.length);
+  const spaceRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
+  const itemHeightRef = useRef(0);
+  const itemCount = items.length;
+
+  useLayoutEffect(() => {
+    const space = spaceRef.current;
+    if (!space) return;
+
+    const measure = () => {
+      // Every rail item has the same height; remember it for when none show
+      const firstItem = listRef.current?.firstElementChild as HTMLElement;
+      if (firstItem) itemHeightRef.current = firstItem.offsetHeight;
+      const itemHeight = itemHeightRef.current;
+      if (!itemHeight) return;
+
+      const fits = Math.floor(
+        (space.clientHeight + RAIL_GAP_PX) / (itemHeight + RAIL_GAP_PX),
+      );
+      setVisibleCount(fits >= itemCount ? itemCount : Math.max(fits - 1, 0));
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(space);
+    return () => observer.disconnect();
+  }, [itemCount]);
+
+  const visibleItems = items.slice(0, visibleCount);
+  const overflowItems = items.slice(visibleCount);
+
   return (
-    <>
-      <aside className="custom:flex w-dashboard-sidebar fixed top-1 bottom-1 left-0 z-50 hidden flex-col items-center pt-0 pb-2">
-        {/* Brand (Icon Only) */}
-        <DashboardBrand showText={false} />
-        <div className="mx-auto mt-1 mb-2 w-full px-2">
-          {/* Home */}
-          <SideBarLink
-            key="/dashboard"
-            href="/dashboard"
-            label="Home"
-            Icon={HousePlug}
-            tooltip="Dashboard"
-            isActive={pathname === "/dashboard"}
-            showToolTip={true}
-          />
+    <aside className="custom:flex w-dashboard-sidebar fixed top-1 bottom-1 left-0 z-50 hidden flex-col items-center pt-0 pb-2">
+      {/* Brand (Icon Only) */}
+      <DashboardBrand />
+
+      <nav
+        aria-label="Main"
+        className="mt-1 mb-2 flex min-h-0 w-full flex-1 flex-col gap-1.5 overflow-hidden px-2"
+      >
+        <RailLink
+          item={HOME_NAV_ITEM}
+          isActive={isNavItemActive(HOME_NAV_ITEM, pathname)}
+        />
+        <div aria-hidden="true" className="mx-3 my-0.5 h-px bg-white/10" />
+
+        {/* Measured: the space left under Home */}
+        <div ref={spaceRef} className="flex min-h-0 flex-1 flex-col">
+          <ul ref={listRef} className="flex flex-col gap-1.5">
+            {visibleItems.map((item) => (
+              <li key={item.key}>
+                <RailLink
+                  item={item}
+                  isActive={isNavItemActive(item, pathname)}
+                />
+              </li>
+            ))}
+            {overflowItems.length > 0 && (
+              <li>
+                <SidebarMoreMenu
+                  items={overflowItems}
+                  pathname={pathname}
+                  buttonClassName={railItemClass}
+                />
+              </li>
+            )}
+          </ul>
         </div>
+      </nav>
 
-        {/* Vertical Navigation */}
-        <nav className="sidebar-nav mb-2 flex w-full flex-1 flex-col items-center gap-1.5 overflow-y-auto px-2">
-          {/* IT Requisition */}
-          <SideBarLink
-            href={newRequisitionHref("it")}
-            label="IT Req"
-            Icon={Monitor}
-            tooltip="IT Requisition"
-            isActive={pathname === newRequisitionHref("it")}
-            showToolTip={true}
-          />
-          {/* Travel Requisition */}
-          <SideBarLink
-            href={newRequisitionHref("travel")}
-            label="Travel"
-            Icon={BriefcaseBusiness}
-            tooltip="Travel Requisition"
-            isActive={pathname === newRequisitionHref("travel")}
-            showToolTip={true}
-          />
-          {/* Home Link */}
-          {links.map(({ href, label, Icon, tooltip }) => {
-            const isActive = pathname === href;
-            return (
-              <SideBarLink
-                key={href}
-                href={href}
-                label={label}
-                Icon={Icon}
-                tooltip={tooltip}
-                isActive={isActive}
-                showToolTip={true}
-              />
-            );
-          })}
-
-          {/* Salary Advance */}
-          <SideBarLink
-            href="/dashboard/advance"
-            key="/dashboard/advance"
-            label="Advance"
-            Icon={CircleDollarSign}
-            tooltip="Salary Advance"
-            isActive={pathname === "/dashboard/advance"}
-            showToolTip={true}
-          />
-
-          {/* Reports - report role holders only */}
-          {showReports && (
-            <SideBarLink
-              href={REPORTS_PAGE.href}
-              key={REPORTS_PAGE.href}
-              label={REPORTS_PAGE.label}
-              Icon={REPORTS_PAGE.Icon}
-              tooltip={REPORTS_PAGE.label}
-              isActive={pathname === REPORTS_PAGE.href}
-              showToolTip={true}
-            />
-          )}
-        </nav>
-
-        {/* User Dropdown at the Bottom */}
-        <div className="mt-auto w-full px-2">
-          <div className="flex w-full flex-col items-center justify-center gap-1.5">
-            {/* Go back button */}
-            <SideBarButton
-              label="Back"
-              handleClick={() => confirmLeave(() => router.back())}
-              Icon={ChevronLeft}
-              showToolTip={true}
-              toolTipMessage="Go Back"
-            />
-            {/* More menu - holds secondary links (Guidelines, future additions) */}
-            <MoreMenuModal
-              align="right"
-              triggerClassName="flex w-full flex-col items-center gap-1 rounded-2xl py-2.5 text-[10px] font-semibold text-white/70 transition-all duration-300 hover:bg-white/10 hover:text-white active:scale-95"
-              trigger={
-                <>
-                  <Ellipsis className="h-5 w-5" />
-                  <span>More</span>
-                </>
-              }
-              items={[
-                {
-                  key: "casual",
-                  label: "Casual Requisition",
-                  Icon: HardHat,
-                  href: newRequisitionHref("casual"),
-                },
-                {
-                  key: "employee",
-                  label: "Employee Requisition",
-                  Icon: UserRoundPlus,
-                  href: newRequisitionHref("employee"),
-                },
-                {
-                  key: "access",
-                  label: "Key & Access",
-                  Icon: LockKeyhole,
-                  href: newRequisitionHref("access"),
-                },
-                {
-                  key: "guidelines",
-                  label: "Guidelines",
-                  Icon: CircleQuestionMark,
-                  href: "/guidelines/travel",
-                  external: true,
-                },
-              ]}
-            />
-            <UserDropdown direction="up" />
-          </div>
-        </div>
-      </aside>
-    </>
+      {/* Back and the user menu at the bottom */}
+      <div className="flex w-full flex-col items-center justify-center gap-1.5 px-2">
+        <RailButton
+          label="Back"
+          tooltip="Go Back"
+          Icon={ChevronLeft}
+          handleClick={() => confirmLeave(() => router.back())}
+        />
+        <UserDropdown direction="up" />
+      </div>
+    </aside>
   );
 };
 
 export default DashboardSidebar;
 
-// Reusable sidebar link function
-type SideBarLinkProps = {
-  href: string;
-  label: string;
-  Icon: LucideIcon;
-  tooltip: string;
-  showToolTip: boolean;
-  isActive: boolean;
-};
-const SideBarLink = ({
-  href,
-  label,
-  Icon,
-  tooltip,
-  showToolTip = true,
-  isActive,
-}: SideBarLinkProps) => {
-  // 1. State to track hover and exact coordinates of the button
-  const [isHovered, setIsHovered] = useState(false);
-  const [coords, setCoords] = useState({ top: 0, left: 0 });
-  const linkRef = useRef<HTMLAnchorElement>(null);
+// Hover/focus tooltip with the item's full name, portaled out of the rail's
+// overflow clip
+const useRailTooltip = () => {
+  const [coords, setCoords] = useState<{ top: number; left: number } | null>(
+    null,
+  );
 
-  const handleMouseEnter = () => {
-    if (!showToolTip) return;
-
-    // 2. Calculate exactly where the button is on the screen right now
-    if (linkRef.current) {
-      const rect = linkRef.current.getBoundingClientRect();
-      setCoords({
-        top: rect.top + rect.height / 2, // Find the vertical center of the button
-        left: rect.right, // Find the exact right edge of the button
-      });
-    }
-    setIsHovered(true);
+  const show = (e: React.SyntheticEvent<HTMLElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setCoords({ top: rect.top + rect.height / 2, left: rect.right });
   };
+  const hide = () => setCoords(null);
+
+  return {
+    handlers: {
+      onMouseEnter: show,
+      onMouseLeave: hide,
+      onFocus: (e: React.FocusEvent<HTMLElement>) => {
+        // Keyboard focus only, not the focus a click leaves behind
+        if (e.currentTarget.matches(":focus-visible")) show(e);
+      },
+      onBlur: hide,
+    },
+    renderTooltip: (text: string) =>
+      coords && (
+        <ClientPortal>
+          <div
+            role="presentation"
+            style={{ top: coords.top, left: coords.left }}
+            className="pointer-events-none fixed z-9999 ml-3 -translate-y-1/2"
+          >
+            <div className="relative rounded-lg bg-neutral-900 px-3 py-1.5 text-xs font-semibold whitespace-nowrap text-white shadow-lg">
+              {text}
+
+              {/* Tooltip Tail/Arrow pointing left */}
+              <div className="absolute top-1/2 -left-1 h-2.5 w-2.5 -translate-y-1/2 rotate-45 rounded-sm bg-neutral-900" />
+            </div>
+          </div>
+        </ClientPortal>
+      ),
+  };
+};
+
+const RailLink = ({
+  item,
+  isActive,
+}: {
+  item: DashboardNavItem;
+  isActive: boolean;
+}) => {
+  const { handlers, renderTooltip } = useRailTooltip();
 
   return (
     <>
       <Link
-        ref={linkRef}
-        href={href}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={() => setIsHovered(false)}
-        className={`group flex w-full flex-col items-center justify-center gap-1 rounded-2xl py-2.5 text-[10px] font-semibold transition-all duration-300 active:scale-95 ${
-          isActive
-            ? "bg-white text-red-950 shadow-md"
-            : "text-white/70 hover:bg-white/10 hover:text-white"
-        }`}
+        href={item.href}
+        aria-label={
+          item.external ? `${item.label} (opens in a new tab)` : item.label
+        }
+        aria-current={isActive ? "page" : undefined}
+        target={item.external ? "_blank" : undefined}
+        rel={item.external ? "noopener noreferrer" : undefined}
+        {...handlers}
+        className={railItemClass(isActive)}
       >
-        <Icon
-          className={`h-5 w-5 transition-colors ${
-            isActive ? "text-red-950" : "text-white/70 group-hover:text-white"
-          }`}
-        />
-        <span>{label}</span>
+        <item.Icon className="h-5 w-5" />
+        <span className="max-w-full truncate px-1">{item.shortLabel}</span>
       </Link>
-      {/* ── TOOLTIP (Rendered via Portal to escape the overflow trap) ── */}
-      {showToolTip && tooltip && isHovered && (
-        <ClientPortal>
-          <div
-            // Position it exactly where we calculated, using fixed so scrolling doesn't break it
-            style={{ top: coords.top, left: coords.left }}
-            className="pointer-events-none fixed z-9999 ml-3 -translate-y-1/2"
-          >
-            <div className="relative rounded-lg bg-neutral-900 px-3 py-1.5 text-xs font-semibold whitespace-nowrap text-white shadow-lg">
-              {tooltip}
-
-              {/* Tooltip Tail/Arrow pointing left */}
-              <div className="absolute top-1/2 -left-1 h-2.5 w-2.5 -translate-y-1/2 rotate-45 rounded-sm bg-neutral-900" />
-            </div>
-          </div>
-        </ClientPortal>
-      )}
+      {renderTooltip(item.label)}
     </>
   );
 };
 
-type SideBarButtonProps = {
-  label: string;
-  handleClick: () => void;
-  Icon: LucideIcon;
-  showToolTip: boolean;
-  toolTipMessage: string;
-};
-
-const SideBarButton = ({
+const RailButton = ({
   label,
-  handleClick,
+  tooltip,
   Icon,
-  showToolTip,
-  toolTipMessage,
-}: SideBarButtonProps) => {
-  // 1. State to track hover and exact coordinates of the button
-  const [isHovered, setIsHovered] = useState(false);
-  const [coords, setCoords] = useState({ top: 0, left: 0 });
-  const linkRef = useRef<HTMLButtonElement>(null);
-
-  const handleMouseEnter = () => {
-    if (!showToolTip) return;
-
-    // 2. Calculate exactly where the button is on the screen right now
-    if (linkRef.current) {
-      const rect = linkRef.current.getBoundingClientRect();
-      setCoords({
-        top: rect.top + rect.height / 2, // Find the vertical center of the button
-        left: rect.right, // Find the exact right edge of the button
-      });
-    }
-    setIsHovered(true);
-  };
+  handleClick,
+}: {
+  label: string;
+  tooltip: string;
+  Icon: LucideIcon;
+  handleClick: () => void;
+}) => {
+  const { handlers, renderTooltip } = useRailTooltip();
 
   return (
     <>
       <button
-        ref={linkRef}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={() => setIsHovered(false)}
+        type="button"
+        aria-label={tooltip}
         onClick={handleClick}
-        className="flex w-full flex-col items-center gap-1 rounded-2xl py-2.5 text-[10px] font-semibold text-white/70 transition-all duration-300 hover:bg-white/10 hover:text-white active:scale-95"
+        {...handlers}
+        className={railItemClass(false)}
       >
         <Icon className="h-5 w-5" />
         <span>{label}</span>
       </button>
-      {/* ── TOOLTIP (Rendered via Portal to escape the overflow trap) ── */}
-      {showToolTip && toolTipMessage && isHovered && (
-        <ClientPortal>
-          <div
-            // Position it exactly where we calculated, using fixed so scrolling doesn't break it
-            style={{ top: coords.top, left: coords.left }}
-            className="pointer-events-none fixed z-9999 ml-3 -translate-y-1/2"
-          >
-            <div className="relative rounded-lg bg-neutral-900 px-3 py-1.5 text-xs font-semibold whitespace-nowrap text-white shadow-lg">
-              {toolTipMessage}
-
-              {/* Tooltip Tail/Arrow pointing left */}
-              <div className="absolute top-1/2 -left-1 h-2.5 w-2.5 -translate-y-1/2 rotate-45 rounded-sm bg-neutral-900" />
-            </div>
-          </div>
-        </ClientPortal>
-      )}
+      {renderTooltip(tooltip)}
     </>
   );
 };
