@@ -334,7 +334,7 @@ export function Select({
             role="listbox"
             aria-label={ariaLabel}
             style={{ maxHeight: LIST_MAX_HEIGHT }}
-            className="normal-scrollbar overflow-y-auto p-1"
+            className="small-scrollbar overflow-y-auto p-1"
           >
             {shown.length === 0 ? (
               <li className="px-3 py-4 text-center text-sm text-neutral-400">

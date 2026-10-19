@@ -19,6 +19,7 @@ import {
 } from "./SettingsPrimitives";
 import { DatePicker } from "@/components/DatePicker";
 import { Select } from "@/components/Select";
+import { CasualSettingsSkeleton } from "@/components/Skeletons/SettingsSkeleton";
 import {
   addCasualCategory,
   addCasualLocation,
@@ -65,16 +66,7 @@ export default function CasualSettings() {
   });
 
   if (isLoading) {
-    return (
-      <div className="space-y-4">
-        {[0, 1, 2].map((key) => (
-          <div
-            key={key}
-            className="h-48 animate-pulse rounded-2xl border border-neutral-200 bg-white"
-          />
-        ))}
-      </div>
-    );
+    return <CasualSettingsSkeleton />;
   }
 
   if (isError || !data) {

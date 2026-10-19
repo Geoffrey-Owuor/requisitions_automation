@@ -7,6 +7,7 @@ import {
   getItConfigAdminData,
   setItRequirementItemActive,
 } from "@/serverActions/ItConfigAdmin";
+import { ItSettingsSkeleton } from "@/components/Skeletons/SettingsSkeleton";
 import {
   AddRow,
   Card,
@@ -32,9 +33,7 @@ export default function ItSettings() {
   });
 
   if (isLoading) {
-    return (
-      <div className="h-48 animate-pulse rounded-2xl border border-neutral-200 bg-white" />
-    );
+    return <ItSettingsSkeleton />;
   }
 
   if (isError || !data) {
