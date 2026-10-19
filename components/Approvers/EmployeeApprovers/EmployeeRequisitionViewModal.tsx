@@ -2,11 +2,7 @@
 
 import { EmployeeEmailDataValues } from "@/services/EmployeeEmailSender";
 import StatusFormatter from "@/components/Dashboard/StatusFormatter";
-import {
-  dateFormatter,
-  getJobGradeNumber,
-  RETAIL_DEPARTMENT,
-} from "@/public/assets";
+import { dateFormatter, getJobGradeNumber } from "@/public/assets";
 import AttachmentTypeGroups from "./AttachmentTypeGroups";
 import EmployeeAmendmentHistory from "./EmployeeAmendmentHistory";
 
@@ -62,8 +58,9 @@ const remainingApprovalStages = [
   },
 ];
 
-function getApprovalStages(department: string) {
-  return department === RETAIL_DEPARTMENT
+// The Retail Director stage is stored as 'N/A' when it doesn't apply
+function getApprovalStages(retailDirectorStatus: string) {
+  return retailDirectorStatus !== "N/A"
     ? [
         ...baseApprovalStages,
         retailDirectorApprovalStage,
@@ -205,12 +202,12 @@ const EmployeeRequisitionViewModal = ({
             <SectionHeading title="Approval Chain" />
             <div
               className={`grid gap-4 max-sm:grid-cols-1 ${
-                viewData.department === RETAIL_DEPARTMENT
+                viewData.retaildirectorapprovalstatus !== "N/A"
                   ? "grid-cols-2 lg:grid-cols-4"
                   : "grid-cols-3"
               }`}
             >
-              {getApprovalStages(viewData.department).map(
+              {getApprovalStages(viewData.retaildirectorapprovalstatus).map(
                 ({ role, approverKey, emailKey, statusKey, commentsKey }) => (
                   <div
                     key={role}

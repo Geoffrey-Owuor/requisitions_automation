@@ -4,6 +4,7 @@ import { query } from "@/lib/db";
 import { EmailSender } from "@/services/EmailSender";
 import { getSession } from "@/lib/session";
 import { loadHodAlternates, resolveHod, sameEmail } from "@/lib/hodAssignment";
+import { INVALID_DEPARTMENT_MESSAGE, resolveDepartment } from "@/lib/departments";
 import { validateTravelFormData } from "@/lib/travelRequisitionRules";
 
 export async function POST(request: NextRequest) {
@@ -54,6 +55,19 @@ export async function POST(request: NextRequest) {
     }
 
     const { totalCost, approvalTier } = validation;
+
+    // The cost centre is picked from the same department list
+    const [departmentRules, costCentreRules] = await Promise.all([
+      resolveDepartment(department),
+      resolveDepartment(costCentre),
+    ]);
+
+    if (!departmentRules || !costCentreRules) {
+      return NextResponse.json(
+        { message: INVALID_DEPARTMENT_MESSAGE },
+        { status: 400 },
+      );
+    }
 
     // The form sends the HOD's email; the stored name comes from hod_array
     const resolvedHod = await resolveHod(hodApprover);

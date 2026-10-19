@@ -4,6 +4,7 @@ import { PoolClient } from "pg";
 import { getSession } from "@/lib/session";
 import { isUuid } from "@/lib/uuid";
 import { assignedHodNameSql, resolveHod, sameEmail } from "@/lib/hodAssignment";
+import { INVALID_DEPARTMENT_MESSAGE, resolveDepartment } from "@/lib/departments";
 import {
   validateCasualFormData,
   CasualFormDataInput,
@@ -133,6 +134,18 @@ export async function POST(request: NextRequest) {
             "This requisition was amended since you opened this form - please reopen it and try again",
         },
         { status: 409 },
+      );
+    }
+
+    if (
+      !(await resolveDepartment(department, {
+        currentDepartment: header.employee_department,
+      }))
+    ) {
+      await client.query("ROLLBACK");
+      return NextResponse.json(
+        { message: INVALID_DEPARTMENT_MESSAGE },
+        { status: 400 },
       );
     }
 

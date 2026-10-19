@@ -4,6 +4,7 @@ import { query } from "@/lib/db";
 import { CasualEmailSender } from "@/services/CasualEmailSender";
 import { getSession } from "@/lib/session";
 import { loadHodAlternates, resolveHod, sameEmail } from "@/lib/hodAssignment";
+import { INVALID_DEPARTMENT_MESSAGE, resolveDepartment } from "@/lib/departments";
 import {
   validateCasualFormData,
   CasualFormDataInput,
@@ -37,6 +38,13 @@ export async function POST(request: NextRequest) {
 
     const { ratePerDay, computedSections } = validation;
     const { department, hodApprover, location, casualCategory } = formData;
+
+    if (!(await resolveDepartment(department))) {
+      return NextResponse.json(
+        { message: INVALID_DEPARTMENT_MESSAGE },
+        { status: 400 },
+      );
+    }
 
     // The form sends the HOD's email; the stored name comes from hod_array
     const resolvedHod = await resolveHod(hodApprover);

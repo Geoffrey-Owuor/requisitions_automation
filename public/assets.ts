@@ -208,8 +208,6 @@ export const ALL_CASUAL_LOCATIONS = [
   "Gitanga",
 ];
 
-export const RETAIL_DEPARTMENT = "Retail";
-
 export const OPERATIONS_DEPARTMENT = "Operations";
 export const OPERATIONS_SECTIONS = [
   "Inbound",
