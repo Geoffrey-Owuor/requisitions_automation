@@ -146,7 +146,7 @@ export async function UpdateITRequisitionStatus(
         break;
       default:
         ITEmailSender({
-          to: "geoffrey@hotpoint.co.ke",
+          to: process.env.ADMIN_EMAIL!,
           requestId: payload.uuid,
           message:
             "A wrong stage was passed in the IT requisition approval workflow for this requistion",
