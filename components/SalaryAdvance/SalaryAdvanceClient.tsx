@@ -1035,6 +1035,7 @@ export default function SalaryAdvanceClient() {
                         <span className="text-red-500">*</span>
                       </label>
                       <DatePicker
+                        tone="rose"
                         value={formData.repaymentStartDate}
                         onChange={(v) => updateField("repaymentStartDate", v)}
                         minDate={submissionWindow?.repaymentMinDate}

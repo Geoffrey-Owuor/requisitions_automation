@@ -656,6 +656,7 @@ export default function TravelRequisitionPage({
                       Departure Date <span className="text-red-500">*</span>
                     </label>
                     <DatePicker
+                      tone="rose"
                       value={formData.departureDate}
                       onChange={(v) => updateField("departureDate", v)}
                     />
@@ -665,6 +666,7 @@ export default function TravelRequisitionPage({
                       Return Date <span className="text-red-500">*</span>
                     </label>
                     <DatePicker
+                      tone="rose"
                       value={formData.returnDate}
                       onChange={(v) => updateField("returnDate", v)}
                     />
