@@ -59,23 +59,16 @@ export const loadBaseDepartments = async (): Promise<BaseDepartment[]> => {
 // Load the hod array - selectable HODs only. Alternate-only HODs
 // (hod_array.is_alternate_only) are never offered in the submission dropdown
 // or department auto-select; they act through lib/hodAssignment.ts instead.
+// Errors are caught outside the cache, as for the departments above.
 const loadCachedHodArray = unstable_cache(
-  async (): Promise<HodApproversObject[] | []> => {
-    try {
-      const result = await query<HodApproversObject>(`
-            SELECT hod_name AS name,
-            hod_email AS email,
-            hod_department AS department
-            FROM hod_array
-            WHERE is_alternate_only = false
-            `);
-
-      return result;
-    } catch (error) {
-      console.error("Error while trying to fetch hod array data:", error);
-      return [];
-    }
-  },
+  async (): Promise<HodApproversObject[]> =>
+    query<HodApproversObject>(`
+      SELECT hod_name AS name,
+      hod_email AS email,
+      hod_department AS department
+      FROM hod_array
+      WHERE is_alternate_only = false
+      `),
   ["hod_array_public"],
   {
     revalidate: 3600,
@@ -86,7 +79,12 @@ const loadCachedHodArray = unstable_cache(
 // Client-callable (the submission forms load it), so it is session-gated.
 export const loadHodArray = async (): Promise<HodApproversObject[] | []> => {
   if (!(await getSession())) return [];
-  return loadCachedHodArray();
+  try {
+    return await loadCachedHodArray();
+  } catch (error) {
+    console.error("Error while trying to fetch hod array data:", error);
+    return [];
+  }
 };
 
 // Client-callable (the casual form loads it), so it is session-gated. Null
