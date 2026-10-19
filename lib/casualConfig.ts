@@ -135,11 +135,11 @@ export function resolveCasualRate(
 
 // The rules in effect on `date` (the latest of each scope), the general
 // default first and the most specific last - for listing the current rates
-export function currentCasualRates(
-  rates: CasualRateRule[],
+export function currentCasualRates<T extends CasualRateRule>(
+  rates: T[],
   date: string,
-): CasualRateRule[] {
-  const latest = new Map<string, CasualRateRule>();
+): T[] {
+  const latest = new Map<string, T>();
 
   for (const rule of rates) {
     if (rule.effectiveFrom > date) continue;
@@ -150,7 +150,7 @@ export function currentCasualRates(
     }
   }
 
-  const specificity = (rule: CasualRateRule) =>
+  const specificity = (rule: T) =>
     (rule.department ? 4 : 0) + (rule.location ? 2 : 0) + (rule.category ? 1 : 0);
 
   return [...latest.values()].sort((a, b) => specificity(a) - specificity(b));
