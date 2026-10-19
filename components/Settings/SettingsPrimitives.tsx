@@ -48,6 +48,32 @@ export const primaryButtonClass =
 export const smallButtonClass =
   "rounded-full border border-neutral-200 px-3 py-1 text-xs font-semibold text-neutral-700 transition-colors hover:border-neutral-400 disabled:opacity-50";
 
+// A small visible label over a form control. With `htmlFor` it is a real
+// <label>; without (e.g. over the DatePicker, which takes no id) it only
+// captions the control.
+export function Field({
+  label,
+  htmlFor,
+  children,
+}: {
+  label: string;
+  htmlFor?: string;
+  children: ReactNode;
+}) {
+  const Caption = htmlFor ? "label" : "span";
+  return (
+    <div className="min-w-0 space-y-1">
+      <Caption
+        htmlFor={htmlFor}
+        className="block text-xs font-medium text-neutral-600"
+      >
+        {label}
+      </Caption>
+      {children}
+    </div>
+  );
+}
+
 export type Confirmation = {
   title: string;
   message: string;
