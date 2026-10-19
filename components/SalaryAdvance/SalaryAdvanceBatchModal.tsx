@@ -73,7 +73,7 @@ export function SalaryAdvanceBatchModal({
       <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
         <div className="flex items-center gap-3">
           <div
-            className={`flex h-10 w-10 items-center justify-center rounded-xl ${
+            className={`rounded-control flex h-10 w-10 items-center justify-center ${
               isApproving
                 ? "bg-slate-100 text-slate-800"
                 : "bg-red-50 text-red-500"
@@ -99,7 +99,7 @@ export function SalaryAdvanceBatchModal({
           onClick={handleClose}
           disabled={isSubmitting}
           aria-label="Close"
-          className="flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 disabled:opacity-50"
+          className="rounded-control flex h-8 w-8 items-center justify-center text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 disabled:opacity-50"
         >
           <X size={18} />
         </button>
@@ -117,7 +117,7 @@ export function SalaryAdvanceBatchModal({
           employee will be notified by email.
         </p>
 
-        <div className="rounded-xl border border-gray-100 bg-gray-50 p-3">
+        <div className="rounded-control border border-gray-100 bg-gray-50 p-3">
           <span className="text-[10px] font-semibold tracking-wider text-gray-400 uppercase">
             Comment to be sent
           </span>
@@ -126,7 +126,7 @@ export function SalaryAdvanceBatchModal({
           </p>
         </div>
 
-        <div className="flex items-start gap-2 rounded-xl border border-amber-100 bg-amber-50 p-3">
+        <div className="rounded-control flex items-start gap-2 border border-amber-100 bg-amber-50 p-3">
           <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
           <p className="text-xs leading-relaxed text-amber-700">
             Emails are sent gradually (a few seconds apart) to avoid provider
@@ -148,7 +148,7 @@ export function SalaryAdvanceBatchModal({
         <button
           onClick={handleConfirm}
           disabled={isSubmitting}
-          className={`flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all disabled:cursor-not-allowed disabled:opacity-50 ${
+          className={`rounded-control flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all disabled:cursor-not-allowed disabled:opacity-50 ${
             isApproving
               ? "bg-slate-800 hover:bg-slate-900"
               : "bg-red-600 hover:bg-red-700"

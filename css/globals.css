@@ -34,10 +34,15 @@
   /* Page ground. Kept in sync with body in app/layout.tsx. */
   --color-canvas: #fdfbfb;
 
-  /* Two radii: surfaces and controls. Pills (rounded-full) are for badges and
-     status chips only, so they stay visually distinct from actions. */
+  /* Three radii, by size: surfaces (cards, panels, modals), controls
+     (buttons, inputs, tabs, icon tiles) and compact controls under ~30px
+     tall (small chips, tags, tooltips, small icon buttons, and items inside a
+     p-1 segmented control), where the control radius would read as a pill.
+     rounded-full is only for badges and status chips (so they stay visually
+     distinct from actions), initials avatars, spinners and progress bars. */
   --radius-surface: 0.95rem;
   --radius-control: 0.7rem;
+  --radius-compact: 0.5rem;
 
   /* Two elevations. Anything needing a third is probably the wrong element. */
   --shadow-raised: 0 1px 2px rgba(140, 40, 60, 0.04);
@@ -368,7 +373,7 @@ html {
     max-height: 90dvh;
     overflow-y: auto;
     overscroll-behavior: contain;
-    border-radius: 1.5rem 1.5rem 0 0;
+    border-radius: var(--radius-surface) var(--radius-surface) 0 0;
     padding-bottom: env(safe-area-inset-bottom);
     transform: translateY(100%);
   }
@@ -391,7 +396,7 @@ html {
     width: min(20rem, 85vw);
     height: 100dvh;
     flex-direction: column;
-    border-radius: 0 1.25rem 1.25rem 0;
+    border-radius: 0 var(--radius-surface) var(--radius-surface) 0;
     padding-bottom: env(safe-area-inset-bottom);
     transform: translateX(-100%);
   }
@@ -413,7 +418,7 @@ html {
       width: calc(100% - 2rem);
       height: fit-content;
       max-height: min(88dvh, 60rem);
-      border-radius: 20px;
+      border-radius: var(--radius-surface);
       box-shadow: 0 32px 64px rgb(0 0 0 / 0.15);
       grid-template-columns: minmax(0, 1fr) auto auto;
       grid-template-rows: auto minmax(0, 1fr) auto;
@@ -440,7 +445,7 @@ html {
       width: calc(100% - 2.5rem);
       max-width: 24rem;
       height: fit-content;
-      border-radius: 1.5rem;
+      border-radius: var(--radius-surface);
       padding-bottom: 0;
       transform: scale(0.96);
     }

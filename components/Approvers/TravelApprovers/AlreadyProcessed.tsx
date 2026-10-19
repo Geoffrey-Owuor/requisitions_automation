@@ -20,10 +20,10 @@ export default function AlreadyProcessed({
 
   return (
     <div className="relative flex min-h-full flex-1 items-center justify-center p-5">
-      <div className="mx-auto max-w-md rounded-3xl border border-gray-100 bg-white p-10 text-center shadow-[0_24px_48px_rgba(160,60,60,0.10)]">
+      <div className="rounded-surface mx-auto max-w-md border border-gray-100 bg-white p-10 text-center shadow-[0_24px_48px_rgba(160,60,60,0.10)]">
         {/* Icon */}
         <div
-          className={`mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full ${
+          className={`rounded-control mx-auto mb-5 flex h-16 w-16 items-center justify-center ${
             isApproved ? "bg-emerald-100" : "bg-rose-100"
           }`}
         >
@@ -52,7 +52,7 @@ export default function AlreadyProcessed({
         </p>
 
         {/* Meta card */}
-        <div className="mb-7 flex flex-col gap-2.5 rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white px-5 py-4 text-left last:mb-0">
+        <div className="rounded-surface mb-7 flex flex-col gap-2.5 border border-[rgba(240,180,180,0.5)] bg-white px-5 py-4 text-left last:mb-0">
           {[
             { label: "Decision", value: status },
             { label: "Processed by", value: processedBy },
@@ -79,7 +79,7 @@ export default function AlreadyProcessed({
         {!isSignedIn && (
           <Link
             href="/"
-            className="block w-full cursor-pointer rounded-[14px] bg-slate-900 py-4 text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(30,27,27,0.3)]"
+            className="rounded-control block w-full cursor-pointer bg-slate-900 py-4 text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(30,27,27,0.3)]"
           >
             Go to Homepage
           </Link>

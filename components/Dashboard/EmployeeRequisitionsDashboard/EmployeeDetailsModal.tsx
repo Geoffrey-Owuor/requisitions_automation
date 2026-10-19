@@ -162,7 +162,7 @@ export const EmployeeDetailsModal = ({
       }
     >
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="flex items-start gap-3 rounded-xl bg-neutral-50 p-3">
+        <div className="rounded-control flex items-start gap-3 bg-neutral-50 p-3">
           <Users size={16} className="mt-1 shrink-0 text-violet-500" />
           <div>
             <p className="text-[10px] font-bold tracking-wider text-violet-500 uppercase">
@@ -173,7 +173,7 @@ export const EmployeeDetailsModal = ({
             </p>
           </div>
         </div>
-        <div className="flex items-start gap-3 rounded-xl bg-neutral-50 p-3">
+        <div className="rounded-control flex items-start gap-3 bg-neutral-50 p-3">
           <Briefcase size={16} className="mt-1 shrink-0 text-violet-500" />
           <div>
             <p className="text-[10px] font-bold tracking-wider text-violet-500 uppercase">
@@ -211,7 +211,7 @@ export const EmployeeDetailsModal = ({
             {details.positions.map((position) => (
               <div
                 key={position.positionid}
-                className="rounded-xl bg-neutral-50 p-3"
+                className="rounded-control bg-neutral-50 p-3"
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <span className="text-sm font-semibold text-[#1e1b1b]">
@@ -277,7 +277,7 @@ export const EmployeeDetailsModal = ({
           {approvalChain.map((step, idx) => (
             <div
               key={idx}
-              className="flex items-center justify-between rounded-xl bg-neutral-50 p-3"
+              className="rounded-control flex items-center justify-between bg-neutral-50 p-3"
             >
               <span className="text-sm text-[#1e1b1b]">
                 {step.label} Status

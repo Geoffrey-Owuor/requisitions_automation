@@ -42,11 +42,11 @@ export function useSettingsRunner(adminKey: QueryKey, relatedKeys: QueryKey[]) {
 }
 
 export const inputClass =
-  "h-10 w-full rounded-xl border border-neutral-200 bg-white px-3 text-sm text-neutral-900 outline-none focus:border-slate-900";
+  "h-10 w-full rounded-control border border-neutral-200 bg-white px-3 text-sm text-neutral-900 outline-none focus:border-slate-900";
 export const primaryButtonClass =
-  "inline-flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-full bg-slate-900 px-4 text-sm font-semibold text-white transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50";
+  "inline-flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-control bg-slate-900 px-4 text-sm font-semibold text-white transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50";
 export const smallButtonClass =
-  "rounded-full border border-neutral-200 px-3 py-1 text-xs font-semibold text-neutral-700 transition-colors hover:border-neutral-400 disabled:opacity-50";
+  "rounded-compact border border-neutral-200 px-3 py-1 text-xs font-semibold text-neutral-700 transition-colors hover:border-neutral-400 disabled:opacity-50";
 
 // A small visible label over a form control. With `htmlFor` it is a real
 // <label>; without (e.g. over the DatePicker, which takes no id) it only
@@ -91,7 +91,7 @@ export function Card({
   children: ReactNode;
 }) {
   return (
-    <section className="space-y-4 rounded-2xl border border-neutral-200 bg-white p-4">
+    <section className="rounded-surface space-y-4 border border-neutral-200 bg-white p-4">
       <div>
         <h2 className="text-[11px] font-bold tracking-widest text-gray-400 uppercase">
           {title}
@@ -255,7 +255,7 @@ export function ConfirmDialog({
         <button
           type="button"
           onClick={onClose}
-          className="rounded-full border border-neutral-200 px-4 py-2 text-sm font-semibold text-neutral-700 hover:border-neutral-400"
+          className="rounded-control border border-neutral-200 px-4 py-2 text-sm font-semibold text-neutral-700 hover:border-neutral-400"
         >
           Cancel
         </button>
@@ -263,7 +263,7 @@ export function ConfirmDialog({
           type="button"
           disabled={busy}
           onClick={() => shown && onConfirm(shown.action)}
-          className="rounded-full bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700 disabled:opacity-50"
+          className="rounded-control bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700 disabled:opacity-50"
         >
           {shown?.confirmLabel}
         </button>

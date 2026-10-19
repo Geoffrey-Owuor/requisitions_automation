@@ -375,7 +375,7 @@ export default function TravelRequisitionPage({
 
   if (amendmentNotEligible) {
     return (
-      <div className="mx-auto max-w-md rounded-2xl border border-rose-200 bg-rose-50 p-6 text-center text-sm text-rose-700">
+      <div className="rounded-surface mx-auto max-w-md border border-rose-200 bg-rose-50 p-6 text-center text-sm text-rose-700">
         This requisition can no longer be amended. It may have already been
         approved by HR, its departure date may have passed, or you may not be
         its original submitter.
@@ -437,11 +437,11 @@ export default function TravelRequisitionPage({
       {step === 1 && (
         <div className="relative z-10 mx-auto max-w-225">
           {/* Form Image */}
-          <div className="mb-4 overflow-hidden rounded-2xl sm:rounded-3xl">
+          <div className="rounded-surface sm:rounded-surface mb-4 overflow-hidden">
             <Image
               src={assets.form_image}
               sizes="100vh"
-              className="rounded-xl object-contain object-center" // or "object-cover" depending on your needs
+              className="rounded-control object-contain object-center" // or "object-cover" depending on your needs
               priority
               alt="Form Image"
             />
@@ -463,7 +463,7 @@ export default function TravelRequisitionPage({
           </header>
 
           {isAmendment && (
-            <div className="mb-6 flex items-start gap-2.5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3.5 text-[13px] text-amber-800">
+            <div className="rounded-surface mb-6 flex items-start gap-2.5 border border-amber-200 bg-amber-50 px-4 py-3.5 text-[13px] text-amber-800">
               <Info className="mt-0.5 h-4 w-4 shrink-0" />
               <p>
                 Amendments are only possible until HR approves this requisition,
@@ -476,7 +476,7 @@ export default function TravelRequisitionPage({
           )}
 
           {isAmendment && !!amendmentContext?.history.length && (
-            <div className="mb-6 rounded-3xl border border-white/85 bg-white/65 px-6 py-6 shadow-[0_24px_48px_rgba(160,60,60,0.10)] sm:px-8">
+            <div className="rounded-surface mb-6 border border-white/85 bg-white/65 px-6 py-6 shadow-[0_24px_48px_rgba(160,60,60,0.10)] sm:px-8">
               <h2 className="mb-2 flex items-center gap-2 text-[13px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
                 <History size={16} /> Previous Amendments
               </h2>
@@ -485,7 +485,7 @@ export default function TravelRequisitionPage({
           )}
 
           {/* Compact Travel Approval Tiers Guideline Card */}
-          <div className="mb-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
+          <div className="rounded-surface mb-8 overflow-hidden border border-slate-200 bg-white shadow-xs">
             {/* Header Area */}
             <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-4 py-3">
               <Info className="h-4 w-4 text-slate-500" />
@@ -499,7 +499,7 @@ export default function TravelRequisitionPage({
               {/* Tier 1 */}
               <div className="flex flex-col justify-between gap-3 p-3.5 transition-colors hover:bg-slate-50 sm:flex-row sm:items-center">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+                  <div className="rounded-control flex h-8 w-8 shrink-0 items-center justify-center bg-emerald-100 text-emerald-600">
                     <MapPin className="h-4 w-4" />
                   </div>
                   <div className="text-sm">
@@ -527,7 +527,7 @@ export default function TravelRequisitionPage({
               {/* Tier 2 */}
               <div className="flex flex-col justify-between gap-3 p-3.5 transition-colors hover:bg-slate-50 sm:flex-row sm:items-center">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+                  <div className="rounded-control flex h-8 w-8 shrink-0 items-center justify-center bg-blue-100 text-blue-600">
                     <Plane className="h-4 w-4" />
                   </div>
                   <div className="text-sm">
@@ -555,7 +555,7 @@ export default function TravelRequisitionPage({
               {/* Tier 3 */}
               <div className="flex flex-col justify-between gap-3 p-3.5 transition-colors hover:bg-slate-50 sm:flex-row sm:items-center">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-100 text-violet-600">
+                  <div className="rounded-control flex h-8 w-8 shrink-0 items-center justify-center bg-violet-100 text-violet-600">
                     <Globe className="h-4 w-4" />
                   </div>
                   <div className="text-sm">
@@ -587,7 +587,7 @@ export default function TravelRequisitionPage({
           </div>
 
           {/* Form Card */}
-          <div className="rounded-3xl border border-white/85 bg-white/65 px-6 py-8 shadow-[0_24px_48px_rgba(160,60,60,0.10)] sm:px-8">
+          <div className="rounded-surface border border-white/85 bg-white/65 px-6 py-8 shadow-[0_24px_48px_rgba(160,60,60,0.10)] sm:px-8">
             <form
               className="flex flex-col gap-10"
               onSubmit={(e) => {
@@ -704,7 +704,7 @@ export default function TravelRequisitionPage({
                       <span className="text-red-500">*</span>
                     </label>
                     <textarea
-                      className="h-25 resize-none rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 py-3 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
+                      className="rounded-control h-25 resize-none border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 py-3 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
                       placeholder="Describe the purpose of this trip..."
                       value={formData.justification}
                       onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
@@ -753,7 +753,7 @@ export default function TravelRequisitionPage({
 
                 <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
                   {/* Total Cost - Deep Slate Red */}
-                  <div className="flex items-center justify-between rounded-2xl bg-linear-to-r from-slate-800 to-rose-900 px-5 py-5 font-semibold text-white shadow-lg">
+                  <div className="rounded-surface flex items-center justify-between bg-linear-to-r from-slate-800 to-rose-900 px-5 py-5 font-semibold text-white shadow-lg">
                     <span>Total Estimated Cost</span>
                     <span className="text-2xl">
                       KES {totalCost.toLocaleString()}
@@ -761,7 +761,7 @@ export default function TravelRequisitionPage({
                   </div>
 
                   {/* Approval Tier - Muted Rose Ash */}
-                  <div className="flex items-center justify-between rounded-2xl border border-rose-700/30 bg-linear-to-r from-rose-900/80 to-rose-800/80 px-5 py-5 font-semibold text-rose-50">
+                  <div className="rounded-surface flex items-center justify-between border border-rose-700/30 bg-linear-to-r from-rose-900/80 to-rose-800/80 px-5 py-5 font-semibold text-rose-50">
                     <span>Approval Tier</span>
                     <span className="text-2xl">{generatedAprovalTier}</span>
                   </div>
@@ -775,7 +775,7 @@ export default function TravelRequisitionPage({
                     <History size={16} /> Reason for Amendment
                   </h2>
                   <textarea
-                    className="h-20 w-full resize-none rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 py-3 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
+                    className="rounded-control h-20 w-full resize-none border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 py-3 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
                     placeholder="Explain what changed and why..."
                     value={reason}
                     maxLength={MAX_AMENDMENT_REASON_LENGTH}
@@ -790,7 +790,7 @@ export default function TravelRequisitionPage({
               <button
                 type="submit"
                 disabled={buttonDisabled}
-                className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-[14px] border-none bg-slate-900 py-4 font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)] disabled:cursor-not-allowed disabled:opacity-70"
+                className="rounded-control flex w-full cursor-pointer items-center justify-center gap-2 border-none bg-slate-900 py-4 font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)] disabled:cursor-not-allowed disabled:opacity-70"
               >
                 Proceed
                 <ArrowRight className="h-4 w-4" />
@@ -822,7 +822,7 @@ function FormInput({
       </label>
       <input
         type={type}
-        className="h-10 rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
+        className="rounded-control h-10 border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
         placeholder={placeholder}
         value={value}
         onChange={(e: ChangeEvent<HTMLInputElement>) => {

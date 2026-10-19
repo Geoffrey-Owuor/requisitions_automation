@@ -22,7 +22,7 @@ const DashboardAdvanceWrapper = () => {
           <button
             onClick={() => setActiveView("page")}
             title="Make a Request"
-            className="group flex h-10 cursor-pointer items-center justify-end overflow-hidden rounded-t-2xl bg-slate-800 px-0.5 text-neutral-100 transition-all duration-300 ease-out"
+            className="group rounded-t-surface flex h-10 cursor-pointer items-center justify-end overflow-hidden bg-slate-800 px-0.5 text-neutral-100 transition-all duration-300 ease-out"
           >
             {/* Label: Slides out to the left on hover */}
             <span className="max-w-0 text-xs font-semibold tracking-wide whitespace-nowrap opacity-0 transition-all duration-300 group-hover:max-w-xs group-hover:pl-4 group-hover:opacity-100">
@@ -38,7 +38,7 @@ const DashboardAdvanceWrapper = () => {
           <button
             onClick={() => setActiveView("dashboard")}
             title="Dashboard"
-            className="group flex h-10 cursor-pointer items-center justify-end overflow-hidden rounded-b-2xl bg-slate-900 px-0.5 text-neutral-100 transition-all duration-300 ease-out"
+            className="group rounded-b-surface flex h-10 cursor-pointer items-center justify-end overflow-hidden bg-slate-900 px-0.5 text-neutral-100 transition-all duration-300 ease-out"
           >
             {/* Label: Slides out to the left on hover */}
             <span className="max-w-0 text-xs font-semibold tracking-wide whitespace-nowrap opacity-0 transition-all duration-300 group-hover:max-w-xs group-hover:pl-4 group-hover:opacity-100">

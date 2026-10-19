@@ -278,8 +278,8 @@ export function Select({
         onKeyDown={onTriggerKey}
         className={
           inline
-            ? `flex items-center gap-1 rounded-lg px-1.5 py-1 text-sm font-medium text-neutral-700 transition outline-none hover:bg-neutral-100 focus-visible:ring-2 focus-visible:ring-neutral-300 ${open ? "bg-neutral-100" : ""}`
-            : `flex h-10 w-full items-center justify-between gap-2 rounded-xl text-left text-sm transition-colors outline-none disabled:opacity-50 ${
+            ? `rounded-compact flex items-center gap-1 px-1.5 py-1 text-sm font-medium text-neutral-700 transition outline-none hover:bg-neutral-100 focus-visible:ring-2 focus-visible:ring-neutral-300 ${open ? "bg-neutral-100" : ""}`
+            : `rounded-control flex h-10 w-full items-center justify-between gap-2 text-left text-sm transition-colors outline-none disabled:opacity-50 ${
                 busy ? "cursor-progress" : "disabled:cursor-not-allowed"
               } ${styles.field} ${open ? styles.fieldOpen : styles.fieldClosed}`
         }
@@ -297,7 +297,7 @@ export function Select({
 
       {open && (
         <div
-          className={`absolute z-60 overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-lg ${
+          className={`rounded-control absolute z-60 overflow-hidden border border-neutral-200 bg-white shadow-lg ${
             inline
               ? "left-1/2 w-36 -translate-x-1/2"
               : "right-0 left-0 min-w-48"
@@ -325,7 +325,7 @@ export function Select({
                   setActiveIndex(0);
                 }}
                 onKeyDown={onListKey}
-                className="h-8 w-full rounded-lg bg-neutral-50 pr-2 pl-8 text-sm text-neutral-900 outline-none placeholder:text-neutral-400 focus:bg-neutral-100"
+                className="rounded-control h-8 w-full bg-neutral-50 pr-2 pl-8 text-sm text-neutral-900 outline-none placeholder:text-neutral-400 focus:bg-neutral-100"
               />
             </div>
           )}
@@ -353,7 +353,7 @@ export function Select({
                     onPointerDown={(e) => e.preventDefault()}
                     onPointerMove={() => setActiveIndex(index)}
                     onClick={() => choose(option)}
-                    className={`flex cursor-pointer items-center gap-2 rounded-lg px-2.5 text-sm ${
+                    className={`rounded-control flex cursor-pointer items-center gap-2 px-2.5 text-sm ${
                       inline ? "py-1.5" : "py-2"
                     } ${isSelected ? "font-medium" : ""} ${
                       index === activeIndex

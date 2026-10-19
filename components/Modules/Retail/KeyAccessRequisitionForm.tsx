@@ -204,11 +204,11 @@ export default function KeyAccessRequisitionForm() {
       {step === 1 && (
         <div className="relative z-10 mx-auto max-w-225">
           {/* Form Image - TODO: Update src to appropriate asset if needed */}
-          <div className="mb-4 overflow-hidden rounded-2xl sm:rounded-3xl">
+          <div className="rounded-surface sm:rounded-surface mb-4 overflow-hidden">
             <Image
               src={assets.access_key_image}
               sizes="100vh"
-              className="rounded-xl object-contain object-center"
+              className="rounded-control object-contain object-center"
               priority
               alt="Form Image"
             />
@@ -227,7 +227,7 @@ export default function KeyAccessRequisitionForm() {
           </header>
 
           {/* Form Card */}
-          <div className="rounded-3xl border border-white/85 bg-white/65 px-6 py-8 shadow-[0_24px_48px_rgba(160,60,60,0.10)] sm:px-8">
+          <div className="rounded-surface border border-white/85 bg-white/65 px-6 py-8 shadow-[0_24px_48px_rgba(160,60,60,0.10)] sm:px-8">
             <form
               className="flex flex-col gap-10"
               onSubmit={(e) => {
@@ -298,7 +298,7 @@ export default function KeyAccessRequisitionForm() {
                       <span className="text-red-500">*</span>
                     </label>
                     <textarea
-                      className="h-24 resize-none rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 py-3 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
+                      className="rounded-control h-24 resize-none border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 py-3 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
                       placeholder="Specify the exact rooms, stores, or facilities you need access to..."
                       value={formData.locations}
                       required
@@ -315,7 +315,7 @@ export default function KeyAccessRequisitionForm() {
                       <span className="text-red-500">*</span>
                     </label>
                     <textarea
-                      className="h-24 resize-none rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 py-3 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
+                      className="rounded-control h-24 resize-none border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 py-3 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
                       placeholder="State the requirements and the reason why access to these locations is required..."
                       value={formData.requirements}
                       required
@@ -333,7 +333,7 @@ export default function KeyAccessRequisitionForm() {
                   <ShieldAlert size={16} /> Key Custody & Access Policy
                 </h2>
 
-                <div className="small-scrollbar mb-4 max-h-60 overflow-y-auto rounded-xl border border-[rgba(240,180,180,0.6)] bg-rose-50/30 p-4 text-[13px] leading-relaxed text-[#5c4a4a]">
+                <div className="small-scrollbar rounded-control mb-4 max-h-60 overflow-y-auto border border-[rgba(240,180,180,0.6)] bg-rose-50/30 p-4 text-[13px] leading-relaxed text-[#5c4a4a]">
                   <p className="mb-3 font-semibold text-[#1e1b1b]">
                     By receiving these keys/access codes, you are bound by the
                     following conditions:
@@ -395,7 +395,7 @@ export default function KeyAccessRequisitionForm() {
                   </p>
                 </div>
 
-                <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-transparent p-2 transition-all hover:bg-rose-50/50">
+                <label className="rounded-control flex cursor-pointer items-start gap-3 border border-transparent p-2 transition-all hover:bg-rose-50/50">
                   <span
                     className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-all ${agreedToTerms ? "border-rose-500 bg-rose-500 text-white" : "border-slate-300 bg-white"}`}
                   >
@@ -425,7 +425,7 @@ export default function KeyAccessRequisitionForm() {
                 <button
                   type="submit"
                   disabled={buttonDisabled}
-                  className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-[14px] border-none bg-slate-900 py-4 font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)] disabled:cursor-not-allowed disabled:opacity-70"
+                  className="rounded-control flex w-full cursor-pointer items-center justify-center gap-2 border-none bg-slate-900 py-4 font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)] disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   Proceed to Review
                   <ArrowRight className="h-4 w-4" />
@@ -452,7 +452,7 @@ function FormInput({ label, placeholder, value, onChange }: FormInputProps) {
       </label>
       <input
         type="text"
-        className="h-10 rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
+        className="rounded-control h-10 border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
         placeholder={placeholder}
         value={value}
         onChange={(e: ChangeEvent<HTMLInputElement>) =>

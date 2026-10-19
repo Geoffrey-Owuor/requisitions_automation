@@ -3,7 +3,7 @@ const ITApprovalSkeleton = () => {
     <div className="relative min-h-screen overflow-x-hidden p-4">
       <div className="relative z-10 mx-auto max-w-225 animate-pulse">
         {/* Banner image placeholder */}
-        <div className="mb-4 h-30 rounded-xl bg-gray-200" />
+        <div className="rounded-control mb-4 h-30 bg-gray-200" />
 
         {/* Page header */}
         <div className="mb-8 space-y-2">
@@ -13,15 +13,15 @@ const ITApprovalSkeleton = () => {
         </div>
 
         {/* Card */}
-        <div className="rounded-3xl border border-gray-100 bg-white p-10 shadow-[0_24px_48px_rgba(160,60,60,0.10)]">
+        <div className="rounded-surface border border-gray-100 bg-white p-10 shadow-[0_24px_48px_rgba(160,60,60,0.10)]">
           {/* Approver badge */}
-          <div className="mb-7 flex items-center gap-3 rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white px-4 py-3">
+          <div className="rounded-surface mb-7 flex items-center gap-3 border border-[rgba(240,180,180,0.5)] bg-white px-4 py-3">
             <div className="h-10 w-10 shrink-0 rounded-full bg-rose-100" />
             <div className="space-y-1.5">
               <div className="h-3.5 w-32 rounded bg-gray-200" />
               <div className="h-3 w-24 rounded bg-gray-100" />
             </div>
-            <div className="ml-auto h-6 w-20 rounded-lg bg-rose-100" />
+            <div className="rounded-compact ml-auto h-6 w-20 bg-rose-100" />
           </div>
 
           {/* 2-column details grid */}
@@ -69,7 +69,7 @@ const ITApprovalSkeleton = () => {
             <div className="mb-2.5 h-3 w-36 rounded bg-gray-200" />
             <div className="flex flex-wrap gap-2">
               {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="h-7 w-20 rounded-lg bg-rose-50" />
+                <div key={i} className="rounded-compact h-7 w-20 bg-rose-50" />
               ))}
             </div>
           </div>
@@ -77,20 +77,20 @@ const ITApprovalSkeleton = () => {
           {/* Other requirements */}
           <div className="mb-6 border-t border-[rgba(240,180,180,0.4)] pt-6">
             <div className="mb-2.5 h-3 w-32 rounded bg-gray-200" />
-            <div className="h-16 rounded-xl bg-gray-50" />
+            <div className="rounded-control h-16 bg-gray-50" />
           </div>
 
           {/* Comments */}
           <div className="mb-6 border-t border-[rgba(240,180,180,0.4)] pt-6">
             <div className="mb-2.5 h-3 w-20 rounded bg-gray-200" />
-            <div className="h-28 rounded-2xl bg-gray-50" />
+            <div className="rounded-surface h-28 bg-gray-50" />
             <div className="mt-1.5 h-3 w-36 rounded bg-gray-100" />
           </div>
 
           {/* Action buttons */}
           <div className="flex gap-3 pt-1">
-            <div className="h-14 flex-1 rounded-[14px] bg-rose-50" />
-            <div className="h-14 flex-1 rounded-[14px] bg-gray-200" />
+            <div className="rounded-control h-14 flex-1 bg-rose-50" />
+            <div className="rounded-control h-14 flex-1 bg-gray-200" />
           </div>
         </div>
 

@@ -39,7 +39,7 @@ export default function CustomDropdown({
       </label>
       <button
         type="button"
-        className="flex h-10 cursor-pointer items-center justify-between rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none"
+        className="rounded-control flex h-10 cursor-pointer items-center justify-between border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none"
         onClick={() => setIsOpen(!isOpen)}
       >
         <span className={selectedLabel ? "text-[#1e1b1b]" : "text-[#a18080]"}>
@@ -62,12 +62,12 @@ export default function CustomDropdown({
           />
           {/* Dropdown Menu */}
           <div
-            className={`absolute right-0 ${openUpwards ? "bottom-[calc(100%-22px)]" : "top-[calc(100%+4px)]"} left-0 z-50 max-h-60 scrollbar-thin overflow-y-auto rounded-xl border border-slate-200 bg-white p-1 shadow-lg`}
+            className={`absolute right-0 ${openUpwards ? "bottom-[calc(100%-22px)]" : "top-[calc(100%+4px)]"} rounded-control left-0 z-50 max-h-60 scrollbar-thin overflow-y-auto border border-slate-200 bg-white p-1 shadow-lg`}
           >
             {options.map((opt) => (
               <div
                 key={opt.value}
-                className={`cursor-pointer rounded-lg px-3 py-2.5 text-[14px] transition-all duration-200 ${
+                className={`rounded-control cursor-pointer px-3 py-2.5 text-[14px] transition-all duration-200 ${
                   String(value) === String(opt.value)
                     ? "bg-rose-100 font-medium text-rose-700"
                     : "text-slate-700 hover:bg-slate-100 hover:text-slate-900"

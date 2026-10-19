@@ -156,14 +156,14 @@ export default function ReportsPage({
                 role="radio"
                 aria-checked={isSelected}
                 onClick={() => setSelectedType(type)}
-                className={`relative flex items-start gap-3 rounded-2xl border p-4 text-left transition-colors ${
+                className={`rounded-surface relative flex items-start gap-3 border p-4 text-left transition-colors ${
                   isSelected
                     ? "border-slate-900 bg-slate-50 ring-1 ring-slate-900"
                     : "border-neutral-200 bg-white hover:border-neutral-400"
                 }`}
               >
                 <span
-                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${
+                  className={`rounded-control flex h-9 w-9 shrink-0 items-center justify-center ${
                     isSelected
                       ? "bg-slate-900 text-white"
                       : "bg-neutral-100 text-neutral-500"
@@ -194,7 +194,7 @@ export default function ReportsPage({
       {/* Filters */}
       <section
         aria-label="Report filters"
-        className="space-y-4 rounded-2xl border border-neutral-200 bg-white p-4"
+        className="rounded-surface space-y-4 border border-neutral-200 bg-white p-4"
       >
         <div className="flex flex-wrap gap-1.5">
           {RANGE_PRESETS.map((preset) => (
@@ -202,7 +202,7 @@ export default function ReportsPage({
               key={preset.label}
               type="button"
               onClick={() => applyPreset(preset)}
-              className="rounded-full border border-neutral-300 px-3 py-1 text-xs font-medium text-neutral-600 transition-colors hover:border-neutral-400 hover:text-neutral-900"
+              className="rounded-compact border border-neutral-300 px-3 py-1 text-xs font-medium text-neutral-600 transition-colors hover:border-neutral-400 hover:text-neutral-900"
             >
               {preset.label}
             </button>
@@ -240,7 +240,7 @@ export default function ReportsPage({
           <div
             role="radiogroup"
             aria-label="Status"
-            className="flex w-full flex-wrap gap-1 rounded-xl border border-gray-200 bg-gray-50 p-1 sm:w-fit"
+            className="rounded-control flex w-full flex-wrap gap-1 border border-gray-200 bg-gray-50 p-1 sm:w-fit"
           >
             {REPORT_STATUS_FILTERS.map(({ value, label }) => (
               <button
@@ -249,7 +249,7 @@ export default function ReportsPage({
                 role="radio"
                 aria-checked={status === value}
                 onClick={() => setStatus(value)}
-                className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors sm:flex-none ${
+                className={`rounded-compact px-3 py-1.5 text-sm font-medium transition-colors sm:flex-none ${
                   status === value
                     ? "bg-white text-gray-900 shadow-sm"
                     : "text-gray-500 hover:text-gray-700"
@@ -261,7 +261,7 @@ export default function ReportsPage({
           </div>
         </div>
 
-        <p className="flex items-start gap-2 rounded-xl bg-gray-50 p-3 text-xs text-gray-600">
+        <p className="rounded-control flex items-start gap-2 bg-gray-50 p-3 text-xs text-gray-600">
           <Info className="mt-px h-3.5 w-3.5 shrink-0" />
           Dates are submission dates in Nairobi time, up to 12 months per
           report. Every download is logged.
@@ -278,7 +278,7 @@ export default function ReportsPage({
             type="button"
             onClick={handleDownload}
             disabled={!!rangeError || isDownloading}
-            className="flex items-center gap-2 rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-control flex items-center gap-2 bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isDownloading ? (
               <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
