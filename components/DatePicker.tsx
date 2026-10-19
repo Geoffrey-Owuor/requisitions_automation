@@ -7,13 +7,8 @@ import {
   useCallback,
   useLayoutEffect,
 } from "react";
-import {
-  CalendarDays,
-  ChevronLeft,
-  ChevronRight,
-  ChevronDown,
-  X,
-} from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { Select } from "@/components/Select";
 
 const DAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 const MONTHS = [
@@ -37,88 +32,17 @@ interface DatePickerProps {
   placeholder?: string;
   minDate?: string;
   maxDate?: string;
+  // Matches the surrounding inputs: "red" (default), the requisition forms'
+  // "rose" or Settings' "slate"
+  tone?: "red" | "rose" | "slate";
 }
 
-interface CustomDropdownProps {
-  options: { label: string; value: number }[];
-  value: number;
-  onChange: (value: number) => void;
-}
-
-function CustomDropdown({ options, value, onChange }: CustomDropdownProps) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  const listRef = useRef<HTMLUListElement>(null);
-
-  // Close on outside click
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
-
-  // Scroll selected item into view when dropdown opens
-  useEffect(() => {
-    if (open && listRef.current) {
-      const selected = listRef.current.querySelector("[data-selected='true']");
-      if (selected) {
-        selected.scrollIntoView({ block: "nearest" });
-      }
-    }
-  }, [open]);
-
-  const selectedLabel = options.find((o) => o.value === value)?.label ?? "";
-
-  return (
-    <div ref={ref} className="relative">
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-1 rounded-lg px-1.5 py-1 text-sm font-medium text-neutral-700 transition hover:bg-neutral-100 hover:text-red-500"
-      >
-        {selectedLabel}
-        <ChevronDown
-          size={12}
-          className={`mt-px text-neutral-400 transition-transform duration-150 ${open ? "rotate-180" : ""}`}
-        />
-      </button>
-
-      {open && (
-        <ul
-          ref={listRef}
-          className="default-scrollbar absolute top-full left-1/2 z-60 mt-1 max-h-48 w-32 -translate-x-1/2 overflow-y-auto rounded-xl border border-neutral-200 bg-white p-1 py-1 shadow-lg"
-        >
-          {options.map((opt) => {
-            const isActive = opt.value === value;
-            return (
-              <li key={opt.value}>
-                <button
-                  type="button"
-                  data-selected={isActive}
-                  onClick={() => {
-                    onChange(opt.value);
-                    setOpen(false);
-                  }}
-                  className={`w-full rounded-lg px-3 py-1.5 text-left text-sm transition ${
-                    isActive
-                      ? "bg-red-500 font-medium text-white"
-                      : "text-neutral-700 hover:bg-neutral-100"
-                  }`}
-                >
-                  {opt.label}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      )}
-    </div>
-  );
-}
+const TRIGGER_TONES = {
+  red: "border-neutral-300 bg-white focus:border-red-500 focus:ring-2 focus:ring-red-500/20",
+  rose: "border-[rgba(240,180,180,0.6)] bg-white/80 placeholder:text-[#a18080] focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]",
+  slate:
+    "border-neutral-200 bg-white hover:border-neutral-400 focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10",
+};
 
 export function DatePicker({
   value,
@@ -126,6 +50,7 @@ export function DatePicker({
   placeholder = "Pick a date",
   minDate,
   maxDate,
+  tone = "red",
 }: DatePickerProps) {
   const [open, setOpen] = useState(false);
   const [placement, setPlacement] = useState<"top" | "bottom">("bottom");
@@ -215,10 +140,11 @@ export function DatePicker({
   const prevMonth = () => setViewDate(new Date(year, month - 1, 1));
   const nextMonth = () => setViewDate(new Date(year, month + 1, 1));
 
-  const monthOptions = MONTHS.map((label, i) => ({ label, value: i }));
+  const monthOptions = MONTHS.map((label, i) => ({ label, value: String(i) }));
+  // Type-ahead finds a year: typing "2027" jumps straight to it
   const yearOptions = Array.from({ length: 101 }, (_, i) => {
-    const y = today.getFullYear() - 50 + i;
-    return { label: String(y), value: y };
+    const y = String(today.getFullYear() - 50 + i);
+    return { label: y, value: y };
   });
 
   const isDisabled = (day: number) => {
@@ -266,7 +192,7 @@ export function DatePicker({
           value={displayValue}
           placeholder={placeholder}
           onClick={toggleOpen}
-          className="h-10 w-full cursor-pointer rounded-xl border border-neutral-300 bg-white py-2 pr-10 pl-3 text-sm text-neutral-600 transition-all outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+          className={`h-10 w-full cursor-pointer rounded-xl border py-2 pr-10 pl-3 text-sm text-neutral-600 transition-all outline-none ${TRIGGER_TONES[tone]}`}
         />
 
         {value && (
@@ -307,15 +233,21 @@ export function DatePicker({
 
             {/* Custom dropdowns for Month and Year */}
             <div className="flex items-center gap-2">
-              <CustomDropdown
+              <Select
+                appearance="inline"
+                aria-label="Month"
+                searchable={false}
                 options={monthOptions}
-                value={month}
-                onChange={(m) => setViewDate(new Date(year, m, 1))}
+                value={String(month)}
+                onChange={(m) => setViewDate(new Date(year, Number(m), 1))}
               />
-              <CustomDropdown
+              <Select
+                appearance="inline"
+                aria-label="Year"
+                searchable={false}
                 options={yearOptions}
-                value={year}
-                onChange={(y) => setViewDate(new Date(y, month, 1))}
+                value={String(year)}
+                onChange={(y) => setViewDate(new Date(Number(y), month, 1))}
               />
             </div>
 

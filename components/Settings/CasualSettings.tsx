@@ -331,6 +331,7 @@ function RatesCard({ data, busy, run, confirm }: CardProps) {
               onChange={setEffectiveFrom}
               minDate={tomorrow}
               placeholder="Pick a date"
+              tone="slate"
             />
           </Field>
         </div>

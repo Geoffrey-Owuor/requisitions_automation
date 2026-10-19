@@ -276,6 +276,7 @@ export default function KeyAccessRequisitionForm() {
                       Issuance Date <span className="text-red-500">*</span>
                     </label>
                     <DatePicker
+                      tone="rose"
                       value={formData.issuanceDate}
                       onChange={(v) => updateField("issuanceDate", v)}
                     />

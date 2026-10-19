@@ -13,13 +13,7 @@ import {
   getDashboardNavGroups,
   isNavItemActive,
 } from "@/lib/dashboardNav";
-import {
-  ExternalLink,
-  LayoutGrid,
-  LucideIcon,
-  Search,
-  X,
-} from "lucide-react";
+import { ExternalLink, LayoutGrid, LucideIcon, Search, X } from "lucide-react";
 
 type LauncherApp = {
   key: string;

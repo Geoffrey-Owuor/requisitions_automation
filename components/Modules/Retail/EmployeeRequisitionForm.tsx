@@ -788,6 +788,7 @@ function PositionFieldset({
             <span className="text-red-500">*</span>
           </label>
           <DatePicker
+            tone="rose"
             value={position.dateFilled}
             onChange={(v) => onChange("dateFilled", v)}
             minDate={today}

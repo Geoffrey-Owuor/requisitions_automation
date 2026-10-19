@@ -321,6 +321,7 @@ export default function ITRequisitionPage() {
                       Requisition Date <span className="text-red-500">*</span>
                     </label>
                     <DatePicker
+                      tone="rose"
                       value={formData.requisitionDate}
                       onChange={(v) => updateField("requisitionDate", v)}
                     />
@@ -330,6 +331,7 @@ export default function ITRequisitionPage() {
                       Date Joining <span className="text-red-500">*</span>
                     </label>
                     <DatePicker
+                      tone="rose"
                       value={formData.dateJoining}
                       onChange={(v) => updateField("dateJoining", v)}
                     />
