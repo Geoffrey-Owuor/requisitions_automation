@@ -4,6 +4,7 @@ import { PoolClient } from "pg";
 import { getSession } from "@/lib/session";
 import { isUuid } from "@/lib/uuid";
 import { assignedHodNameSql, resolveHod, sameEmail } from "@/lib/hodAssignment";
+import { INVALID_DEPARTMENT_MESSAGE, resolveDepartment } from "@/lib/departments";
 import {
   TravelFormDataInput,
   validateTravelFormData,
@@ -159,6 +160,24 @@ export async function POST(request: NextRequest) {
       await client.query("ROLLBACK");
       return NextResponse.json(
         { message: "The departure date cannot be in the past" },
+        { status: 400 },
+      );
+    }
+
+    // The cost centre is picked from the same department list
+    const [departmentRules, costCentreRules] = await Promise.all([
+      resolveDepartment(input.department, {
+        currentDepartment: header.employee_department,
+      }),
+      resolveDepartment(input.costCentre, {
+        currentDepartment: header.travel_cost_center,
+      }),
+    ]);
+
+    if (!departmentRules || !costCentreRules) {
+      await client.query("ROLLBACK");
+      return NextResponse.json(
+        { message: INVALID_DEPARTMENT_MESSAGE },
         { status: 400 },
       );
     }

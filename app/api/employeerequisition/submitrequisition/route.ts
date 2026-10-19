@@ -3,6 +3,7 @@ import { randomUUID } from "crypto";
 import { pool } from "@/lib/db";
 import { getSession } from "@/lib/session";
 import { resolveHod } from "@/lib/hodAssignment";
+import { INVALID_DEPARTMENT_MESSAGE, resolveDepartment } from "@/lib/departments";
 import {
   writePositionAttachments,
   deleteRequisitionDirectory,
@@ -20,11 +21,7 @@ import {
   submissionStage,
   EmployeeFirstPendingStage,
 } from "@/utils/EmployeeApprovalStages/submissionStage";
-import {
-  formatSalaryRange,
-  EmployeeAttachmentType,
-  RETAIL_DEPARTMENT,
-} from "@/public/assets";
+import { formatSalaryRange, EmployeeAttachmentType } from "@/public/assets";
 
 export async function POST(request: NextRequest) {
   // Check if we have a valid session
@@ -61,6 +58,15 @@ export async function POST(request: NextRequest) {
     if (isEmpty(department) || isEmpty(hodApprover)) {
       return NextResponse.json(
         { message: "Your requisition is missing some required form fields" },
+        { status: 400 },
+      );
+    }
+
+    const departmentRules = await resolveDepartment(department);
+
+    if (!departmentRules) {
+      return NextResponse.json(
+        { message: INVALID_DEPARTMENT_MESSAGE },
         { status: 400 },
       );
     }
@@ -151,8 +157,10 @@ export async function POST(request: NextRequest) {
     try {
       await client.query("BEGIN");
 
+      // Stored once here; everything afterwards reads this status rather
+      // than the department's current flag
       const retailDirectorApprovalStatus =
-        department === RETAIL_DEPARTMENT ? "pending" : "N/A";
+        departmentRules.requiresRetailDirector ? "pending" : "N/A";
 
       await client.query(
         `
@@ -251,7 +259,7 @@ export async function POST(request: NextRequest) {
 
       firstPendingStage = await applySubmissionAutoApprovals(client, {
         requestId,
-        department,
+        hasRetailDirectorStage: departmentRules.requiresRetailDirector,
         submitterEmail: email,
         submitterName: name,
         hodEmail,

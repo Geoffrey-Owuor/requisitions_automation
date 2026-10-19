@@ -26,9 +26,9 @@ import {
   parseSalaryRange,
   isEmployeeAmendableHrStatus,
   EmployeeAttachmentType,
-  RETAIL_DEPARTMENT,
   MAX_AMENDMENT_REASON_LENGTH,
 } from "@/public/assets";
+import { INVALID_DEPARTMENT_MESSAGE, resolveDepartment } from "@/lib/departments";
 
 // Amends an employee requisition: the original submitter only, until HR
 // approves it. Sent as multipart like the submission - `metadata` JSON plus
@@ -377,6 +377,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const departmentRules = await resolveDepartment(department, {
+      currentDepartment: header.employee_department,
+      client,
+    });
+
+    if (!departmentRules) {
+      return rejectWith(INVALID_DEPARTMENT_MESSAGE, 400);
+    }
+
     const { rows: existingPositions } =
       await client.query<ExistingPositionRow>(
         `SELECT position_id, position_title, number_required,
@@ -651,8 +660,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Apply the amended header, and reset the approval chain to defaults.
-    // Retail Director applies only to a retail department (which an
-    // amendment may have changed).
+    // Retail Director applies only to a department flagged
+    // requires_retail_director (which an amendment may have changed).
     await client.query(
       `UPDATE employee_requisitions
        SET employee_department = $1,
@@ -674,7 +683,7 @@ export async function POST(request: NextRequest) {
         department,
         newHodName,
         newHodEmail,
-        department === RETAIL_DEPARTMENT ? "pending" : "N/A",
+        departmentRules.requiresRetailDirector ? "pending" : "N/A",
         amendmentNumber,
         requestId,
       ],
@@ -760,7 +769,7 @@ export async function POST(request: NextRequest) {
     // Reproduce the self-HOD auto-approvals from the initial submission
     const firstPendingStage = await applySubmissionAutoApprovals(client, {
       requestId,
-      department,
+      hasRetailDirectorStage: departmentRules.requiresRetailDirector,
       submitterEmail: user.email,
       submitterName: user.name,
       hodEmail: newHodEmail,

@@ -4,6 +4,7 @@ import { AccessEmailSender } from "@/services/AccessEmailSender";
 import { query } from "@/lib/db";
 import { getSession } from "@/lib/session";
 import { loadHodAlternates, resolveHod, sameEmail } from "@/lib/hodAssignment";
+import { INVALID_DEPARTMENT_MESSAGE, resolveDepartment } from "@/lib/departments";
 
 export async function POST(request: NextRequest) {
   // Check if we have a valid session
@@ -57,6 +58,13 @@ export async function POST(request: NextRequest) {
     if (isMissingFields) {
       return NextResponse.json(
         { message: "Your requisition is missing some required form fields" },
+        { status: 400 },
+      );
+    }
+
+    if (!(await resolveDepartment(department))) {
+      return NextResponse.json(
+        { message: INVALID_DEPARTMENT_MESSAGE },
         { status: 400 },
       );
     }

@@ -22,12 +22,14 @@ export interface HodApproversObject {
   department: string | null;
 }
 
-// Loading base departments
+// Loading base departments - active ones only. An amendment form still shows
+// its requisition's department if it was made inactive since (FormSelect
+// displays a value that isn't among its options).
 export const loadBaseDepartments = unstable_cache(
   async (): Promise<string[]> => {
     try {
       const result = await query<BaseDepartments>(
-        "SELECT department_name FROM base_departments",
+        "SELECT department_name FROM base_departments WHERE is_active = true",
       );
 
       return result.map((dept) => dept.department_name);
