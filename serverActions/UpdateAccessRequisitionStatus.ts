@@ -146,7 +146,7 @@ export const UpdateAccessRequisitionStatus = async (
         break;
       default:
         AccessEmailSender({
-          to: "developer@example.com",
+          to: process.env.ADMIN_EMAIL!,
           requestId: payload.uuid,
           message:
             "A wrong stage was passed in the access requisition approval workflow for this requistion",

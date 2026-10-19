@@ -73,9 +73,9 @@ Each requisition type has its own multi-stage chain under `utils/`:
 
 Status transitions live in `serverActions/Update{IT,Travel,AccessRequisitionStatus}` and each fires an email via the matching `services/*EmailSender.ts`, rendered from templates in `utils/templates/`.
 
-### Two approver-loading paths — check which one applies
+### Approver and department loaders
 
-`lib/loadAppData.ts` (JSON-backed, reads `data/*.json`) and the Postgres-backed loaders export functions with the **same names** (`loadHodArray`, `loadHrArray`, `loadITArray`, `loadDirectorArray`, `loadBaseDepartments`, plus DB-only `loadSecurityArray`, `loadRetailDirectorArray`, `loadFinanceArray`). The DB-backed loaders are the current path, split by who may call them: `lib/loadAppDataV2.ts` is `"use server"` and holds only what the browser forms load (`loadBaseDepartments`, and a session-gated `loadHodArray` with no tokens); every approver list that returns `*_uuid` approval tokens lives in the `server-only` `lib/loadApprovers.ts` — never add a token-returning loader to the `"use server"` file, since importing it into a client component makes it callable from the browser; the JSON version is being phased out and `data/*.json` is gitignored — untracked in git, though local copies may still exist on a given machine from before the Postgres migration. When editing approver-loading code, check the actual import to know which module a given caller uses — don't assume based on the function name alone.
+Approvers and departments are loaded from Postgres only, split by who may call them: `lib/loadAppDataV2.ts` is `"use server"` and holds only what the browser forms load (`loadBaseDepartments`, and a session-gated `loadHodArray` with no tokens); every approver list that returns `*_uuid` approval tokens (`loadHrArray`, `loadITArray`, `loadDirectorArray`, `loadSecurityArray`, `loadRetailDirectorArray`, `loadFinanceArray`) lives in the `server-only` `lib/loadApprovers.ts`. Never add a token-returning loader to the `"use server"` file, since importing it into a client component makes it callable from the browser. The old JSON-backed `lib/loadAppData.ts`/`data/*.json` and `lib/secretAssets.ts` were removed; `.gitignore` still lists them so a stale local copy can't be committed.
 
 ### HOD self-selection guard in submission forms
 
