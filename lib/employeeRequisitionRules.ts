@@ -5,7 +5,6 @@ import {
 } from "@/lib/attachmentStorage";
 import {
   REPLACEMENT_OR_NEW_OPTIONS,
-  JOB_GRADES,
   EMPLOYEE_ATTACHMENT_TYPES,
   EMPLOYEE_ATTACHMENT_TYPE_LABELS,
   EmployeeAttachmentType,
@@ -41,10 +40,13 @@ export function todayIsoDate() {
 // Returns the first problem with a position's fields, or null when valid.
 // The target fill date must not be in the past - on an amendment this
 // applies to unchanged positions too, so approvers never see a stale target.
+// `allowedGrades` are the active job grades, plus - for a position an
+// amendment keeps - the grade it already has.
 export function getPositionError(
   position: PositionInput,
   index: number,
   today: string,
+  allowedGrades: string[],
 ): string | null {
   if (
     isEmpty(position.title) ||
@@ -78,7 +80,7 @@ export function getPositionError(
     return `Position ${index + 1} has an invalid Replacement/New selection`;
   }
 
-  if (!JOB_GRADES.includes(position.jobGrade as (typeof JOB_GRADES)[number])) {
+  if (!allowedGrades.includes(position.jobGrade)) {
     return `Position ${index + 1} has an invalid Job Grade selection`;
   }
 

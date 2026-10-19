@@ -4,11 +4,14 @@ import { PoolClient } from "pg";
 import { getSession } from "@/lib/session";
 import { isUuid } from "@/lib/uuid";
 import { assignedHodNameSql, resolveHod, sameEmail } from "@/lib/hodAssignment";
+import { INVALID_DEPARTMENT_MESSAGE, resolveDepartment } from "@/lib/departments";
 import {
   validateCasualFormData,
   CasualFormDataInput,
 } from "@/lib/casualRequisitionRules";
 import { amendmentStage } from "@/utils/CasualApprovalStages/amendmentStage";
+import { loadCasualConfig } from "@/lib/loadCasualConfig";
+import { nairobiToday } from "@/lib/casualConfig";
 import { isCasualAmendableHrStatus } from "@/public/assets";
 
 interface ExistingSectionRow {
@@ -73,15 +76,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const validation = validateCasualFormData(formData as CasualFormDataInput);
-
-    if (!validation.ok) {
-      return NextResponse.json({ message: validation.message }, { status: 400 });
-    }
-
-    const { ratePerDay, computedSections } = validation;
-    const { department, hodApprover, location, casualCategory } =
+    const { department, hodApprover, location } =
       formData as CasualFormDataInput;
+    const config = await loadCasualConfig();
 
     client = await pool.connect();
     await client.query("BEGIN");
@@ -136,6 +133,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const departmentRules = await resolveDepartment(department, {
+      currentDepartment: header.employee_department,
+    });
+
+    if (!departmentRules) {
+      await client.query("ROLLBACK");
+      return NextResponse.json(
+        { message: INVALID_DEPARTMENT_MESSAGE },
+        { status: 400 },
+      );
+    }
+
     const resolvedHod = await resolveHod(hodApprover);
 
     if (!resolvedHod) {
@@ -161,9 +170,33 @@ export async function POST(request: NextRequest) {
       [requestId],
     );
 
+    // Priced at today's rates; the requisition may keep a location, category
+    // or section it already has even if it's no longer offered
+    const validation = validateCasualFormData(formData as CasualFormDataInput, {
+      config,
+      casualCategoryRequired: departmentRules.casualCategoryRequired,
+      date: nairobiToday(),
+      current: {
+        department: header.employee_department,
+        location: header.casual_location,
+        category: header.casual_category,
+        sectionNames: existingSections.map((section) => section.section_name),
+      },
+    });
+
+    if (!validation.ok) {
+      await client.query("ROLLBACK");
+      return NextResponse.json(
+        { message: validation.message },
+        { status: validation.status },
+      );
+    }
+
+    const { ratePerDay, casualCategory, computedSections } = validation;
+
     // ---- Header diff ----
     const casualCategoryChanged =
-      (casualCategory ?? null) !== (header.casual_category ?? null);
+      casualCategory !== (header.casual_category ?? null);
     const headerDiff = {
       previousDepartment:
         department !== header.employee_department
@@ -177,7 +210,7 @@ export async function POST(request: NextRequest) {
       previousCasualCategory: casualCategoryChanged
         ? header.casual_category
         : null,
-      newCasualCategory: casualCategoryChanged ? casualCategory ?? null : null,
+      newCasualCategory: casualCategoryChanged ? casualCategory : null,
       // The HOD is compared by email (names aren't unique) and recorded by
       // name. casual_hod_approver holds whoever acted on the HOD stage
       // (possibly an alternate), so the previous name is the ASSIGNED HOD's.

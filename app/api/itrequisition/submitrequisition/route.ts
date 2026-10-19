@@ -4,6 +4,11 @@ import { ITEmailSender } from "@/services/ITEmailSender";
 import { query } from "@/lib/db";
 import { getSession } from "@/lib/session";
 import { loadHodAlternates, resolveHod, sameEmail } from "@/lib/hodAssignment";
+import {
+  INVALID_DEPARTMENT_MESSAGE,
+  resolveDepartment,
+} from "@/lib/departments";
+import { loadItRequirementItems } from "@/lib/loadRequisitionOptions";
 
 export async function POST(request: NextRequest) {
   // Check if we have a valid session
@@ -61,6 +66,32 @@ export async function POST(request: NextRequest) {
     if (isMissingFields) {
       return NextResponse.json(
         { message: "Your requisition is missing some required form fields" },
+        { status: 400 },
+      );
+    }
+
+    // Only the active items from it_requirement_items (no item name holds a
+    // comma, so the joined text stays splittable)
+    const activeItems = (await loadItRequirementItems())
+      .filter((item) => item.isActive)
+      .map((item) => item.name);
+
+    if (
+      !Array.isArray(requirements) ||
+      !requirements.every((item) => activeItems.includes(item))
+    ) {
+      return NextResponse.json(
+        {
+          message:
+            "One of the selected requirements is no longer available - please reload the form",
+        },
+        { status: 400 },
+      );
+    }
+
+    if (!(await resolveDepartment(department))) {
+      return NextResponse.json(
+        { message: INVALID_DEPARTMENT_MESSAGE },
         { status: 400 },
       );
     }

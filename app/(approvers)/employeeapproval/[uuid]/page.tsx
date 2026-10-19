@@ -13,11 +13,7 @@ import {
   employeeAmendmentsQuery,
   EmployeeAmendmentValues,
 } from "@/lib/employeeAmendment";
-import {
-  isValidEmployeeStage,
-  RETAIL_DEPARTMENT,
-  EMPLOYEE_STAGE_LABELS,
-} from "@/public/assets";
+import { isValidEmployeeStage, EMPLOYEE_STAGE_LABELS } from "@/public/assets";
 
 type ApprovalPageProps = {
   params: Promise<{ uuid: string }>;
@@ -116,20 +112,17 @@ const ApprovalPageContent = async ({
 
   const requestData = result[0];
 
-  // Retail Director is only part of the chain for Retail-department
-  // requisitions
-  if (
-    stage === "retail_director" &&
-    requestData.employee_department !== RETAIL_DEPARTMENT
-  )
+  // Retail Director is only part of the chain when the requisition has that
+  // stage - stored as 'N/A' otherwise, decided at submission/amendment
+  const hasRetailDirectorStage =
+    requestData.employee_retail_director_approval_status !== "N/A";
+
+  if (stage === "retail_director" && !hasRetailDirectorStage)
     return <NotFoundRequest />;
 
-  const isRetailRequisition =
-    requestData.employee_department === RETAIL_DEPARTMENT;
-
   // Build the list of stages that precede the current one. Retail Director
-  // only ever sits between HOD and CEO, and only for Retail-department
-  // requisitions.
+  // only ever sits between HOD and CEO, and only when the requisition has
+  // that stage.
   const previousApprovals: PreviousApproval[] = [];
   if (stage !== "hod") {
     previousApprovals.push({
@@ -139,7 +132,7 @@ const ApprovalPageContent = async ({
       comments: requestData.employee_hod_comments,
     });
   }
-  if (isRetailRequisition && (stage === "director" || stage === "hr")) {
+  if (hasRetailDirectorStage && (stage === "director" || stage === "hr")) {
     previousApprovals.push({
       label: EMPLOYEE_STAGE_LABELS.retail_director,
       approverName: requestData.employee_retail_director_approver,
@@ -161,7 +154,8 @@ const ApprovalPageContent = async ({
       SELECT
         position_id, position_title, number_required,
         position_justification, position_reporting_to, date_position_filled,
-        position_replacement_or_new, position_job_grade, position_salary_range
+        position_replacement_or_new, position_job_grade, position_job_grade_rank,
+        position_salary_range
         FROM employee_requisition_positions
         WHERE request_id = $1
         ORDER BY position_created_at, position_id
@@ -215,6 +209,7 @@ const ApprovalPageContent = async ({
         numberRequired: position.number_required,
         replacementOrNew: position.position_replacement_or_new,
         jobGrade: position.position_job_grade,
+        jobGradeRank: position.position_job_grade_rank,
         salaryRange: position.position_salary_range,
         justification: position.position_justification,
         reportingTo: position.position_reporting_to,

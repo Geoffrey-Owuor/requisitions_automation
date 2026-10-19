@@ -12,9 +12,8 @@ import { QueryResultRow } from "pg";
 import { useQuery } from "@tanstack/react-query";
 import StatusFormatter from "../StatusFormatter";
 import {
-  RETAIL_DEPARTMENT,
   dateFormatter,
-  getJobGradeNumber,
+  formatJobGrade,
   isEmployeeAmendableHrStatus,
 } from "@/public/assets";
 import Link from "next/link";
@@ -92,7 +91,9 @@ export const EmployeeDetailsModal = ({
 
   if (!data) return null;
 
-  const isRetail = data.employee_department === RETAIL_DEPARTMENT;
+  // Stored as 'N/A' when the Retail Director stage doesn't apply
+  const hasRetailDirectorStage =
+    data.employee_retail_director_approval_status !== "N/A";
 
   // Visibility only - the amend form and the amendment route re-check
   // ownership and the HR status
@@ -103,7 +104,7 @@ export const EmployeeDetailsModal = ({
 
   const approvalChain = [
     { label: "HOD", status: data.employee_hod_approval_status },
-    ...(isRetail
+    ...(hasRetailDirectorStage
       ? [
           {
             label: "Retail Director",
@@ -217,8 +218,8 @@ export const EmployeeDetailsModal = ({
                     {position.positiontitle}
                   </span>
                   <span className="text-[11px] text-neutral-500">
-                    {position.replacementornew} &middot; {position.jobgrade}{" "}
-                    (Grade {getJobGradeNumber(position.jobgrade)})
+                    {position.replacementornew} &middot;{" "}
+                    {formatJobGrade(position.jobgrade, position.jobgraderank)}
                   </span>
                 </div>
                 <div className="mt-2 flex flex-wrap gap-4 text-[12px] text-neutral-500">

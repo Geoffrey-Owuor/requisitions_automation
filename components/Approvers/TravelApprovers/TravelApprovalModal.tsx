@@ -393,7 +393,8 @@ const TravelApprovalModal = ({
               </div>
 
               {/* Showing the engineering jobs area */}
-              {employeeDepartment === "Engineering & HVAC" && (
+              {/* Stored only for departments flagged requires_engineering_jobs */}
+              {!!engineeringJobs && (
                 <EngineeringJobSummaryCard jobDetailsString={engineeringJobs} />
               )}
 

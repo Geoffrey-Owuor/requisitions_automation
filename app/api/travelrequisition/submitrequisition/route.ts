@@ -4,7 +4,12 @@ import { query } from "@/lib/db";
 import { EmailSender } from "@/services/EmailSender";
 import { getSession } from "@/lib/session";
 import { loadHodAlternates, resolveHod, sameEmail } from "@/lib/hodAssignment";
-import { validateTravelFormData } from "@/lib/travelRequisitionRules";
+import { INVALID_DEPARTMENT_MESSAGE, resolveDepartment } from "@/lib/departments";
+import { loadTravelThresholdsToday } from "@/lib/loadRequisitionOptions";
+import {
+  resolveEngineeringJobs,
+  validateTravelFormData,
+} from "@/lib/travelRequisitionRules";
 
 export async function POST(request: NextRequest) {
   // Check if we have a valid session
@@ -42,18 +47,47 @@ export async function POST(request: NextRequest) {
       perDiem,
       costCentre,
       withinBudget,
-      engineeringJobs,
     } = formData;
 
     // Recompute total cost and approval tier server-side rather than trusting
     // the client-supplied values, so a tampered request can't skip HR/Director review.
-    const validation = validateTravelFormData(formData);
+    const validation = validateTravelFormData(
+      formData,
+      await loadTravelThresholdsToday(),
+    );
 
     if (!validation.ok) {
-      return NextResponse.json({ message: validation.message }, { status: 400 });
+      return NextResponse.json(
+        { message: validation.message },
+        { status: validation.status },
+      );
     }
 
     const { totalCost, approvalTier } = validation;
+
+    // The cost centre is picked from the same department list
+    const [departmentRules, costCentreRules] = await Promise.all([
+      resolveDepartment(department),
+      resolveDepartment(costCentre),
+    ]);
+
+    if (!departmentRules || !costCentreRules) {
+      return NextResponse.json(
+        { message: INVALID_DEPARTMENT_MESSAGE },
+        { status: 400 },
+      );
+    }
+
+    const jobs = resolveEngineeringJobs(
+      formData,
+      departmentRules.requiresEngineeringJobs,
+    );
+
+    if (!jobs.ok) {
+      return NextResponse.json({ message: jobs.message }, { status: 400 });
+    }
+
+    const { engineeringJobs } = jobs;
 
     // The form sends the HOD's email; the stored name comes from hod_array
     const resolvedHod = await resolveHod(hodApprover);
@@ -115,7 +149,7 @@ export async function POST(request: NextRequest) {
       directorStatus,
       hodName,
       hodEmail,
-      engineeringJobs || null,
+      engineeringJobs,
     ];
 
     // Run the query

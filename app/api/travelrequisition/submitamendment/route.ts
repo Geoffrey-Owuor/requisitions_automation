@@ -4,7 +4,10 @@ import { PoolClient } from "pg";
 import { getSession } from "@/lib/session";
 import { isUuid } from "@/lib/uuid";
 import { assignedHodNameSql, resolveHod, sameEmail } from "@/lib/hodAssignment";
+import { INVALID_DEPARTMENT_MESSAGE, resolveDepartment } from "@/lib/departments";
+import { loadTravelThresholdsToday } from "@/lib/loadRequisitionOptions";
 import {
+  resolveEngineeringJobs,
   TravelFormDataInput,
   validateTravelFormData,
 } from "@/lib/travelRequisitionRules";
@@ -64,18 +67,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const validation = validateTravelFormData(formData as TravelFormDataInput);
+    const validation = validateTravelFormData(
+      formData as TravelFormDataInput,
+      await loadTravelThresholdsToday(),
+    );
 
     if (!validation.ok) {
-      return NextResponse.json({ message: validation.message }, { status: 400 });
+      return NextResponse.json(
+        { message: validation.message },
+        { status: validation.status },
+      );
     }
 
     const { totalCost, approvalTier } = validation;
     const input = formData as TravelFormDataInput;
-    const engineeringJobs =
-      input.department === "Engineering & HVAC"
-        ? input.engineeringJobs || null
-        : null;
 
     if (
       !ISO_DATE.test(input.departureDate) ||
@@ -162,6 +167,36 @@ export async function POST(request: NextRequest) {
         { status: 400 },
       );
     }
+
+    // The cost centre is picked from the same department list
+    const [departmentRules, costCentreRules] = await Promise.all([
+      resolveDepartment(input.department, {
+        currentDepartment: header.employee_department,
+      }),
+      resolveDepartment(input.costCentre, {
+        currentDepartment: header.travel_cost_center,
+      }),
+    ]);
+
+    if (!departmentRules || !costCentreRules) {
+      await client.query("ROLLBACK");
+      return NextResponse.json(
+        { message: INVALID_DEPARTMENT_MESSAGE },
+        { status: 400 },
+      );
+    }
+
+    const jobs = resolveEngineeringJobs(
+      input,
+      departmentRules.requiresEngineeringJobs,
+    );
+
+    if (!jobs.ok) {
+      await client.query("ROLLBACK");
+      return NextResponse.json({ message: jobs.message }, { status: 400 });
+    }
+
+    const { engineeringJobs } = jobs;
 
     const resolvedHod = await resolveHod(input.hodApprover);
 
