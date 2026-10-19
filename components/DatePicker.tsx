@@ -192,14 +192,14 @@ export function DatePicker({
           value={displayValue}
           placeholder={placeholder}
           onClick={toggleOpen}
-          className={`h-10 w-full cursor-pointer rounded-xl border py-2 pr-10 pl-3 text-sm text-neutral-600 transition-all outline-none ${TRIGGER_TONES[tone]}`}
+          className={`rounded-control h-10 w-full cursor-pointer border py-2 pr-10 pl-3 text-sm text-neutral-600 transition-all outline-none ${TRIGGER_TONES[tone]}`}
         />
 
         {value && (
           <button
             type="button"
             onClick={() => onChange("")}
-            className="absolute right-12 cursor-pointer rounded-full p-0.5 hover:bg-neutral-200"
+            className="absolute right-12 cursor-pointer rounded-md p-0.5 hover:bg-neutral-200"
           >
             <X className="h-3 w-3 text-neutral-500" />
           </button>
@@ -218,7 +218,7 @@ export function DatePicker({
         <div
           ref={popoverRef}
           style={shift ? { transform: `translateY(${shift}px)` } : undefined}
-          className={`absolute left-0 z-50 w-full rounded-2xl border border-neutral-200 bg-white p-4 shadow-xl ${
+          className={`rounded-surface absolute left-0 z-50 w-full border border-neutral-200 bg-white p-4 shadow-xl ${
             placement === "top" ? "bottom-full mb-2" : "top-full mt-2"
           }`}
         >
@@ -226,7 +226,7 @@ export function DatePicker({
             <button
               type="button"
               onClick={prevMonth}
-              className="flex h-7 w-7 items-center justify-center rounded-lg text-neutral-400 transition hover:bg-neutral-100 hover:text-neutral-700"
+              className="rounded-compact flex h-7 w-7 items-center justify-center text-neutral-400 transition hover:bg-neutral-100 hover:text-neutral-700"
             >
               <ChevronLeft size={14} />
             </button>
@@ -254,7 +254,7 @@ export function DatePicker({
             <button
               type="button"
               onClick={nextMonth}
-              className="flex h-7 w-7 items-center justify-center rounded-lg text-neutral-400 transition hover:bg-neutral-100 hover:text-neutral-700"
+              className="rounded-compact flex h-7 w-7 items-center justify-center text-neutral-400 transition hover:bg-neutral-100 hover:text-neutral-700"
             >
               <ChevronRight size={14} />
             </button>
@@ -284,7 +284,7 @@ export function DatePicker({
                     type="button"
                     disabled={disabled}
                     onClick={() => selectDay(day)}
-                    className={`flex h-8 w-8 items-center justify-center rounded-lg text-sm transition ${
+                    className={`rounded-control flex h-8 w-8 items-center justify-center text-sm transition ${
                       disabled
                         ? "cursor-not-allowed text-neutral-300"
                         : sel
@@ -310,7 +310,7 @@ export function DatePicker({
                 onChange(iso);
                 setOpen(false);
               }}
-              className="w-full rounded-lg py-2.5 text-sm text-red-500 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:text-neutral-300 disabled:hover:bg-transparent"
+              className="rounded-control w-full py-2.5 text-sm text-red-500 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:text-neutral-300 disabled:hover:bg-transparent"
             >
               Today
             </button>

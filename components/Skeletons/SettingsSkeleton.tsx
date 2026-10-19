@@ -9,7 +9,7 @@ const softBar = "rounded-md bg-neutral-100";
 
 function CardSkeleton({ children }: { children: ReactNode }) {
   return (
-    <div className="space-y-4 rounded-2xl border border-neutral-200 bg-white p-4">
+    <div className="rounded-surface space-y-4 border border-neutral-200 bg-white p-4">
       <div className="space-y-2">
         <div className={`h-3 w-28 ${bar}`} />
         <div className={`h-3 w-full max-w-md ${softBar}`} />
@@ -36,7 +36,7 @@ function ToggleRowsSkeleton({
             <div className={`h-3.5 ${widths[i % widths.length]} ${bar}`} />
             {withDetail && <div className={`h-3 w-24 ${softBar}`} />}
           </div>
-          <div className="h-6 w-20 shrink-0 rounded-full bg-neutral-100" />
+          <div className="rounded-compact h-6 w-20 shrink-0 bg-neutral-100" />
         </div>
       ))}
     </div>
@@ -46,8 +46,8 @@ function ToggleRowsSkeleton({
 function AddRowSkeleton() {
   return (
     <div className="flex gap-2">
-      <div className="h-10 flex-1 rounded-xl border border-neutral-200" />
-      <div className="h-10 w-20 shrink-0 rounded-full bg-neutral-200" />
+      <div className="rounded-control h-10 flex-1 border border-neutral-200" />
+      <div className="rounded-control h-10 w-20 shrink-0 bg-neutral-200" />
     </div>
   );
 }
@@ -57,7 +57,7 @@ function FieldSkeleton() {
   return (
     <div className="space-y-1">
       <div className={`h-3 w-20 ${bar}`} />
-      <div className="h-10 rounded-xl border border-neutral-200 bg-white" />
+      <div className="rounded-control h-10 border border-neutral-200 bg-white" />
     </div>
   );
 }
@@ -100,7 +100,7 @@ function RatesSkeleton() {
           </div>
         ))}
       </div>
-      <div className="space-y-3 rounded-xl bg-neutral-50 p-3">
+      <div className="rounded-control space-y-3 bg-neutral-50 p-3">
         <div className={`h-3 w-28 ${bar}`} />
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
           {Array.from({ length: 5 }, (_, i) => (
@@ -109,7 +109,7 @@ function RatesSkeleton() {
         </div>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className={`h-3 w-44 ${bar}`} />
-          <div className="h-10 w-36 rounded-full bg-neutral-200" />
+          <div className="rounded-control h-10 w-36 bg-neutral-200" />
         </div>
       </div>
     </CardSkeleton>
@@ -123,7 +123,7 @@ function LocationLimitsSkeleton() {
         <div className={`h-3.5 w-3/4 ${bar}`} />
         <div className={`h-3.5 w-1/2 ${bar}`} />
       </div>
-      <div className="h-10 rounded-xl border border-neutral-200" />
+      <div className="rounded-control h-10 border border-neutral-200" />
     </CardSkeleton>
   );
 }
@@ -135,14 +135,14 @@ function SectionsSkeleton() {
         <div className={`h-3 w-24 ${bar}`} />
         <ToggleRowsSkeleton rows={3} withDetail />
       </div>
-      <div className="space-y-2 rounded-xl bg-neutral-50 p-3">
+      <div className="rounded-control space-y-2 bg-neutral-50 p-3">
         <div className="grid gap-2 sm:grid-cols-3">
           {Array.from({ length: 3 }, (_, i) => (
             <FieldSkeleton key={i} />
           ))}
         </div>
         <div className="flex justify-end">
-          <div className="h-10 w-32 rounded-full bg-neutral-200" />
+          <div className="rounded-control h-10 w-32 bg-neutral-200" />
         </div>
       </div>
     </CardSkeleton>

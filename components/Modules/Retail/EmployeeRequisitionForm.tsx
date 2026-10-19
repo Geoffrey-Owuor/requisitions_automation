@@ -455,7 +455,7 @@ export default function EmployeeRequisitionForm({
 
   if (amendmentNotEligible) {
     return (
-      <div className="mx-auto max-w-md rounded-2xl border border-rose-200 bg-rose-50 p-6 text-center text-sm text-rose-700">
+      <div className="rounded-surface mx-auto max-w-md border border-rose-200 bg-rose-50 p-6 text-center text-sm text-rose-700">
         This requisition can no longer be amended. It may have already been
         approved by HR, or you may not be its original submitter.
       </div>
@@ -515,11 +515,11 @@ export default function EmployeeRequisitionForm({
 
       {step === 1 && (
         <div className="relative z-10 mx-auto max-w-225">
-          <div className="mb-4 overflow-hidden rounded-2xl sm:rounded-3xl">
+          <div className="rounded-surface sm:rounded-surface mb-4 overflow-hidden">
             <Image
               src={assets.employee_form_image}
               sizes="100vh"
-              className="rounded-xl object-contain object-center"
+              className="rounded-control object-contain object-center"
               priority
               alt="Form Image"
             />
@@ -541,7 +541,7 @@ export default function EmployeeRequisitionForm({
           </header>
 
           {isAmendment && (
-            <div className="mb-6 flex items-start gap-2.5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3.5 text-[13px] text-amber-800">
+            <div className="rounded-surface mb-6 flex items-start gap-2.5 border border-amber-200 bg-amber-50 px-4 py-3.5 text-[13px] text-amber-800">
               <Info className="mt-0.5 h-4 w-4 shrink-0" />
               <p>
                 Amendments are only possible until HR approves this requisition.
@@ -554,13 +554,13 @@ export default function EmployeeRequisitionForm({
           )}
 
           {isAmendment && !!amendmentContext?.history.length && (
-            <div className="mb-6 rounded-3xl border border-white/85 bg-white/65 px-6 py-6 shadow-[0_24px_48px_rgba(160,60,60,0.10)] sm:px-8">
+            <div className="rounded-surface mb-6 border border-white/85 bg-white/65 px-6 py-6 shadow-[0_24px_48px_rgba(160,60,60,0.10)] sm:px-8">
               <EmployeeAmendmentHistory amendments={amendmentContext.history} />
             </div>
           )}
 
           {/* Form Card */}
-          <div className="rounded-3xl border border-white/85 bg-white/65 px-6 py-8 shadow-[0_24px_48px_rgba(160,60,60,0.10)] sm:px-8">
+          <div className="rounded-surface border border-white/85 bg-white/65 px-6 py-8 shadow-[0_24px_48px_rgba(160,60,60,0.10)] sm:px-8">
             <form
               className="flex flex-col gap-10"
               onSubmit={(e) => {
@@ -602,7 +602,7 @@ export default function EmployeeRequisitionForm({
                   <button
                     type="button"
                     onClick={addPosition}
-                    className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-rose-200 bg-white/80 px-3.5 py-1.5 text-[12px] font-semibold text-rose-700 transition-all duration-200 hover:border-rose-300 hover:bg-rose-50"
+                    className="rounded-compact flex cursor-pointer items-center gap-1.5 border border-rose-200 bg-white/80 px-3.5 py-1.5 text-[12px] font-semibold text-rose-700 transition-all duration-200 hover:border-rose-300 hover:bg-rose-50"
                   >
                     <Plus className="h-3.5 w-3.5" />
                     Add Position
@@ -638,7 +638,7 @@ export default function EmployeeRequisitionForm({
                 <button
                   type="button"
                   onClick={addPosition}
-                  className="mt-4 flex cursor-pointer items-center gap-1.5 rounded-lg border border-rose-200 bg-white/80 px-3.5 py-1.5 text-[12px] font-semibold text-rose-700 transition-all duration-200 hover:border-rose-300 hover:bg-rose-50"
+                  className="rounded-compact mt-4 flex cursor-pointer items-center gap-1.5 border border-rose-200 bg-white/80 px-3.5 py-1.5 text-[12px] font-semibold text-rose-700 transition-all duration-200 hover:border-rose-300 hover:bg-rose-50"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   Add Position
@@ -652,7 +652,7 @@ export default function EmployeeRequisitionForm({
                     <History size={16} /> Reason for Amendment
                   </h2>
                   <textarea
-                    className="h-20 w-full resize-none rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 py-3 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
+                    className="rounded-control h-20 w-full resize-none border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 py-3 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
                     placeholder="Explain what changed and why..."
                     maxLength={MAX_AMENDMENT_REASON_LENGTH}
                     value={reason}
@@ -669,7 +669,7 @@ export default function EmployeeRequisitionForm({
                 <button
                   type="submit"
                   disabled={buttonDisabled}
-                  className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-[14px] border-none bg-slate-900 py-4 font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)] disabled:cursor-not-allowed disabled:opacity-70"
+                  className="rounded-control flex w-full cursor-pointer items-center justify-center gap-2 border-none bg-slate-900 py-4 font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)] disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   Proceed to Review
                   <ArrowRight className="h-4 w-4" />
@@ -719,7 +719,7 @@ function PositionFieldset({
   onRemoveFile: (type: EmployeeAttachmentType) => void;
 }) {
   return (
-    <div className="rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white/70 p-5">
+    <div className="rounded-surface border border-[rgba(240,180,180,0.5)] bg-white/70 p-5">
       <div className="mb-4 flex items-center justify-between">
         <h3 className="text-[14px] font-semibold text-[#1e1b1b]">
           Position {index + 1}
@@ -744,7 +744,7 @@ function PositionFieldset({
           <input
             type="text"
             maxLength={100}
-            className="h-10 rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
+            className="rounded-control h-10 border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
             value={position.title}
             onChange={(e: ChangeEvent<HTMLInputElement>) =>
               onChange("title", e.target.value)
@@ -759,7 +759,7 @@ function PositionFieldset({
           <input
             type="number"
             min={1}
-            className="h-10 rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
+            className="rounded-control h-10 border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
             value={position.numberRequired || ""}
             onChange={(e: ChangeEvent<HTMLInputElement>) =>
               onChange("numberRequired", Number(e.target.value))
@@ -774,7 +774,7 @@ function PositionFieldset({
           <input
             type="text"
             maxLength={100}
-            className="h-10 rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
+            className="rounded-control h-10 border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
             value={position.reportingTo}
             onChange={(e: ChangeEvent<HTMLInputElement>) =>
               onChange("reportingTo", e.target.value)
@@ -829,7 +829,7 @@ function PositionFieldset({
           <input
             type="number"
             min={1}
-            className="h-10 rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
+            className="rounded-control h-10 border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
             value={position.salaryMin || ""}
             onChange={(e: ChangeEvent<HTMLInputElement>) =>
               onChange("salaryMin", Number(e.target.value))
@@ -845,7 +845,7 @@ function PositionFieldset({
           <input
             type="number"
             min={1}
-            className="h-10 rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
+            className="rounded-control h-10 border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
             value={position.salaryMax || ""}
             onChange={(e: ChangeEvent<HTMLInputElement>) =>
               onChange("salaryMax", Number(e.target.value))
@@ -860,7 +860,7 @@ function PositionFieldset({
           Position Justification <span className="text-red-500">*</span>
         </label>
         <textarea
-          className="h-20 resize-none rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 py-3 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
+          className="rounded-control h-20 resize-none border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 py-3 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
           placeholder="Briefly describe why this position is being filled..."
           value={position.justification}
           required
@@ -886,7 +886,7 @@ function PositionFieldset({
                 <span className="text-red-500">*</span>
               </label>
               {file ? (
-                <div className="flex items-center justify-between rounded-lg bg-white/80 px-3 py-2 text-[12px] text-[#1e1b1b]">
+                <div className="rounded-control flex items-center justify-between bg-white/80 px-3 py-2 text-[12px] text-[#1e1b1b]">
                   <span className="flex min-w-0 items-center gap-2">
                     {existing && (
                       <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
@@ -905,12 +905,12 @@ function PositionFieldset({
                   </button>
                 </div>
               ) : existing ? (
-                <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-white/80 px-3 py-2">
+                <div className="rounded-control flex flex-wrap items-center justify-between gap-2 bg-white/80 px-3 py-2">
                   <AttachmentLink
                     attachmentId={existing.attachmentId}
                     label={existing.originalFilename}
                   />
-                  <label className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-rose-200 bg-white px-3 py-1.5 text-[12px] font-semibold text-rose-700 transition-all duration-200 hover:bg-rose-50">
+                  <label className="rounded-compact flex cursor-pointer items-center gap-1.5 border border-rose-200 bg-white px-3 py-1.5 text-[12px] font-semibold text-rose-700 transition-all duration-200 hover:bg-rose-50">
                     <RefreshCw className="h-3.5 w-3.5" />
                     Replace
                     <input
@@ -924,7 +924,7 @@ function PositionFieldset({
                   </label>
                 </div>
               ) : (
-                <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-[rgba(240,180,180,0.8)] bg-white/60 px-3.5 py-4 text-[13px] font-medium text-rose-600 transition-all duration-200 hover:bg-rose-50">
+                <label className="rounded-control flex cursor-pointer items-center justify-center gap-2 border border-dashed border-[rgba(240,180,180,0.8)] bg-white/60 px-3.5 py-4 text-[13px] font-medium text-rose-600 transition-all duration-200 hover:bg-rose-50">
                   <Paperclip className="h-4 w-4" />
                   Upload Word, Excel, or PDF (Max 2MB)
                   <input

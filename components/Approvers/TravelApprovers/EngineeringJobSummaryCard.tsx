@@ -42,10 +42,10 @@ export default function EngineeringJobSummaryCard({
   if (parsedJobs.length === 0) return null;
 
   return (
-    <div className="mb-3 rounded-2xl border border-rose-100 bg-rose-50/50 p-5 shadow-xs">
+    <div className="rounded-surface mb-3 border border-rose-100 bg-rose-50/50 p-5 shadow-xs">
       {/* Header */}
       <div className="mb-4 flex items-center gap-2">
-        <div className="flex h-7 w-7 items-center justify-center rounded-full bg-rose-100 text-rose-600">
+        <div className="rounded-compact flex h-7 w-7 items-center justify-center bg-rose-100 text-rose-600">
           <Wrench size={14} />
         </div>
         <h3 className="text-[11px] font-semibold tracking-[0.4px] text-rose-800 uppercase">

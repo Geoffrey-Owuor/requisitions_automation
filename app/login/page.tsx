@@ -77,14 +77,14 @@ export default async function LoginPage({ searchParams }: Props) {
           <main className="flex flex-1 items-center justify-center py-6">
             <div className="animate-rise relative w-full max-w-sm">
               {/* Neomorphic Enterprise Card */}
-              <div className="relative overflow-hidden rounded-3xl border border-white/80 bg-white/90 p-8 shadow-[0_2px_4px_rgba(140,40,60,0.03),0_28px_56px_-24px_rgba(140,40,60,0.35),inset_0_1px_0_rgba(255,255,255,1)] sm:p-9">
+              <div className="rounded-surface relative overflow-hidden border border-white/80 bg-white/90 p-8 shadow-[0_2px_4px_rgba(140,40,60,0.03),0_28px_56px_-24px_rgba(140,40,60,0.35),inset_0_1px_0_rgba(255,255,255,1)] sm:p-9">
                 {/* Top gradient hairline */}
                 <div className="absolute inset-x-10 top-0 h-px bg-linear-to-r from-transparent via-rose-400/60 to-transparent" />
 
                 {/* Embedded Logo Core */}
                 <div className="mb-6 flex justify-center">
-                  <div className="relative flex h-16 w-16 items-center justify-center rounded-full border border-rose-100 bg-linear-to-br from-white to-rose-50 shadow-[inset_0_1.5px_0_rgba(255,255,255,1),0_10px_24px_-10px_rgba(225,29,72,0.45)]">
-                    <div className="absolute inset-0 rounded-full ring-8 ring-rose-50/60" />
+                  <div className="rounded-control relative flex h-16 w-16 items-center justify-center border border-rose-100 bg-linear-to-br from-white to-rose-50 shadow-[inset_0_1.5px_0_rgba(255,255,255,1),0_10px_24px_-10px_rgba(225,29,72,0.45)]">
+                    <div className="rounded-control absolute inset-0 ring-8 ring-rose-50/60" />
                     <div className="relative h-7 w-7">
                       <Image
                         src={assets.hotpoint_logo}
@@ -100,7 +100,7 @@ export default async function LoginPage({ searchParams }: Props) {
 
                 {/* Typography Header Group */}
                 <div className="mb-6 text-center">
-                  <span className="mb-3 inline-flex items-center gap-1.5 rounded-lg border border-rose-100 bg-rose-50/70 px-3 py-1 text-[10px] font-bold tracking-[0.14em] text-rose-600 uppercase">
+                  <span className="rounded-compact mb-3 inline-flex items-center gap-1.5 border border-rose-100 bg-rose-50/70 px-3 py-1 text-[10px] font-bold tracking-[0.14em] text-rose-600 uppercase">
                     <Lock size={10} />
                     Secure Sign In
                   </span>
@@ -125,7 +125,7 @@ export default async function LoginPage({ searchParams }: Props) {
                 {error && SSO_ERROR_MESSAGES[error] && (
                   <p
                     role="alert"
-                    className="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-center text-[12.5px] text-rose-700"
+                    className="rounded-control mb-4 border border-rose-200 bg-rose-50 px-3 py-2 text-center text-[12.5px] text-rose-700"
                   >
                     {SSO_ERROR_MESSAGES[error]}
                   </p>
@@ -149,7 +149,7 @@ export default async function LoginPage({ searchParams }: Props) {
                 <div className="mt-5 text-center">
                   <Link
                     href="/"
-                    className="group inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12.5px] font-medium text-slate-500 transition-colors hover:bg-rose-50/70 hover:text-rose-600"
+                    className="group rounded-compact inline-flex items-center gap-1.5 px-3 py-1.5 text-[12.5px] font-medium text-slate-500 transition-colors hover:bg-rose-50/70 hover:text-rose-600"
                   >
                     <ArrowLeft
                       size={13}

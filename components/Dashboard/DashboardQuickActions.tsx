@@ -80,7 +80,7 @@ const DashboardQuickActions = () => {
       {actions.map(({ label, description, Icon, href }) => {
         const content = (
           <>
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-500 transition-colors group-hover:bg-red-100">
+            <div className="rounded-control flex h-11 w-11 shrink-0 items-center justify-center bg-red-50 text-red-500 transition-colors group-hover:bg-red-100">
               <Icon className="h-5 w-5" />
             </div>
             <div className="flex-1 text-left">
@@ -96,7 +96,7 @@ const DashboardQuickActions = () => {
         );
 
         const className =
-          "group flex items-center gap-3 rounded-2xl border border-gray-200 bg-white/50 p-4 text-left shadow-[0_12px_24px_rgba(160,60,60,0.05)] transition-all hover:border-red-200 hover:bg-white/80";
+          "group flex items-center gap-3 rounded-surface border border-gray-200 bg-white/50 p-4 text-left shadow-[0_12px_24px_rgba(160,60,60,0.05)] transition-all hover:border-red-200 hover:bg-white/80";
 
         return (
           <Link key={label} href={href} className={className}>

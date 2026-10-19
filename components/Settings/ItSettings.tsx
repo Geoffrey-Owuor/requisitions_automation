@@ -38,7 +38,7 @@ export default function ItSettings() {
 
   if (isError || !data) {
     return (
-      <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+      <div className="rounded-surface border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
         The IT settings could not be loaded.{" "}
         <button
           type="button"

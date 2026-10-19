@@ -41,7 +41,7 @@ export function EngineeringJobFields({
   };
 
   return (
-    <div className="mt-6 rounded-2xl border border-rose-100 bg-rose-50/30 p-6">
+    <div className="rounded-surface mt-6 border border-rose-100 bg-rose-50/30 p-6">
       <div className="mb-4 flex items-center justify-between">
         <div>
           <h3 className="text-sm font-semibold tracking-tight text-rose-800">
@@ -55,7 +55,7 @@ export function EngineeringJobFields({
         <button
           type="button"
           onClick={handleAdd}
-          className="flex items-center gap-1.5 rounded-lg border border-rose-100 bg-white px-3 py-1.5 text-xs font-medium text-rose-600 shadow-xs transition-colors hover:bg-rose-50"
+          className="rounded-compact flex items-center gap-1.5 border border-rose-100 bg-white px-3 py-1.5 text-xs font-medium text-rose-600 shadow-xs transition-colors hover:bg-rose-50"
         >
           <Plus size={14} /> Add Job
         </button>
@@ -70,7 +70,7 @@ export function EngineeringJobFields({
                 placeholder="Job ID / Title"
                 value={job.title}
                 onChange={(e) => handleChange(job.id, "title", e.target.value)}
-                className="h-10 w-full rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
+                className="rounded-control h-10 w-full border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
                 required
               />
             </div>
@@ -86,14 +86,14 @@ export function EngineeringJobFields({
                     e.target.value ? Number(e.target.value) : 0,
                   )
                 }
-                className="h-10 w-full rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
+                className="rounded-control h-10 w-full border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
                 required
               />
               <button
                 type="button"
                 onClick={() => handleRemove(job.id)}
                 disabled={jobs.length <= 1}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-red-50 hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-control flex h-10 w-10 shrink-0 items-center justify-center text-slate-400 transition-colors hover:bg-red-50 hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Trash2 size={18} />
               </button>
@@ -104,7 +104,7 @@ export function EngineeringJobFields({
 
       {/* Total Amount Area */}
       <div className="mt-5 flex items-center justify-end border-t border-rose-200/60 pt-4">
-        <div className="flex items-center gap-3 rounded-xl border border-rose-100 bg-white/60 px-3 py-2.5 text-sm font-semibold tracking-tight shadow-xs">
+        <div className="rounded-control flex items-center gap-3 border border-rose-100 bg-white/60 px-3 py-2.5 text-sm font-semibold tracking-tight shadow-xs">
           <span className="inline-flex items-center gap-1 text-rose-700">
             <Wallet className="h-4 w-4" />
             Total Amount:

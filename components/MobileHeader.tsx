@@ -82,7 +82,7 @@ const MobileHeader = () => {
             type="button"
             onClick={closeSidebar}
             aria-label="Close menu"
-            className="rounded-full p-2 text-slate-500 transition-colors outline-none hover:bg-red-50 hover:text-red-950 focus-visible:ring-2 focus-visible:ring-red-950/40"
+            className="rounded-control p-2 text-slate-500 transition-colors outline-none hover:bg-red-50 hover:text-red-950 focus-visible:ring-2 focus-visible:ring-red-950/40"
           >
             <X size={20} />
           </button>
@@ -140,7 +140,7 @@ const MobileHeader = () => {
             aria-label="Open menu"
             aria-haspopup="dialog"
             aria-expanded={sidebarOpen}
-            className="rounded-full p-2.5 text-white/80 transition-all outline-none hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white/80 active:scale-95"
+            className="rounded-control p-2.5 text-white/80 transition-all outline-none hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white/80 active:scale-95"
           >
             <Menu size={24} />
           </button>
@@ -154,7 +154,7 @@ const MobileHeader = () => {
             aria-label="Guidelines (opens in a new tab)"
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-full p-2.5 text-white/80 transition-all outline-none hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white/80"
+            className="rounded-control p-2.5 text-white/80 transition-all outline-none hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white/80"
           >
             <CircleQuestionMark className="h-5 w-5" />
           </Link>
@@ -182,7 +182,7 @@ const DrawerLink = ({
     aria-current={isActive ? "page" : undefined}
     target={item.external ? "_blank" : undefined}
     rel={item.external ? "noopener noreferrer" : undefined}
-    className={`group flex min-h-11 items-center gap-3 rounded-xl px-4 py-2.5 text-[14px] font-semibold transition-colors outline-none focus-visible:ring-2 focus-visible:ring-red-950/40 ${
+    className={`group rounded-control flex min-h-11 items-center gap-3 px-4 py-2.5 text-[14px] font-semibold transition-colors outline-none focus-visible:ring-2 focus-visible:ring-red-950/40 ${
       isActive
         ? "bg-red-950 text-white shadow-md"
         : "text-slate-700 hover:bg-red-50 hover:text-red-950"

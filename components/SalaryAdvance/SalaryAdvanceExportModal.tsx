@@ -90,7 +90,7 @@ export function SalaryAdvanceExportModal({
           <button
             onClick={handleExport}
             disabled={!canExport || isExporting}
-            className="flex items-center gap-2 rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-control flex items-center gap-2 bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isExporting ? (
               <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -106,10 +106,10 @@ export function SalaryAdvanceExportModal({
         <label className="text-[11px] font-bold tracking-widest text-gray-400 uppercase">
           Scope
         </label>
-        <div className="flex items-center gap-1 rounded-xl border border-gray-200 bg-gray-50 p-1">
+        <div className="rounded-control flex items-center gap-1 border border-gray-200 bg-gray-50 p-1">
           <button
             onClick={() => setScope("range")}
-            className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+            className={`rounded-control flex-1 px-3 py-2 text-sm font-medium transition-colors ${
               isRangeScope
                 ? "bg-white text-gray-900 shadow-sm"
                 : "text-gray-500 hover:text-gray-700"
@@ -119,7 +119,7 @@ export function SalaryAdvanceExportModal({
           </button>
           <button
             onClick={() => setScope("unexported")}
-            className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+            className={`rounded-control flex-1 px-3 py-2 text-sm font-medium transition-colors ${
               !isRangeScope
                 ? "bg-white text-gray-900 shadow-sm"
                 : "text-gray-500 hover:text-gray-700"
@@ -155,7 +155,7 @@ export function SalaryAdvanceExportModal({
           </div>
         </div>
       ) : (
-        <p className="rounded-xl bg-gray-50 p-3 text-xs text-gray-600">
+        <p className="rounded-control bg-gray-50 p-3 text-xs text-gray-600">
           Rows not yet exported, plus every continuous request — without
           touching the exported flags, so the scheduled report still picks these
           rows up normally.

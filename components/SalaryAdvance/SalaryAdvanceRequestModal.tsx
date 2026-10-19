@@ -33,7 +33,7 @@ export default function SalaryAdvanceRequestModal({
       widthClassName="sm:max-w-lg"
     >
       <div className="grid grid-cols-2 gap-4">
-        <div className="rounded-xl bg-slate-50 p-3">
+        <div className="rounded-control bg-slate-50 p-3">
           <p className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
             Amount
           </p>
@@ -41,13 +41,13 @@ export default function SalaryAdvanceRequestModal({
             KES {Number(shown.requestAmount).toLocaleString()}
           </p>
         </div>
-        <div className="rounded-xl bg-slate-50 p-3">
+        <div className="rounded-control bg-slate-50 p-3">
           <p className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
             Status
           </p>
           <StatusFormatter status={shown.approvalStatus} />
         </div>
-        <div className="rounded-xl bg-slate-50 p-3">
+        <div className="rounded-control bg-slate-50 p-3">
           <p className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
             Installments
           </p>
@@ -57,7 +57,7 @@ export default function SalaryAdvanceRequestModal({
               ` (${Math.max(shown.remainingInstallments, 0)} remaining)`}
           </p>
         </div>
-        <div className="rounded-xl bg-slate-50 p-3">
+        <div className="rounded-control bg-slate-50 p-3">
           <p className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
             Repayment Started
           </p>
@@ -68,7 +68,7 @@ export default function SalaryAdvanceRequestModal({
         </div>
         {/* Only multi-installment requests collect a phone number. */}
         {shown.phoneNumber && (
-          <div className="rounded-xl bg-slate-50 p-3">
+          <div className="rounded-control bg-slate-50 p-3">
             <p className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
               Phone Number
             </p>
@@ -80,7 +80,7 @@ export default function SalaryAdvanceRequestModal({
       </div>
 
       {shown.approverComments && (
-        <div className="rounded-xl bg-slate-50 p-3">
+        <div className="rounded-control bg-slate-50 p-3">
           <p className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
             Approver Comments
           </p>
@@ -108,7 +108,7 @@ export default function SalaryAdvanceRequestModal({
             {shown.alterations.map((alteration, idx) => (
               <div
                 key={idx}
-                className="rounded-xl bg-slate-50 p-3 text-[13px] text-slate-700"
+                className="rounded-control bg-slate-50 p-3 text-[13px] text-slate-700"
               >
                 <p className="font-medium text-[#1e1b1b]">
                   {ALTERATION_TYPE_LABELS[alteration.alterationType] ??

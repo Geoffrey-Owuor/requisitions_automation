@@ -39,7 +39,7 @@ function SectionHeader({
 }) {
   return (
     <div className="mb-3 flex items-center gap-2">
-      <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-red-50 text-red-400">
+      <div className="rounded-compact flex h-7 w-7 items-center justify-center bg-red-50 text-red-400">
         <Icon size={14} />
       </div>
       <h3 className="text-[11px] font-bold tracking-widest text-red-400 uppercase">
@@ -118,7 +118,7 @@ export function SalaryAdvanceModal({
       {/* — Employee Info — */}
       <section>
         <SectionHeader icon={UserRound} title="Employee Details" />
-        <div className="grid grid-cols-2 gap-4 rounded-2xl border border-gray-100 bg-neutral-50 p-4">
+        <div className="rounded-surface grid grid-cols-2 gap-4 border border-gray-100 bg-neutral-50 p-4">
           <Field label="Staff Name" value={data.staff_name} />
           <Field label="Staff Number" value={data.staff_number} />
           <Field label="Email" value={data.staff_email} />
@@ -137,7 +137,7 @@ export function SalaryAdvanceModal({
       {/* — Advance Details — */}
       <section>
         <SectionHeader icon={Banknote} title="Advance Details" />
-        <div className="grid grid-cols-2 gap-4 rounded-2xl border border-gray-100 bg-neutral-50 p-4">
+        <div className="rounded-surface grid grid-cols-2 gap-4 border border-gray-100 bg-neutral-50 p-4">
           <Field
             label="Request Amount"
             value={`KES ${Number(data.request_amount).toLocaleString()}`}
@@ -185,11 +185,11 @@ export function SalaryAdvanceModal({
       {data.alterations.length > 0 && (
         <section>
           <SectionHeader icon={History} title="Alteration History" />
-          <div className="space-y-2 rounded-2xl border border-gray-100 bg-neutral-50 p-4">
+          <div className="rounded-surface space-y-2 border border-gray-100 bg-neutral-50 p-4">
             {data.alterations.map((alteration, idx) => (
               <div
                 key={idx}
-                className="rounded-xl bg-slate-50 p-3 text-[13px] text-slate-700"
+                className="rounded-control bg-slate-50 p-3 text-[13px] text-slate-700"
               >
                 <div className="flex items-center justify-between gap-2">
                   <p className="font-medium text-[#1e1b1b]">
@@ -217,7 +217,7 @@ export function SalaryAdvanceModal({
       {/* — Approval Workflow / Review Area — */}
       <section>
         <SectionHeader icon={CheckCircle2} title="Approval Workflow" />
-        <div className="rounded-2xl border border-gray-100 bg-neutral-50 p-4">
+        <div className="rounded-surface border border-gray-100 bg-neutral-50 p-4">
           <div className="mb-4 flex items-center justify-between">
             <span className="text-[11px] font-bold tracking-widest text-gray-400 uppercase">
               Current Status
@@ -235,7 +235,7 @@ export function SalaryAdvanceModal({
                   value={comments}
                   onChange={(e) => setComments(e.target.value)}
                   placeholder="Add your comments here (optional)..."
-                  className="w-full rounded-xl border border-gray-200 bg-white p-3 text-sm text-gray-700 shadow-sm outline-hidden transition-all focus:border-red-400 focus:ring-4 focus:ring-red-500/5"
+                  className="rounded-control w-full border border-gray-200 bg-white p-3 text-sm text-gray-700 shadow-sm outline-hidden transition-all focus:border-red-400 focus:ring-4 focus:ring-red-500/5"
                   rows={3}
                 />
               </div>
@@ -244,7 +244,7 @@ export function SalaryAdvanceModal({
                 <button
                   onClick={() => handleReview("declined")}
                   disabled={loadingAction !== null}
-                  className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-100 disabled:opacity-50"
+                  className="rounded-control flex items-center gap-2 border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-100 disabled:opacity-50"
                 >
                   {loadingAction === "declined" ? (
                     <span className="h-4 w-4 animate-spin rounded-full border-2 border-red-600 border-t-transparent" />
@@ -256,7 +256,7 @@ export function SalaryAdvanceModal({
                 <button
                   onClick={() => handleReview("approved")}
                   disabled={loadingAction !== null}
-                  className="flex items-center gap-2 rounded-xl bg-slate-800 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-slate-900 disabled:opacity-50"
+                  className="rounded-control flex items-center gap-2 bg-slate-800 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-slate-900 disabled:opacity-50"
                 >
                   {loadingAction === "approved" ? (
                     <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />

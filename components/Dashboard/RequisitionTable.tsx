@@ -230,7 +230,7 @@ export default function RequisitionTable<TParams>({
     <>
       <div
         id={`table-${tableKey}`}
-        className="scroll-mt-4 rounded-xl border border-neutral-300 p-3"
+        className="rounded-control scroll-mt-4 border border-neutral-300 p-3"
       >
         <button
           type="button"
@@ -240,7 +240,7 @@ export default function RequisitionTable<TParams>({
         >
           <Icon className="h-5 w-5 shrink-0" />
           <span className="flex-1">{title}</span>
-          <div className="rounded-full p-1.5 text-neutral-700 hover:bg-neutral-200/70">
+          <div className="rounded-compact p-1.5 text-neutral-700 hover:bg-neutral-200/70">
             {collapsed ? (
               <ChevronRight className="h-4 w-4 shrink-0" />
             ) : (
@@ -265,12 +265,12 @@ export default function RequisitionTable<TParams>({
                     placeholder={searchPlaceholder}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className={`w-full rounded-xl border border-gray-300 bg-white/60 px-3 py-2.5 pr-4 pl-12 text-sm shadow-[0_8px_16px_rgba(60,100,160,0.02)] outline-hidden transition-all ${theme.searchFocus}`}
+                    className={`rounded-control w-full border border-gray-300 bg-white/60 px-3 py-2.5 pr-4 pl-12 text-sm shadow-[0_8px_16px_rgba(60,100,160,0.02)] outline-hidden transition-all ${theme.searchFocus}`}
                   />
                   {searchTerm && (
                     <button
                       onClick={clearSearch}
-                      className="absolute top-1/2 right-4 z-10 -translate-y-1/2 rounded-full p-1 hover:bg-gray-200"
+                      className="rounded-compact absolute top-1/2 right-4 z-10 -translate-y-1/2 p-1 hover:bg-gray-200"
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -279,7 +279,7 @@ export default function RequisitionTable<TParams>({
               )}
               <button
                 onClick={() => refetch()}
-                className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-3 py-2.5 text-sm text-white hover:bg-slate-800"
+                className="rounded-control inline-flex items-center gap-2 bg-slate-900 px-3 py-2.5 text-sm text-white hover:bg-slate-800"
               >
                 <RotateCcw className="h-4 w-4" />
                 Refresh
@@ -289,7 +289,7 @@ export default function RequisitionTable<TParams>({
 
             {/* Table Container */}
             <div
-              className={`relative overflow-hidden rounded-2xl border border-gray-200 bg-white/50 ${theme.tableShadow}`}
+              className={`rounded-surface relative overflow-hidden border border-gray-200 bg-white/50 ${theme.tableShadow}`}
             >
               {/* Refetch in progress: a thin bar, and the stale rows dim */}
               {isFetching && (
@@ -350,7 +350,7 @@ export default function RequisitionTable<TParams>({
                           <div className="flex flex-col items-center justify-center text-center">
                             {/* Glassmorphic Icon Circle */}
                             <div
-                              className={`mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/80 bg-white/40 ${theme.emptyIconWrap}`}
+                              className={`rounded-surface mb-4 flex h-16 w-16 items-center justify-center border border-white/80 bg-white/40 ${theme.emptyIconWrap}`}
                             >
                               {showError ? (
                                 <TriangleAlert size={32} strokeWidth={1.5} />
@@ -377,7 +377,7 @@ export default function RequisitionTable<TParams>({
                             {showError && (
                               <button
                                 onClick={() => refetch()}
-                                className="my-2 flex items-center gap-2 rounded-xl bg-slate-900 px-3 py-2 text-sm text-white hover:bg-slate-800"
+                                className="rounded-control my-2 flex items-center gap-2 bg-slate-900 px-3 py-2 text-sm text-white hover:bg-slate-800"
                               >
                                 <RotateCcw className="h-4 w-4" />
                                 <span>Try again</span>
@@ -390,7 +390,7 @@ export default function RequisitionTable<TParams>({
                               emptyState.newRequisitionHref && (
                                 <Link
                                   href={emptyState.newRequisitionHref}
-                                  className="my-2 flex items-center gap-2 rounded-xl bg-slate-900 px-3 py-2 text-sm text-white hover:bg-slate-800"
+                                  className="rounded-control my-2 flex items-center gap-2 bg-slate-900 px-3 py-2 text-sm text-white hover:bg-slate-800"
                                 >
                                   <Plus className="h-4 w-4" />
                                   <span>

@@ -45,12 +45,12 @@ export default function SalaryAdvanceCards() {
   if (isPending) {
     return (
       <div className="mb-6">
-        <div className="mb-5.5 h-6 w-64 animate-pulse rounded-2xl bg-neutral-100" />
+        <div className="rounded-surface mb-5.5 h-6 w-64 animate-pulse bg-neutral-100" />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="h-42 animate-pulse rounded-2xl bg-neutral-100 shadow-[0_8px_16px_rgba(60,100,160,0.02)]"
+              className="rounded-surface h-42 animate-pulse bg-neutral-100 shadow-[0_8px_16px_rgba(60,100,160,0.02)]"
             />
           ))}
         </div>
@@ -70,16 +70,16 @@ export default function SalaryAdvanceCards() {
         <button
           onClick={() => refetch()}
           title="refetch card counts"
-          className="rounded-full bg-neutral-200/70 p-2 hover:bg-neutral-200"
+          className="rounded-control bg-neutral-200/70 p-2 hover:bg-neutral-200"
         >
           <RotateCcw className="h-4 w-4" />
         </button>
       </div>
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {/* 1. Total Overview Card */}
-        <div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-5 shadow-[0_8px_16px_rgba(60,100,160,0.04)]">
+        <div className="rounded-surface relative overflow-hidden border border-gray-200 bg-white p-5 shadow-[0_8px_16px_rgba(60,100,160,0.04)]">
           <div className="mb-4 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100 text-neutral-600">
+            <div className="rounded-control flex h-10 w-10 items-center justify-center bg-neutral-100 text-neutral-600">
               <BarChart3 size={20} strokeWidth={2} />
             </div>
             <div>
@@ -101,9 +101,9 @@ export default function SalaryAdvanceCards() {
         </div>
 
         {/* 2. Status Breakdown Card */}
-        <div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-5 shadow-[0_8px_16px_rgba(60,100,160,0.04)]">
+        <div className="rounded-surface relative overflow-hidden border border-gray-200 bg-white p-5 shadow-[0_8px_16px_rgba(60,100,160,0.04)]">
           <div className="mb-4 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+            <div className="rounded-control flex h-10 w-10 items-center justify-center bg-blue-50 text-blue-600">
               <Activity size={20} strokeWidth={2} />
             </div>
             <div>
@@ -117,7 +117,7 @@ export default function SalaryAdvanceCards() {
           </div>
 
           <div className="grid grid-cols-3 gap-2">
-            <div className="flex flex-col gap-1 rounded-xl border border-amber-100/50 bg-amber-50/50 p-2">
+            <div className="rounded-control flex flex-col gap-1 border border-amber-100/50 bg-amber-50/50 p-2">
               <div className="flex items-center gap-1.5 text-amber-600">
                 <span className="text-xs font-bold tracking-wide">Pending</span>
               </div>
@@ -126,7 +126,7 @@ export default function SalaryAdvanceCards() {
               </span>
             </div>
 
-            <div className="flex flex-col gap-1 rounded-xl border border-emerald-100/50 bg-emerald-50/50 p-2">
+            <div className="rounded-control flex flex-col gap-1 border border-emerald-100/50 bg-emerald-50/50 p-2">
               <div className="flex items-center gap-1.5 text-emerald-600">
                 <span className="text-xs font-bold tracking-wide">
                   Approved
@@ -137,7 +137,7 @@ export default function SalaryAdvanceCards() {
               </span>
             </div>
 
-            <div className="flex flex-col gap-1 rounded-xl border border-red-100/50 bg-red-50/50 p-2">
+            <div className="rounded-control flex flex-col gap-1 border border-red-100/50 bg-red-50/50 p-2">
               <div className="flex items-center gap-1.5 text-red-600">
                 <span className="text-xs font-bold tracking-wide">
                   Declined
@@ -151,9 +151,9 @@ export default function SalaryAdvanceCards() {
         </div>
 
         {/* 3. Request Types Card */}
-        <div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-5 shadow-[0_8px_16px_rgba(60,100,160,0.04)]">
+        <div className="rounded-surface relative overflow-hidden border border-gray-200 bg-white p-5 shadow-[0_8px_16px_rgba(60,100,160,0.04)]">
           <div className="mb-4 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50 text-purple-600">
+            <div className="rounded-control flex h-10 w-10 items-center justify-center bg-purple-50 text-purple-600">
               <Layers size={20} strokeWidth={2} />
             </div>
             <div>
@@ -167,7 +167,7 @@ export default function SalaryAdvanceCards() {
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1 rounded-xl border border-gray-100 bg-gray-50 p-2.5">
+            <div className="rounded-control flex flex-col gap-1 border border-gray-100 bg-gray-50 p-2.5">
               <div className="flex items-center gap-1.5 text-gray-500">
                 <FileDigit size={14} strokeWidth={2} />
                 <span className="text-xs font-bold tracking-wide text-gray-600">
@@ -179,7 +179,7 @@ export default function SalaryAdvanceCards() {
               </span>
             </div>
 
-            <div className="flex flex-col gap-1 rounded-xl border border-gray-100 bg-gray-50 p-2.5">
+            <div className="rounded-control flex flex-col gap-1 border border-gray-100 bg-gray-50 p-2.5">
               <div className="flex items-center gap-1.5 text-gray-500">
                 <Repeat size={14} strokeWidth={2} />
                 <span className="text-xs font-bold tracking-wide text-gray-600">
@@ -194,9 +194,9 @@ export default function SalaryAdvanceCards() {
         </div>
 
         {/* 4. Export & Alterations Card */}
-        <div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-5 shadow-[0_8px_16px_rgba(60,100,160,0.04)]">
+        <div className="rounded-surface relative overflow-hidden border border-gray-200 bg-white p-5 shadow-[0_8px_16px_rgba(60,100,160,0.04)]">
           <div className="mb-4 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 text-red-500">
+            <div className="rounded-control flex h-10 w-10 items-center justify-center bg-red-50 text-red-500">
               <SendHorizontal size={20} strokeWidth={2} />
             </div>
             <div>
@@ -210,7 +210,7 @@ export default function SalaryAdvanceCards() {
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1 rounded-xl border border-gray-100 bg-gray-50 p-2.5">
+            <div className="rounded-control flex flex-col gap-1 border border-gray-100 bg-gray-50 p-2.5">
               <div className="flex items-center gap-1.5 text-gray-500">
                 <SendHorizontal size={14} strokeWidth={2} />
                 <span className="text-xs font-bold tracking-wide text-gray-600">
@@ -222,7 +222,7 @@ export default function SalaryAdvanceCards() {
               </span>
             </div>
 
-            <div className="flex flex-col gap-1 rounded-xl border border-violet-100/50 bg-violet-50/50 p-2.5">
+            <div className="rounded-control flex flex-col gap-1 border border-violet-100/50 bg-violet-50/50 p-2.5">
               <div className="flex items-center gap-1.5 text-violet-600">
                 <History size={14} strokeWidth={2} />
                 <span className="text-xs font-bold tracking-wide">Altered</span>

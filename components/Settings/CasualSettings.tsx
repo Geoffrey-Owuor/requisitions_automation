@@ -71,7 +71,7 @@ export default function CasualSettings() {
 
   if (isError || !data) {
     return (
-      <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+      <div className="rounded-surface border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
         The casual settings could not be loaded.{" "}
         <button
           type="button"
@@ -260,7 +260,7 @@ function RatesCard({ data, busy, run, confirm }: CardProps) {
         </button>
       )}
 
-      <div className="space-y-3 rounded-xl bg-neutral-50 p-3">
+      <div className="rounded-control space-y-3 bg-neutral-50 p-3">
         <p className="flex items-center gap-1.5 text-xs font-semibold text-neutral-700">
           <CalendarClock className="h-3.5 w-3.5" /> Schedule a rate
         </p>
@@ -449,7 +449,7 @@ function LocationLimitsCard({ data, busy, run }: Omit<CardProps, "confirm">) {
                   type="button"
                   aria-pressed={isChosen}
                   onClick={() => toggle(location.id)}
-                  className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                  className={`rounded-compact border px-3 py-1 text-xs font-medium transition-colors ${
                     isChosen
                       ? "border-slate-900 bg-slate-900 text-white"
                       : "border-neutral-200 text-neutral-700 hover:border-neutral-400"
@@ -533,7 +533,7 @@ function SectionsCard({ data, busy, run, confirm }: CardProps) {
           />
         </div>
       ))}
-      <div className="space-y-2 rounded-xl bg-neutral-50 p-3">
+      <div className="rounded-control space-y-2 bg-neutral-50 p-3">
         <div className="grid gap-2 sm:grid-cols-3">
           <Field label="Department" htmlFor="section-department">
             <Select

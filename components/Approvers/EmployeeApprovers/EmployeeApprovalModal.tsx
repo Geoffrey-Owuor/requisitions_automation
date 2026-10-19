@@ -198,11 +198,11 @@ const EmployeeApprovalModal = ({
       {step === 1 && (
         <div className="relative z-10 mx-auto max-w-225">
           {/* Form Image */}
-          <div className="mb-4 overflow-hidden rounded-2xl sm:rounded-3xl">
+          <div className="rounded-surface sm:rounded-surface mb-4 overflow-hidden">
             <Image
               src={assets.employee_form_image}
               sizes="100vh"
-              className="rounded-xl object-contain object-center"
+              className="rounded-control object-contain object-center"
               priority
               alt="Form Image"
             />
@@ -221,9 +221,9 @@ const EmployeeApprovalModal = ({
           </div>
 
           {/* ── Card ── */}
-          <div className="rounded-3xl border border-gray-100 bg-white px-6 py-8 shadow-[0_24px_48px_rgba(160,60,60,0.10)] sm:px-8">
+          <div className="rounded-surface border border-gray-100 bg-white px-6 py-8 shadow-[0_24px_48px_rgba(160,60,60,0.10)] sm:px-8">
             {/* Approver identity badge */}
-            <div className="mb-7 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white px-4 py-3">
+            <div className="rounded-surface mb-7 flex flex-wrap items-center justify-between gap-3 border border-[rgba(240,180,180,0.5)] bg-white px-4 py-3">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-rose-100 text-[13px] font-semibold text-rose-700">
                   {initialsHelper(approverName)}
@@ -235,7 +235,7 @@ const EmployeeApprovalModal = ({
                   <p className="text-[12px] text-[#a18080]">{roleLabel}</p>
                 </div>
               </div>
-              <span className="rounded-lg bg-rose-100 px-3 py-1 text-[11px] font-medium text-rose-700">
+              <span className="rounded-compact bg-rose-100 px-3 py-1 text-[11px] font-medium text-rose-700">
                 Reviewing
               </span>
             </div>
@@ -297,7 +297,7 @@ const EmployeeApprovalModal = ({
                 {positions.map((position) => (
                   <div
                     key={position.positionId}
-                    className="rounded-2xl border border-[rgba(240,180,180,0.4)] bg-white p-5"
+                    className="rounded-surface border border-[rgba(240,180,180,0.4)] bg-white p-5"
                   >
                     <h3 className="mb-3 text-[13px] font-semibold text-[#1e1b1b]">
                       {position.positionTitle}
@@ -344,7 +344,7 @@ const EmployeeApprovalModal = ({
                         <HardHat className="h-3.5 w-3.5 text-rose-400" />
                         Justification
                       </p>
-                      <p className="rounded-xl border border-[rgba(240,180,180,0.3)] bg-white px-4 py-3 text-[13px] leading-relaxed wrap-break-word whitespace-pre-wrap text-[#1e1b1b]">
+                      <p className="rounded-control border border-[rgba(240,180,180,0.3)] bg-white px-4 py-3 text-[13px] leading-relaxed wrap-break-word whitespace-pre-wrap text-[#1e1b1b]">
                         {position.justification}
                       </p>
                     </div>
@@ -387,7 +387,7 @@ const EmployeeApprovalModal = ({
                 onChange={(e) => setComments(e.target.value)}
                 placeholder="No comments"
                 rows={4}
-                className="w-full resize-none rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white px-4 py-3.5 text-[13px] leading-relaxed text-[#1e1b1b] transition-all duration-200 outline-none placeholder:text-[#c0a0a0] focus:border-rose-300 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.07)]"
+                className="rounded-surface w-full resize-none border border-[rgba(240,180,180,0.5)] bg-white px-4 py-3.5 text-[13px] leading-relaxed text-[#1e1b1b] transition-all duration-200 outline-none placeholder:text-[#c0a0a0] focus:border-rose-300 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.07)]"
               />
               <p className="mt-1.5 text-[11px] text-[#b0a0a0]">
                 {comments.trim() === ""
@@ -403,7 +403,7 @@ const EmployeeApprovalModal = ({
                 type="button"
                 disabled={declining}
                 onClick={() => handleApproval("declined")}
-                className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-[14px] border border-rose-200 bg-white py-4 text-[14px] font-semibold text-rose-700 transition-all duration-200 hover:border-rose-300 hover:bg-rose-50 active:scale-[0.98]"
+                className="rounded-control flex flex-1 cursor-pointer items-center justify-center gap-2 border border-rose-200 bg-white py-4 text-[14px] font-semibold text-rose-700 transition-all duration-200 hover:border-rose-300 hover:bg-rose-50 active:scale-[0.98]"
               >
                 <X className="h-4 w-4" />
                 {declining ? "Declining..." : "Decline"}
@@ -414,7 +414,7 @@ const EmployeeApprovalModal = ({
                 type="button"
                 disabled={approving}
                 onClick={() => handleApproval("approved")}
-                className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-[14px] border-none bg-slate-900 py-4 text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
+                className="rounded-control flex flex-1 cursor-pointer items-center justify-center gap-2 border-none bg-slate-900 py-4 text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
               >
                 <Check className="h-4 w-4" />
                 {approving ? "Approving..." : "Approve"}

@@ -24,7 +24,7 @@ const REASON_OPTIONS: DropdownOption[] = EMAIL_CHANGE_REASONS.map((reason) => ({
 }));
 
 const inputClass =
-  "h-10 rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]";
+  "h-10 rounded-control border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]";
 
 const buildInitialState = (
   defaults: EmailChangeRequestModalProps["defaults"],
@@ -100,7 +100,7 @@ export default function EmailChangeRequestModal({
           type="submit"
           form={formId}
           disabled={submitting || emailsMismatch}
-          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-rose-600 px-6 py-3 text-sm font-semibold text-white transition-colors duration-200 hover:bg-rose-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+          className="rounded-surface flex w-full cursor-pointer items-center justify-center gap-2 bg-rose-600 px-6 py-3 text-sm font-semibold text-white transition-colors duration-200 hover:bg-rose-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
         >
           <Send size={15} />
           {submitting ? "Submitting..." : "Submit request"}
@@ -108,7 +108,7 @@ export default function EmailChangeRequestModal({
       }
     >
       <form id={formId} onSubmit={handleSubmit} className="space-y-4">
-        <div className="mb-6 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-900">
+        <div className="rounded-surface mb-6 flex items-start gap-3 border border-amber-200 bg-amber-50 px-4 py-3 text-amber-900">
           <TriangleAlert size={16} className="mt-0.5 shrink-0" />
           <p className="text-xs leading-relaxed">
             Enter the new address carefully and make sure you own it and can

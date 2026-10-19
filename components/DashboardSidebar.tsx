@@ -20,7 +20,7 @@ import {
 } from "@/lib/dashboardNav";
 
 const RAIL_ITEM_CLASS =
-  "group flex w-full shrink-0 flex-col items-center justify-center gap-1 rounded-2xl py-2 text-[11px] leading-tight font-semibold transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-white/80 active:scale-95";
+  "group flex w-full shrink-0 flex-col items-center justify-center gap-1 rounded-surface py-2 text-[11px] leading-tight font-semibold transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-white/80 active:scale-95";
 
 const railItemClass = (highlighted: boolean) =>
   `${RAIL_ITEM_CLASS} ${
@@ -168,7 +168,7 @@ const useRailTooltip = () => {
             style={{ top: coords.top, left: coords.left }}
             className="pointer-events-none fixed z-9999 ml-3 -translate-y-1/2"
           >
-            <div className="relative rounded-lg bg-neutral-900 px-3 py-1.5 text-xs font-semibold whitespace-nowrap text-white shadow-lg">
+            <div className="rounded-compact relative bg-neutral-900 px-3 py-1.5 text-xs font-semibold whitespace-nowrap text-white shadow-lg">
               {text}
 
               {/* Tooltip Tail/Arrow pointing left */}

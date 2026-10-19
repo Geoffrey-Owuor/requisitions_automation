@@ -42,7 +42,7 @@ export default function SettingsPage() {
               role="tab"
               aria-selected={isActive}
               onClick={() => setActiveKey(key)}
-              className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors ${
+              className={`rounded-compact inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold transition-colors ${
                 isActive
                   ? "bg-slate-900 text-white"
                   : "border border-neutral-200 bg-white text-neutral-700 hover:border-neutral-400"

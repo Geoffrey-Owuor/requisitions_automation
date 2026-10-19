@@ -147,7 +147,7 @@ export default function SidebarMoreMenu({
           aria-label="More pages"
           onKeyDown={handleMenuKeyDown}
           style={{ top: position.top, left: position.left }}
-          className="fixed z-60 w-60 rounded-2xl bg-red-950 p-1.5 shadow-2xl ring-1 ring-white/10"
+          className="rounded-surface fixed z-60 w-60 bg-red-950 p-1.5 shadow-2xl ring-1 ring-white/10"
         >
           <p
             aria-hidden="true"
@@ -170,7 +170,7 @@ export default function SidebarMoreMenu({
                 target={item.external ? "_blank" : undefined}
                 rel={item.external ? "noopener noreferrer" : undefined}
                 onClick={() => setOpen(false)}
-                className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-semibold transition-colors outline-none focus-visible:ring-2 focus-visible:ring-white/80 ${
+                className={`rounded-control flex w-full items-center gap-3 px-3 py-2.5 text-[13px] font-semibold transition-colors outline-none focus-visible:ring-2 focus-visible:ring-white/80 ${
                   isActive
                     ? "bg-white text-red-950"
                     : "text-white/80 hover:bg-white/10 hover:text-white focus-visible:bg-white/10 focus-visible:text-white"

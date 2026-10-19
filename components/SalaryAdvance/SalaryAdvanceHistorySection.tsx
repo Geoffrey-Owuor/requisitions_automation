@@ -59,7 +59,7 @@ export default function SalaryAdvanceHistorySection() {
 
   if (loadError) {
     return (
-      <div className="rounded-2xl border border-rose-200 bg-rose-50 p-6 text-sm text-rose-700">
+      <div className="rounded-surface border border-rose-200 bg-rose-50 p-6 text-sm text-rose-700">
         {loadError}
       </div>
     );
@@ -67,8 +67,8 @@ export default function SalaryAdvanceHistorySection() {
 
   if (requests.length === 0) {
     return (
-      <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center">
-        <div className="mx-auto mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100 text-slate-500">
+      <div className="rounded-surface border border-slate-200 bg-white p-8 text-center">
+        <div className="rounded-control mx-auto mb-4 flex h-11 w-11 items-center justify-center bg-slate-100 text-slate-500">
           <Info size={20} />
         </div>
         <h3 className="text-[15px] font-semibold text-slate-900">
@@ -88,7 +88,7 @@ export default function SalaryAdvanceHistorySection() {
           key={request.requestId}
           type="button"
           onClick={() => setSelected(request)}
-          className="group flex w-full items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-5 text-left transition-colors hover:bg-slate-50"
+          className="group rounded-surface flex w-full items-center justify-between gap-3 border border-slate-200 bg-white p-5 text-left transition-colors hover:bg-slate-50"
         >
           <div>
             <p className="text-sm font-semibold text-slate-900">

@@ -27,7 +27,7 @@ const TravelPushbackHistory = ({
         {pushbacks.map((pushback) => (
           <div
             key={pushback.pushbackid}
-            className="rounded-2xl border border-amber-200 bg-amber-50/60 p-4"
+            className="rounded-surface border border-amber-200 bg-amber-50/60 p-4"
           >
             <div className="mb-2 flex flex-wrap items-start justify-between gap-2">
               <div>
@@ -45,7 +45,7 @@ const TravelPushbackHistory = ({
                 <StatusFormatter status={pushback.newstatus} />
               </div>
             </div>
-            <p className="mb-2 rounded-xl border border-dashed border-amber-300 bg-white/60 px-3 py-2 text-[12px] leading-relaxed text-[#7c5a5a] italic">
+            <p className="rounded-control mb-2 border border-dashed border-amber-300 bg-white/60 px-3 py-2 text-[12px] leading-relaxed text-[#7c5a5a] italic">
               <span className="font-semibold not-italic">Reason: </span>
               &quot;{pushback.pushbackreason}&quot;
             </p>

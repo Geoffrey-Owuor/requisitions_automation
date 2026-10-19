@@ -53,7 +53,7 @@ const RequisitionSectionCard = ({
   section: CasualSectionValues;
   formatCost: (val: string | number) => string;
 }) => (
-  <div className="mb-4 rounded-2xl border border-[rgba(240,180,180,0.4)] bg-white/60 p-5">
+  <div className="rounded-surface mb-4 border border-[rgba(240,180,180,0.4)] bg-white/60 p-5">
     <h3 className="mb-3 text-[13px] font-semibold text-[#1e1b1b]">
       {section.sectionname}
     </h3>
@@ -111,7 +111,7 @@ const RequisitionPdfModal = ({
     <div className="relative p-4 font-sans">
       <div className="relative z-10 mx-auto max-w-3xl">
         {/* Toolbar — hidden in print */}
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-gray-100 bg-white/70 px-6 py-4 shadow-[0_8px_16px_rgba(160,60,60,0.06)]">
+        <div className="rounded-surface mb-6 flex flex-wrap items-center justify-between gap-4 border border-gray-100 bg-white/70 px-6 py-4 shadow-[0_8px_16px_rgba(160,60,60,0.06)]">
           <span className="text-[13px] font-medium text-[#7c5a5a]">
             Casual Requisition - {pdfData.submittername}
           </span>
@@ -121,7 +121,7 @@ const RequisitionPdfModal = ({
                 <CasualRequisitionPdf pdfData={pdfData} requestId={requestId} />
               }
               fileName={`Casual_Requisition_${pdfData.submittername.replace(/\s+/g, "_")}_${new Date().toLocaleDateString("en-GB")}.pdf`}
-              className="flex cursor-pointer items-center gap-2 rounded-[14px] border-none bg-slate-900 px-5 py-2.5 text-[13px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)]"
+              className="rounded-control flex cursor-pointer items-center gap-2 border-none bg-slate-900 px-5 py-2.5 text-[13px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)]"
             >
               <Printer size={14} />
               <span>Download PDF</span>
@@ -129,7 +129,7 @@ const RequisitionPdfModal = ({
           ) : (
             <button
               disabled
-              className="flex cursor-not-allowed items-center gap-2 rounded-[14px] border-none bg-slate-700 px-5 py-2.5 text-[13px] font-semibold text-white/70"
+              className="rounded-control flex cursor-not-allowed items-center gap-2 border-none bg-slate-700 px-5 py-2.5 text-[13px] font-semibold text-white/70"
             >
               <Printer size={14} />
               Download PDF
@@ -140,7 +140,7 @@ const RequisitionPdfModal = ({
         {/* Document */}
         <div
           id="printable-area"
-          className="rounded-3xl border border-white/85 bg-white/65 px-6 py-8 shadow-[0_24px_48px_rgba(160,60,60,0.10)] sm:px-8"
+          className="rounded-surface border border-white/85 bg-white/65 px-6 py-8 shadow-[0_24px_48px_rgba(160,60,60,0.10)] sm:px-8"
         >
           {/* Doc header */}
           <div className="mb-8 border-b border-[rgba(240,180,180,0.4)] pb-6">
@@ -185,7 +185,7 @@ const RequisitionPdfModal = ({
           <div className="mb-8 border-t border-[rgba(240,180,180,0.4)] pt-8">
             <SectionHeading title="Overall Summary (KES)" />
 
-            <div className="my-6 rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white/60 p-6">
+            <div className="rounded-surface my-6 border border-[rgba(240,180,180,0.5)] bg-white/60 p-6">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-[#7c5a5a]">Total Casuals</span>
                 <span className="text-sm font-semibold text-[#1e1b1b]">
@@ -223,7 +223,7 @@ const RequisitionPdfModal = ({
                 ({ role, approverKey, emailKey, statusKey, commentsKey }) => (
                   <div
                     key={role}
-                    className="rounded-2xl border border-[rgba(240,180,180,0.4)] bg-white/60 px-5 py-5"
+                    className="rounded-surface border border-[rgba(240,180,180,0.4)] bg-white/60 px-5 py-5"
                   >
                     <p className="mb-3 text-[11px] font-semibold tracking-[0.4px] text-[#b0a0a0] uppercase">
                       {role}

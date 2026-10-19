@@ -13,9 +13,9 @@ import {
 import AttachmentLink from "./AttachmentLink";
 
 const OLD_FILE_CLASS =
-  "flex cursor-pointer items-center gap-1.5 rounded-lg border border-dashed border-[rgba(240,180,180,0.6)] bg-white/50 px-2.5 py-1 text-[11px] text-[#a18080] line-through hover:bg-rose-50";
+  "flex cursor-pointer items-center gap-1.5 rounded-compact border border-dashed border-[rgba(240,180,180,0.6)] bg-white/50 px-2.5 py-1 text-[11px] text-[#a18080] line-through hover:bg-rose-50";
 const NEW_FILE_CLASS =
-  "flex cursor-pointer items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-100 px-2.5 py-1 text-[11px] font-medium text-amber-950 hover:bg-amber-200";
+  "flex cursor-pointer items-center gap-1.5 rounded-compact border border-amber-300 bg-amber-100 px-2.5 py-1 text-[11px] font-medium text-amber-950 hover:bg-amber-200";
 
 function FieldDiff({
   label,
@@ -32,9 +32,7 @@ function FieldDiff({
     <div className="flex items-center justify-between gap-3 text-[12px]">
       <span className="text-[#7c5a5a]">{label}</span>
       <span className="flex items-center gap-1.5">
-        <span className="text-[#a18080] line-through">
-          {previous ?? "—"}
-        </span>
+        <span className="text-[#a18080] line-through">{previous ?? "—"}</span>
         <ChangedValuePill>{next ?? "—"}</ChangedValuePill>
       </span>
     </div>
@@ -58,7 +56,7 @@ function LongFieldDiff({
       <p className="whitespace-pre-line text-[#a18080] line-through">
         {previous ?? "—"}
       </p>
-      <p className="mt-1 rounded-lg bg-amber-100 px-2 py-1 whitespace-pre-line text-amber-950">
+      <p className="rounded-compact mt-1 bg-amber-100 px-2 py-1 whitespace-pre-line text-amber-950">
         {next ?? "—"}
       </p>
     </div>
@@ -127,7 +125,7 @@ function PositionChange({
         };
 
   return (
-    <div className="rounded-xl bg-white/70 p-3">
+    <div className="rounded-control bg-white/70 p-3">
       <p className="mb-1.5 text-[12px] font-semibold text-[#1e1b1b]">
         <span
           className={
@@ -187,7 +185,9 @@ function PositionChange({
       ) : (
         <p className="text-[12px] text-[#7c5a5a]">
           {values.numberRequired} required &middot; {values.jobGrade}
-          {values.dateFilled && <> &middot; by {dateFormatter(values.dateFilled)}</>}
+          {values.dateFilled && (
+            <> &middot; by {dateFormatter(values.dateFilled)}</>
+          )}
         </p>
       )}
 
@@ -232,7 +232,7 @@ const EmployeeAmendmentHistory = ({
       {amendments.map((amendment) => (
         <div
           key={amendment.amendmentid}
-          className="rounded-2xl border border-amber-200 bg-amber-50/60 p-4"
+          className="rounded-surface border border-amber-200 bg-amber-50/60 p-4"
         >
           <div className="mb-2">
             <p className="text-[13px] font-semibold text-[#1e1b1b]">
@@ -243,7 +243,7 @@ const EmployeeAmendmentHistory = ({
               {dateFormatter(amendment.createdat)}
             </p>
           </div>
-          <p className="mb-3 rounded-xl border border-dashed border-amber-300 bg-white/60 px-3 py-2 text-[12px] leading-relaxed whitespace-pre-line text-[#7c5a5a] italic">
+          <p className="rounded-control mb-3 border border-dashed border-amber-300 bg-white/60 px-3 py-2 text-[12px] leading-relaxed whitespace-pre-line text-[#7c5a5a] italic">
             &quot;{amendment.amendmentreason}&quot;
           </p>
 
