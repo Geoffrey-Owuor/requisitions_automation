@@ -9,6 +9,7 @@ import {
 import type { DashboardRequisitionType } from "@/lib/dashboardApi";
 import { getRequisitionType, newRequisitionHref } from "@/lib/dashboardTables";
 import { REPORTS_PAGE, canViewReports } from "@/lib/reports/definitions";
+import { SETTINGS_PAGE, canManageSettings } from "@/lib/configAdmin";
 
 // The dashboard navigation shared by the desktop rail (DashboardSidebar) and
 // the mobile drawer (MobileHeader), so the two can't drift apart.
@@ -149,22 +150,30 @@ export function getDashboardNavGroups(roles: string[]): DashboardNavGroup[] {
     },
   ];
 
-  // Report role holders only
+  // Report role and config-admin holders only
+  const adminItems: DashboardNavItem[] = [];
   if (canViewReports(roles)) {
-    groups.push({
-      key: "admin",
-      label: "Admin",
-      items: [
-        {
-          key: "reports",
-          href: REPORTS_PAGE.href,
-          label: REPORTS_PAGE.label,
-          shortLabel: REPORTS_PAGE.label,
-          Icon: REPORTS_PAGE.Icon,
-          keywords: ["excel", "export", "audit", "download"],
-        },
-      ],
+    adminItems.push({
+      key: "reports",
+      href: REPORTS_PAGE.href,
+      label: REPORTS_PAGE.label,
+      shortLabel: REPORTS_PAGE.label,
+      Icon: REPORTS_PAGE.Icon,
+      keywords: ["excel", "export", "audit", "download"],
     });
+  }
+  if (canManageSettings(roles)) {
+    adminItems.push({
+      key: "settings",
+      href: SETTINGS_PAGE.href,
+      label: SETTINGS_PAGE.label,
+      shortLabel: SETTINGS_PAGE.label,
+      Icon: SETTINGS_PAGE.Icon,
+      keywords: ["config", "configuration", "rates", "locations", "casual"],
+    });
+  }
+  if (adminItems.length > 0) {
+    groups.push({ key: "admin", label: "Admin", items: adminItems });
   }
 
   return groups;
