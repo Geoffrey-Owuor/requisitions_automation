@@ -133,10 +133,11 @@ export default function EmployeeRequisitionForm({
   const queryClient = useQueryClient();
   const router = useRouter();
 
-  const { data: DEPARTMENTS = [], isLoading: departmentsLoading } = useQuery({
+  const { data: departments = [], isLoading: departmentsLoading } = useQuery({
     queryKey: ["BaseDepartmentsData"],
     queryFn: loadBaseDepartments,
   });
+  const DEPARTMENTS = departments.map((department) => department.name);
 
   const { data: rawHodArray = [], isLoading: hodsLoading } = useQuery({
     queryKey: ["BaseHodArrayData"],

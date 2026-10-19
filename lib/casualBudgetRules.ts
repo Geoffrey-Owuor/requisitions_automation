@@ -1,5 +1,3 @@
-import { OPERATIONS_DEPARTMENT } from "@/public/assets";
-
 // Shared between the confirmation-step estimate (client, in-progress form
 // data) and the approval-modal estimate (persisted requisition data) so both
 // derive financial years and budget units identically.
@@ -48,12 +46,6 @@ export function getFinancialYearDateRange(financialYear: string): {
   return { start: `${startYear}-04-01`, end: `${startYear + 1}-03-31` };
 }
 
-// Only Operations splits its budget - into 'warehouse' (every section except
-// Bond) and 'bond' (the Bond section). Every other department is 'default'.
-export function getBudgetUnitForSection(
-  department: string,
-  sectionName: string,
-): CasualBudgetUnit {
-  if (department !== OPERATIONS_DEPARTMENT) return "default";
-  return sectionName === "Bond" ? "bond" : "warehouse";
-}
+// A section's budget unit comes from casual_department_sections.budget_unit
+// (getBudgetUnitForSection in lib/casualConfig.ts); a department without
+// configured sections is always 'default'.

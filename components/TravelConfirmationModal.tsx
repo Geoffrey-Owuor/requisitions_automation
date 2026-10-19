@@ -14,6 +14,8 @@ interface ConfirmationModalProps {
   onSubmit: () => Promise<void>;
   submitting: boolean;
   totalEngineeringAmount: number;
+  // The department is flagged requires_engineering_jobs
+  showEngineeringJobs: boolean;
   isAmendment?: boolean;
   reason?: string;
 }
@@ -27,6 +29,7 @@ export default function TravelConfirmationModal({
   onSubmit,
   submitting,
   totalEngineeringAmount,
+  showEngineeringJobs,
   isAmendment = false,
   reason,
 }: ConfirmationModalProps) {
@@ -134,7 +137,7 @@ export default function TravelConfirmationModal({
       {/* Cost breakdown */}
       <div className="mb-5 border-t border-[rgba(240,180,180,0.4)] pt-5">
         {/* --- NEW: Engineering Jobs Breakdown --- */}
-        {formData.department === "Engineering & HVAC" &&
+        {showEngineeringJobs &&
           formData.engineeringJobs && (
             <div className="mb-3 rounded-2xl border border-rose-100 bg-rose-50 p-4">
               <span className="mb-3 flex items-center gap-2 text-[11px] font-semibold tracking-[0.4px] text-rose-800 uppercase">

@@ -22,17 +22,17 @@ import { DASHBOARD_SUMMARY_KEY } from "@/hooks/useDashboardSummary";
 import {
   loadHodArray,
   loadBaseDepartments,
+  loadCasualConfig,
   HodApproversObject,
 } from "@/lib/loadAppDataV2";
+import { assets } from "@/public/assets";
 import {
-  assets,
+  getActiveCasualCategories,
   getCasualLocationsForDepartment,
   getCasualSections,
-  getCasualRatePerDay,
-  ENGINEERING_HVAC_DEPARTMENT,
-  CASUAL_CATEGORIES,
-  CasualCategory,
-} from "@/public/assets";
+  nairobiToday,
+  resolveCasualRate,
+} from "@/lib/casualConfig";
 import { ApiHandler } from "@/utils/ApiHandler";
 import SubmittingOverlay from "@/components/SubmittingOverlay";
 import AlertModal from "@/components/AlertModal";
@@ -62,8 +62,10 @@ export interface CasualFormData {
   hodApprover: string;
   location: string;
   sections: CasualSectionFormData[];
-  casualCategory?: CasualCategory;
+  casualCategory?: string;
 }
+
+const CASUAL_CONFIG_KEY = ["CasualConfigData"];
 
 const InitialFormState: CasualFormData = {
   department: "",
@@ -148,16 +150,23 @@ export default function CasualRequisitionForm({
   const router = useRouter();
 
   // Load departments
-  const { data: DEPARTMENTS = [], isLoading: departmentsLoading } = useQuery({
+  const { data: departments = [], isLoading: departmentsLoading } = useQuery({
     queryKey: ["BaseDepartmentsData"],
     queryFn: loadBaseDepartments,
   });
+  const DEPARTMENTS = departments.map((department) => department.name);
 
   // Load HODS
   const { data: rawHodArray = [], isLoading: hodsLoading } = useQuery({
     queryKey: ["BaseHodArrayData"],
     queryFn: loadHodArray,
   });
+  // Locations, sections, categories and rates (casual_* tables)
+  const { data: casualConfig, isLoading: configLoading } = useQuery({
+    queryKey: CASUAL_CONFIG_KEY,
+    queryFn: loadCasualConfig,
+  });
+
   const hodArray = excludeSubmitterFromHodArray(rawHodArray, email);
   const HOD_APPROVERS = hodArray.map((hod) => hod.email);
   const hodLabel = hodNameLabel(hodArray);
@@ -225,22 +234,44 @@ export default function CasualRequisitionForm({
     }
   }
 
-  const availableLocations = formData.department
-    ? getCasualLocationsForDepartment(formData.department)
+  // An amendment's department may have been made inactive since, and so be
+  // missing from the list - it keeps the category it already has then
+  const selectedDepartment = departments.find(
+    (department) => department.name === formData.department,
+  );
+  const categoryRequired = selectedDepartment
+    ? selectedDepartment.casualCategoryRequired
+    : !!formData.casualCategory;
+  const categoryOptions = casualConfig
+    ? getActiveCasualCategories(casualConfig)
     : [];
 
-  const availableSections = formData.location
-    ? getCasualSections(formData.department, formData.location)
-    : [];
+  const availableLocations =
+    casualConfig && formData.department
+      ? getCasualLocationsForDepartment(casualConfig, formData.department)
+      : [];
+
+  const availableSections =
+    casualConfig && formData.location
+      ? getCasualSections(casualConfig, formData.department, formData.location)
+      : [];
   const hasSectionChoice = availableSections.length > 1;
 
-  const ratePerDay = formData.location
-    ? getCasualRatePerDay(
-        formData.location,
-        formData.department,
-        formData.casualCategory,
-      )
-    : 0;
+  // Priced at today's rate (Africa/Nairobi); the server re-prices and rejects
+  // the submission if the rate it gets differs from the one shown here.
+  // null when no rate rule matches - the form can't be submitted then.
+  const resolvedRate =
+    casualConfig && formData.location
+      ? resolveCasualRate(casualConfig.rates, {
+          department: formData.department,
+          location: formData.location,
+          category: categoryRequired ? (formData.casualCategory ?? null) : null,
+          date: nairobiToday(),
+        })
+      : null;
+  const ratePerDay = resolvedRate ?? 0;
+  const rateMissing =
+    !!casualConfig && !!formData.location && resolvedRate === null;
 
   // Per-section derived engagement days + total
   const sectionDerived = useMemo(
@@ -292,6 +323,8 @@ export default function CasualRequisitionForm({
     isEmpty(formData.department) ||
     isEmpty(formData.hodApprover) ||
     isEmpty(formData.location) ||
+    (categoryRequired && isEmpty(formData.casualCategory)) ||
+    rateMissing ||
     sectionsInvalid ||
     (!!amendRequestId && isEmpty(reason));
 
@@ -303,6 +336,10 @@ export default function CasualRequisitionForm({
   };
 
   const handleDepartmentChange = (department: string) => {
+    const requiresCategory = !!departments.find(
+      (option) => option.name === department,
+    )?.casualCategoryRequired;
+
     setFormData((prev) => ({
       ...prev,
       department,
@@ -312,13 +349,14 @@ export default function CasualRequisitionForm({
       // Available locations/sections depend on the department - reset both
       location: "",
       sections: [],
-      casualCategory:
-        department === ENGINEERING_HVAC_DEPARTMENT ? "Technician" : undefined,
+      casualCategory: requiresCategory ? categoryOptions[0] : undefined,
     }));
   };
 
   const handleLocationChange = (location: string) => {
-    const sections = getCasualSections(formData.department, location);
+    const sections = casualConfig
+      ? getCasualSections(casualConfig, formData.department, location)
+      : [];
 
     setFormData((prev) => ({
       ...prev,
@@ -362,10 +400,10 @@ export default function CasualRequisitionForm({
           requestId: amendRequestId,
           expectedAmendmentCount: amendmentContext?.expectedAmendmentCount,
           reason,
-          formData,
+          formData: { ...formData, expectedRatePerDay: ratePerDay },
         }
       : {
-          formData,
+          formData: { ...formData, expectedRatePerDay: ratePerDay },
         };
 
     setSubmitting(true);
@@ -406,6 +444,9 @@ export default function CasualRequisitionForm({
     } catch (error) {
       if (error instanceof Error) {
         console.error("Error while trying to submit Casual requisition", error);
+        // Rates may have changed since the form loaded - refetch so the
+        // totals shown are the ones the server will use
+        queryClient.invalidateQueries({ queryKey: CASUAL_CONFIG_KEY });
         setAlertInfo({ alertType: "error", alertMessage: error.toString() });
         setStep(3);
       }
@@ -572,17 +613,23 @@ export default function CasualRequisitionForm({
                     label="Location"
                     options={availableLocations}
                     value={formData.location}
+                    loading={configLoading}
                     onChange={handleLocationChange}
                   />
-                  {formData.department === ENGINEERING_HVAC_DEPARTMENT && (
+                  {categoryRequired && (
                     <FormSelect
                       label="Casual Category"
-                      options={[...CASUAL_CATEGORIES]}
-                      value={formData.casualCategory ?? "Technician"}
-                      onChange={(v) =>
-                        updateField("casualCategory", v as CasualCategory)
-                      }
+                      options={categoryOptions}
+                      value={formData.casualCategory ?? ""}
+                      loading={configLoading}
+                      onChange={(v) => updateField("casualCategory", v)}
                     />
+                  )}
+                  {rateMissing && (
+                    <p className="col-span-full text-[13px] text-rose-600">
+                      No daily rate is set up for this department and
+                      location yet - contact the admin for support.
+                    </p>
                   )}
                 </div>
               </div>

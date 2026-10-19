@@ -9,6 +9,8 @@ import {
   validateCasualFormData,
   CasualFormDataInput,
 } from "@/lib/casualRequisitionRules";
+import { loadCasualConfig } from "@/lib/loadCasualConfig";
+import { nairobiToday } from "@/lib/casualConfig";
 
 export async function POST(request: NextRequest) {
   // Check if we have a valid session
@@ -30,21 +32,31 @@ export async function POST(request: NextRequest) {
     // anyone could submit as their own HOD and be auto-approved
     const { name, email } = user;
 
-    const validation = validateCasualFormData(formData as CasualFormDataInput);
+    const { department, hodApprover, location } = formData as CasualFormDataInput;
 
-    if (!validation.ok) {
-      return NextResponse.json({ message: validation.message }, { status: 400 });
-    }
+    const departmentRules = await resolveDepartment(department);
 
-    const { ratePerDay, computedSections } = validation;
-    const { department, hodApprover, location, casualCategory } = formData;
-
-    if (!(await resolveDepartment(department))) {
+    if (!departmentRules) {
       return NextResponse.json(
         { message: INVALID_DEPARTMENT_MESSAGE },
         { status: 400 },
       );
     }
+
+    const validation = validateCasualFormData(formData as CasualFormDataInput, {
+      config: await loadCasualConfig(),
+      casualCategoryRequired: departmentRules.casualCategoryRequired,
+      date: nairobiToday(),
+    });
+
+    if (!validation.ok) {
+      return NextResponse.json(
+        { message: validation.message },
+        { status: validation.status },
+      );
+    }
+
+    const { ratePerDay, casualCategory, computedSections } = validation;
 
     // The form sends the HOD's email; the stored name comes from hod_array
     const resolvedHod = await resolveHod(hodApprover);
@@ -77,7 +89,7 @@ export async function POST(request: NextRequest) {
       name,
       department,
       location,
-      casualCategory ?? null,
+      casualCategory,
       "pending",
       "pending",
       hodName,

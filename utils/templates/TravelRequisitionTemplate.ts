@@ -31,10 +31,8 @@ export function TravelRequisitionTemplate({
   let engineeringJobs: { title: string; amount: number }[] = [];
   let totalEngineeringCost = 0;
 
-  if (
-    emailData.department === "Engineering & HVAC" &&
-    emailData.engineeringjobs
-  ) {
+  // Stored only for departments flagged requires_engineering_jobs
+  if (emailData.engineeringjobs) {
     const lines = emailData.engineeringjobs
       .split("\n")
       .filter((line) => line.trim() !== "");

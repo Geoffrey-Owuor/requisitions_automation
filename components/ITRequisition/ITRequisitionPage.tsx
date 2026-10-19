@@ -89,10 +89,11 @@ export default function ITRequisitionPage() {
   const { email } = useUser();
 
   // Load departments
-  const { data: DEPARTMENTS = [], isLoading: departmentsLoading } = useQuery({
+  const { data: departments = [], isLoading: departmentsLoading } = useQuery({
     queryKey: ["BaseDepartmentsData"],
     queryFn: loadBaseDepartments,
   });
+  const DEPARTMENTS = departments.map((department) => department.name);
 
   // Load HODS
   const { data: rawHodArray = [], isLoading: hodsLoading } = useQuery({
