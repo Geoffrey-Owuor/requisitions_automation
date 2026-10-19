@@ -18,7 +18,6 @@ import {
   LayoutGrid,
   LucideIcon,
   Search,
-  Sparkles,
   X,
 } from "lucide-react";
 
@@ -37,8 +36,9 @@ type LauncherApp = {
 
 type LauncherSection = { key: string; label: string; apps: LauncherApp[] };
 
-// Microsoft's product icons (Fluent UI brand icons), served from
-// public/icons/m365. Copilot has none there, so it keeps a Lucide icon.
+// Microsoft's product icons (the October 2025 designs), served from
+// public/icons/m365. The SVGs come from selfh.st/icons (CC BY 4.0); Copilot is
+// Microsoft's own 48px PNG, since that set only has the older Copilot logo.
 const MICROSOFT_APPS: LauncherApp[] = [
   {
     key: "m365-outlook",
@@ -92,7 +92,7 @@ const MICROSOFT_APPS: LauncherApp[] = [
   {
     key: "m365-copilot",
     name: "Copilot",
-    Icon: Sparkles,
+    iconSrc: "/icons/m365/copilot.png",
     href: "https://copilot.cloud.microsoft",
     keywords: ["ai", "assistant", "chat"],
   },

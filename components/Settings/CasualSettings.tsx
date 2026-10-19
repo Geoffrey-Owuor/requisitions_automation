@@ -9,6 +9,7 @@ import {
   ChangesCard,
   ConfirmDialog,
   type Confirmation,
+  Field,
   inputClass,
   primaryButtonClass,
   smallButtonClass,
@@ -17,6 +18,7 @@ import {
   useSettingsRunner,
 } from "./SettingsPrimitives";
 import { DatePicker } from "@/components/DatePicker";
+import { Select } from "@/components/Select";
 import {
   addCasualCategory,
   addCasualLocation,
@@ -271,59 +273,66 @@ function RatesCard({ data, busy, run, confirm }: CardProps) {
           <CalendarClock className="h-3.5 w-3.5" /> Schedule a rate
         </p>
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
-          <select
-            aria-label="Department"
-            className={inputClass}
-            value={department}
-            onChange={(e) => setDepartment(e.target.value)}
-          >
-            <option value="">Any department</option>
-            {data.departments.map((name) => (
-              <option key={name} value={name}>
-                {name}
-              </option>
-            ))}
-          </select>
-          <select
-            aria-label="Location"
-            className={inputClass}
-            value={locationId}
-            onChange={(e) => setLocationId(e.target.value)}
-          >
-            <option value="">Any location</option>
-            {activeLocations.map((location) => (
-              <option key={location.id} value={location.id}>
-                {location.name}
-              </option>
-            ))}
-          </select>
-          <select
-            aria-label="Category"
-            className={inputClass}
-            value={categoryId}
-            onChange={(e) => setCategoryId(e.target.value)}
-          >
-            <option value="">Any category</option>
-            {activeCategories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
-          <input
-            aria-label="Rate per day (KES)"
-            className={inputClass}
-            inputMode="numeric"
-            placeholder="Rate per day (KES)"
-            value={ratePerDay}
-            onChange={(e) => setRatePerDay(e.target.value.replace(/\D/g, ""))}
-          />
-          <DatePicker
-            value={effectiveFrom}
-            onChange={setEffectiveFrom}
-            minDate={tomorrow}
-            placeholder="Takes effect from"
-          />
+          <Field label="Department" htmlFor="rate-department">
+            <Select
+              id="rate-department"
+              value={department}
+              onChange={setDepartment}
+              options={[
+                { value: "", label: "Any department" },
+                ...data.departments.map((name) => ({
+                  value: name,
+                  label: name,
+                })),
+              ]}
+            />
+          </Field>
+          <Field label="Location" htmlFor="rate-location">
+            <Select
+              id="rate-location"
+              value={locationId}
+              onChange={setLocationId}
+              options={[
+                { value: "", label: "Any location" },
+                ...activeLocations.map((location) => ({
+                  value: String(location.id),
+                  label: location.name,
+                })),
+              ]}
+            />
+          </Field>
+          <Field label="Category" htmlFor="rate-category">
+            <Select
+              id="rate-category"
+              value={categoryId}
+              onChange={setCategoryId}
+              options={[
+                { value: "", label: "Any category" },
+                ...activeCategories.map((category) => ({
+                  value: String(category.id),
+                  label: category.name,
+                })),
+              ]}
+            />
+          </Field>
+          <Field label="Rate per day (KES)" htmlFor="rate-amount">
+            <input
+              id="rate-amount"
+              className={inputClass}
+              inputMode="numeric"
+              placeholder="e.g. 850"
+              value={ratePerDay}
+              onChange={(e) => setRatePerDay(e.target.value.replace(/\D/g, ""))}
+            />
+          </Field>
+          <Field label="Takes effect from">
+            <DatePicker
+              value={effectiveFrom}
+              onChange={setEffectiveFrom}
+              minDate={tomorrow}
+              placeholder="Pick a date"
+            />
+          </Field>
         </div>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-xs text-neutral-500">
@@ -415,22 +424,27 @@ function LocationLimitsCard({ data, busy, run }: Omit<CardProps, "confirm">) {
           ))}
         </ul>
       )}
-      <select
+      <Select
         aria-label="Department"
-        className={inputClass}
+        placeholder="Choose a department to edit"
         value={department}
-        onChange={(e) => {
-          setDepartment(e.target.value);
+        onChange={(next) => {
+          setDepartment(next);
           setSelected(null);
         }}
-      >
-        <option value="">Choose a department to edit</option>
-        {data.departments.map((name) => (
-          <option key={name} value={name}>
-            {name}
-          </option>
-        ))}
-      </select>
+        options={data.departments.map((name) => {
+          const limited = data.departmentLocations.find(
+            (row) => row.department === name,
+          )?.locationIds.length;
+          return {
+            value: name,
+            label: name,
+            description: limited
+              ? `Limited to ${limited} location${limited === 1 ? "" : "s"}`
+              : undefined,
+          };
+        })}
+      />
       {department && (
         <>
           <div className="flex flex-wrap gap-1.5">
@@ -528,39 +542,37 @@ function SectionsCard({ data, busy, run, confirm }: CardProps) {
       ))}
       <div className="space-y-2 rounded-xl bg-neutral-50 p-3">
         <div className="grid gap-2 sm:grid-cols-3">
-          <select
-            aria-label="Department"
-            className={inputClass}
-            value={department}
-            onChange={(e) => setDepartment(e.target.value)}
-          >
-            <option value="">Department</option>
-            {data.departments.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-          <input
-            aria-label="Section name"
-            className={inputClass}
-            placeholder="Section name"
-            value={name}
-            maxLength={100}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <select
-            aria-label="Budget unit"
-            className={inputClass}
-            value={budgetUnit}
-            onChange={(e) => setBudgetUnit(e.target.value as CasualBudgetUnit)}
-          >
-            {Object.entries(BUDGET_UNIT_LABELS).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
+          <Field label="Department" htmlFor="section-department">
+            <Select
+              id="section-department"
+              value={department}
+              onChange={setDepartment}
+              options={data.departments.map((option) => ({
+                value: option,
+                label: option,
+              }))}
+            />
+          </Field>
+          <Field label="Section name" htmlFor="section-name">
+            <input
+              id="section-name"
+              className={inputClass}
+              placeholder="e.g. Receiving"
+              value={name}
+              maxLength={100}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </Field>
+          <Field label="Budget unit" htmlFor="section-budget-unit">
+            <Select
+              id="section-budget-unit"
+              value={budgetUnit}
+              onChange={(next) => setBudgetUnit(next as CasualBudgetUnit)}
+              options={Object.entries(BUDGET_UNIT_LABELS).map(
+                ([value, label]) => ({ value, label }),
+              )}
+            />
+          </Field>
         </div>
         {department && !departmentsWithSections.includes(department) && (
           <p className="text-xs text-amber-700">
