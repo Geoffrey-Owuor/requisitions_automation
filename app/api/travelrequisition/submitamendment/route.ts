@@ -6,6 +6,7 @@ import { isUuid } from "@/lib/uuid";
 import { assignedHodNameSql, resolveHod, sameEmail } from "@/lib/hodAssignment";
 import { INVALID_DEPARTMENT_MESSAGE, resolveDepartment } from "@/lib/departments";
 import {
+  resolveEngineeringJobs,
   TravelFormDataInput,
   validateTravelFormData,
 } from "@/lib/travelRequisitionRules";
@@ -73,10 +74,6 @@ export async function POST(request: NextRequest) {
 
     const { totalCost, approvalTier } = validation;
     const input = formData as TravelFormDataInput;
-    const engineeringJobs =
-      input.department === "Engineering & HVAC"
-        ? input.engineeringJobs || null
-        : null;
 
     if (
       !ISO_DATE.test(input.departureDate) ||
@@ -181,6 +178,18 @@ export async function POST(request: NextRequest) {
         { status: 400 },
       );
     }
+
+    const jobs = resolveEngineeringJobs(
+      input,
+      departmentRules.requiresEngineeringJobs,
+    );
+
+    if (!jobs.ok) {
+      await client.query("ROLLBACK");
+      return NextResponse.json({ message: jobs.message }, { status: 400 });
+    }
+
+    const { engineeringJobs } = jobs;
 
     const resolvedHod = await resolveHod(input.hodApprover);
 

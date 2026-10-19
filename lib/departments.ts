@@ -2,10 +2,13 @@ import "server-only";
 import { PoolClient } from "pg";
 import { query } from "@/lib/db";
 
-// Department flags (base_departments, migration 024_department_flags.sql).
-// Behaviour is keyed on these flags, never on department names in code.
+// Department flags (base_departments, migrations 024_department_flags.sql
+// and 025_casual_config.sql). Behaviour is keyed on these flags, never on
+// department names in code.
 export interface DepartmentRules {
   requiresRetailDirector: boolean;
+  casualCategoryRequired: boolean;
+  requiresEngineeringJobs: boolean;
 }
 
 export const INVALID_DEPARTMENT_MESSAGE =
@@ -29,10 +32,16 @@ export async function resolveDepartment(
   if (typeof department !== "string" || !department.trim()) return null;
 
   const sql = `
-    SELECT is_active, requires_retail_director
+    SELECT is_active, requires_retail_director, casual_category_required,
+    requires_engineering_jobs
     FROM base_departments WHERE department_name = $1 LIMIT 1
   `;
-  type Row = { is_active: boolean; requires_retail_director: boolean };
+  type Row = {
+    is_active: boolean;
+    requires_retail_director: boolean;
+    casual_category_required: boolean;
+    requires_engineering_jobs: boolean;
+  };
   const rows = client
     ? (await client.query<Row>(sql, [department])).rows
     : await query<Row>(sql, [department]);
@@ -41,5 +50,9 @@ export async function resolveDepartment(
   if (!row) return null;
   if (!row.is_active && department !== currentDepartment) return null;
 
-  return { requiresRetailDirector: row.requires_retail_director };
+  return {
+    requiresRetailDirector: row.requires_retail_director,
+    casualCategoryRequired: row.casual_category_required,
+    requiresEngineeringJobs: row.requires_engineering_jobs,
+  };
 }

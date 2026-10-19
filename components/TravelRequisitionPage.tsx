@@ -107,10 +107,11 @@ export default function TravelRequisitionPage({
   const router = useRouter();
 
   // Load departments
-  const { data: DEPARTMENTS = [], isLoading: departmentsLoading } = useQuery({
+  const { data: departments = [], isLoading: departmentsLoading } = useQuery({
     queryKey: ["BaseDepartmentsData"],
     queryFn: loadBaseDepartments,
   });
+  const DEPARTMENTS = departments.map((department) => department.name);
 
   // Load HODS
   const { data: rawHodArray = [], isLoading: hodsLoading } = useQuery({
@@ -190,8 +191,15 @@ export default function TravelRequisitionPage({
       (reason.trim() !== "" || !isSameFormValue(formData, savedFormData)),
   );
 
-  // Check if department is engineering
-  const isEngineering = formData.department === "Engineering & HVAC";
+  // Departments flagged requires_engineering_jobs allocate the cost to
+  // engineering jobs. An amendment's department may have been made inactive
+  // since (and so be missing from the list) - it keeps any jobs it has then.
+  const selectedDepartment = departments.find(
+    (department) => department.name === formData.department,
+  );
+  const isEngineering = selectedDepartment
+    ? selectedDepartment.requiresEngineeringJobs
+    : formData.engineeringJobs.some((job) => !!job.title);
 
   // More robust validation logic
   // Returns true only if the value is genuinely missing (Allowing 0 values)
@@ -221,18 +229,18 @@ export default function TravelRequisitionPage({
 
   // Calculate total engineering job costs
   const totalEngineeringCost = useMemo(() => {
-    // Only calculate if they are in the Engineering department
-    if (formData.department !== "Engineering & HVAC") return 0;
+    // Only calculate for departments that allocate to engineering jobs
+    if (!isEngineering) return 0;
 
     return formData.engineeringJobs.reduce((sum, job) => {
       return sum + job.amount;
     }, 0); // 0 is the starting value of the some here
-  }, [formData.department, formData.engineeringJobs]);
+  }, [isEngineering, formData.engineeringJobs]);
 
   const handleSubmit = async () => {
     // 1. Format the engineering jobs array into the required text format
     let formattedEngineeringJobs = "";
-    if (formData.department === "Engineering & HVAC") {
+    if (isEngineering) {
       formattedEngineeringJobs = formData.engineeringJobs
         .map((job) => `${job.title.trim()} - ${job.amount}`)
         .join("\n");
@@ -394,6 +402,7 @@ export default function TravelRequisitionPage({
           onSubmit={handleSubmit}
           submitting={submitting}
           totalEngineeringAmount={totalEngineeringCost}
+          showEngineeringJobs={isEngineering}
           isAmendment={isAmendment}
           reason={reason}
         />
@@ -705,7 +714,7 @@ export default function TravelRequisitionPage({
                 </div>
 
                 {/* NEW: Conditional Engineering Jobs Component */}
-                {formData.department === "Engineering & HVAC" && (
+                {isEngineering && (
                   <EngineeringJobFields
                     jobs={formData.engineeringJobs}
                     totalAmount={totalEngineeringCost}

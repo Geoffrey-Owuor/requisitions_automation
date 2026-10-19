@@ -170,7 +170,8 @@ const RequisitionPdfModal = ({ pdfData }: { pdfData: TravelPdfValues }) => {
             <SectionHeading title="Estimated Costs (KES)" />
 
             {/* Engineering Job Summary Card */}
-            {pdfData.department === "Engineering & HVAC" && (
+            {/* Stored only for departments flagged requires_engineering_jobs */}
+            {!!pdfData.engineeringjobs && (
               <EngineeringJobSummaryCard
                 jobDetailsString={pdfData.engineeringjobs}
               />

@@ -6,10 +6,15 @@
 import { unstable_cache } from "next/cache";
 import { query } from "./db";
 import { getSession } from "./session";
+import { loadCasualConfig as loadCachedCasualConfig } from "./loadCasualConfig";
+import type { CasualConfig, CasualRateRule } from "./casualConfig";
 
-// Global Interfaces
-interface BaseDepartments {
-  department_name: string;
+// A department as the forms see it: its name plus the flags that change
+// what a form asks for (base_departments, migrations 024/025)
+export interface BaseDepartment {
+  name: string;
+  casualCategoryRequired: boolean;
+  requiresEngineeringJobs: boolean;
 }
 
 // HOD approver for the submission forms, carrying the department it should
@@ -22,28 +27,34 @@ export interface HodApproversObject {
   department: string | null;
 }
 
-// Loading base departments - active ones only. An amendment form still shows
-// its requisition's department if it was made inactive since (FormSelect
-// displays a value that isn't among its options).
-export const loadBaseDepartments = unstable_cache(
-  async (): Promise<string[]> => {
-    try {
-      const result = await query<BaseDepartments>(
-        "SELECT department_name FROM base_departments WHERE is_active = true",
-      );
-
-      return result.map((dept) => dept.department_name);
-    } catch (error) {
-      console.error("Error while trying to fetch base departments:", error);
-      return [];
-    }
-  },
-  ["base_departments"],
+// Active departments only. Errors are caught outside the cache so a failed
+// read (e.g. code deployed before its migration ran) isn't cached as an
+// empty list for an hour.
+const loadCachedBaseDepartments = unstable_cache(
+  async (): Promise<BaseDepartment[]> =>
+    query<BaseDepartment>(
+      `SELECT department_name AS name,
+       casual_category_required AS "casualCategoryRequired",
+       requires_engineering_jobs AS "requiresEngineeringJobs"
+       FROM base_departments WHERE is_active = true`,
+    ),
+  ["base_departments_with_flags"],
   {
     revalidate: 3600,
     tags: ["GetBaseDepartments"],
   },
 );
+
+// An amendment form still shows its requisition's department if it was made
+// inactive since (FormSelect displays a value that isn't among its options).
+export const loadBaseDepartments = async (): Promise<BaseDepartment[]> => {
+  try {
+    return await loadCachedBaseDepartments();
+  } catch (error) {
+    console.error("Error while trying to fetch base departments:", error);
+    return [];
+  }
+};
 
 // Load the hod array - selectable HODs only. Alternate-only HODs
 // (hod_array.is_alternate_only) are never offered in the submission dropdown
@@ -76,4 +87,29 @@ const loadCachedHodArray = unstable_cache(
 export const loadHodArray = async (): Promise<HodApproversObject[] | []> => {
   if (!(await getSession())) return [];
   return loadCachedHodArray();
+};
+
+// Client-callable (the casual form loads it), so it is session-gated. Null
+// when signed out or the config can't be read - the form can't price
+// anything without it.
+export const loadCasualConfig = async (): Promise<CasualConfig | null> => {
+  if (!(await getSession())) return null;
+  try {
+    return await loadCachedCasualConfig();
+  } catch (error) {
+    console.error("Error while trying to fetch the casual config:", error);
+    return null;
+  }
+};
+
+// The casual rate rules alone, for the public casual guideline page (which
+// published these rates before they moved to the database). Not
+// session-gated for that reason; returns nothing else from the config.
+export const loadPublicCasualRates = async (): Promise<CasualRateRule[]> => {
+  try {
+    return (await loadCachedCasualConfig()).rates;
+  } catch (error) {
+    console.error("Error while trying to fetch the casual rates:", error);
+    return [];
+  }
 };

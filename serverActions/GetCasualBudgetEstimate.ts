@@ -3,12 +3,13 @@
 import { query } from "@/lib/db";
 import {
   CasualBudgetUnit,
-  getBudgetUnitForSection,
   getFinancialYear,
   getFinancialYearDateRange,
   getFinancialYearMonths,
   toLocalDate,
 } from "@/lib/casualBudgetRules";
+import { CasualConfig, getBudgetUnitForSection } from "@/lib/casualConfig";
+import { loadCasualConfig } from "@/lib/loadCasualConfig";
 
 // No session/auth check here on purpose: this is read-only budget aggregate
 // data (no PII), and it's called both from the authenticated submission
@@ -56,6 +57,7 @@ export interface CasualBudgetUnitEstimate {
 // periods straddle Operations' Bond/Warehouse split and/or a FY boundary
 // gets one estimate per group rather than conflating them.
 function groupSectionsByUnitAndFY(
+  config: CasualConfig,
   department: string,
   sections: CasualBudgetSectionInput[],
 ) {
@@ -66,7 +68,11 @@ function groupSectionsByUnitAndFY(
 
   for (const section of sections) {
     if (!section.periodFrom) continue;
-    const unit = getBudgetUnitForSection(department, section.sectionName);
+    const unit = getBudgetUnitForSection(
+      config,
+      department,
+      section.sectionName,
+    );
     const financialYear = getFinancialYear(toLocalDate(section.periodFrom));
     const key = `${unit}::${financialYear}`;
     const group = groups.get(key) ?? { unit, financialYear, sections: [] };
@@ -83,7 +89,11 @@ export async function getCasualBudgetEstimate({
 }: CasualBudgetEstimateInput): Promise<CasualBudgetUnitEstimate[]> {
   if (!department || sections.length === 0) return [];
 
-  const groups = groupSectionsByUnitAndFY(department, sections);
+  const groups = groupSectionsByUnitAndFY(
+    await loadCasualConfig(),
+    department,
+    sections,
+  );
 
   return Promise.all(
     groups.map(async ({ unit, financialYear, sections: groupSections }) => {

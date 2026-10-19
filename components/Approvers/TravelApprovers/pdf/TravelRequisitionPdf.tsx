@@ -93,7 +93,8 @@ export const TravelRequisitionPdf = ({
   let engineeringJobs: { title: string; amount: number }[] = [];
   let totalEngineeringCost = 0;
 
-  if (pdfData.department === "Engineering & HVAC" && pdfData.engineeringjobs) {
+  // Stored only for departments flagged requires_engineering_jobs
+  if (pdfData.engineeringjobs) {
     const lines = pdfData.engineeringjobs
       .split("\n")
       .filter((line) => line.trim() !== "");
@@ -169,7 +170,7 @@ export const TravelRequisitionPdf = ({
           <PdfSectionHeading title="Estimated Costs (KES)" />
 
           {/* --- NEW: Engineering Job Allocations PDF Card --- */}
-          {pdfData.department === "Engineering & HVAC" &&
+          {!!pdfData.engineeringjobs &&
             engineeringJobs.length > 0 && (
               <View
                 style={tw(

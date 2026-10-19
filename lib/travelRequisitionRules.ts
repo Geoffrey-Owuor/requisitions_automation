@@ -24,7 +24,7 @@ export interface TravelFormDataInput {
   costCentre: string;
   withinBudget: string;
   // Already formatted by the client as "<title> - <amount>" lines; empty
-  // for non-engineering departments
+  // for departments not flagged requires_engineering_jobs
   engineeringJobs: string;
 }
 
@@ -49,14 +49,12 @@ export function validateTravelFormData(
     };
   }
 
-  const isEngineering = formData.department === "Engineering & HVAC";
-
-  const missingFields =
-    Object.entries(formData).some(([key, value]) => {
-      if (key === "engineeringJobs") return false;
-      return isEmpty(value);
-    }) ||
-    (isEngineering && !formData.engineeringJobs);
+  // Engineering Jobs are checked by resolveEngineeringJobs, once the
+  // department's flags are known
+  const missingFields = Object.entries(formData).some(([key, value]) => {
+    if (key === "engineeringJobs") return false;
+    return isEmpty(value);
+  });
 
   if (missingFields) {
     return {
@@ -75,4 +73,23 @@ export function validateTravelFormData(
     totalCost,
     approvalTier: calculateTravelApprovalTier(totalCost),
   };
+}
+
+// Engineering Jobs are required for, and only stored for, departments
+// flagged requires_engineering_jobs (base_departments). Returns the value to
+// store - null for any other department.
+export function resolveEngineeringJobs(
+  formData: TravelFormDataInput,
+  requiresEngineeringJobs: boolean,
+): { ok: true; engineeringJobs: string | null } | { ok: false; message: string } {
+  if (!requiresEngineeringJobs) return { ok: true, engineeringJobs: null };
+
+  if (isEmpty(formData.engineeringJobs)) {
+    return {
+      ok: false,
+      message: "Your requisition is missing some required form fields",
+    };
+  }
+
+  return { ok: true, engineeringJobs: formData.engineeringJobs };
 }
