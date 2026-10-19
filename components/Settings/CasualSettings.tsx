@@ -1,18 +1,28 @@
 "use client";
 
-import { ReactNode, useId, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { CalendarClock, History, Plus } from "lucide-react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { CalendarClock, Plus } from "lucide-react";
+import {
+  AddRow,
+  Card,
+  ChangesCard,
+  ConfirmDialog,
+  type Confirmation,
+  inputClass,
+  primaryButtonClass,
+  smallButtonClass,
+  StatusBadge,
+  ToggleList,
+  useSettingsRunner,
+} from "./SettingsPrimitives";
 import { DatePicker } from "@/components/DatePicker";
-import { AlertDialog, useLastDefined } from "@/components/Modal";
-import { useAlertStore } from "@/store/useAlertStore";
 import {
   addCasualCategory,
   addCasualLocation,
   addCasualRate,
   addCasualSection,
   CasualConfigAdminData,
-  ConfigActionResult,
   deleteCasualRate,
   getCasualConfigAdminData,
   setCasualCategoryActive,
@@ -20,8 +30,12 @@ import {
   setCasualSectionActive,
   setDepartmentLocationLimits,
 } from "@/serverActions/CasualConfigAdmin";
-import { currentCasualRates, describeCasualRateScope } from "@/lib/casualConfig";
+import {
+  currentCasualRates,
+  describeCasualRateScope,
+} from "@/lib/casualConfig";
 import type { CasualBudgetUnit } from "@/lib/casualBudgetRules";
+import type { ConfigActionResult } from "@/lib/configAdminAccess";
 
 const ADMIN_KEY = ["CasualConfigAdmin"];
 // The form and guideline caches of the same data, refreshed after a change
@@ -33,58 +47,20 @@ const BUDGET_UNIT_LABELS: Record<CasualBudgetUnit, string> = {
   bond: "Bond budget",
 };
 
-const inputClass =
-  "h-10 w-full rounded-xl border border-neutral-200 bg-white px-3 text-sm text-neutral-900 outline-none focus:border-slate-900";
-const primaryButtonClass =
-  "inline-flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-full bg-slate-900 px-4 text-sm font-semibold text-white transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50";
-const smallButtonClass =
-  "rounded-full border border-neutral-200 px-3 py-1 text-xs font-semibold text-neutral-700 transition-colors hover:border-neutral-400 disabled:opacity-50";
-
 // YYYY-MM-DD plus one day, in UTC so no local time zone shifts the date
 const nextDay = (date: string) =>
   new Date(Date.parse(`${date}T00:00:00Z`) + 86_400_000)
     .toISOString()
     .slice(0, 10);
 
-type Confirmation = {
-  title: string;
-  message: string;
-  confirmLabel: string;
-  action: () => Promise<ConfigActionResult>;
-};
-
 export default function CasualSettings() {
-  const queryClient = useQueryClient();
-  const triggerAlert = useAlertStore((state) => state.triggerAlert);
-  const [busy, setBusy] = useState(false);
+  const { busy, run } = useSettingsRunner(ADMIN_KEY, RELATED_KEYS);
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ADMIN_KEY,
     queryFn: getCasualConfigAdminData,
   });
-
-  // Runs a Settings action, reports its outcome and reloads the data.
-  // Returns whether it succeeded, so forms can clear their inputs.
-  const run = async (action: () => Promise<ConfigActionResult>) => {
-    setBusy(true);
-    try {
-      const result = await action();
-      triggerAlert(result.ok ? "success" : "error", result.message);
-      if (result.ok) {
-        await queryClient.invalidateQueries({ queryKey: ADMIN_KEY });
-        RELATED_KEYS.forEach((queryKey) =>
-          queryClient.invalidateQueries({ queryKey }),
-        );
-      }
-      return result.ok;
-    } catch {
-      triggerAlert("error", "The change could not be saved, please try again");
-      return false;
-    } finally {
-      setBusy(false);
-    }
-  };
 
   if (isLoading) {
     return (
@@ -118,12 +94,27 @@ export default function CasualSettings() {
     <div className="space-y-4">
       <RatesCard data={data} busy={busy} run={run} confirm={setConfirmation} />
       <div className="grid gap-4 lg:grid-cols-2">
-        <LocationsCard data={data} busy={busy} run={run} confirm={setConfirmation} />
+        <LocationsCard
+          data={data}
+          busy={busy}
+          run={run}
+          confirm={setConfirmation}
+        />
         <LocationLimitsCard data={data} busy={busy} run={run} />
       </div>
       <div className="grid gap-4 lg:grid-cols-2">
-        <SectionsCard data={data} busy={busy} run={run} confirm={setConfirmation} />
-        <CategoriesCard data={data} busy={busy} run={run} confirm={setConfirmation} />
+        <SectionsCard
+          data={data}
+          busy={busy}
+          run={run}
+          confirm={setConfirmation}
+        />
+        <CategoriesCard
+          data={data}
+          busy={busy}
+          run={run}
+          confirm={setConfirmation}
+        />
       </div>
       <ChangesCard changes={data.changes} />
 
@@ -146,41 +137,6 @@ type CardProps = {
   confirm: (confirmation: Confirmation) => void;
 };
 
-function Card({
-  title,
-  description,
-  children,
-}: {
-  title: string;
-  description: ReactNode;
-  children: ReactNode;
-}) {
-  return (
-    <section className="space-y-4 rounded-2xl border border-neutral-200 bg-white p-4">
-      <div>
-        <h2 className="text-[11px] font-bold tracking-widest text-gray-400 uppercase">
-          {title}
-        </h2>
-        <p className="mt-1 text-xs text-neutral-500">{description}</p>
-      </div>
-      {children}
-    </section>
-  );
-}
-
-function StatusBadge({ tone, children }: { tone: "green" | "amber" | "grey"; children: ReactNode }) {
-  const toneClass = {
-    green: "bg-emerald-50 text-emerald-700",
-    amber: "bg-amber-50 text-amber-700",
-    grey: "bg-neutral-100 text-neutral-500",
-  }[tone];
-  return (
-    <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${toneClass}`}>
-      {children}
-    </span>
-  );
-}
-
 // ---- Rates ----
 
 function RatesCard({ data, busy, run, confirm }: CardProps) {
@@ -201,16 +157,22 @@ function RatesCard({ data, busy, run, confirm }: CardProps) {
     (rate) => rate.effectiveFrom <= data.today && !currentIds.has(rate.id),
   );
 
-  const activeLocations = data.locations.filter((location) => location.isActive);
-  const activeCategories = data.categories.filter((category) => category.isActive);
+  const activeLocations = data.locations.filter(
+    (location) => location.isActive,
+  );
+  const activeCategories = data.categories.filter(
+    (category) => category.isActive,
+  );
   const rateValue = Number(ratePerDay);
   const canAdd =
     Number.isInteger(rateValue) && rateValue > 0 && effectiveFrom >= tomorrow;
 
   const scopePreview = describeCasualRateScope({
     department: department || null,
-    location: activeLocations.find((l) => String(l.id) === locationId)?.name ?? null,
-    category: activeCategories.find((c) => String(c.id) === categoryId)?.name ?? null,
+    location:
+      activeLocations.find((l) => String(l.id) === locationId)?.name ?? null,
+    category:
+      activeCategories.find((c) => String(c.id) === categoryId)?.name ?? null,
     ratePerDay: 0,
     effectiveFrom: "",
   });
@@ -228,7 +190,10 @@ function RatesCard({ data, busy, run, confirm }: CardProps) {
     if (added) setRatePerDay("");
   };
 
-  const rateRow = (rate: (typeof rules)[number], status: "current" | "scheduled" | "superseded") => (
+  const rateRow = (
+    rate: (typeof rules)[number],
+    status: "current" | "scheduled" | "superseded",
+  ) => (
     <li
       key={rate.id}
       className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-2.5"
@@ -239,16 +204,25 @@ function RatesCard({ data, busy, run, confirm }: CardProps) {
         </p>
         <p className="text-xs text-neutral-500">
           {/* The rates seeded by migration 025 are dated 2000-01-01 */}
-          From {rate.effectiveFrom === "2000-01-01" ? "the start" : rate.effectiveFrom}
+          From{" "}
+          {rate.effectiveFrom === "2000-01-01"
+            ? "the start"
+            : rate.effectiveFrom}
         </p>
       </div>
       <div className="flex items-center gap-2">
         <span className="text-sm font-semibold text-neutral-900">
           KES {rate.ratePerDay.toLocaleString()}
         </span>
-        {status === "current" && <StatusBadge tone="green">In effect</StatusBadge>}
-        {status === "scheduled" && <StatusBadge tone="amber">Scheduled</StatusBadge>}
-        {status === "superseded" && <StatusBadge tone="grey">Superseded</StatusBadge>}
+        {status === "current" && (
+          <StatusBadge tone="green">In effect</StatusBadge>
+        )}
+        {status === "scheduled" && (
+          <StatusBadge tone="amber">Scheduled</StatusBadge>
+        )}
+        {status === "superseded" && (
+          <StatusBadge tone="grey">Superseded</StatusBadge>
+        )}
         {status === "scheduled" && (
           <button
             type="button"
@@ -278,7 +252,8 @@ function RatesCard({ data, busy, run, confirm }: CardProps) {
       <ul className="divide-y divide-neutral-100">
         {current.map((rate) => rateRow(rate, "current"))}
         {scheduled.map((rate) => rateRow(rate, "scheduled"))}
-        {showSuperseded && superseded.map((rate) => rateRow(rate, "superseded"))}
+        {showSuperseded &&
+          superseded.map((rate) => rateRow(rate, "superseded"))}
       </ul>
       {superseded.length > 0 && (
         <button
@@ -286,7 +261,8 @@ function RatesCard({ data, busy, run, confirm }: CardProps) {
           onClick={() => setShowSuperseded((shown) => !shown)}
           className="text-xs font-semibold text-neutral-500 hover:text-neutral-900"
         >
-          {showSuperseded ? "Hide" : "Show"} superseded rates ({superseded.length})
+          {showSuperseded ? "Hide" : "Show"} superseded rates (
+          {superseded.length})
         </button>
       )}
 
@@ -351,7 +327,8 @@ function RatesCard({ data, busy, run, confirm }: CardProps) {
         </div>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-xs text-neutral-500">
-            Applies to: <span className="font-medium text-neutral-800">{scopePreview}</span>
+            Applies to:{" "}
+            <span className="font-medium text-neutral-800">{scopePreview}</span>
           </p>
           <button
             type="button"
@@ -398,11 +375,7 @@ function LocationsCard({ data, busy, run, confirm }: CardProps) {
   );
 }
 
-function LocationLimitsCard({
-  data,
-  busy,
-  run,
-}: Omit<CardProps, "confirm">) {
+function LocationLimitsCard({ data, busy, run }: Omit<CardProps, "confirm">) {
   const [department, setDepartment] = useState("");
   const [selected, setSelected] = useState<number[] | null>(null);
 
@@ -420,7 +393,9 @@ function LocationLimitsCard({
 
   const toggle = (id: number) =>
     setSelected(
-      chosen.includes(id) ? chosen.filter((other) => other !== id) : [...chosen, id],
+      chosen.includes(id)
+        ? chosen.filter((other) => other !== id)
+        : [...chosen, id],
     );
 
   return (
@@ -432,7 +407,9 @@ function LocationLimitsCard({
         <ul className="space-y-1 text-sm">
           {data.departmentLocations.map((row) => (
             <li key={row.department} className="text-neutral-700">
-              <span className="font-medium text-neutral-900">{row.department}:</span>{" "}
+              <span className="font-medium text-neutral-900">
+                {row.department}:
+              </span>{" "}
               {row.locationIds.map(locationName).join(", ")}
             </li>
           ))}
@@ -488,7 +465,11 @@ function LocationLimitsCard({
               disabled={busy || selected === null}
               className={primaryButtonClass}
               onClick={async () => {
-                if (await run(() => setDepartmentLocationLimits(department, chosen))) {
+                if (
+                  await run(() =>
+                    setDepartmentLocationLimits(department, chosen),
+                  )
+                ) {
                   setSelected(null);
                 }
               }}
@@ -527,7 +508,9 @@ function SectionsCard({ data, busy, run, confirm }: CardProps) {
     >
       {departmentsWithSections.map((sectionDepartment) => (
         <div key={sectionDepartment} className="space-y-1">
-          <p className="text-xs font-semibold text-neutral-700">{sectionDepartment}</p>
+          <p className="text-xs font-semibold text-neutral-700">
+            {sectionDepartment}
+          </p>
           <ToggleList
             items={data.sections
               .filter((section) => section.department === sectionDepartment)
@@ -591,7 +574,9 @@ function SectionsCard({ data, busy, run, confirm }: CardProps) {
             disabled={busy || !department || !name.trim()}
             className={primaryButtonClass}
             onClick={async () => {
-              if (await run(() => addCasualSection(department, name, budgetUnit))) {
+              if (
+                await run(() => addCasualSection(department, name, budgetUnit))
+              ) {
                 setName("");
               }
             }}
@@ -632,176 +617,5 @@ function CategoriesCard({ data, busy, run, confirm }: CardProps) {
         }}
       />
     </Card>
-  );
-}
-
-// ---- Changes ----
-
-function ChangesCard({ changes }: { changes: CasualConfigAdminData["changes"] }) {
-  return (
-    <Card title="Recent changes" description="The last 30 changes made on this page.">
-      {changes.length === 0 ? (
-        <p className="text-sm text-neutral-500">No changes yet.</p>
-      ) : (
-        <ul className="divide-y divide-neutral-100">
-          {changes.map((change) => (
-            <li key={change.id} className="flex items-start gap-2 py-2 text-sm">
-              <History className="mt-0.5 h-3.5 w-3.5 shrink-0 text-neutral-400" />
-              <div className="min-w-0">
-                <p className="text-neutral-900">{change.summary}</p>
-                <p className="text-xs text-neutral-500">
-                  {change.changedByName} · {change.changedAt}
-                </p>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-    </Card>
-  );
-}
-
-// ---- Shared pieces ----
-
-function ToggleList({
-  items,
-  busy,
-  label,
-  confirm,
-  setActive,
-  run,
-}: {
-  items: { id: number; name: string; isActive: boolean; detail?: string }[];
-  busy: boolean;
-  label: string;
-  confirm: CardProps["confirm"];
-  setActive: (id: number, isActive: boolean) => Promise<ConfigActionResult>;
-  run: CardProps["run"];
-}) {
-  return (
-    <ul className="divide-y divide-neutral-100">
-      {items.map((item) => (
-        <li key={item.id} className="flex items-center justify-between gap-3 py-2">
-          <div className="min-w-0">
-            <p
-              className={`truncate text-sm ${item.isActive ? "text-neutral-900" : "text-neutral-400 line-through"}`}
-            >
-              {item.name}
-            </p>
-            {item.detail && <p className="text-xs text-neutral-500">{item.detail}</p>}
-          </div>
-          <div className="flex shrink-0 items-center gap-2">
-            {!item.isActive && <StatusBadge tone="grey">Inactive</StatusBadge>}
-            <button
-              type="button"
-              disabled={busy}
-              className={smallButtonClass}
-              onClick={() =>
-                item.isActive
-                  ? confirm({
-                      title: `Deactivate "${item.name}"?`,
-                      message: `It won't be offered on new requisitions. Requisitions that already use this ${label} keep it, and you can reactivate it later.`,
-                      confirmLabel: "Deactivate",
-                      action: () => setActive(item.id, false),
-                    })
-                  : run(() => setActive(item.id, true))
-              }
-            >
-              {item.isActive ? "Deactivate" : "Reactivate"}
-            </button>
-          </div>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-function AddRow({
-  placeholder,
-  value,
-  onChange,
-  busy,
-  onAdd,
-}: {
-  placeholder: string;
-  value: string;
-  onChange: (value: string) => void;
-  busy: boolean;
-  onAdd: () => void;
-}) {
-  return (
-    <form
-      className="flex gap-2"
-      onSubmit={(e) => {
-        e.preventDefault();
-        if (value.trim()) onAdd();
-      }}
-    >
-      <input
-        aria-label={placeholder}
-        className={inputClass}
-        placeholder={placeholder}
-        value={value}
-        maxLength={100}
-        onChange={(e) => onChange(e.target.value)}
-      />
-      <button
-        type="submit"
-        disabled={busy || !value.trim()}
-        className={primaryButtonClass}
-      >
-        <Plus className="h-4 w-4" /> Add
-      </button>
-    </form>
-  );
-}
-
-function ConfirmDialog({
-  confirmation,
-  busy,
-  onClose,
-  onConfirm,
-}: {
-  confirmation: Confirmation | null;
-  busy: boolean;
-  onClose: () => void;
-  onConfirm: (action: Confirmation["action"]) => void;
-}) {
-  const titleId = useId();
-  const messageId = useId();
-  // Keep the last content while the dialog animates closed
-  const shown = useLastDefined(confirmation);
-
-  return (
-    <AlertDialog
-      open={!!confirmation}
-      onClose={onClose}
-      labelledBy={titleId}
-      describedBy={messageId}
-    >
-      <h2 id={titleId} className="text-base font-semibold text-neutral-900">
-        {shown?.title}
-      </h2>
-      <p id={messageId} className="mt-2 text-sm text-neutral-600">
-        {shown?.message}
-      </p>
-      <div className="mt-6 flex justify-end gap-2">
-        <button
-          type="button"
-          onClick={onClose}
-          className="rounded-full border border-neutral-200 px-4 py-2 text-sm font-semibold text-neutral-700 hover:border-neutral-400"
-        >
-          Cancel
-        </button>
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => shown && onConfirm(shown.action)}
-          className="rounded-full bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700 disabled:opacity-50"
-        >
-          {shown?.confirmLabel}
-        </button>
-      </div>
-    </AlertDialog>
   );
 }

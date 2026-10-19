@@ -1,11 +1,13 @@
 "use server";
-import { PoolClient } from "pg";
-import { updateTag } from "next/cache";
-import { pool, query } from "@/lib/db";
-import type { SessionPayload } from "@/lib/session";
+import { query } from "@/lib/db";
 import {
+  cleanConfigName,
+  ConfigInputError,
   getConfigAdminSession,
+  isConfigId,
   recordConfigChange,
+  runConfigChange as runChange,
+  type ConfigActionResult,
 } from "@/lib/configAdminAccess";
 import type { CasualBudgetUnit } from "@/lib/casualBudgetRules";
 
@@ -49,8 +51,6 @@ export interface CasualConfigAdminData {
   }[];
 }
 
-export type ConfigActionResult = { ok: boolean; message: string };
-
 // Fixed table names, so safe to inline in SQL
 const CASUAL_TABLES_SQL = [
   "casual_locations",
@@ -63,56 +63,8 @@ const CASUAL_TABLES_SQL = [
   .join(", ");
 
 const BUDGET_UNITS: CasualBudgetUnit[] = ["default", "warehouse", "bond"];
-const MAX_NAME_LENGTH = 100;
 const MAX_RATE_PER_DAY = 1_000_000;
 const NAIROBI_TODAY_SQL = `(CURRENT_TIMESTAMP AT TIME ZONE 'Africa/Nairobi')::date`;
-
-// A message for the admin, as opposed to an unexpected failure
-class ConfigInputError extends Error {}
-
-const cleanName = (value: unknown, label: string): string => {
-  const name = typeof value === "string" ? value.trim() : "";
-  if (!name) throw new ConfigInputError(`Enter a ${label} name`);
-  if (name.length > MAX_NAME_LENGTH) {
-    throw new ConfigInputError(
-      `A ${label} name cannot be longer than ${MAX_NAME_LENGTH} characters`,
-    );
-  }
-  return name;
-};
-
-const isId = (value: unknown): value is number =>
-  typeof value === "number" && Number.isInteger(value) && value > 0;
-
-async function runConfigChange(
-  work: (client: PoolClient, actor: SessionPayload) => Promise<string>,
-): Promise<ConfigActionResult> {
-  const actor = await getConfigAdminSession();
-  if (!actor) {
-    return { ok: false, message: "You are not authorized to change the settings" };
-  }
-
-  const client = await pool.connect();
-  try {
-    await client.query("BEGIN");
-    const message = await work(client, actor);
-    await client.query("COMMIT");
-    updateTag("GetCasualConfig");
-    return { ok: true, message };
-  } catch (error) {
-    await client.query("ROLLBACK");
-    if (error instanceof ConfigInputError) {
-      return { ok: false, message: error.message };
-    }
-    if ((error as { code?: string }).code === "23505") {
-      return { ok: false, message: "That already exists" };
-    }
-    console.error("Error while changing the casual config:", error);
-    return { ok: false, message: "The change could not be saved, please try again" };
-  } finally {
-    client.release();
-  }
-}
 
 export async function getCasualConfigAdminData(): Promise<CasualConfigAdminData | null> {
   if (!(await getConfigAdminSession())) return null;
@@ -164,7 +116,12 @@ export async function getCasualConfigAdminData(): Promise<CasualConfigAdminData 
        LEFT JOIN casual_categories c ON c.id = r.category_id
        ORDER BY r.effective_from DESC, r.id DESC`,
     ),
-    query<{ id: string; summary: string; changedByName: string; changedAt: string }>(
+    query<{
+      id: string;
+      summary: string;
+      changedByName: string;
+      changedAt: string;
+    }>(
       `SELECT id::text, summary, changed_by_name AS "changedByName",
        TO_CHAR(changed_at AT TIME ZONE 'Africa/Nairobi', 'DD Mon YYYY, HH24:MI') AS "changedAt"
        FROM config_changes WHERE table_name IN (${CASUAL_TABLES_SQL})
@@ -184,11 +141,16 @@ export async function getCasualConfigAdminData(): Promise<CasualConfigAdminData 
   };
 }
 
+// Every casual change expires the config the forms load
+const runCasualChange = (
+  work: Parameters<typeof runChange>[1],
+): Promise<ConfigActionResult> => runChange("GetCasualConfig", work);
+
 // ---- Locations ----
 
 export async function addCasualLocation(name: unknown) {
-  return runConfigChange(async (client, actor) => {
-    const locationName = cleanName(name, "location");
+  return runCasualChange(async (client, actor) => {
+    const locationName = cleanConfigName(name, "location");
     const { rows } = await client.query(
       `INSERT INTO casual_locations (location_name) VALUES ($1)
        RETURNING id, location_name, is_active`,
@@ -206,7 +168,13 @@ export async function addCasualLocation(name: unknown) {
 }
 
 export async function setCasualLocationActive(id: unknown, isActive: unknown) {
-  return setActive("casual_locations", "location_name", "location", id, isActive);
+  return setActive(
+    "casual_locations",
+    "location_name",
+    "location",
+    id,
+    isActive,
+  );
 }
 
 // Locations a department may use; an empty list removes its limits, so it
@@ -215,11 +183,11 @@ export async function setDepartmentLocationLimits(
   department: unknown,
   locationIds: unknown,
 ) {
-  return runConfigChange(async (client, actor) => {
+  return runCasualChange(async (client, actor) => {
     if (typeof department !== "string" || !department) {
       throw new ConfigInputError("Choose a department");
     }
-    if (!Array.isArray(locationIds) || !locationIds.every(isId)) {
+    if (!Array.isArray(locationIds) || !locationIds.every(isConfigId)) {
       throw new ConfigInputError("Choose valid locations");
     }
     const ids = [...new Set(locationIds as number[])].sort((a, b) => a - b);
@@ -277,8 +245,8 @@ export async function addCasualSection(
   name: unknown,
   budgetUnit: unknown,
 ) {
-  return runConfigChange(async (client, actor) => {
-    const sectionName = cleanName(name, "section");
+  return runCasualChange(async (client, actor) => {
+    const sectionName = cleanConfigName(name, "section");
     if (!BUDGET_UNITS.includes(budgetUnit as CasualBudgetUnit)) {
       throw new ConfigInputError("Choose a budget unit");
     }
@@ -319,8 +287,8 @@ export async function setCasualSectionActive(id: unknown, isActive: unknown) {
 // ---- Categories ----
 
 export async function addCasualCategory(name: unknown) {
-  return runConfigChange(async (client, actor) => {
-    const categoryName = cleanName(name, "category");
+  return runCasualChange(async (client, actor) => {
+    const categoryName = cleanConfigName(name, "category");
     const { rows } = await client.query(
       `INSERT INTO casual_categories (category_name) VALUES ($1)
        RETURNING id, category_name, is_active`,
@@ -338,7 +306,13 @@ export async function addCasualCategory(name: unknown) {
 }
 
 export async function setCasualCategoryActive(id: unknown, isActive: unknown) {
-  return setActive("casual_categories", "category_name", "category", id, isActive);
+  return setActive(
+    "casual_categories",
+    "category_name",
+    "category",
+    id,
+    isActive,
+  );
 }
 
 // ---- Rates ----
@@ -352,7 +326,7 @@ export async function addCasualRate(input: {
   ratePerDay: number;
   effectiveFrom: string;
 }) {
-  return runConfigChange(async (client, actor) => {
+  return runCasualChange(async (client, actor) => {
     const { department, locationId, categoryId, ratePerDay, effectiveFrom } =
       input ?? {};
 
@@ -364,11 +338,16 @@ export async function addCasualRate(input: {
     ) {
       throw new ConfigInputError("Enter a whole-shilling daily rate above 0");
     }
-    if (typeof effectiveFrom !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(effectiveFrom)) {
+    if (
+      typeof effectiveFrom !== "string" ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(effectiveFrom)
+    ) {
       throw new ConfigInputError("Choose the date the rate takes effect");
     }
 
-    const { rows: [check] } = await client.query<{
+    const {
+      rows: [check],
+    } = await client.query<{
       future: boolean;
       department_ok: boolean;
       location: string | null;
@@ -383,7 +362,9 @@ export async function addCasualRate(input: {
     );
 
     if (!check.future) {
-      throw new ConfigInputError("A new rate must take effect from tomorrow or later");
+      throw new ConfigInputError(
+        "A new rate must take effect from tomorrow or later",
+      );
     }
     if (!check.department_ok) throw new ConfigInputError("Choose a department");
     if (locationId !== null && !check.location) {
@@ -393,25 +374,35 @@ export async function addCasualRate(input: {
       throw new ConfigInputError("Choose an active category");
     }
 
-    const { rows } = await client.query(
-      `INSERT INTO casual_rates
+    const { rows } = await client
+      .query(
+        `INSERT INTO casual_rates
        (department_name, location_id, category_id, rate_per_day, effective_from, created_by_email)
        VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING id, department_name, location_id, category_id, rate_per_day,
        TO_CHAR(effective_from, 'YYYY-MM-DD') AS effective_from`,
-      [department, locationId, categoryId, ratePerDay, effectiveFrom, actor.email],
-    ).catch((error) => {
-      if (error.code === "23505") {
-        throw new ConfigInputError(
-          "A rate for this department, location and category already starts on that date",
-        );
-      }
-      throw error;
-    });
+        [
+          department,
+          locationId,
+          categoryId,
+          ratePerDay,
+          effectiveFrom,
+          actor.email,
+        ],
+      )
+      .catch((error) => {
+        if (error.code === "23505") {
+          throw new ConfigInputError(
+            "A rate for this department, location and category already starts on that date",
+          );
+        }
+        throw error;
+      });
 
     const scope =
-      [department, check.location, check.category].filter(Boolean).join(" · ") ||
-      "all other cases";
+      [department, check.location, check.category]
+        .filter(Boolean)
+        .join(" · ") || "all other cases";
     const summary = `Added rate KES ${ratePerDay.toLocaleString()} for ${scope} from ${effectiveFrom}`;
     await recordConfigChange(client, actor, {
       table: "casual_rates",
@@ -427,8 +418,8 @@ export async function addCasualRate(input: {
 // Only a rate that hasn't taken effect yet - one that has may already have
 // priced requisitions
 export async function deleteCasualRate(id: unknown) {
-  return runConfigChange(async (client, actor) => {
-    if (!isId(id)) throw new ConfigInputError("Choose a rate");
+  return runCasualChange(async (client, actor) => {
+    if (!isConfigId(id)) throw new ConfigInputError("Choose a rate");
 
     const { rows } = await client.query(
       `DELETE FROM casual_rates r
@@ -458,14 +449,17 @@ export async function deleteCasualRate(id: unknown) {
 // ---- Shared ----
 
 async function setActive(
-  table: "casual_locations" | "casual_department_sections" | "casual_categories",
+  table:
+    | "casual_locations"
+    | "casual_department_sections"
+    | "casual_categories",
   nameColumn: string,
   label: string,
   id: unknown,
   isActive: unknown,
 ) {
-  return runConfigChange(async (client, actor) => {
-    if (!isId(id) || typeof isActive !== "boolean") {
+  return runCasualChange(async (client, actor) => {
+    if (!isConfigId(id) || typeof isActive !== "boolean") {
       throw new ConfigInputError(`Choose a ${label}`);
     }
 

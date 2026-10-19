@@ -1,15 +1,23 @@
 "use client";
 
-import { HardHat } from "lucide-react";
+import { useState } from "react";
+import { HardHat, Monitor } from "lucide-react";
 import { SETTINGS_PAGE } from "@/lib/configAdmin";
 import CasualSettings from "./CasualSettings";
+import ItSettings from "./ItSettings";
 
-// One tab per area whose configuration lives in the database. Only Casual
-// so far; the tab strip is where further areas (e.g. IT) go.
-const TABS = [{ key: "casual", label: "Casual", Icon: HardHat }] as const;
+// One tab per area whose configuration is managed here. Travel tiers and
+// job grades live in the database too but are set there by hand.
+const TABS = [
+  { key: "casual", label: "Casual", Icon: HardHat, Panel: CasualSettings },
+  { key: "it", label: "IT", Icon: Monitor, Panel: ItSettings },
+] as const;
+
+type TabKey = (typeof TABS)[number]["key"];
 
 export default function SettingsPage() {
-  const activeTab = TABS[0];
+  const [activeKey, setActiveKey] = useState<TabKey>("casual");
+  const activeTab = TABS.find((tab) => tab.key === activeKey) ?? TABS[0];
 
   return (
     <div className="space-y-5 px-2 pt-4 pb-6">
@@ -25,22 +33,30 @@ export default function SettingsPage() {
       </div>
 
       <div role="tablist" className="flex flex-wrap gap-1.5">
-        {TABS.map(({ key, label, Icon }) => (
-          <button
-            key={key}
-            type="button"
-            role="tab"
-            aria-selected={key === activeTab.key}
-            className="inline-flex items-center gap-1.5 rounded-full bg-slate-900 px-3.5 py-1.5 text-xs font-semibold text-white"
-          >
-            <Icon className="h-3.5 w-3.5" />
-            {label}
-          </button>
-        ))}
+        {TABS.map(({ key, label, Icon }) => {
+          const isActive = key === activeTab.key;
+          return (
+            <button
+              key={key}
+              type="button"
+              role="tab"
+              aria-selected={isActive}
+              onClick={() => setActiveKey(key)}
+              className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors ${
+                isActive
+                  ? "bg-slate-900 text-white"
+                  : "border border-neutral-200 bg-white text-neutral-700 hover:border-neutral-400"
+              }`}
+            >
+              <Icon className="h-3.5 w-3.5" />
+              {label}
+            </button>
+          );
+        })}
       </div>
 
       <div role="tabpanel">
-        <CasualSettings />
+        <activeTab.Panel />
       </div>
     </div>
   );

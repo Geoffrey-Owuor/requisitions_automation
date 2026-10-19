@@ -4,7 +4,10 @@ import { AccessEmailSender } from "@/services/AccessEmailSender";
 import { query } from "@/lib/db";
 import { getSession } from "@/lib/session";
 import { loadHodAlternates, resolveHod, sameEmail } from "@/lib/hodAssignment";
-import { INVALID_DEPARTMENT_MESSAGE, resolveDepartment } from "@/lib/departments";
+import {
+  INVALID_DEPARTMENT_MESSAGE,
+  resolveDepartment,
+} from "@/lib/departments";
 
 export async function POST(request: NextRequest) {
   // Check if we have a valid session

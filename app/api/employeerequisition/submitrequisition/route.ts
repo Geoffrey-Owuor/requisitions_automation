@@ -3,6 +3,7 @@ import { randomUUID } from "crypto";
 import { pool } from "@/lib/db";
 import { getSession } from "@/lib/session";
 import { resolveHod } from "@/lib/hodAssignment";
+import { loadJobGrades } from "@/lib/loadRequisitionOptions";
 import { INVALID_DEPARTMENT_MESSAGE, resolveDepartment } from "@/lib/departments";
 import {
   writePositionAttachments,
@@ -82,12 +83,25 @@ export async function POST(request: NextRequest) {
     }
 
     const today = todayIsoDate();
+    const jobGrades = await loadJobGrades();
+    const activeGrades = jobGrades
+      .filter((grade) => grade.isActive)
+      .map((grade) => grade.name);
+    // Each position stores its grade's rank at submission, so re-ranking
+    // grades later never renumbers it
+    const gradeRank = (name: string) =>
+      jobGrades.find((grade) => grade.name === name)?.rank ?? null;
 
     // Validate every position and collect its files - never trust client state
     const positionFiles: Partial<Record<EmployeeAttachmentType, File>>[] = [];
 
     for (let index = 0; index < positions.length; index++) {
-      const positionError = getPositionError(positions[index], index, today);
+      const positionError = getPositionError(
+        positions[index],
+        index,
+        today,
+        activeGrades,
+      );
 
       if (positionError) {
         return NextResponse.json({ message: positionError }, { status: 400 });
@@ -185,11 +199,11 @@ export async function POST(request: NextRequest) {
         ],
       );
 
-      const positionColumns = 10;
+      const positionColumns = 11;
       const positionValuesClause = positions
         .map(
           (_, index) =>
-            `($${index * positionColumns + 1}, $${index * positionColumns + 2}, $${index * positionColumns + 3}, $${index * positionColumns + 4}, $${index * positionColumns + 5}, $${index * positionColumns + 6}, $${index * positionColumns + 7}, $${index * positionColumns + 8}, $${index * positionColumns + 9}, $${index * positionColumns + 10})`,
+            `($${index * positionColumns + 1}, $${index * positionColumns + 2}, $${index * positionColumns + 3}, $${index * positionColumns + 4}, $${index * positionColumns + 5}, $${index * positionColumns + 6}, $${index * positionColumns + 7}, $${index * positionColumns + 8}, $${index * positionColumns + 9}, $${index * positionColumns + 10}, $${index * positionColumns + 11})`,
         )
         .join(", ");
 
@@ -204,6 +218,7 @@ export async function POST(request: NextRequest) {
         position.replacementOrNew,
         position.jobGrade,
         formatSalaryRange(Number(position.salaryMin), Number(position.salaryMax)),
+        gradeRank(position.jobGrade),
       ]);
 
       await client.query(
@@ -211,7 +226,8 @@ export async function POST(request: NextRequest) {
         INSERT INTO employee_requisition_positions
         (position_id, request_id, position_title, number_required,
         position_justification, position_reporting_to, date_position_filled,
-        position_replacement_or_new, position_job_grade, position_salary_range)
+        position_replacement_or_new, position_job_grade, position_salary_range,
+        position_job_grade_rank)
         VALUES ${positionValuesClause}
         `,
         positionParams,

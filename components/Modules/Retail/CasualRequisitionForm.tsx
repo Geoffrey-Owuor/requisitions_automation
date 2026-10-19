@@ -627,8 +627,8 @@ export default function CasualRequisitionForm({
                   )}
                   {rateMissing && (
                     <p className="col-span-full text-[13px] text-rose-600">
-                      No daily rate is set up for this department and
-                      location yet - contact the admin for support.
+                      No daily rate is set up for this department and location
+                      yet - contact the admin for support.
                     </p>
                   )}
                 </div>

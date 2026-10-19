@@ -13,7 +13,11 @@ import {
 import Image from "next/image";
 import { assets } from "@/public/assets";
 import { useQuery } from "@tanstack/react-query";
-import { loadHodArray, loadBaseDepartments } from "@/lib/loadAppDataV2";
+import {
+  loadHodArray,
+  loadBaseDepartments,
+  loadItRequirementOptions,
+} from "@/lib/loadAppDataV2";
 import ITConfirmationModal from "./ITConfirmationModal";
 import { ApiHandler } from "@/utils/ApiHandler";
 import SubmittingOverlay from "../SubmittingOverlay";
@@ -32,17 +36,6 @@ import {
 
 // ---- Constants ----
 const REQUEST_TYPES = ["Replacement", "New"];
-
-const IT_REQUIREMENTS = [
-  "Laptop",
-  "Desktop",
-  "Email",
-  "Orion",
-  "DMS",
-  "Qlik",
-  "Phone Extension",
-  "Dialing Code",
-] as const;
 
 // ---- Types ----
 export interface ITFormData {
@@ -89,6 +82,13 @@ export default function ITRequisitionPage() {
   const { email } = useUser();
 
   // Load departments
+  // Requirement checkboxes (it_requirement_items, managed in Settings)
+  const { data: requirementItems = [] } = useQuery({
+    queryKey: ["ItRequirementItemsData"],
+    queryFn: loadItRequirementOptions,
+  });
+  const requirementOptions = requirementItems.map((item) => item.name);
+
   const { data: departments = [], isLoading: departmentsLoading } = useQuery({
     queryKey: ["BaseDepartmentsData"],
     queryFn: loadBaseDepartments,
@@ -344,7 +344,7 @@ export default function ITRequisitionPage() {
                 </h2>
                 <CheckboxGroup
                   label="Select all that apply"
-                  options={IT_REQUIREMENTS}
+                  options={requirementOptions}
                   selected={formData.requirements}
                   onChange={(v) => updateField("requirements", v)}
                 />

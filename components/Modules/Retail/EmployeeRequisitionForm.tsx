@@ -18,12 +18,15 @@ import {
 import { RequisitionFormSkeleton } from "@/components/Skeletons/RequisitionFormSkeleton";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { DASHBOARD_SUMMARY_KEY } from "@/hooks/useDashboardSummary";
-import { loadHodArray, loadBaseDepartments } from "@/lib/loadAppDataV2";
+import {
+  loadHodArray,
+  loadBaseDepartments,
+  loadJobGradeOptions,
+} from "@/lib/loadAppDataV2";
+import type { JobGrade } from "@/lib/loadRequisitionOptions";
 import {
   assets,
   REPLACEMENT_OR_NEW_OPTIONS,
-  JOB_GRADES,
-  getJobGradeNumber,
   EMPLOYEE_ATTACHMENT_TYPES,
   EMPLOYEE_ATTACHMENT_TYPE_LABELS,
   EmployeeAttachmentType,
@@ -138,6 +141,13 @@ export default function EmployeeRequisitionForm({
     queryFn: loadBaseDepartments,
   });
   const DEPARTMENTS = departments.map((department) => department.name);
+
+  // Job grades (job_grades), inactive ones included so an amendment's
+  // existing grade still gets its number
+  const { data: jobGrades = [], isLoading: gradesLoading } = useQuery({
+    queryKey: ["JobGradesData"],
+    queryFn: loadJobGradeOptions,
+  });
 
   const { data: rawHodArray = [], isLoading: hodsLoading } = useQuery({
     queryKey: ["BaseHodArrayData"],
@@ -490,6 +500,7 @@ export default function EmployeeRequisitionForm({
       {step === 2 && (
         <EmployeeConfirmationModal
           formData={formData}
+          jobGrades={jobGrades}
           hodApproverName={hodLabel(formData.hodApprover)}
           isAmendment={isAmendment}
           reason={reason.trim()}
@@ -607,6 +618,8 @@ export default function EmployeeRequisitionForm({
                       today={today}
                       showRemove={formData.positions.length > 1}
                       fileErrors={fileErrors}
+                      jobGrades={jobGrades}
+                      gradesLoading={gradesLoading}
                       onRemove={() => removePosition(position.clientId)}
                       onChange={(field, value) =>
                         updatePositionField(position.clientId, field, value)
@@ -683,6 +696,8 @@ function PositionFieldset({
   today,
   showRemove,
   fileErrors,
+  jobGrades,
+  gradesLoading,
   onRemove,
   onChange,
   onFileChange,
@@ -693,6 +708,8 @@ function PositionFieldset({
   today: string;
   showRemove: boolean;
   fileErrors: Record<string, string>;
+  jobGrades: JobGrade[];
+  gradesLoading: boolean;
   onRemove: () => void;
   onChange: <K extends keyof EmployeePositionFormData>(
     field: K,
@@ -789,10 +806,16 @@ function PositionFieldset({
         />
         <FormSelect
           label="Job Grade"
-          options={[...JOB_GRADES]}
+          options={jobGrades
+            .filter((grade) => grade.isActive)
+            .map((grade) => grade.name)}
           value={position.jobGrade}
+          loading={gradesLoading}
           onChange={(v) => onChange("jobGrade", v)}
-          optionLabel={(grade) => `${getJobGradeNumber(grade)}. ${grade}`}
+          optionLabel={(name) => {
+            const rank = jobGrades.find((grade) => grade.name === name)?.rank;
+            return rank ? `${rank}. ${name}` : name;
+          }}
         />
         <span className="col-span-2 text-[13px] font-semibold text-rose-600">
           Salary Range (KES)

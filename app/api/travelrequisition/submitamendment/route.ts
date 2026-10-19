@@ -5,6 +5,7 @@ import { getSession } from "@/lib/session";
 import { isUuid } from "@/lib/uuid";
 import { assignedHodNameSql, resolveHod, sameEmail } from "@/lib/hodAssignment";
 import { INVALID_DEPARTMENT_MESSAGE, resolveDepartment } from "@/lib/departments";
+import { loadTravelThresholdsToday } from "@/lib/loadRequisitionOptions";
 import {
   resolveEngineeringJobs,
   TravelFormDataInput,
@@ -66,10 +67,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const validation = validateTravelFormData(formData as TravelFormDataInput);
+    const validation = validateTravelFormData(
+      formData as TravelFormDataInput,
+      await loadTravelThresholdsToday(),
+    );
 
     if (!validation.ok) {
-      return NextResponse.json({ message: validation.message }, { status: 400 });
+      return NextResponse.json(
+        { message: validation.message },
+        { status: validation.status },
+      );
     }
 
     const { totalCost, approvalTier } = validation;

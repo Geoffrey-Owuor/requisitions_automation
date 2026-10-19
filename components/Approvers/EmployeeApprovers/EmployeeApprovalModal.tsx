@@ -18,7 +18,7 @@ import {
 import {
   assets,
   dateFormatter,
-  getJobGradeNumber,
+  formatJobGrade,
   EMPLOYEE_STAGE_LABELS,
 } from "@/public/assets";
 import SubmittingOverlay from "@/components/SubmittingOverlay";
@@ -48,6 +48,7 @@ export interface EmployeeApprovalPosition {
   numberRequired: number;
   replacementOrNew: string;
   jobGrade: string;
+  jobGradeRank: number | null;
   salaryRange: string;
   justification: string;
   reportingTo: string;
@@ -326,7 +327,10 @@ const EmployeeApprovalModal = ({
                       <DetailRow
                         icon={Layers}
                         label="Job Grade"
-                        value={`${position.jobGrade} (Grade ${getJobGradeNumber(position.jobGrade)})`}
+                        value={formatJobGrade(
+                          position.jobGrade,
+                          position.jobGradeRank,
+                        )}
                       />
                       <DetailRow
                         icon={Wallet}

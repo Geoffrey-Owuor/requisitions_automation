@@ -2,7 +2,7 @@
 
 import { EmployeeEmailDataValues } from "@/services/EmployeeEmailSender";
 import StatusFormatter from "@/components/Dashboard/StatusFormatter";
-import { dateFormatter, getJobGradeNumber } from "@/public/assets";
+import { dateFormatter, formatJobGrade } from "@/public/assets";
 import AttachmentTypeGroups from "./AttachmentTypeGroups";
 import EmployeeAmendmentHistory from "./EmployeeAmendmentHistory";
 
@@ -88,7 +88,7 @@ const PositionCard = ({
       <Field label="Replacement/New" value={position.replacementornew} />
       <Field
         label="Job Grade"
-        value={`${position.jobgrade} (Grade ${getJobGradeNumber(position.jobgrade)})`}
+        value={formatJobGrade(position.jobgrade, position.jobgraderank)}
       />
       <Field label="Salary Range (KES)" value={position.salaryrange} />
     </div>
