@@ -46,7 +46,7 @@ export const HOME_NAV_ITEM: DashboardNavItem = {
 
 export const GUIDELINES_NAV_ITEM: DashboardNavItem = {
   key: "guidelines",
-  href: "/guidelines",
+  href: "/guidelines/travel",
   label: "Guidelines",
   shortLabel: "Guides",
   Icon: CircleQuestionMark,
