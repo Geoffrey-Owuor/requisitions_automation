@@ -114,7 +114,9 @@ export function resolveCasualRate(
   },
 ): number | null {
   const specificity = (rule: CasualRateRule) =>
-    (rule.department ? 4 : 0) + (rule.location ? 2 : 0) + (rule.category ? 1 : 0);
+    (rule.department ? 4 : 0) +
+    (rule.location ? 2 : 0) +
+    (rule.category ? 1 : 0);
 
   const matches = rates.filter(
     (rule) =>
@@ -151,7 +153,9 @@ export function currentCasualRates<T extends CasualRateRule>(
   }
 
   const specificity = (rule: T) =>
-    (rule.department ? 4 : 0) + (rule.location ? 2 : 0) + (rule.category ? 1 : 0);
+    (rule.department ? 4 : 0) +
+    (rule.location ? 2 : 0) +
+    (rule.category ? 1 : 0);
 
   return [...latest.values()].sort((a, b) => specificity(a) - specificity(b));
 }

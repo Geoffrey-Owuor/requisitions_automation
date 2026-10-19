@@ -8,6 +8,14 @@ import { query } from "./db";
 import { getSession } from "./session";
 import { loadCasualConfig as loadCachedCasualConfig } from "./loadCasualConfig";
 import type { CasualConfig, CasualRateRule } from "./casualConfig";
+import {
+  loadItRequirementItems as loadCachedItRequirementItems,
+  loadJobGrades as loadCachedJobGrades,
+  loadTravelTierThresholds as loadCachedTravelTierThresholds,
+  type ItRequirementItem,
+  type JobGrade,
+} from "./loadRequisitionOptions";
+import type { TravelTierThresholds } from "@/utils/calculateTravelApprovalTier";
 
 // A department as the forms see it: its name plus the flags that change
 // what a form asks for (base_departments, migrations 024/025)
@@ -108,6 +116,63 @@ export const loadPublicCasualRates = async (): Promise<CasualRateRule[]> => {
     return (await loadCachedCasualConfig()).rates;
   } catch (error) {
     console.error("Error while trying to fetch the casual rates:", error);
+    return [];
+  }
+};
+
+// Travel tier thresholds, every effective date (thresholdsOn picks one).
+// Session-gated for the Travel form; null when they can't be read.
+export const loadTravelTiers = async (): Promise<
+  TravelTierThresholds[] | null
+> => {
+  if (!(await getSession())) return null;
+  try {
+    return await loadCachedTravelTierThresholds();
+  } catch (error) {
+    console.error("Error while trying to fetch the travel tiers:", error);
+    return null;
+  }
+};
+
+// The same thresholds for the public Travel guideline page, which published
+// them before they moved to the database
+export const loadPublicTravelTiers = async (): Promise<
+  TravelTierThresholds[]
+> => {
+  try {
+    return await loadCachedTravelTierThresholds();
+  } catch (error) {
+    console.error("Error while trying to fetch the travel tiers:", error);
+    return [];
+  }
+};
+
+// Job grades in rank order, inactive ones included; session-gated for the
+// Employee form
+export const loadJobGradeOptions = async (): Promise<JobGrade[]> => {
+  if (!(await getSession())) return [];
+  try {
+    return await loadCachedJobGrades();
+  } catch (error) {
+    console.error("Error while trying to fetch the job grades:", error);
+    return [];
+  }
+};
+
+// Active IT requirement items; session-gated for the IT form
+export const loadItRequirementOptions = async (): Promise<
+  ItRequirementItem[]
+> => {
+  if (!(await getSession())) return [];
+  try {
+    return (await loadCachedItRequirementItems()).filter(
+      (item) => item.isActive,
+    );
+  } catch (error) {
+    console.error(
+      "Error while trying to fetch the IT requirement items:",
+      error,
+    );
     return [];
   }
 };

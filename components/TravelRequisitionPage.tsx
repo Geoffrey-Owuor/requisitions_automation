@@ -24,10 +24,21 @@ import {
 } from "@/public/assets";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { DASHBOARD_SUMMARY_KEY } from "@/hooks/useDashboardSummary";
-import { loadBaseDepartments, loadHodArray } from "@/lib/loadAppDataV2";
+import {
+  loadBaseDepartments,
+  loadHodArray,
+  loadTravelTiers,
+} from "@/lib/loadAppDataV2";
 import TravelConfirmationModal from "./TravelConfirmationModal";
 import { ApiHandler } from "@/utils/ApiHandler";
-import { calculateTravelApprovalTier } from "@/utils/calculateTravelApprovalTier";
+import {
+  calculateTravelApprovalTier,
+  thresholdsOn,
+  travelTierCostLabels,
+} from "@/utils/calculateTravelApprovalTier";
+import { nairobiToday } from "@/lib/casualConfig";
+
+const TRAVEL_TIERS_KEY = ["TravelTiersData"];
 import SubmittingOverlay from "./SubmittingOverlay";
 import AlertModal from "./AlertModal";
 import { EngineeringJobFields, EngineeringJob } from "./EngineeringJobFields";
@@ -112,6 +123,14 @@ export default function TravelRequisitionPage({
     queryFn: loadBaseDepartments,
   });
   const DEPARTMENTS = departments.map((department) => department.name);
+
+  // Approval tier thresholds in effect today (travel_tier_thresholds)
+  const { data: tierRows } = useQuery({
+    queryKey: TRAVEL_TIERS_KEY,
+    queryFn: loadTravelTiers,
+  });
+  const thresholds = tierRows ? thresholdsOn(tierRows, nairobiToday()) : null;
+  const tierCostLabels = thresholds ? travelTierCostLabels(thresholds) : null;
 
   // Load HODS
   const { data: rawHodArray = [], isLoading: hodsLoading } = useQuery({
@@ -215,16 +234,21 @@ export default function TravelRequisitionPage({
       formData.engineeringJobs.some(
         (job) => !job.title || isEmpty(job.amount),
       )) ||
-    (isAmendment && reason.trim() === "");
+    (isAmendment && reason.trim() === "") ||
+    !thresholds;
 
   // Getting the total cost
   const totalCost =
     formData.transportCost + formData.otherCost + formData.perDiem;
 
-  // Generating an approval tier
+  // Generating an approval tier - the server recomputes it and rejects the
+  // submission if the thresholds changed since they loaded here
   const generatedAprovalTier = useMemo(
-    () => calculateTravelApprovalTier(Number(totalCost)),
-    [totalCost],
+    () =>
+      thresholds
+        ? calculateTravelApprovalTier(Number(totalCost), thresholds)
+        : "—",
+    [totalCost, thresholds],
   );
 
   // Calculate total engineering job costs
@@ -250,6 +274,7 @@ export default function TravelRequisitionPage({
       ...formData,
       // We override this property specifically for the database string
       engineeringJobs: formattedEngineeringJobs,
+      expectedApprovalTier: generatedAprovalTier,
     };
 
     const payload = isAmendment
@@ -308,6 +333,8 @@ export default function TravelRequisitionPage({
     } catch (error) {
       if (error instanceof Error) {
         console.error("Error while trying to submit your requisition", error);
+        // The tier thresholds may have changed since the form loaded
+        queryClient.invalidateQueries({ queryKey: TRAVEL_TIERS_KEY });
         const errorString = error.toString();
         setAlertInfo({ alertType: "error", alertMessage: errorString });
 
@@ -483,7 +510,7 @@ export default function TravelRequisitionPage({
                       |
                     </span>
                     <span className="block text-xs text-slate-500 sm:inline sm:text-sm">
-                      Under KES 30,000
+                      {tierCostLabels?.["Tier 1"] ?? "…"}
                     </span>
                   </div>
                 </div>
@@ -511,7 +538,7 @@ export default function TravelRequisitionPage({
                       |
                     </span>
                     <span className="block text-xs text-slate-500 sm:inline sm:text-sm">
-                      KES 30,000 - 100,000
+                      {tierCostLabels?.["Tier 2"] ?? "…"}
                     </span>
                   </div>
                 </div>
@@ -539,7 +566,7 @@ export default function TravelRequisitionPage({
                       |
                     </span>
                     <span className="block text-xs text-slate-500 sm:inline sm:text-sm">
-                      Over KES 100,000
+                      {tierCostLabels?.["Tier 3"] ?? "…"}
                     </span>
                   </div>
                 </div>

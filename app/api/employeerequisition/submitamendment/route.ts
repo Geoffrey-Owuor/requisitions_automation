@@ -28,6 +28,7 @@ import {
   EmployeeAttachmentType,
   MAX_AMENDMENT_REASON_LENGTH,
 } from "@/public/assets";
+import { loadJobGrades } from "@/lib/loadRequisitionOptions";
 import { INVALID_DEPARTMENT_MESSAGE, resolveDepartment } from "@/lib/departments";
 
 // Amends an employee requisition: the original submitter only, until HR
@@ -195,13 +196,38 @@ export async function POST(request: NextRequest) {
     }
 
     const today = todayIsoDate();
+    const jobGrades = await loadJobGrades();
+    const activeGrades = jobGrades
+      .filter((grade) => grade.isActive)
+      .map((grade) => grade.name);
+    // A position stores its grade's rank as of this amendment
+    const gradeRank = (name: string) =>
+      jobGrades.find((grade) => grade.name === name)?.rank ?? null;
+    // An existing position may keep its grade even once it's inactive.
+    // Read before the ownership check, but only used to widen validation.
+    const currentGrades = new Map(
+      (
+        await query<{ position_id: string; position_job_grade: string }>(
+          `SELECT position_id, position_job_grade FROM employee_requisition_positions
+           WHERE request_id = $1`,
+          [requestId],
+        )
+      ).map((row) => [row.position_id, row.position_job_grade]),
+    );
     const positionFiles: Partial<Record<EmployeeAttachmentType, File>>[] = [];
     const seenPositionIds = new Set<string>();
 
     for (let index = 0; index < positions.length; index++) {
       const position = positions[index];
 
-      const positionError = getPositionError(position, index, today);
+      const keptGrade =
+        typeof position.positionId === "string"
+          ? currentGrades.get(position.positionId)
+          : undefined;
+      const positionError = getPositionError(position, index, today, [
+        ...activeGrades,
+        ...(keptGrade ? [keptGrade] : []),
+      ]);
       if (positionError) {
         return NextResponse.json({ message: positionError }, { status: 400 });
       }
@@ -722,9 +748,10 @@ export async function POST(request: NextRequest) {
           `INSERT INTO employee_requisition_positions
            (position_id, request_id, position_title, number_required,
             position_justification, position_reporting_to, date_position_filled,
-            position_replacement_or_new, position_job_grade, position_salary_range)
-           VALUES ($1, $10, $2, $3, $4, $5, $6, $7, $8, $9)`,
-          [...values, requestId],
+            position_replacement_or_new, position_job_grade, position_salary_range,
+           position_job_grade_rank)
+           VALUES ($1, $10, $2, $3, $4, $5, $6, $7, $8, $9, $11)`,
+          [...values, requestId, gradeRank(next.jobGrade)],
         );
 
         await insertPositionHistory(diff);
@@ -734,9 +761,10 @@ export async function POST(request: NextRequest) {
            SET position_title = $2, number_required = $3,
            position_justification = $4, position_reporting_to = $5,
            date_position_filled = $6, position_replacement_or_new = $7,
-           position_job_grade = $8, position_salary_range = $9
+           position_job_grade = $8, position_salary_range = $9,
+           position_job_grade_rank = $10
            WHERE position_id = $1`,
-          values,
+          [...values, gradeRank(next.jobGrade)],
         );
       }
     }

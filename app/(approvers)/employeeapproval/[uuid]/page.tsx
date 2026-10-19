@@ -13,10 +13,7 @@ import {
   employeeAmendmentsQuery,
   EmployeeAmendmentValues,
 } from "@/lib/employeeAmendment";
-import {
-  isValidEmployeeStage,
-  EMPLOYEE_STAGE_LABELS,
-} from "@/public/assets";
+import { isValidEmployeeStage, EMPLOYEE_STAGE_LABELS } from "@/public/assets";
 
 type ApprovalPageProps = {
   params: Promise<{ uuid: string }>;
@@ -157,7 +154,8 @@ const ApprovalPageContent = async ({
       SELECT
         position_id, position_title, number_required,
         position_justification, position_reporting_to, date_position_filled,
-        position_replacement_or_new, position_job_grade, position_salary_range
+        position_replacement_or_new, position_job_grade, position_job_grade_rank,
+        position_salary_range
         FROM employee_requisition_positions
         WHERE request_id = $1
         ORDER BY position_created_at, position_id
@@ -211,6 +209,7 @@ const ApprovalPageContent = async ({
         numberRequired: position.number_required,
         replacementOrNew: position.position_replacement_or_new,
         jobGrade: position.position_job_grade,
+        jobGradeRank: position.position_job_grade_rank,
         salaryRange: position.position_salary_range,
         justification: position.position_justification,
         reportingTo: position.position_reporting_to,

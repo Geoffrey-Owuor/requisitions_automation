@@ -4,15 +4,17 @@ import { ArrowLeft, Send } from "lucide-react";
 import { EmployeeFormData } from "./EmployeeRequisitionForm";
 import {
   dateFormatter,
-  getJobGradeNumber,
+  formatJobGrade,
   EMPLOYEE_ATTACHMENT_TYPES,
   EMPLOYEE_ATTACHMENT_TYPE_LABELS,
 } from "@/public/assets";
 import { useUser } from "@/context/UserContext";
+import type { JobGrade } from "@/lib/loadRequisitionOptions";
 import { initialsHelper } from "@/public/assets";
 
 interface EmployeeConfirmationModalProps {
   formData: EmployeeFormData;
+  jobGrades: JobGrade[];
   // Display name for formData.hodApprover, which holds the HOD's email
   hodApproverName: string;
   isAmendment?: boolean;
@@ -24,6 +26,7 @@ interface EmployeeConfirmationModalProps {
 
 export default function EmployeeConfirmationModal({
   formData,
+  jobGrades,
   hodApproverName,
   isAmendment = false,
   reason,
@@ -153,7 +156,12 @@ export default function EmployeeConfirmationModal({
                   <span className="text-[#7c5a5a]">Job Grade</span>
                   <span className="font-medium text-[#1e1b1b]">
                     {position.jobGrade
-                      ? `${position.jobGrade} (Grade ${getJobGradeNumber(position.jobGrade)})`
+                      ? formatJobGrade(
+                          position.jobGrade,
+                          jobGrades.find(
+                            (grade) => grade.name === position.jobGrade,
+                          )?.rank ?? null,
+                        )
                       : "—"}
                   </span>
                 </div>

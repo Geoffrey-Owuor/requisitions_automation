@@ -5,6 +5,7 @@ import { EmailSender } from "@/services/EmailSender";
 import { getSession } from "@/lib/session";
 import { loadHodAlternates, resolveHod, sameEmail } from "@/lib/hodAssignment";
 import { INVALID_DEPARTMENT_MESSAGE, resolveDepartment } from "@/lib/departments";
+import { loadTravelThresholdsToday } from "@/lib/loadRequisitionOptions";
 import {
   resolveEngineeringJobs,
   validateTravelFormData,
@@ -50,10 +51,16 @@ export async function POST(request: NextRequest) {
 
     // Recompute total cost and approval tier server-side rather than trusting
     // the client-supplied values, so a tampered request can't skip HR/Director review.
-    const validation = validateTravelFormData(formData);
+    const validation = validateTravelFormData(
+      formData,
+      await loadTravelThresholdsToday(),
+    );
 
     if (!validation.ok) {
-      return NextResponse.json({ message: validation.message }, { status: 400 });
+      return NextResponse.json(
+        { message: validation.message },
+        { status: validation.status },
+      );
     }
 
     const { totalCost, approvalTier } = validation;

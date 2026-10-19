@@ -13,7 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import StatusFormatter from "../StatusFormatter";
 import {
   dateFormatter,
-  getJobGradeNumber,
+  formatJobGrade,
   isEmployeeAmendableHrStatus,
 } from "@/public/assets";
 import Link from "next/link";
@@ -218,8 +218,8 @@ export const EmployeeDetailsModal = ({
                     {position.positiontitle}
                   </span>
                   <span className="text-[11px] text-neutral-500">
-                    {position.replacementornew} &middot; {position.jobgrade}{" "}
-                    (Grade {getJobGradeNumber(position.jobgrade)})
+                    {position.replacementornew} &middot;{" "}
+                    {formatJobGrade(position.jobgrade, position.jobgraderank)}
                   </span>
                 </div>
                 <div className="mt-2 flex flex-wrap gap-4 text-[12px] text-neutral-500">

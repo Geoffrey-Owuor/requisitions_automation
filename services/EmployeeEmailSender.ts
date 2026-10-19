@@ -21,6 +21,7 @@ export interface EmployeePositionValues {
   numberrequired: number;
   replacementornew: string;
   jobgrade: string;
+  jobgraderank: number | null;
   salaryrange: string;
   justification: string;
   reportingto: string;
@@ -91,6 +92,7 @@ export const employeePositionsQuery = `
        number_required AS numberrequired,
        position_replacement_or_new AS replacementornew,
        position_job_grade AS jobgrade,
+       position_job_grade_rank AS jobgraderank,
        position_salary_range AS salaryrange,
        position_justification AS justification,
        position_reporting_to AS reportingto,

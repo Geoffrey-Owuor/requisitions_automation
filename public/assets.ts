@@ -197,20 +197,11 @@ export function isCasualAmendableHrStatus(hrStatus: string): boolean {
 export const REPLACEMENT_OR_NEW_OPTIONS = ["Replacement", "New"] as const;
 export type ReplacementOrNew = (typeof REPLACEMENT_OR_NEW_OPTIONS)[number];
 
-export const JOB_GRADES = [
-  "Assistant Officer",
-  "Officer",
-  "Supervisor",
-  "Executive",
-  "Senior Executive",
-  "Manager",
-  "Senior Manager",
-  "Head",
-  "Director",
-] as const;
-export type JobGrade = (typeof JOB_GRADES)[number];
-export function getJobGradeNumber(grade: string): number {
-  return JOB_GRADES.indexOf(grade as JobGrade) + 1;
+// "Officer (Grade 2)". Job grades live in job_grades (migration 027); a
+// position stores its grade's rank at submission (position_job_grade_rank),
+// null for a grade that had none - shown without a number then.
+export function formatJobGrade(grade: string, rank: number | null): string {
+  return rank ? `${grade} (Grade ${rank})` : grade;
 }
 
 export function formatSalaryRange(min: number, max: number): string {
