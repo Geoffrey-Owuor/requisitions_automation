@@ -1,7 +1,6 @@
 import {
   CheckCircle2,
   CreditCard,
-  MapPin,
   Pencil,
   Plane,
   Shield,
@@ -14,8 +13,8 @@ import {
   GuidelineHeading,
   InfoCard,
   SectionTitle,
-  TierCard,
 } from "./GuidelinePrimitives";
+import TravelTierCards from "./TravelTierCards";
 
 // Guidelines Content Components
 export default function TravelRequisitionGuideline() {
@@ -62,29 +61,7 @@ export default function TravelRequisitionGuideline() {
       {/* Approval Tiers Section */}
       <section className="space-y-4">
         <SectionTitle icon={<Shield size={17} />}>Approval Tiers</SectionTitle>
-        <div className="flex flex-col gap-3">
-          <TierCard
-            tier="Tier 1"
-            type="Local Road Travel"
-            cost="Under KES 30k"
-            approvers={["HOD Approval", "HR Approval"]}
-            icon={<MapPin size={22} />}
-          />
-          <TierCard
-            tier="Tier 2"
-            type="Local Air Travel"
-            cost="KES 30k - 100k"
-            approvers={["HOD Approval", "HR Approval"]}
-            icon={<Plane size={22} />}
-          />
-          <TierCard
-            tier="Tier 3"
-            type="International Travel"
-            cost="Above KES 100k"
-            approvers={["HOD Approval", "HR Approval", "Director Approval"]}
-            icon={<Shield size={22} />}
-          />
-        </div>
+        <TravelTierCards />
       </section>
 
       {/* Amendments Section */}

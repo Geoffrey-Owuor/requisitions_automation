@@ -7,7 +7,7 @@ import {
   dateFormatter,
   BASE_URL,
   EMPLOYEE_ATTACHMENT_TYPE_LABELS,
-  RETAIL_DEPARTMENT,
+  formatJobGrade,
 } from "@/public/assets";
 import { escapeHtml } from "@/utils/escapeHtml";
 
@@ -105,7 +105,7 @@ export function EmployeeRequisitionTemplate({
           <div style="border-radius: 16px; border: 1px solid #f0e6e6; overflow: hidden;">
              ${statusCard("Head of Department", emailData.hodapprovalstatus, emailData.hodapprover, emailData.hodemail, emailData.hodcomments)}
              ${
-               emailData.department === RETAIL_DEPARTMENT
+               emailData.retaildirectorapprovalstatus !== "N/A"
                  ? statusCard("Retail Director", emailData.retaildirectorapprovalstatus, emailData.retaildirectorapprover, emailData.retaildirectoremail, emailData.retaildirectorcomments)
                  : ""
              }
@@ -170,7 +170,7 @@ function positionCard(position: EmployeePositionValues, reviewLink?: string) {
         ${modernRow("Reporting To", position.reportingto)}
         ${modernRow("Date Position Should Be Filled", formattedDate)}
         ${modernRow("Replacement/New", position.replacementornew)}
-        ${modernRow("Job Grade", position.jobgrade)}
+        ${modernRow("Job Grade", formatJobGrade(position.jobgrade, position.jobgraderank))}
         ${modernRow("Salary Range (KES)", position.salaryrange)}
         ${modernRow("Justification", position.justification)}
       </table>

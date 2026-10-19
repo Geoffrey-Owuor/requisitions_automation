@@ -10,7 +10,7 @@ import { retailDirectorApprovalStage } from "@/utils/EmployeeApprovalStages/reta
 import { directorApprovalStage } from "@/utils/EmployeeApprovalStages/directorApprovalStage";
 import { hrApprovalStage } from "@/utils/EmployeeApprovalStages/hrApprovalStage";
 import { EmployeeEmailSender } from "@/services/EmployeeEmailSender";
-import { isValidEmployeeStage, RETAIL_DEPARTMENT } from "@/public/assets";
+import { isValidEmployeeStage } from "@/public/assets";
 import { isDirectorEmail } from "@/utils/isDirectorEmail";
 import { isRetailDirectorEmail } from "@/utils/isRetailDirectorEmail";
 
@@ -67,7 +67,8 @@ export async function UpdateEmployeeStatus(
     const { rows: reviewedResult } = await client.query(
       `SELECT employee_${payload.stage}_approval_status AS approval_status,
        employee_${payload.stage}_approver AS approver,
-       submitter_email, employee_department, employee_hod_email,
+       submitter_email, employee_hod_email,
+       employee_retail_director_approval_status AS retail_director_approval_status,
        COALESCE(employee_hod_actioned_by_email, employee_hod_email) AS employee_hod_actioned_by_email,
        employee_retail_director_email, employee_director_email,
        employee_director_approval_status AS director_approval_status,
@@ -107,7 +108,10 @@ export async function UpdateEmployeeStatus(
 
     // Required stages data
     const userEmail = reviewedResult[0].submitter_email;
-    const department = reviewedResult[0].employee_department;
+    // Decided at submission/amendment from the department's flag and stored
+    // as 'N/A' when the stage doesn't apply
+    const hasRetailDirectorStage =
+      reviewedResult[0].retail_director_approval_status !== "N/A";
     const assignedHodEmail = reviewedResult[0].employee_hod_email;
     // Later-stage emails go to whoever actually acted on the HOD stage
     const hodEmail = reviewedResult[0].employee_hod_actioned_by_email;
@@ -128,10 +132,10 @@ export async function UpdateEmployeeStatus(
       }
     }
 
-    // Retail Director is only part of the chain for Retail-department
-    // requisitions - reject action on that stage otherwise, even if a valid
-    // retail director approval token is used.
-    if (payload.stage === "retail_director" && department !== RETAIL_DEPARTMENT) {
+    // Retail Director is only part of the chain when the requisition has that
+    // stage - reject action on it otherwise, even if a valid retail director
+    // approval token is used.
+    if (payload.stage === "retail_director" && !hasRetailDirectorStage) {
       await client.query("ROLLBACK");
       return {
         alertType: "error",
@@ -172,7 +176,7 @@ export async function UpdateEmployeeStatus(
     let skipRetailDirectorStage = false;
     let skipDirectorStage = false;
     if (payload.stage === "hod" && payload.status === "approved") {
-      if (department === RETAIL_DEPARTMENT) {
+      if (hasRetailDirectorStage) {
         skipRetailDirectorStage = await isRetailDirectorEmail(
           client,
           approverEmail,
@@ -222,7 +226,7 @@ export async function UpdateEmployeeStatus(
           status: payload.status,
           approverEmail,
           approverName,
-          department,
+          hasRetailDirectorStage,
           skipRetailDirectorStage,
           skipDirectorStage,
         });

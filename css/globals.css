@@ -383,6 +383,30 @@ html {
     }
   }
 
+  /* Mobile navigation drawer (MobileHeader): slides in from the left edge,
+     leaving a strip of backdrop to tap on the narrowest phones */
+  .modal-drawer {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: min(20rem, 85vw);
+    height: 100dvh;
+    flex-direction: column;
+    border-radius: 0 1.25rem 1.25rem 0;
+    padding-bottom: env(safe-area-inset-bottom);
+    transform: translateX(-100%);
+  }
+
+  .modal-drawer[open] {
+    display: flex;
+    transform: none;
+  }
+
+  @starting-style {
+    .modal-drawer[open] {
+      transform: translateX(-100%);
+    }
+  }
+
   @media (width >= 40rem) {
     .modal-sheet {
       margin: auto;

@@ -8,7 +8,6 @@ import {
 import { loadHodAlternates, sameEmail } from "@/lib/hodAssignment";
 import { isDirectorEmail } from "@/utils/isDirectorEmail";
 import { isRetailDirectorEmail } from "@/utils/isRetailDirectorEmail";
-import { RETAIL_DEPARTMENT } from "@/public/assets";
 
 // Shared by the initial submission route and the amendment route: both start
 // the approval chain from the HOD stage, with the same auto-approvals when
@@ -23,7 +22,8 @@ export type EmployeeFirstPendingStage =
 
 type AutoApprovalProps = {
   requestId: string;
-  department: string;
+  // From the department's requires_retail_director flag (lib/departments.ts)
+  hasRetailDirectorStage: boolean;
   submitterEmail: string;
   submitterName: string;
   hodEmail: string;
@@ -44,7 +44,7 @@ export async function applySubmissionAutoApprovals(
   client: PoolClient,
   {
     requestId,
-    department,
+    hasRetailDirectorStage,
     submitterEmail,
     submitterName,
     hodEmail,
@@ -70,7 +70,7 @@ export async function applySubmissionAutoApprovals(
   // both roles, or only one of them.
   let retailDirectorPending = false;
 
-  if (department === RETAIL_DEPARTMENT) {
+  if (hasRetailDirectorStage) {
     const hodIsRetailDirector = await isRetailDirectorEmail(client, hodEmail);
 
     if (hodIsRetailDirector) {

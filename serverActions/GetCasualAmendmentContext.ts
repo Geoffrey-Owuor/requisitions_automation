@@ -4,7 +4,7 @@ import { query } from "@/lib/db";
 import { getSession } from "@/lib/session";
 import { isUuid } from "@/lib/uuid";
 import { sameEmail } from "@/lib/hodAssignment";
-import { CasualCategory, isCasualAmendableHrStatus } from "@/public/assets";
+import { isCasualAmendableHrStatus } from "@/public/assets";
 import { CasualFormData } from "@/components/Modules/Retail/CasualRequisitionForm";
 import {
   casualAmendmentsQuery,
@@ -37,7 +37,7 @@ export async function getCasualAmendmentContext(
     amendment_count: number;
     employee_department: string;
     casual_location: string;
-    casual_category: CasualCategory | null;
+    casual_category: string | null;
     casual_hod_email: string;
   }>(
     `SELECT submitter_email, casual_hr_approval_status, amendment_count,

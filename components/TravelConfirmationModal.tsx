@@ -14,6 +14,8 @@ interface ConfirmationModalProps {
   onSubmit: () => Promise<void>;
   submitting: boolean;
   totalEngineeringAmount: number;
+  // The department is flagged requires_engineering_jobs
+  showEngineeringJobs: boolean;
   isAmendment?: boolean;
   reason?: string;
 }
@@ -27,6 +29,7 @@ export default function TravelConfirmationModal({
   onSubmit,
   submitting,
   totalEngineeringAmount,
+  showEngineeringJobs,
   isAmendment = false,
   reason,
 }: ConfirmationModalProps) {
@@ -134,40 +137,39 @@ export default function TravelConfirmationModal({
       {/* Cost breakdown */}
       <div className="mb-5 border-t border-[rgba(240,180,180,0.4)] pt-5">
         {/* --- NEW: Engineering Jobs Breakdown --- */}
-        {formData.department === "Engineering & HVAC" &&
-          formData.engineeringJobs && (
-            <div className="mb-3 rounded-2xl border border-rose-100 bg-rose-50 p-4">
-              <span className="mb-3 flex items-center gap-2 text-[11px] font-semibold tracking-[0.4px] text-rose-800 uppercase">
-                <Wrench className="h-3.5 w-3.5" />
-                Engineering Job Allocations
-              </span>
-              <div className="flex flex-col gap-2.5">
-                {formData.engineeringJobs.map((job, idx) => (
-                  <div
-                    key={job.id || idx}
-                    className="flex items-center justify-between border-b border-rose-100/50 pb-2 text-[13px] last:border-0 last:pb-0"
-                  >
-                    <span className="font-medium text-[#7c5a5a]">
-                      {job.title || "Unnamed Job"}
-                    </span>
-                    <span className="font-semibold text-[#1e1b1b]">
-                      KES {Number(job.amount || 0).toLocaleString()}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Engineering Subtotal Placeholder */}
-              <div className="mt-3 flex items-center justify-between border-t border-rose-200/80 pt-3">
-                <span className="text-[14px] font-semibold tracking-wide text-rose-700">
-                  Allocations Subtotal
-                </span>
-                <span className="text-[15px] font-bold text-rose-900">
-                  KES {totalEngineeringAmount.toLocaleString()}
-                </span>
-              </div>
+        {showEngineeringJobs && formData.engineeringJobs && (
+          <div className="mb-3 rounded-2xl border border-rose-100 bg-rose-50 p-4">
+            <span className="mb-3 flex items-center gap-2 text-[11px] font-semibold tracking-[0.4px] text-rose-800 uppercase">
+              <Wrench className="h-3.5 w-3.5" />
+              Engineering Job Allocations
+            </span>
+            <div className="flex flex-col gap-2.5">
+              {formData.engineeringJobs.map((job, idx) => (
+                <div
+                  key={job.id || idx}
+                  className="flex items-center justify-between border-b border-rose-100/50 pb-2 text-[13px] last:border-0 last:pb-0"
+                >
+                  <span className="font-medium text-[#7c5a5a]">
+                    {job.title || "Unnamed Job"}
+                  </span>
+                  <span className="font-semibold text-[#1e1b1b]">
+                    KES {Number(job.amount || 0).toLocaleString()}
+                  </span>
+                </div>
+              ))}
             </div>
-          )}
+
+            {/* Engineering Subtotal Placeholder */}
+            <div className="mt-3 flex items-center justify-between border-t border-rose-200/80 pt-3">
+              <span className="text-[14px] font-semibold tracking-wide text-rose-700">
+                Allocations Subtotal
+              </span>
+              <span className="text-[15px] font-bold text-rose-900">
+                KES {totalEngineeringAmount.toLocaleString()}
+              </span>
+            </div>
+          </div>
+        )}
         <p className="mb-3 text-[11px] font-semibold tracking-[0.4px] text-[#b0a0a0] uppercase">
           Cost Breakdown (KES)
         </p>

@@ -4,7 +4,6 @@ import {
   loadHrArray,
   loadRetailDirectorArray,
 } from "@/lib/loadApprovers";
-import { RETAIL_DEPARTMENT } from "@/public/assets";
 
 type HodApprovalStageProps = {
   uuid: string;
@@ -12,7 +11,8 @@ type HodApprovalStageProps = {
   status: string;
   approverEmail: string;
   approverName: string;
-  department: string;
+  // The requisition's stored Retail Director status isn't 'N/A'
+  hasRetailDirectorStage: boolean;
   skipRetailDirectorStage?: boolean;
   skipDirectorStage?: boolean;
 };
@@ -22,7 +22,7 @@ export async function hodApprovalStage({
   status,
   approverEmail,
   approverName,
-  department,
+  hasRetailDirectorStage,
   skipRetailDirectorStage = false,
   skipDirectorStage = false,
 }: HodApprovalStageProps) {
@@ -53,7 +53,7 @@ export async function hodApprovalStage({
   // in which case that stage was already auto-approved and we fall through
   // to the existing Director/HR routing below.
   if (status === "approved") {
-    if (department === RETAIL_DEPARTMENT && !skipRetailDirectorStage) {
+    if (hasRetailDirectorStage && !skipRetailDirectorStage) {
       const RETAIL_DIRECTOR_ARRAY = await loadRetailDirectorArray();
 
       RETAIL_DIRECTOR_ARRAY.forEach((retailDirectorApprover) => {

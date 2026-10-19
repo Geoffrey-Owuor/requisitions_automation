@@ -188,70 +188,20 @@ export function formatPhoneForDisplay(
   return isAdvancePhoneRequired(installments) ? "Not provided" : "Not required";
 }
 
-export const ALL_CASUAL_LOCATIONS = [
-  "Ruiru",
-  "Imaara",
-  "Galleria",
-  "Garden City",
-  "Village Market",
-  "Karen",
-  "Diani",
-  "Likoni",
-  "Kisumu",
-  "Eldoret",
-  "CBD",
-  "Riara",
-  "Nyali",
-  "Sarit",
-  "Yaya",
-  "Mega",
-  "Gitanga",
-];
-
-export const RETAIL_DEPARTMENT = "Retail";
-
-export const OPERATIONS_DEPARTMENT = "Operations";
-export const OPERATIONS_SECTIONS = [
-  "Inbound",
-  "Outbound",
-  "Bond",
-  "DO2 Store",
-  "CKD Store",
-  "RHW2/RHW3",
-];
-
 // A casual requisition stays amendable by its submitter until HR approves it -
 // HOD and HR declines can both be corrected by amending.
 export function isCasualAmendableHrStatus(hrStatus: string): boolean {
   return hrStatus === "pending" || hrStatus === "declined";
 }
 
-export const ENGINEERING_HVAC_DEPARTMENT = "Engineering & HVAC";
-export const CASUAL_CATEGORIES = ["Technician", "Welder"] as const;
-export type CasualCategory = (typeof CASUAL_CATEGORIES)[number];
-export const CASUAL_CATEGORY_RATES: Record<CasualCategory, number> = {
-  Technician: 1000,
-  Welder: 1500,
-};
-export const ENGINEERING_HVAC_NON_RUIRU_RATE = 900;
-
 export const REPLACEMENT_OR_NEW_OPTIONS = ["Replacement", "New"] as const;
 export type ReplacementOrNew = (typeof REPLACEMENT_OR_NEW_OPTIONS)[number];
 
-export const JOB_GRADES = [
-  "Assistant Officer",
-  "Officer",
-  "Supervisor",
-  "Executive",
-  "Senior Executive",
-  "Manager",
-  "Senior Manager",
-  "Head",
-  "Director",
-] as const;
-export type JobGrade = (typeof JOB_GRADES)[number];
-export function getJobGradeNumber(grade: string): number {
-  return JOB_GRADES.indexOf(grade as JobGrade) + 1;
+// "Officer (Grade 2)". Job grades live in job_grades (migration 027); a
+// position stores its grade's rank at submission (position_job_grade_rank),
+// null for a grade that had none - shown without a number then.
+export function formatJobGrade(grade: string, rank: number | null): string {
+  return rank ? `${grade} (Grade ${rank})` : grade;
 }
 
 export function formatSalaryRange(min: number, max: number): string {
@@ -296,54 +246,6 @@ export const EMPLOYEE_ATTACHMENT_TYPE_LABELS: Record<
   kpis: "KPIs",
   "org-chart": "Org Chart",
 };
-
-// Locations available per department. Departments not listed here fall back
-// to showing all locations rather than blocking the form.
-export const CASUAL_DEPARTMENT_LOCATIONS: Record<string, string[]> = {
-  "IT & Projects": ALL_CASUAL_LOCATIONS,
-  Finance: ALL_CASUAL_LOCATIONS,
-  Marketing: ALL_CASUAL_LOCATIONS,
-  Operations: ["Ruiru"],
-  Commercial: ALL_CASUAL_LOCATIONS,
-  "HR & Admin": ALL_CASUAL_LOCATIONS,
-  "Modern Trade": ALL_CASUAL_LOCATIONS,
-  Directorate: ALL_CASUAL_LOCATIONS,
-  "Internal Audit": ALL_CASUAL_LOCATIONS,
-  B2B: ALL_CASUAL_LOCATIONS,
-  "Retail Projects": ALL_CASUAL_LOCATIONS,
-  Security: ALL_CASUAL_LOCATIONS,
-  Retail: ALL_CASUAL_LOCATIONS,
-  "Engineering & HVAC": ALL_CASUAL_LOCATIONS,
-  "Service Center": ALL_CASUAL_LOCATIONS,
-};
-
-export function getCasualLocationsForDepartment(department: string): string[] {
-  return CASUAL_DEPARTMENT_LOCATIONS[department] ?? ALL_CASUAL_LOCATIONS;
-}
-
-export function getCasualSections(
-  department: string,
-  location: string,
-): string[] {
-  if (department === OPERATIONS_DEPARTMENT) return OPERATIONS_SECTIONS;
-  if (!department || !location) return [];
-  return [`${department}-${location}`];
-}
-
-export function getCasualRatePerDay(
-  location: string,
-  department?: string,
-  casualCategory?: CasualCategory,
-) {
-  // Engineering & HVAC category rates apply at Ruiru only; every other
-  // location pays a flat rate regardless of category.
-  if (department === ENGINEERING_HVAC_DEPARTMENT) {
-    return location === "Ruiru"
-      ? CASUAL_CATEGORY_RATES[casualCategory ?? "Technician"]
-      : ENGINEERING_HVAC_NON_RUIRU_RATE;
-  }
-  return location === "Ruiru" ? 798 : 868;
-}
 
 export function getDailyGreeting(date: Date = new Date()): string {
   const dayOfWeek = date.getDay(); // 0 (Sunday) to 6 (Saturday)

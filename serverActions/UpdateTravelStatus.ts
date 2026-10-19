@@ -233,7 +233,7 @@ export async function UpdateTravelStatus(
         break;
       default:
         EmailSender({
-          to: "developer@example.com",
+          to: process.env.ADMIN_EMAIL!,
           requestId: payload.uuid,
           message:
             "A wrong stage was passed in the travel requisition approval workflow for this requistion",

@@ -15,6 +15,7 @@ import {
   SectionTitle,
   TierCard,
 } from "./GuidelinePrimitives";
+import CasualRateCard from "./CasualRateCard";
 
 export default function CasualRequisitionGuideline() {
   return (
@@ -62,16 +63,7 @@ export default function CasualRequisitionGuideline() {
           Rate Calculation
         </SectionTitle>
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-          <InfoCard
-            icon={<Wallet size={18} />}
-            title="Daily Rate"
-            items={[
-              "Ruiru location: KES 798 per casual, per day.",
-              "All other locations: KES 868 per casual, per day.",
-              "Engineering & HVAC department: at Ruiru, KES 1,000 per casual, per day for Technicians and KES 1,500 for Welders; at all other locations, KES 900 per casual, per day for both (overrides the location-based rate).",
-              "Total cost = Number of Casuals &times; Rate per Day &times; Engagement Days.",
-            ]}
-          />
+          <CasualRateCard />
         </div>
       </section>
 
