@@ -1,4 +1,5 @@
 "use server";
+import type { PoolClient } from "pg";
 import { query } from "@/lib/db";
 import {
   emptyPaginatedResult,
@@ -16,6 +17,7 @@ import {
   getHrAdvanceSession,
   runHrAdvanceChange,
 } from "@/lib/salaryAdvanceAccess";
+import { resolveDepartment } from "@/lib/departments";
 
 // The salary advance HR dashboard's Staff directory: company_staff_data,
 // which identifies staff for the advance form's email verification and the
@@ -23,6 +25,11 @@ import {
 // so edits here are for fixes that can't wait for the next import and are
 // lost by it unless also made there. Staff are never deleted here. Changes
 // are recorded in config_changes like the Settings page's.
+//
+// Records are deactivated rather than deleted (migration 032): a deactivated
+// record can't verify for a salary advance, and the staff lookup API reports
+// it inactive to Staff Product Purchase. The department must be an active
+// base_departments one, except that an edit may keep the one a record has.
 
 export interface StaffRecord {
   id: number;
@@ -32,6 +39,7 @@ export interface StaffRecord {
   department: string;
   location: string;
   openRequests: number;
+  deactivation: { at: string; byEmail: string; reason: string } | null;
 }
 
 export async function getStaffDirectory({
@@ -55,6 +63,10 @@ export async function getStaffDirectory({
      s.staff_location AS location,
      (SELECT COUNT(*) FROM email_change_requests r
        WHERE r.staff_number = s.staff_number AND r.status = 'open')::int AS "openRequests",
+     CASE WHEN s.deactivated_at IS NOT NULL THEN JSON_BUILD_OBJECT(
+       'at', TO_CHAR(s.deactivated_at AT TIME ZONE 'Africa/Nairobi', 'DD Mon YYYY, HH24:MI'),
+       'byEmail', s.deactivated_by,
+       'reason', s.deactivation_reason) END AS deactivation,
      COUNT(*) OVER() AS total_count
      FROM company_staff_data s
      WHERE $1::text IS NULL OR s.staff_number ILIKE $1 OR s.staff_name ILIKE $1
@@ -67,7 +79,8 @@ export async function getStaffDirectory({
   return toPaginatedResult(rows, page, pageSize);
 }
 
-// Existing departments and locations, offered as suggestions
+// The active departments (the only ones a record may be given) and the
+// existing locations, offered as suggestions
 export async function getStaffDirectoryOptions(): Promise<{
   departments: string[];
   locations: string[];
@@ -75,7 +88,8 @@ export async function getStaffDirectoryOptions(): Promise<{
   if (!(await getHrAdvanceSession())) return { departments: [], locations: [] };
   const [departments, locations] = await Promise.all([
     query<{ value: string }>(
-      `SELECT DISTINCT staff_department AS value FROM company_staff_data ORDER BY 1`,
+      `SELECT department_name AS value FROM base_departments
+       WHERE is_active ORDER BY 1`,
     ),
     query<{ value: string }>(
       `SELECT DISTINCT staff_location AS value FROM company_staff_data ORDER BY 1`,
@@ -85,6 +99,16 @@ export async function getStaffDirectoryOptions(): Promise<{
     departments: departments.map((row) => row.value),
     locations: locations.map((row) => row.value),
   };
+}
+
+async function checkDepartment(
+  client: PoolClient,
+  department: string,
+  currentDepartment: string | null,
+) {
+  if (!(await resolveDepartment(department, { currentDepartment, client }))) {
+    throw new ConfigInputError("Choose a department from the list");
+  }
 }
 
 function cleanText(value: unknown, label: string, max: number): string {
@@ -152,6 +176,7 @@ export async function saveStaffRecord(input: {
     }
 
     if (isNew) {
+      await checkDepartment(client, record.staff_department, null);
       const { rows } = await client.query(
         `INSERT INTO company_staff_data
          (staff_number, staff_name, staff_email, staff_department, staff_location)
@@ -182,6 +207,11 @@ export async function saveStaffRecord(input: {
     if (JSON.stringify(before.rows[0]) === JSON.stringify(record)) {
       throw new ConfigInputError("Nothing to change");
     }
+    await checkDepartment(
+      client,
+      record.staff_department,
+      before.rows[0].staff_department,
+    );
 
     await client.query(
       `UPDATE company_staff_data SET staff_number = $2, staff_name = $3,
@@ -208,4 +238,112 @@ export async function saveStaffRecord(input: {
     });
     return `${summary}. Make the same change in the HR system, or the next import will undo it.`;
   });
+}
+
+type LockedStaff = {
+  id: number;
+  staff_number: string;
+  staff_name: string;
+  staff_email: string;
+  deactivated: boolean;
+  deactivated_by: string | null;
+  deactivation_reason: string | null;
+};
+
+async function lockStaffRecord(
+  client: PoolClient,
+  id: unknown,
+): Promise<LockedStaff> {
+  if (!isConfigId(id)) throw new ConfigInputError("Choose a staff record");
+  const { rows } = await client.query<LockedStaff>(
+    `SELECT id, staff_number, staff_name, staff_email,
+     deactivated_at IS NOT NULL AS deactivated, deactivated_by,
+     deactivation_reason
+     FROM company_staff_data WHERE id = $1 FOR UPDATE`,
+    [id],
+  );
+  if (rows.length === 0) {
+    throw new ConfigInputError(
+      "That staff record no longer exists - reload to see the latest",
+    );
+  }
+  return rows[0];
+}
+
+// The staff member can no longer verify for a salary advance (unused codes
+// are stopped too) nor register or sign in on Staff Product Purchase.
+// A reason is required, since this cuts someone off from other apps.
+export async function deactivateStaffRecord(id: unknown, reason: unknown) {
+  return runHrAdvanceChange(
+    "deactivating a staff record",
+    async (client, actor) => {
+      const staff = await lockStaffRecord(client, id);
+      if (staff.deactivated) {
+        throw new ConfigInputError(`${staff.staff_name} is already inactive`);
+      }
+      const text = typeof reason === "string" ? reason.trim() : "";
+      if (!text) throw new ConfigInputError("Enter a reason");
+      if (text.length > 500) {
+        throw new ConfigInputError(
+          "A reason cannot be longer than 500 characters",
+        );
+      }
+
+      await client.query(
+        `UPDATE company_staff_data SET deactivated_at = NOW(),
+         deactivated_by = $2, deactivation_reason = $3 WHERE id = $1`,
+        [staff.id, actor.email, text],
+      );
+      await client.query(
+        `UPDATE verification_codes SET consumed = true
+         WHERE LOWER(staff_email) = LOWER($1) AND NOT consumed`,
+        [staff.staff_email],
+      );
+
+      const summary = `Deactivated staff record ${staff.staff_name} (${staff.staff_number})`;
+      await recordConfigChange(client, actor, {
+        table: "company_staff_data",
+        key: staff.id,
+        action: "update",
+        summary,
+        before: { staff_number: staff.staff_number, active: true },
+        after: { staff_number: staff.staff_number, active: false, reason: text },
+      });
+      return summary;
+    },
+  );
+}
+
+export async function reactivateStaffRecord(id: unknown) {
+  return runHrAdvanceChange(
+    "reactivating a staff record",
+    async (client, actor) => {
+      const staff = await lockStaffRecord(client, id);
+      if (!staff.deactivated) {
+        throw new ConfigInputError(`${staff.staff_name} is already active`);
+      }
+
+      await client.query(
+        `UPDATE company_staff_data SET deactivated_at = NULL,
+         deactivated_by = NULL, deactivation_reason = NULL WHERE id = $1`,
+        [staff.id],
+      );
+
+      const summary = `Reactivated staff record ${staff.staff_name} (${staff.staff_number})`;
+      await recordConfigChange(client, actor, {
+        table: "company_staff_data",
+        key: staff.id,
+        action: "update",
+        summary,
+        before: {
+          staff_number: staff.staff_number,
+          active: false,
+          deactivatedBy: staff.deactivated_by,
+          reason: staff.deactivation_reason,
+        },
+        after: { staff_number: staff.staff_number, active: true },
+      });
+      return summary;
+    },
+  );
 }

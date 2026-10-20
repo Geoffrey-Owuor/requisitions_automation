@@ -12,16 +12,26 @@ import {
   X,
 } from "lucide-react";
 import {
+  deactivateStaffRecord,
   getStaffDirectory,
   getStaffDirectoryOptions,
+  reactivateStaffRecord,
   saveStaffRecord,
   type StaffRecord,
 } from "@/serverActions/StaffDirectoryAdmin";
 import { useServerPagination } from "@/hooks/useServerPagination";
 import { useAlertStore } from "@/store/useAlertStore";
 import { Modal, useLastDefined } from "@/components/Modal";
+import { Select } from "@/components/Select";
 import { TablePagination } from "@/components/Dashboard/TablePagination";
 import { SkeletonTable } from "@/components/Skeletons/SkeletonTable";
+import {
+  ConfirmDialog,
+  type Confirmation,
+  smallButtonClass,
+  StatusBadge,
+  useSettingsRunner,
+} from "@/components/Settings/SettingsPrimitives";
 
 const DIRECTORY_KEY = ["StaffDirectory"];
 
@@ -33,6 +43,8 @@ type Editing = StaffRecord | "new" | null;
 
 export default function StaffDirectoryPanel() {
   const [editing, setEditing] = useState<Editing>(null);
+  const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
+  const { busy, run } = useSettingsRunner(DIRECTORY_KEY, []);
 
   const {
     data: staff,
@@ -62,7 +74,9 @@ export default function StaffDirectoryPanel() {
         <Info className="mt-0.5 h-4 w-4 shrink-0" />
         These records are imported from the HR system, and the next import
         replaces any change made here. Use this for fixes that can&apos;t wait,
-        and make the same change in the HR system.
+        and make the same change in the HR system. Deactivating a record stops
+        that person verifying for a salary advance and using Staff Product
+        Purchase.
       </p>
 
       <div className="flex flex-wrap items-center gap-2">
@@ -129,7 +143,7 @@ export default function StaffDirectoryPanel() {
         </div>
       ) : (
         <div className="rounded-surface overflow-x-auto border border-neutral-200 bg-white">
-          <table className="w-full min-w-[44rem] text-sm">
+          <table className="w-full min-w-[52rem] text-sm">
             <thead>
               <tr className="border-b border-neutral-100 text-left text-[11px] font-semibold tracking-wide text-neutral-500 uppercase">
                 <th className="px-4 py-3">Staff no.</th>
@@ -137,6 +151,7 @@ export default function StaffDirectoryPanel() {
                 <th className="px-4 py-3">Email</th>
                 <th className="px-4 py-3">Department</th>
                 <th className="px-4 py-3">Location</th>
+                <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
@@ -146,12 +161,21 @@ export default function StaffDirectoryPanel() {
                   <td className="px-4 py-2.5 font-mono text-xs text-neutral-700">
                     {record.staffNumber}
                   </td>
-                  <td className="px-4 py-2.5 text-neutral-900">
+                  <td
+                    className={`px-4 py-2.5 ${record.deactivation ? "text-neutral-400" : "text-neutral-900"}`}
+                  >
                     {record.name}
                     {record.openRequests > 0 && (
                       <span className="ml-2 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700">
                         Email change open
                       </span>
+                    )}
+                    {record.deactivation && (
+                      <p className="mt-0.5 text-xs text-neutral-500">
+                        Deactivated {record.deactivation.at} by{" "}
+                        {record.deactivation.byEmail} ·{" "}
+                        {record.deactivation.reason}
+                      </p>
                     )}
                   </td>
                   <td className="px-4 py-2.5 text-neutral-700">
@@ -163,15 +187,59 @@ export default function StaffDirectoryPanel() {
                   <td className="px-4 py-2.5 text-neutral-700">
                     {record.location}
                   </td>
-                  <td className="px-4 py-2.5 text-right">
-                    <button
-                      type="button"
-                      aria-label={`Edit ${record.name}`}
-                      onClick={() => setEditing(record)}
-                      className="rounded-compact p-1.5 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900"
-                    >
-                      <Pencil className="h-3.5 w-3.5" />
-                    </button>
+                  <td className="px-4 py-2.5">
+                    {record.deactivation ? (
+                      <StatusBadge tone="grey">Inactive</StatusBadge>
+                    ) : (
+                      <StatusBadge tone="green">Active</StatusBadge>
+                    )}
+                  </td>
+                  <td className="px-4 py-2.5">
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        type="button"
+                        aria-label={`Edit ${record.name}`}
+                        onClick={() => setEditing(record)}
+                        className="rounded-compact p-1.5 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </button>
+                      {record.deactivation ? (
+                        <button
+                          type="button"
+                          disabled={busy}
+                          className={smallButtonClass}
+                          onClick={() =>
+                            setConfirmation({
+                              title: `Reactivate ${record.name}?`,
+                              message: `${record.name} (${record.staffNumber}) will be able to verify for a salary advance and use Staff Product Purchase again.`,
+                              confirmLabel: "Reactivate",
+                              action: () => reactivateStaffRecord(record.id),
+                            })
+                          }
+                        >
+                          Reactivate
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          disabled={busy}
+                          className={smallButtonClass}
+                          onClick={() =>
+                            setConfirmation({
+                              title: `Deactivate ${record.name}?`,
+                              message: `${record.name} (${record.staffNumber}) won't be able to verify for a salary advance, and can't register or sign in on Staff Product Purchase. Their existing requests are kept.`,
+                              confirmLabel: "Deactivate",
+                              input: { label: "Reason", maxLength: 500 },
+                              action: (reason) =>
+                                deactivateStaffRecord(record.id, reason),
+                            })
+                          }
+                        >
+                          Deactivate
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -192,6 +260,14 @@ export default function StaffDirectoryPanel() {
       )}
 
       <StaffRecordModal editing={editing} onClose={() => setEditing(null)} />
+      <ConfirmDialog
+        confirmation={confirmation}
+        busy={busy}
+        onClose={() => setConfirmation(null)}
+        onConfirm={async (action) => {
+          if (await run(action)) setConfirmation(null);
+        }}
+      />
     </div>
   );
 }
@@ -338,19 +414,23 @@ function StaffRecordModal({
           </Field>
         </div>
         <Field label="Department" id="staff-department">
-          <input
+          {/* Active departments only; an edit keeps showing a record's
+              current department even if it isn't one of them */}
+          <Select
             id="staff-department"
-            list="staff-departments"
-            className={inputClass}
+            tone="slate"
             value={form.department}
-            maxLength={255}
-            onChange={set("department")}
+            onChange={(department) =>
+              setForm((current) => ({ ...current, department }))
+            }
+            options={(options?.departments ?? []).map((value) => ({
+              value,
+              label: value,
+            }))}
+            unlistedLabel={form.department}
+            placeholder="Select a department"
+            busy={!options}
           />
-          <datalist id="staff-departments">
-            {options?.departments.map((value) => (
-              <option key={value} value={value} />
-            ))}
-          </datalist>
         </Field>
         <Field label="Location" id="staff-location">
           <input
@@ -367,6 +447,13 @@ function StaffRecordModal({
             ))}
           </datalist>
         </Field>
+        <p className="rounded-control flex items-start gap-2 border border-sky-200 bg-sky-50 p-3 text-xs text-sky-800 sm:col-span-2">
+          <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+          Please double-check these details before saving. Other company apps
+          use this record to confirm who someone is - for example to let them
+          register on Staff Product Purchase - so a wrong email or staff number
+          can lock the right person out or let the wrong person in.
+        </p>
         {!isNew && (
           <p className="text-xs text-neutral-500 sm:col-span-2">
             Changing the email stops any unused verification codes sent to the
