@@ -9,14 +9,20 @@ import {
   ChangesCard,
   ConfirmDialog,
   type Confirmation,
+  Field,
+  nextDay,
   inputClass,
+  ListPagination,
   primaryButtonClass,
   smallButtonClass,
   StatusBadge,
   ToggleList,
+  useListPage,
   useSettingsRunner,
 } from "./SettingsPrimitives";
 import { DatePicker } from "@/components/DatePicker";
+import { Select } from "@/components/Select";
+import { CasualSettingsSkeleton } from "@/components/Skeletons/SettingsSkeleton";
 import {
   addCasualCategory,
   addCasualLocation,
@@ -34,24 +40,15 @@ import {
   currentCasualRates,
   describeCasualRateScope,
 } from "@/lib/casualConfig";
-import type { CasualBudgetUnit } from "@/lib/casualBudgetRules";
+import {
+  BUDGET_UNIT_LABELS,
+  type CasualBudgetUnit,
+} from "@/lib/casualBudgetRules";
 import type { ConfigActionResult } from "@/lib/configAdminAccess";
 
 const ADMIN_KEY = ["CasualConfigAdmin"];
 // The form and guideline caches of the same data, refreshed after a change
 const RELATED_KEYS = [["CasualConfigData"], ["PublicCasualRates"]];
-
-const BUDGET_UNIT_LABELS: Record<CasualBudgetUnit, string> = {
-  default: "Department budget",
-  warehouse: "Warehouse budget",
-  bond: "Bond budget",
-};
-
-// YYYY-MM-DD plus one day, in UTC so no local time zone shifts the date
-const nextDay = (date: string) =>
-  new Date(Date.parse(`${date}T00:00:00Z`) + 86_400_000)
-    .toISOString()
-    .slice(0, 10);
 
 export default function CasualSettings() {
   const { busy, run } = useSettingsRunner(ADMIN_KEY, RELATED_KEYS);
@@ -63,21 +60,12 @@ export default function CasualSettings() {
   });
 
   if (isLoading) {
-    return (
-      <div className="space-y-4">
-        {[0, 1, 2].map((key) => (
-          <div
-            key={key}
-            className="h-48 animate-pulse rounded-2xl border border-neutral-200 bg-white"
-          />
-        ))}
-      </div>
-    );
+    return <CasualSettingsSkeleton />;
   }
 
   if (isError || !data) {
     return (
-      <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+      <div className="rounded-surface border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
         The casual settings could not be loaded.{" "}
         <button
           type="button"
@@ -156,6 +144,14 @@ function RatesCard({ data, busy, run, confirm }: CardProps) {
   const superseded = rules.filter(
     (rate) => rate.effectiveFrom <= data.today && !currentIds.has(rate.id),
   );
+  const listed = [
+    ...current.map((rate) => ({ rate, status: "current" as const })),
+    ...scheduled.map((rate) => ({ rate, status: "scheduled" as const })),
+    ...(showSuperseded
+      ? superseded.map((rate) => ({ rate, status: "superseded" as const }))
+      : []),
+  ];
+  const { pageItems, pagination } = useListPage(listed);
 
   const activeLocations = data.locations.filter(
     (location) => location.isActive,
@@ -250,11 +246,9 @@ function RatesCard({ data, busy, run, confirm }: CardProps) {
       description="Where more than one rate matches a requisition, the most specific wins: department, then location, then category. A change is a new rate from a future date - rates already in effect are never edited, and each requisition keeps the rate it was priced at."
     >
       <ul className="divide-y divide-neutral-100">
-        {current.map((rate) => rateRow(rate, "current"))}
-        {scheduled.map((rate) => rateRow(rate, "scheduled"))}
-        {showSuperseded &&
-          superseded.map((rate) => rateRow(rate, "superseded"))}
+        {pageItems.map(({ rate, status }) => rateRow(rate, status))}
       </ul>
+      <ListPagination pagination={pagination} />
       {superseded.length > 0 && (
         <button
           type="button"
@@ -266,64 +260,72 @@ function RatesCard({ data, busy, run, confirm }: CardProps) {
         </button>
       )}
 
-      <div className="space-y-3 rounded-xl bg-neutral-50 p-3">
+      <div className="rounded-control space-y-3 bg-neutral-50 p-3">
         <p className="flex items-center gap-1.5 text-xs font-semibold text-neutral-700">
           <CalendarClock className="h-3.5 w-3.5" /> Schedule a rate
         </p>
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
-          <select
-            aria-label="Department"
-            className={inputClass}
-            value={department}
-            onChange={(e) => setDepartment(e.target.value)}
-          >
-            <option value="">Any department</option>
-            {data.departments.map((name) => (
-              <option key={name} value={name}>
-                {name}
-              </option>
-            ))}
-          </select>
-          <select
-            aria-label="Location"
-            className={inputClass}
-            value={locationId}
-            onChange={(e) => setLocationId(e.target.value)}
-          >
-            <option value="">Any location</option>
-            {activeLocations.map((location) => (
-              <option key={location.id} value={location.id}>
-                {location.name}
-              </option>
-            ))}
-          </select>
-          <select
-            aria-label="Category"
-            className={inputClass}
-            value={categoryId}
-            onChange={(e) => setCategoryId(e.target.value)}
-          >
-            <option value="">Any category</option>
-            {activeCategories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
-          <input
-            aria-label="Rate per day (KES)"
-            className={inputClass}
-            inputMode="numeric"
-            placeholder="Rate per day (KES)"
-            value={ratePerDay}
-            onChange={(e) => setRatePerDay(e.target.value.replace(/\D/g, ""))}
-          />
-          <DatePicker
-            value={effectiveFrom}
-            onChange={setEffectiveFrom}
-            minDate={tomorrow}
-            placeholder="Takes effect from"
-          />
+          <Field label="Department" htmlFor="rate-department">
+            <Select
+              id="rate-department"
+              value={department}
+              onChange={setDepartment}
+              options={[
+                { value: "", label: "Any department" },
+                ...data.departments.map((name) => ({
+                  value: name,
+                  label: name,
+                })),
+              ]}
+            />
+          </Field>
+          <Field label="Location" htmlFor="rate-location">
+            <Select
+              id="rate-location"
+              value={locationId}
+              onChange={setLocationId}
+              options={[
+                { value: "", label: "Any location" },
+                ...activeLocations.map((location) => ({
+                  value: String(location.id),
+                  label: location.name,
+                })),
+              ]}
+            />
+          </Field>
+          <Field label="Category" htmlFor="rate-category">
+            <Select
+              id="rate-category"
+              value={categoryId}
+              onChange={setCategoryId}
+              options={[
+                { value: "", label: "Any category" },
+                ...activeCategories.map((category) => ({
+                  value: String(category.id),
+                  label: category.name,
+                })),
+              ]}
+            />
+          </Field>
+          <Field label="Rate per day (KES)" htmlFor="rate-amount">
+            <input
+              id="rate-amount"
+              className={inputClass}
+              inputMode="numeric"
+              placeholder="e.g. 850"
+              value={ratePerDay}
+              onChange={(e) => setRatePerDay(e.target.value.replace(/\D/g, ""))}
+            />
+          </Field>
+          <Field label="Takes effect from">
+            <DatePicker
+              value={effectiveFrom}
+              onChange={setEffectiveFrom}
+              minDate={tomorrow}
+              placeholder="Pick a date"
+              tone="slate"
+            />
+          </Field>
         </div>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-xs text-neutral-500">
@@ -415,22 +417,27 @@ function LocationLimitsCard({ data, busy, run }: Omit<CardProps, "confirm">) {
           ))}
         </ul>
       )}
-      <select
+      <Select
         aria-label="Department"
-        className={inputClass}
+        placeholder="Choose a department to edit"
         value={department}
-        onChange={(e) => {
-          setDepartment(e.target.value);
+        onChange={(next) => {
+          setDepartment(next);
           setSelected(null);
         }}
-      >
-        <option value="">Choose a department to edit</option>
-        {data.departments.map((name) => (
-          <option key={name} value={name}>
-            {name}
-          </option>
-        ))}
-      </select>
+        options={data.departments.map((name) => {
+          const limited = data.departmentLocations.find(
+            (row) => row.department === name,
+          )?.locationIds.length;
+          return {
+            value: name,
+            label: name,
+            description: limited
+              ? `Limited to ${limited} location${limited === 1 ? "" : "s"}`
+              : undefined,
+          };
+        })}
+      />
       {department && (
         <>
           <div className="flex flex-wrap gap-1.5">
@@ -442,7 +449,7 @@ function LocationLimitsCard({ data, busy, run }: Omit<CardProps, "confirm">) {
                   type="button"
                   aria-pressed={isChosen}
                   onClick={() => toggle(location.id)}
-                  className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                  className={`rounded-compact border px-3 py-1 text-xs font-medium transition-colors ${
                     isChosen
                       ? "border-slate-900 bg-slate-900 text-white"
                       : "border-neutral-200 text-neutral-700 hover:border-neutral-400"
@@ -526,41 +533,39 @@ function SectionsCard({ data, busy, run, confirm }: CardProps) {
           />
         </div>
       ))}
-      <div className="space-y-2 rounded-xl bg-neutral-50 p-3">
+      <div className="rounded-control space-y-2 bg-neutral-50 p-3">
         <div className="grid gap-2 sm:grid-cols-3">
-          <select
-            aria-label="Department"
-            className={inputClass}
-            value={department}
-            onChange={(e) => setDepartment(e.target.value)}
-          >
-            <option value="">Department</option>
-            {data.departments.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-          <input
-            aria-label="Section name"
-            className={inputClass}
-            placeholder="Section name"
-            value={name}
-            maxLength={100}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <select
-            aria-label="Budget unit"
-            className={inputClass}
-            value={budgetUnit}
-            onChange={(e) => setBudgetUnit(e.target.value as CasualBudgetUnit)}
-          >
-            {Object.entries(BUDGET_UNIT_LABELS).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
+          <Field label="Department" htmlFor="section-department">
+            <Select
+              id="section-department"
+              value={department}
+              onChange={setDepartment}
+              options={data.departments.map((option) => ({
+                value: option,
+                label: option,
+              }))}
+            />
+          </Field>
+          <Field label="Section name" htmlFor="section-name">
+            <input
+              id="section-name"
+              className={inputClass}
+              placeholder="e.g. Receiving"
+              value={name}
+              maxLength={100}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </Field>
+          <Field label="Budget unit" htmlFor="section-budget-unit">
+            <Select
+              id="section-budget-unit"
+              value={budgetUnit}
+              onChange={(next) => setBudgetUnit(next as CasualBudgetUnit)}
+              options={Object.entries(BUDGET_UNIT_LABELS).map(
+                ([value, label]) => ({ value, label }),
+              )}
+            />
+          </Field>
         </div>
         {department && !departmentsWithSections.includes(department) && (
           <p className="text-xs text-amber-700">

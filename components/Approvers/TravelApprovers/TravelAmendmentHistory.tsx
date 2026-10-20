@@ -35,7 +35,7 @@ const TravelAmendmentHistory = ({
         {amendments.map((amendment) => (
           <div
             key={amendment.amendmentid}
-            className="rounded-2xl border border-amber-200 bg-amber-50/60 p-4"
+            className="rounded-surface border border-amber-200 bg-amber-50/60 p-4"
           >
             <div className="mb-2">
               <p className="text-[13px] font-semibold text-[#1e1b1b]">
@@ -46,7 +46,7 @@ const TravelAmendmentHistory = ({
                 {dateFormatter(amendment.createdat)}
               </p>
             </div>
-            <p className="mb-3 rounded-xl border border-dashed border-amber-300 bg-white/60 px-3 py-2 text-[12px] leading-relaxed text-[#7c5a5a] italic">
+            <p className="rounded-control mb-3 border border-dashed border-amber-300 bg-white/60 px-3 py-2 text-[12px] leading-relaxed text-[#7c5a5a] italic">
               &quot;{amendment.amendmentreason}&quot;
             </p>
 
@@ -63,7 +63,7 @@ const TravelAmendmentHistory = ({
                         field.previousValue,
                       )}
                     </p>
-                    <p className="mt-1 rounded-lg bg-amber-100 px-2 py-1 whitespace-pre-line text-amber-950">
+                    <p className="rounded-compact mt-1 bg-amber-100 px-2 py-1 whitespace-pre-line text-amber-950">
                       {formatTravelAmendmentValue(
                         field.fieldKey,
                         field.newValue,
@@ -102,7 +102,9 @@ const TravelAmendmentHistory = ({
                     <span className="text-[#a18080] line-through">
                       {amendment.previousapprovaltier}
                     </span>
-                    <ChangedValuePill>{amendment.newapprovaltier}</ChangedValuePill>
+                    <ChangedValuePill>
+                      {amendment.newapprovaltier}
+                    </ChangedValuePill>
                   </span>
                 </div>
               )}
@@ -113,7 +115,10 @@ const TravelAmendmentHistory = ({
               {[
                 { label: "HOD", status: amendment.nullifiedhodstatus },
                 { label: "HR", status: amendment.nullifiedhrstatus },
-                { label: "Director", status: amendment.nullifieddirectorstatus },
+                {
+                  label: "Director",
+                  status: amendment.nullifieddirectorstatus,
+                },
               ]
                 .filter((step) => step.status && step.status !== "N/A")
                 .map((step) => (

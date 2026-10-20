@@ -2,6 +2,7 @@
 import { MicrosoftEntraId } from "arctic";
 import { cookies } from "next/headers";
 import { createSession } from "@/lib/session";
+import { isUserDeactivated, recordSignIn } from "@/lib/users";
 import { getRequestOrigin } from "@/lib/getRequestOrigin";
 import {
   fetchMicrosoftProfile,
@@ -63,11 +64,19 @@ export async function GET(req: Request) {
       return Response.redirect(new URL("/login?error=auth_failed", origin));
     }
 
+    // Checked before any session is issued, and before recordSignIn so a
+    // refused attempt doesn't count as a sign-in
+    if (await isUserDeactivated(email)) {
+      return Response.redirect(
+        new URL("/login?error=account_deactivated", origin),
+      );
+    }
+
     // Store user data in the secure cookie using our jose helper
-    await createSession({
-      name: profile.name || "Microsoft User",
-      email,
-    });
+    const name = profile.name || "Microsoft User";
+    await createSession({ name, email });
+    // So Settings can list and assign roles to everyone who has signed in
+    await recordSignIn(email, name);
 
     // Cleanup state tracking cookies
     cookieStore.delete("oauth_state");

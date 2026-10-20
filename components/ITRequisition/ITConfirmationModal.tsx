@@ -39,7 +39,7 @@ export default function ITConfirmationModal({
   ];
 
   return (
-    <div className="mx-auto max-w-3xl rounded-3xl border border-gray-100 bg-white p-10 shadow-[0_24px_48px_rgba(160,60,60,0.10)]">
+    <div className="rounded-surface mx-auto max-w-3xl border border-gray-100 bg-white p-10 shadow-[0_24px_48px_rgba(160,60,60,0.10)]">
       {/* Header */}
       <div className="mb-6">
         <p className="text-[11px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
@@ -54,7 +54,7 @@ export default function ITConfirmationModal({
       </div>
 
       {/* User account card */}
-      <div className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white px-4 py-3">
+      <div className="rounded-surface mb-6 flex flex-wrap items-center gap-3 border border-[rgba(240,180,180,0.5)] bg-white px-4 py-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-rose-100 text-[13px] font-semibold text-rose-700">
           {initialsHelper(nameString)}
         </div>
@@ -62,7 +62,7 @@ export default function ITConfirmationModal({
           <p className="text-[14px] font-semibold text-[#1e1b1b]">{userName}</p>
           <p className="text-[12px] text-[#a18080]">{userEmail}</p>
         </div>
-        <span className="ml-auto rounded-lg bg-rose-100 px-3 py-1 text-[11px] font-medium text-rose-700">
+        <span className="rounded-compact ml-auto bg-rose-100 px-3 py-1 text-[11px] font-medium text-rose-700">
           Requestor
         </span>
       </div>
@@ -111,7 +111,7 @@ export default function ITConfirmationModal({
           {formData.requirements.map((req) => (
             <span
               key={req}
-              className="rounded-lg bg-rose-100 px-3 py-1 text-[12px] font-medium text-rose-700"
+              className="rounded-compact bg-rose-100 px-3 py-1 text-[12px] font-medium text-rose-700"
             >
               {req}
             </span>
@@ -124,7 +124,7 @@ export default function ITConfirmationModal({
         <p className="mb-2 text-[11px] font-semibold tracking-[0.4px] text-[#b0a0a0] uppercase">
           Other Requirements
         </p>
-        <p className="rounded-xl bg-white py-3 text-[13px] leading-relaxed text-[#1e1b1b]">
+        <p className="rounded-control bg-white py-3 text-[13px] leading-relaxed text-[#1e1b1b]">
           {formData.otherRequirements || "No other requirements"}
         </p>
       </div>
@@ -134,7 +134,7 @@ export default function ITConfirmationModal({
         <button
           type="button"
           onClick={onBack}
-          className="flex cursor-pointer items-center gap-2 rounded-[14px] border border-[rgba(240,180,180,0.6)] bg-transparent px-6 py-4 text-[14px] font-semibold text-[#1e1b1b] transition-all duration-200 hover:bg-rose-50"
+          className="rounded-control flex cursor-pointer items-center gap-2 border border-[rgba(240,180,180,0.6)] bg-transparent px-6 py-4 text-[14px] font-semibold text-[#1e1b1b] transition-all duration-200 hover:bg-rose-50"
         >
           <ArrowLeft className="h-4 w-4" />
           Back
@@ -143,7 +143,7 @@ export default function ITConfirmationModal({
           type="button"
           onClick={onSubmit}
           disabled={submitting}
-          className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-[14px] border-none bg-slate-900 py-4 text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)] disabled:opacity-50"
+          className="rounded-control flex flex-1 cursor-pointer items-center justify-center gap-2 border-none bg-slate-900 py-4 text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)] disabled:opacity-50"
         >
           {submitting ? "Submitting..." : "Submit request"}
           <Send className="h-4 w-4" />

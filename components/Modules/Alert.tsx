@@ -67,7 +67,7 @@ const Alert = () => {
       }`}
     >
       {/* Solid High-Contrast Card */}
-      <div className="relative flex items-start gap-3 overflow-hidden rounded-2xl bg-black p-4">
+      <div className="rounded-surface relative flex items-start gap-3 overflow-hidden bg-black p-4">
         {/* Left Accent Line */}
         <div
           className={`absolute top-0 bottom-0 left-0 w-1.5 ${theme.accentBar}`}
@@ -75,7 +75,7 @@ const Alert = () => {
 
         {/* Icon Avatar */}
         <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${theme.iconBg}`}
+          className={`rounded-control flex h-10 w-10 shrink-0 items-center justify-center ${theme.iconBg}`}
         >
           <IconComponent className={`h-5 w-5 ${theme.iconColor}`} />
         </div>
@@ -98,7 +98,7 @@ const Alert = () => {
         {/* Close Button */}
         <button
           onClick={handleClose}
-          className="shrink-0 rounded-full p-1.5 text-neutral-500 transition-colors hover:bg-neutral-800 hover:text-white active:scale-95"
+          className="rounded-compact shrink-0 p-1.5 text-neutral-500 transition-colors hover:bg-neutral-800 hover:text-white active:scale-95"
           aria-label="Close alert"
         >
           <X className="h-4 w-4" strokeWidth={2.5} />

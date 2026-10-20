@@ -1,8 +1,11 @@
 import { sendEmail } from "./EmailService";
 import {
+  EmailChangeAppliedNoticeTemplate,
+  EmailChangeApprovedTemplate,
   EmailChangeHrTemplate,
   EmailChangeOnFileNoticeTemplate,
   EmailChangeOnFile,
+  EmailChangeRejectedTemplate,
   EmailChangeRequesterTemplate,
   EmailChangeSubmission,
 } from "@/utils/templates/EmailChangeRequestTemplate";
@@ -58,4 +61,51 @@ export async function EmailChangeRequestEmailSender({
   }
 
   return hrResult;
+}
+
+interface EmailChangeResolutionProps {
+  staffName: string;
+  requestedEmail: string;
+  // The address an approval replaced, if any
+  previousEmail?: string | null;
+}
+
+// Sent after HR approves (the change is already applied) or rejects a
+// request. Approval tells both the new and the replaced address; the result
+// is the email to the requested address.
+export async function EmailChangeResolutionEmailSender(
+  outcome: "approved" | "rejected",
+  { staffName, requestedEmail, previousEmail }: EmailChangeResolutionProps,
+) {
+  const from = process.env.ADVANCE_EMAIL_SENDER!;
+
+  if (outcome === "rejected") {
+    return sendEmail({
+      from,
+      to: requestedEmail,
+      subject: "Your Email Change Request",
+      html: EmailChangeRejectedTemplate(staffName),
+    });
+  }
+
+  const result = await sendEmail({
+    from,
+    to: requestedEmail,
+    subject: "Your Staff Record Email Was Updated",
+    html: EmailChangeApprovedTemplate(staffName, requestedEmail),
+  });
+
+  if (
+    previousEmail &&
+    previousEmail.toLowerCase() !== requestedEmail.toLowerCase()
+  ) {
+    await sendEmail({
+      from,
+      to: previousEmail,
+      subject: "The Email On Your Staff Record Was Changed",
+      html: EmailChangeAppliedNoticeTemplate(staffName, requestedEmail),
+    });
+  }
+
+  return result;
 }

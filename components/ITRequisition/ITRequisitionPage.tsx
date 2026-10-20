@@ -226,11 +226,11 @@ export default function ITRequisitionPage() {
       {step === 1 && (
         <div className="relative z-10 mx-auto max-w-225">
           {/* Form Image */}
-          <div className="mb-4 overflow-hidden rounded-2xl sm:rounded-3xl">
+          <div className="rounded-surface sm:rounded-surface mb-4 overflow-hidden">
             <Image
               src={assets.it_form_image}
               sizes="100vh"
-              className="rounded-xl object-contain object-center"
+              className="rounded-control object-contain object-center"
               priority
               alt="Form Image"
             />
@@ -249,8 +249,8 @@ export default function ITRequisitionPage() {
           </header>
 
           {/* Advance Notice Tip Card */}
-          <div className="mb-8 flex items-start gap-3 rounded-2xl border border-amber-200/60 bg-linear-to-br from-amber-50 to-orange-50 p-4 shadow-xs">
-            <div className="flex shrink-0 items-center justify-center rounded-xl bg-amber-100/50 p-2">
+          <div className="rounded-surface mb-8 flex items-start gap-3 border border-amber-200/60 bg-linear-to-br from-amber-50 to-orange-50 p-4 shadow-xs">
+            <div className="rounded-control flex shrink-0 items-center justify-center bg-amber-100/50 p-2">
               <Lightbulb className="h-5 w-5 text-amber-600 dark:text-amber-400" />
             </div>
             <div className="pt-0.5">
@@ -266,7 +266,7 @@ export default function ITRequisitionPage() {
           </div>
 
           {/* Form Card */}
-          <div className="rounded-3xl border border-white/85 bg-white/65 px-6 py-8 shadow-[0_24px_48px_rgba(160,60,60,0.10)] sm:px-8">
+          <div className="rounded-surface border border-white/85 bg-white/65 px-6 py-8 shadow-[0_24px_48px_rgba(160,60,60,0.10)] sm:px-8">
             <form
               className="flex flex-col gap-10"
               onSubmit={(e) => {
@@ -321,6 +321,7 @@ export default function ITRequisitionPage() {
                       Requisition Date <span className="text-red-500">*</span>
                     </label>
                     <DatePicker
+                      tone="rose"
                       value={formData.requisitionDate}
                       onChange={(v) => updateField("requisitionDate", v)}
                     />
@@ -330,6 +331,7 @@ export default function ITRequisitionPage() {
                       Date Joining <span className="text-red-500">*</span>
                     </label>
                     <DatePicker
+                      tone="rose"
                       value={formData.dateJoining}
                       onChange={(v) => updateField("dateJoining", v)}
                     />
@@ -358,7 +360,7 @@ export default function ITRequisitionPage() {
                     </span>
                   </label>
                   <textarea
-                    className="h-25 resize-none rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 py-3 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
+                    className="rounded-control h-25 resize-none border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 py-3 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
                     placeholder="Specify any other requirements not listed above..."
                     value={formData.otherRequirements}
                     onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
@@ -371,7 +373,7 @@ export default function ITRequisitionPage() {
               <button
                 type="submit"
                 disabled={buttonDisabled}
-                className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-[14px] border-none bg-slate-900 py-4 font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)] disabled:cursor-not-allowed disabled:opacity-70"
+                className="rounded-control flex w-full cursor-pointer items-center justify-center gap-2 border-none bg-slate-900 py-4 font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)] disabled:cursor-not-allowed disabled:opacity-70"
               >
                 Proceed
                 <ArrowRight className="h-4 w-4" />
@@ -398,7 +400,7 @@ function FormInput({ label, placeholder, value, onChange }: FormInputProps) {
       </label>
       <input
         type="text"
-        className="h-10 rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
+        className="rounded-control h-10 border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
         placeholder={placeholder}
         value={value}
         onChange={(e: ChangeEvent<HTMLInputElement>) =>
@@ -435,7 +437,7 @@ function CheckboxGroup({
           return (
             <label
               key={opt}
-              className={`flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 text-sm transition-all duration-200 ${
+              className={`rounded-control flex cursor-pointer items-center gap-3 border px-4 py-3 text-sm transition-all duration-200 ${
                 checked
                   ? "border-rose-300 bg-rose-50 text-rose-700"
                   : "border-[rgba(240,180,180,0.6)] bg-white/80 text-[#1e1b1b] hover:border-rose-200 hover:bg-rose-50/50"

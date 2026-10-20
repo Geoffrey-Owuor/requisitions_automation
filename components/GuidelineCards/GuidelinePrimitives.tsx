@@ -61,7 +61,7 @@ export const Callout = ({
       className={`rounded-surface flex items-start gap-3 border p-4 ${tones.wrap}`}
     >
       <div
-        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white ${tones.chip}`}
+        className={`rounded-control flex h-8 w-8 shrink-0 items-center justify-center text-white ${tones.chip}`}
       >
         {icon}
       </div>
@@ -77,7 +77,7 @@ export const Callout = ({
 
 export const GeneralNote = () => (
   <div className="rounded-surface shadow-raised flex items-start gap-3 border border-slate-200 bg-white p-4">
-    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500">
+    <div className="rounded-control flex h-8 w-8 shrink-0 items-center justify-center bg-slate-100 text-slate-500">
       <AlertCircle size={16} />
     </div>
     <p className="text-sm leading-relaxed text-slate-600">
@@ -100,7 +100,7 @@ export const InfoCard = ({
 }) => (
   <div className="rounded-surface shadow-raised border border-slate-200 bg-white p-4">
     <div className="mb-3 flex items-center gap-2.5">
-      <div className="ring-brand-100 bg-brand-50 text-brand-600 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ring-1">
+      <div className="ring-brand-100 bg-brand-50 text-brand-600 rounded-control flex h-8 w-8 shrink-0 items-center justify-center ring-1">
         {icon}
       </div>
       <h4 className="text-sm font-semibold text-slate-900">{title}</h4>
@@ -134,7 +134,7 @@ export const TierCard = ({
 }) => (
   <div className="rounded-surface shadow-raised flex flex-col justify-between gap-3 border border-slate-200 bg-white p-4 sm:flex-row sm:items-center">
     <div className="flex items-center gap-3">
-      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-slate-50 text-slate-400 ring-1 ring-slate-100">
+      <div className="rounded-control flex h-11 w-11 shrink-0 items-center justify-center bg-slate-50 text-slate-400 ring-1 ring-slate-100">
         {icon}
       </div>
       <div>
@@ -149,7 +149,7 @@ export const TierCard = ({
     <div className="flex flex-wrap items-center gap-1.5 sm:justify-end">
       {approvers.map((approver, idx) => (
         <Fragment key={approver}>
-          <div className="border-brand-100 bg-brand-50/60 flex items-center gap-1.5 rounded-lg border py-1 pr-2.5 pl-1.5 text-xs font-semibold text-slate-700">
+          <div className="border-brand-100 bg-brand-50/60 rounded-compact flex items-center gap-1.5 border py-1 pr-2.5 pl-1.5 text-xs font-semibold text-slate-700">
             <CheckCircle2 size={12} className="text-brand-500 shrink-0" />
             {approver}
           </div>
@@ -187,7 +187,7 @@ export const GuidelineHeading = ({
     <div className="space-y-2">
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5">
         <div className="flex items-center gap-2.5">
-          <span className="bg-brand-600 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white">
+          <span className="bg-brand-600 rounded-control flex h-8 w-8 shrink-0 items-center justify-center text-white">
             {icon}
           </span>
           <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
@@ -258,7 +258,7 @@ export const SectionTitle = ({
   children: ReactNode;
 }) => (
   <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
-    <span className="ring-brand-100 bg-brand-50 text-brand-600 flex h-7 w-7 items-center justify-center rounded-full ring-1">
+    <span className="ring-brand-100 bg-brand-50 text-brand-600 rounded-compact flex h-7 w-7 items-center justify-center ring-1">
       {icon}
     </span>
     {children}

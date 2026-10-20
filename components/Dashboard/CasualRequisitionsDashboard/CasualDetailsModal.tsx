@@ -128,7 +128,7 @@ export const CasualDetailsModal = ({
       }
     >
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="flex items-start gap-3 rounded-xl bg-neutral-50 p-3">
+        <div className="rounded-control flex items-start gap-3 bg-neutral-50 p-3">
           <MapPin size={16} className="mt-1 shrink-0 text-emerald-500" />
           <div>
             <p className="text-[10px] font-bold tracking-wider text-emerald-500 uppercase">
@@ -139,7 +139,7 @@ export const CasualDetailsModal = ({
             </p>
           </div>
         </div>
-        <div className="flex items-start gap-3 rounded-xl bg-neutral-50 p-3">
+        <div className="rounded-control flex items-start gap-3 bg-neutral-50 p-3">
           <Users size={16} className="mt-1 shrink-0 text-emerald-500" />
           <div>
             <p className="text-[10px] font-bold tracking-wider text-emerald-500 uppercase">
@@ -176,7 +176,7 @@ export const CasualDetailsModal = ({
             {details.sections.map((section) => (
               <div
                 key={section.sectionname}
-                className="rounded-xl bg-neutral-50 p-3"
+                className="rounded-control bg-neutral-50 p-3"
               >
                 <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
                   <span className="text-sm font-semibold text-[#1e1b1b]">
@@ -206,7 +206,7 @@ export const CasualDetailsModal = ({
                 </div>
               </div>
             ))}
-            <div className="flex items-center justify-between rounded-xl bg-emerald-50 p-3 text-sm">
+            <div className="rounded-control flex items-center justify-between bg-emerald-50 p-3 text-sm">
               <span className="font-semibold text-[#1e1b1b]">
                 Total ({details.totalcasuals} casuals)
               </span>
@@ -231,7 +231,7 @@ export const CasualDetailsModal = ({
           ].map((step, idx) => (
             <div
               key={idx}
-              className="flex items-center justify-between rounded-xl bg-neutral-50 p-3"
+              className="rounded-control flex items-center justify-between bg-neutral-50 p-3"
             >
               <span className="text-sm text-[#1e1b1b]">
                 {step.label} Status

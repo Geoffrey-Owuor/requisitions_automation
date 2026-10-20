@@ -1,18 +1,16 @@
 "use client";
 
 import { useUser } from "@/context/UserContext";
-import { useState, ChangeEvent, useMemo } from "react";
+import { useState, ChangeEvent, useId, useMemo } from "react";
 import { DatePicker } from "@/components/DatePicker";
+import { Select } from "@/components/Select";
 import {
-  ChevronDown,
   UserRound,
   ArrowRight,
   HardHat,
   Wallet,
   Check,
   Trash2,
-  Search,
-  X,
   Info,
   History,
 } from "lucide-react";
@@ -468,7 +466,7 @@ export default function CasualRequisitionForm({
 
   if (amendmentNotEligible) {
     return (
-      <div className="mx-auto max-w-md rounded-2xl border border-rose-200 bg-rose-50 p-6 text-center text-sm text-rose-700">
+      <div className="rounded-surface mx-auto max-w-md border border-rose-200 bg-rose-50 p-6 text-center text-sm text-rose-700">
         This requisition can no longer be amended. It may have already been
         approved by HR, or you may not be its original submitter.
       </div>
@@ -532,11 +530,11 @@ export default function CasualRequisitionForm({
       {step === 1 && (
         <div className="relative z-10 mx-auto max-w-225">
           {/* Form Image - TODO: Update src to appropriate asset if needed */}
-          <div className="mb-4 overflow-hidden rounded-2xl sm:rounded-3xl">
+          <div className="rounded-surface sm:rounded-surface mb-4 overflow-hidden">
             <Image
               src={assets.casual_form_image}
               sizes="100vh"
-              className="rounded-xl object-contain object-center"
+              className="rounded-control object-contain object-center"
               priority
               alt="Form Image"
             />
@@ -558,7 +556,7 @@ export default function CasualRequisitionForm({
           </header>
 
           {isAmendment && (
-            <div className="mb-6 flex items-start gap-2.5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3.5 text-[13px] text-amber-800">
+            <div className="rounded-surface mb-6 flex items-start gap-2.5 border border-amber-200 bg-amber-50 px-4 py-3.5 text-[13px] text-amber-800">
               <Info className="mt-0.5 h-4 w-4 shrink-0" />
               <p>
                 Amendments are only possible until HR approves this requisition.
@@ -570,7 +568,7 @@ export default function CasualRequisitionForm({
           )}
 
           {isAmendment && !!amendmentContext?.history.length && (
-            <div className="mb-6 rounded-3xl border border-white/85 bg-white/65 px-6 py-6 shadow-[0_24px_48px_rgba(160,60,60,0.10)] sm:px-8">
+            <div className="rounded-surface mb-6 border border-white/85 bg-white/65 px-6 py-6 shadow-[0_24px_48px_rgba(160,60,60,0.10)] sm:px-8">
               <h2 className="mb-2 flex items-center gap-2 text-[13px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
                 <History size={16} /> Previous Amendments
               </h2>
@@ -579,7 +577,7 @@ export default function CasualRequisitionForm({
           )}
 
           {/* Form Card */}
-          <div className="rounded-3xl border border-white/85 bg-white/65 px-6 py-8 shadow-[0_24px_48px_rgba(160,60,60,0.10)] sm:px-8">
+          <div className="rounded-surface border border-white/85 bg-white/65 px-6 py-8 shadow-[0_24px_48px_rgba(160,60,60,0.10)] sm:px-8">
             <form
               className="flex flex-col gap-10"
               onSubmit={(e) => {
@@ -657,7 +655,7 @@ export default function CasualRequisitionForm({
                             key={sectionName}
                             type="button"
                             onClick={() => toggleSection(sectionName)}
-                            className={`flex cursor-pointer items-center gap-1.5 rounded-xl border px-4 py-2 text-[13px] font-medium transition-all duration-200 ${
+                            className={`rounded-control flex cursor-pointer items-center gap-1.5 border px-4 py-2 text-[13px] font-medium transition-all duration-200 ${
                               active
                                 ? "border-rose-600 bg-rose-600 text-white"
                                 : "border-[rgba(240,180,180,0.6)] bg-white/80 text-[#7c5a5a] hover:border-rose-300"
@@ -705,11 +703,11 @@ export default function CasualRequisitionForm({
                     <Wallet size={16} /> Overall Summary
                   </h2>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div className="flex items-center justify-between rounded-2xl border border-rose-700/30 bg-linear-to-r from-rose-900/80 to-rose-800/80 px-5 py-5 font-semibold text-rose-50">
+                    <div className="rounded-surface flex items-center justify-between border border-rose-700/30 bg-linear-to-r from-rose-900/80 to-rose-800/80 px-5 py-5 font-semibold text-rose-50">
                       <span>Total Casuals</span>
                       <span className="text-xl">{overallTotalCasuals}</span>
                     </div>
-                    <div className="flex items-center justify-between rounded-2xl bg-linear-to-r from-slate-800 to-rose-900 px-5 py-5 font-semibold text-white shadow-lg">
+                    <div className="rounded-surface flex items-center justify-between bg-linear-to-r from-slate-800 to-rose-900 px-5 py-5 font-semibold text-white shadow-lg">
                       <span>Total (KES)</span>
                       <span className="text-xl">
                         {overallTotalAmount.toLocaleString()}
@@ -726,7 +724,7 @@ export default function CasualRequisitionForm({
                     <History size={16} /> Reason for Amendment
                   </h2>
                   <textarea
-                    className="h-20 w-full resize-none rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 py-3 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
+                    className="rounded-control h-20 w-full resize-none border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 py-3 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
                     placeholder="Explain what changed and why..."
                     value={reason}
                     required
@@ -742,7 +740,7 @@ export default function CasualRequisitionForm({
                 <button
                   type="submit"
                   disabled={buttonDisabled}
-                  className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-[14px] border-none bg-slate-900 py-4 font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)] disabled:cursor-not-allowed disabled:opacity-70"
+                  className="rounded-control flex w-full cursor-pointer items-center justify-center gap-2 border-none bg-slate-900 py-4 font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)] disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   Proceed to Review
                   <ArrowRight className="h-4 w-4" />
@@ -787,7 +785,7 @@ function SectionFieldset({
     section.periodTo < section.periodFrom;
 
   return (
-    <div className="rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white/70 p-5">
+    <div className="rounded-surface border border-[rgba(240,180,180,0.5)] bg-white/70 p-5">
       <div className="mb-4 flex items-center justify-between">
         <h3 className="text-[14px] font-semibold text-[#1e1b1b]">
           {section.sectionName}
@@ -812,7 +810,7 @@ function SectionFieldset({
           <input
             type="number"
             min={1}
-            className="h-10 rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
+            className="rounded-control h-10 border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
             value={section.numberOfCasuals || ""}
             onChange={(e: ChangeEvent<HTMLInputElement>) =>
               onChange("numberOfCasuals", Number(e.target.value))
@@ -825,6 +823,7 @@ function SectionFieldset({
             Period From <span className="text-red-500">*</span>
           </label>
           <DatePicker
+            tone="rose"
             value={section.periodFrom}
             onChange={(v) => onChange("periodFrom", v)}
           />
@@ -834,6 +833,7 @@ function SectionFieldset({
             Period To <span className="text-red-500">*</span>
           </label>
           <DatePicker
+            tone="rose"
             value={section.periodTo}
             onChange={(v) => onChange("periodTo", v)}
             minDate={section.periodFrom || undefined}
@@ -852,7 +852,7 @@ function SectionFieldset({
             Justification <span className="text-red-500">*</span>
           </label>
           <textarea
-            className="h-20 resize-none rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 py-3 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
+            className="rounded-control h-20 resize-none border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 py-3 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
             placeholder="State the reason casual staff are required..."
             value={section.justification}
             required
@@ -866,7 +866,7 @@ function SectionFieldset({
             PPEs Required <span className="text-red-500">*</span>
           </label>
           <textarea
-            className="h-20 resize-none rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 py-3 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
+            className="rounded-control h-20 resize-none border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 py-3 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
             placeholder="List the personal protective equipment required..."
             value={section.ppesRequired}
             required
@@ -878,19 +878,19 @@ function SectionFieldset({
       </div>
 
       <div className="mt-5 grid grid-cols-3 gap-3 max-sm:grid-cols-1">
-        <div className="rounded-xl border border-gray-100 bg-gray-50 px-3 py-3 text-center">
+        <div className="rounded-control border border-gray-100 bg-gray-50 px-3 py-3 text-center">
           <p className="text-[11px] text-[#7c5a5a]">Rate / Day</p>
           <p className="mt-0.5 text-[14px] font-semibold text-[#1e1b1b]">
             KES {ratePerDay.toLocaleString()}
           </p>
         </div>
-        <div className="rounded-xl border border-gray-100 bg-gray-50 px-3 py-3 text-center">
+        <div className="rounded-control border border-gray-100 bg-gray-50 px-3 py-3 text-center">
           <p className="text-[11px] text-[#7c5a5a]">Engagement Days</p>
           <p className="mt-0.5 text-[14px] font-semibold text-[#1e1b1b]">
             {engagementDays}
           </p>
         </div>
-        <div className="rounded-xl bg-linear-to-r from-slate-800 to-rose-900 px-3 py-3 text-center text-white">
+        <div className="rounded-control bg-linear-to-r from-slate-800 to-rose-900 px-3 py-3 text-center text-white">
           <p className="text-[11px] text-white/70">Total (KES)</p>
           <p className="mt-0.5 text-[14px] font-semibold">
             {totalAmount.toLocaleString()}
@@ -901,6 +901,8 @@ function SectionFieldset({
   );
 }
 
+// The requisition forms' dropdown: the shared Select in the forms' rose tone,
+// under a visible label
 export function FormSelect({
   label,
   options,
@@ -909,98 +911,24 @@ export function FormSelect({
   loading,
   optionLabel,
 }: FormSelectProps) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const [searchQuery, setSearchQuery] = useState("");
-
-  const filteredOptions = useMemo(() => {
-    if (!searchQuery.trim()) return options;
-
-    const searchValue = searchQuery.toLowerCase();
-
-    return options.filter((option) =>
-      option.toLowerCase().includes(searchValue),
-    );
-  }, [options, searchQuery]);
-
+  const id = useId();
   return (
-    <div className="relative flex flex-col gap-2">
-      <label className="text-[13px] font-medium text-[#7c5a5a]">
+    <div className="flex flex-col gap-2">
+      <label htmlFor={id} className="text-[13px] font-medium text-[#7c5a5a]">
         {label} <span className="text-red-500">*</span>
       </label>
-      <button
-        type="button"
-        className="flex h-10 cursor-pointer items-center justify-between rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none disabled:cursor-progress"
-        onClick={() => setIsOpen(!isOpen)}
-        disabled={loading}
-      >
-        <span className={value ? "text-[#1e1b1b]" : "text-[#a18080]"}>
-          {value ? (optionLabel ? optionLabel(value) : value) : "Select..."}
-        </span>
-        <ChevronDown
-          size={14}
-          className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
-        />
-      </button>
-
-      {isOpen && (
-        <>
-          <div
-            className="fixed inset-0 z-40"
-            onClick={() => setIsOpen(false)}
-          />
-          <div className="absolute top-full right-0 left-0 z-50 mt-1 rounded-xl border border-[rgba(240,180,180,0.6)] bg-white px-1 py-2 shadow-[0_10px_25px_rgba(160,60,60,0.1)]">
-            {/* SEARCH INPUT - Search threshold of six*/}
-            {options.length > 6 && (
-              <div className="relative px-1 pb-2">
-                <div className="relative flex items-center">
-                  <Search className="absolute left-2.5 h-3.5 w-3.5 text-neutral-400" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search..."
-                    className="w-full rounded-full border border-neutral-200 bg-neutral-100 py-2 pr-8 pl-8 text-xs text-neutral-900 placeholder-neutral-400 transition-colors focus:border-rose-500 focus:bg-white focus:outline-none"
-                  />
-                  {searchQuery && (
-                    <button
-                      type="button"
-                      onClick={() => setSearchQuery("")}
-                      className="absolute right-2 rounded-full p-0.5 text-neutral-400 hover:bg-neutral-200 hover:text-neutral-600"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  )}
-                </div>
-              </div>
-            )}
-
-            <div className="max-h-60 scrollbar-thin overflow-y-auto">
-              {filteredOptions.length > 0 ? (
-                filteredOptions.map((opt) => (
-                  <div
-                    key={opt}
-                    className="cursor-pointer rounded-lg px-3 py-2.5 text-sm text-[#1e1b1b] transition-all duration-200 hover:bg-rose-50 hover:text-rose-600"
-                    onClick={() => {
-                      onChange(opt);
-                      setIsOpen(false);
-                    }}
-                  >
-                    {optionLabel ? optionLabel(opt) : opt}
-                  </div>
-                ))
-              ) : (
-                /* Fallback state when no options exist */
-                <div className="px-3 py-6 text-center text-sm text-neutral-400">
-                  {searchQuery
-                    ? "No matching results found."
-                    : "No results found for this selection"}
-                </div>
-              )}
-            </div>
-          </div>
-        </>
-      )}
+      <Select
+        id={id}
+        tone="rose"
+        value={value}
+        onChange={onChange}
+        busy={loading}
+        unlistedLabel={optionLabel ? optionLabel(value) : value}
+        options={options.map((option) => ({
+          value: option,
+          label: optionLabel ? optionLabel(option) : option,
+        }))}
+      />
     </div>
   );
 }

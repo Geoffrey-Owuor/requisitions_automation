@@ -3,7 +3,7 @@ import "server-only";
 // action — see that route for why.
 import { query } from "@/lib/db";
 import { getSession } from "@/lib/session";
-import { getUserRoles } from "@/serverActions/GetUserRoles";
+import { getApproverMemberships } from "@/serverActions/GetApproverMemberships";
 import { hodHistoryScopeSql, hodPendingScopeSql } from "@/lib/hodAssignment";
 import {
   PaginatedResult,
@@ -44,11 +44,11 @@ export const getITRequisitionData = async ({
   const user = await getSession();
   if (!user) return emptyPaginatedResult(page, pageSize);
 
-  // The IT queues expose every requisition, so verify the "it" role
-  // server-side rather than trusting the dashboard's role gate.
+  // The IT queues expose every requisition, so verify it_array membership
+  // server-side rather than trusting the dashboard's gate.
   if (dataFlag === "itPending" || dataFlag === "itAll") {
-    const roles = await getUserRoles(user.email);
-    if (!roles.includes("it")) return emptyPaginatedResult(page, pageSize);
+    const { isITApprover } = await getApproverMemberships();
+    if (!isITApprover) return emptyPaginatedResult(page, pageSize);
   }
 
   const baseParams: (string | number)[] = [];

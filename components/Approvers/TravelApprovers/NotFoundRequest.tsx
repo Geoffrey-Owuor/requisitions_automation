@@ -9,9 +9,9 @@ export default function NotFoundRequest() {
 
   return (
     <div className="relative flex min-h-full flex-1 items-center justify-center p-5">
-      <div className="mx-auto max-w-md rounded-3xl border border-gray-100 bg-white p-10 text-center shadow-[0_24px_48px_rgba(160,60,60,0.10)]">
+      <div className="rounded-surface mx-auto max-w-md border border-gray-100 bg-white p-10 text-center shadow-[0_24px_48px_rgba(160,60,60,0.10)]">
         {/* Icon */}
-        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
+        <div className="rounded-control mx-auto mb-5 flex h-16 w-16 items-center justify-center bg-gray-100">
           <FileSearch className="h-7 w-7 text-[#7c5a5a]" />
         </div>
 
@@ -31,7 +31,7 @@ export default function NotFoundRequest() {
         </p>
 
         {/* Possible reasons card */}
-        <div className="mb-7 rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white px-5 py-4 text-left last:mb-0">
+        <div className="rounded-surface mb-7 border border-[rgba(240,180,180,0.5)] bg-white px-5 py-4 text-left last:mb-0">
           <p className="mb-2.5 text-[11px] font-semibold tracking-[0.4px] text-[#b0a0a0] uppercase">
             Possible reasons
           </p>
@@ -59,7 +59,7 @@ export default function NotFoundRequest() {
         {!isSignedIn && (
           <Link
             href="/"
-            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-[14px] bg-slate-900 py-4 text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(30,27,27,0.3)]"
+            className="rounded-control flex w-full cursor-pointer items-center justify-center gap-2 bg-slate-900 py-4 text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(30,27,27,0.3)]"
           >
             <Home size={16} />
             Go to Homepage

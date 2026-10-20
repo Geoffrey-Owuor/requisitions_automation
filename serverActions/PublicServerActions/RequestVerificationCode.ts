@@ -2,10 +2,31 @@
 import { randomInt } from "crypto";
 import { query } from "@/lib/db";
 import { MessageResponse } from "./SubmitAdvanceForm";
-import { AdvanceVerificationEmailSender } from "@/services/AdvanceVerificationEmailSender";
+import {
+  AdvanceRecordInactiveEmailSender,
+  AdvanceVerificationEmailSender,
+} from "@/services/AdvanceVerificationEmailSender";
 
 const CODE_EXPIRY_MINUTES = 10;
 const RESEND_COOLDOWN_SECONDS = 60;
+const INACTIVE_NOTICE_COOLDOWN_MS = 60 * 60 * 1000;
+
+// When each deactivated email was last sent the inactive notice, so the
+// public form can't be used to flood its inbox. Per PM2 worker and lost on
+// restart, which is fine for a courtesy notice.
+const inactiveNoticeSentAt = new Map<string, number>();
+
+function shouldSendInactiveNotice(email: string) {
+  const now = Date.now();
+  for (const [key, sentAt] of inactiveNoticeSentAt) {
+    if (now - sentAt > INACTIVE_NOTICE_COOLDOWN_MS) {
+      inactiveNoticeSentAt.delete(key);
+    }
+  }
+  if (inactiveNoticeSentAt.has(email)) return false;
+  inactiveNoticeSentAt.set(email, now);
+  return true;
+}
 
 const GENERIC_RESPONSE: MessageResponse = {
   type: "success",
@@ -34,17 +55,32 @@ export async function RequestVerificationCode(
       };
     }
 
-    const staffResult = await query<StaffLookup>(
-      `SELECT staff_name, staff_email FROM company_staff_data WHERE LOWER(staff_email) = $1 LIMIT 1`,
+    const staffResult = await query<StaffLookup & { deactivated: boolean }>(
+      `SELECT staff_name, staff_email, deactivated_at IS NOT NULL AS deactivated
+       FROM company_staff_data WHERE LOWER(staff_email) = $1 LIMIT 1`,
       [normalizedEmail],
     );
 
-    // Anti-enumeration: always respond identically whether or not the email matched.
+    // Anti-enumeration: always respond identically whether or not the email
+    // matched.
     if (staffResult.length === 0) {
       return GENERIC_RESPONSE;
     }
 
     const staff = staffResult[0];
+
+    // A deactivated record (migration 032) gets no code. Its email on file
+    // is told why instead - the same reply here keeps that invisible to
+    // whoever typed it - at most once per INACTIVE_NOTICE_COOLDOWN_MS.
+    if (staff.deactivated) {
+      if (shouldSendInactiveNotice(staff.staff_email.toLowerCase())) {
+        await AdvanceRecordInactiveEmailSender({
+          to: staff.staff_email,
+          staffName: staff.staff_name,
+        });
+      }
+      return GENERIC_RESPONSE;
+    }
 
     // Silent cooldown: if a still-valid code was requested moments ago, don't send another.
     const recentCodeResult = await query(

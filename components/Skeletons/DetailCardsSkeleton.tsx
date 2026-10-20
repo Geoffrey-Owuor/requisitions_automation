@@ -11,7 +11,7 @@ export function DetailCardsSkeleton({
   return (
     <div className="animate-pulse space-y-3" aria-hidden="true">
       {Array.from({ length: count }, (_, i) => (
-        <div key={i} className="rounded-xl bg-neutral-50 p-3">
+        <div key={i} className="rounded-control bg-neutral-50 p-3">
           <div className="flex items-center justify-between gap-4">
             <div className="h-4 w-36 rounded-md bg-neutral-200" />
             <div className="h-3 w-28 rounded-md bg-neutral-200" />
@@ -26,9 +26,9 @@ export function DetailCardsSkeleton({
           </div>
           {withChips && (
             <div className="mt-4 flex flex-wrap gap-2">
-              <div className="h-7 w-32 rounded-lg bg-neutral-200" />
-              <div className="h-7 w-24 rounded-lg bg-neutral-200" />
-              <div className="h-7 w-28 rounded-lg bg-neutral-200" />
+              <div className="rounded-compact h-7 w-32 bg-neutral-200" />
+              <div className="rounded-compact h-7 w-24 bg-neutral-200" />
+              <div className="rounded-compact h-7 w-28 bg-neutral-200" />
             </div>
           )}
         </div>

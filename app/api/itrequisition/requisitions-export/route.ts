@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { query } from "@/lib/db";
 import { Workbook } from "exceljs";
 import { getSession } from "@/lib/session";
-import { getUserRoles } from "@/serverActions/GetUserRoles";
+import { getApproverMemberships } from "@/serverActions/GetApproverMemberships";
 
 export async function GET() {
   // Check if we have a valid session
@@ -15,10 +15,10 @@ export async function GET() {
     );
   }
 
-  // The export contains every IT requisition — restrict it to IT admins,
-  // the same "it" role that gates the "IT · All" dashboard table.
-  const roles = await getUserRoles(user.email);
-  if (!roles.includes("it")) {
+  // The export contains every IT requisition — restrict it to it_array
+  // members, the same gate as the "IT · All" dashboard table.
+  const { isITApprover } = await getApproverMemberships();
+  if (!isITApprover) {
     return NextResponse.json(
       { message: "You are not authorized to export IT requisitions" },
       { status: 403 },

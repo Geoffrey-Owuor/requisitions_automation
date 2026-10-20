@@ -4,6 +4,12 @@
 
 export type CasualBudgetUnit = "default" | "warehouse" | "bond";
 
+export const BUDGET_UNIT_LABELS: Record<CasualBudgetUnit, string> = {
+  default: "Department budget",
+  warehouse: "Warehouse budget",
+  bond: "Bond budget",
+};
+
 // Section dates arriving from a client date-input are plain "YYYY-MM-DD"
 // strings, but the same field read back off a DB row (via Postgres's date
 // type parser, then serialized as a Server Component prop or a server

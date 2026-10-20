@@ -13,14 +13,7 @@ import {
   getDashboardNavGroups,
   isNavItemActive,
 } from "@/lib/dashboardNav";
-import {
-  ExternalLink,
-  LayoutGrid,
-  LucideIcon,
-  Search,
-  Sparkles,
-  X,
-} from "lucide-react";
+import { ExternalLink, LayoutGrid, LucideIcon, Search, X } from "lucide-react";
 
 type LauncherApp = {
   key: string;
@@ -37,8 +30,9 @@ type LauncherApp = {
 
 type LauncherSection = { key: string; label: string; apps: LauncherApp[] };
 
-// Microsoft's product icons (Fluent UI brand icons), served from
-// public/icons/m365. Copilot has none there, so it keeps a Lucide icon.
+// Microsoft's product icons (the October 2025 designs), served from
+// public/icons/m365. The SVGs come from selfh.st/icons (CC BY 4.0); Copilot is
+// Microsoft's own 48px PNG, since that set only has the older Copilot logo.
 const MICROSOFT_APPS: LauncherApp[] = [
   {
     key: "m365-outlook",
@@ -92,7 +86,7 @@ const MICROSOFT_APPS: LauncherApp[] = [
   {
     key: "m365-copilot",
     name: "Copilot",
-    Icon: Sparkles,
+    iconSrc: "/icons/m365/copilot.png",
     href: "https://copilot.cloud.microsoft",
     keywords: ["ai", "assistant", "chat"],
   },
@@ -210,7 +204,7 @@ const DashboardBrand = () => {
         aria-expanded={openMenu}
         aria-controls={openMenu ? panelId : undefined}
         onClick={() => setOpenMenu((prev) => !prev)}
-        className="group relative flex cursor-pointer items-center rounded-full p-2 outline-none hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white/80"
+        className="group rounded-control relative flex cursor-pointer items-center p-2 outline-none hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white/80"
       >
         <span className="relative inline-flex h-6.5 w-6.5 shrink-0 items-center justify-center">
           <Image
@@ -234,7 +228,7 @@ const DashboardBrand = () => {
         {!openMenu && (
           <span
             aria-hidden="true"
-            className="pointer-events-none absolute top-1/2 left-full z-10 ml-2 -translate-y-1/2 rounded-lg bg-neutral-900 px-3 py-1.5 text-xs font-semibold whitespace-nowrap text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
+            className="rounded-compact pointer-events-none absolute top-1/2 left-full z-10 ml-2 -translate-y-1/2 bg-neutral-900 px-3 py-1.5 text-xs font-semibold whitespace-nowrap text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
           >
             Apps
           </span>
@@ -422,11 +416,11 @@ const AppMenu = ({
         role="dialog"
         aria-label="Apps"
         tabIndex={-1}
-        className="custom:absolute custom:inset-x-auto custom:top-full custom:left-0 custom:mt-1 custom:w-88 custom:max-h-[min(36rem,calc(100dvh-5rem))] fixed inset-x-2 top-16 z-60 flex max-h-[calc(100dvh-5rem)] flex-col overflow-hidden rounded-3xl bg-white shadow-2xl outline-none sm:right-auto sm:w-104"
+        className="custom:absolute custom:inset-x-auto custom:top-full custom:left-0 custom:mt-1 custom:w-88 custom:max-h-[min(36rem,calc(100dvh-5rem))] rounded-surface fixed inset-x-2 top-16 z-60 flex max-h-[calc(100dvh-5rem)] flex-col overflow-hidden bg-white shadow-2xl outline-none sm:right-auto sm:w-104"
       >
         {/* Search */}
         <div className="flex shrink-0 items-center gap-2 border-b border-gray-100 p-3">
-          <div className="flex flex-1 items-center gap-2 rounded-2xl bg-gray-100 px-3.5 py-2.5 focus-within:ring-2 focus-within:ring-red-950/30">
+          <div className="rounded-surface flex flex-1 items-center gap-2 bg-gray-100 px-3.5 py-2.5 focus-within:ring-2 focus-within:ring-red-950/30">
             <Search
               aria-hidden="true"
               className="h-4 w-4 shrink-0 text-gray-500"
@@ -450,7 +444,7 @@ const AppMenu = ({
                   searchRef.current?.focus();
                 }}
                 aria-label="Clear search"
-                className="shrink-0 rounded-full p-0.5 text-gray-500 hover:bg-gray-200 hover:text-gray-700"
+                className="rounded-compact shrink-0 p-0.5 text-gray-500 hover:bg-gray-200 hover:text-gray-700"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
@@ -460,7 +454,7 @@ const AppMenu = ({
             type="button"
             onClick={onClose}
             aria-label="Close apps"
-            className="custom:hidden shrink-0 rounded-full p-2 text-gray-500 outline-none hover:bg-red-50 hover:text-red-950 focus-visible:ring-2 focus-visible:ring-red-950/40"
+            className="custom:hidden rounded-control shrink-0 p-2 text-gray-500 outline-none hover:bg-red-50 hover:text-red-950 focus-visible:ring-2 focus-visible:ring-red-950/40"
           >
             <X className="h-5 w-5" />
           </button>
@@ -527,7 +521,7 @@ const AppTile = ({
   isActive: boolean;
   onSelect: (app: LauncherApp) => void;
 }) => {
-  const className = `group relative flex h-full flex-col items-center rounded-2xl px-1.5 pt-2.5 pb-2 transition-colors duration-200 outline-none focus-visible:ring-2 focus-visible:ring-red-950/40 active:scale-95 ${
+  const className = `group relative flex h-full flex-col items-center rounded-surface px-1.5 pt-2.5 pb-2 transition-colors duration-200 outline-none focus-visible:ring-2 focus-visible:ring-red-950/40 active:scale-95 ${
     isActive ? "bg-red-50" : "hover:bg-red-50/70"
   }`;
 
@@ -535,7 +529,7 @@ const AppTile = ({
     <>
       {/* Icon Tile */}
       <span
-        className={`mb-1.5 flex h-12 w-12 items-center justify-center rounded-2xl shadow-sm ring-1 transition-all duration-200 group-hover:shadow-md ${
+        className={`rounded-surface mb-1.5 flex h-12 w-12 items-center justify-center shadow-sm ring-1 transition-all duration-200 group-hover:shadow-md ${
           isActive
             ? "bg-red-950 text-white ring-red-950"
             : "bg-white text-gray-600 ring-black/5 group-hover:text-red-950 group-hover:ring-red-100"

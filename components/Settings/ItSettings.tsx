@@ -7,12 +7,14 @@ import {
   getItConfigAdminData,
   setItRequirementItemActive,
 } from "@/serverActions/ItConfigAdmin";
+import { ItSettingsSkeleton } from "@/components/Skeletons/SettingsSkeleton";
 import {
   AddRow,
   Card,
   ChangesCard,
   ConfirmDialog,
   type Confirmation,
+  LoadError,
   ToggleList,
   useSettingsRunner,
 } from "./SettingsPrimitives";
@@ -32,24 +34,11 @@ export default function ItSettings() {
   });
 
   if (isLoading) {
-    return (
-      <div className="h-48 animate-pulse rounded-2xl border border-neutral-200 bg-white" />
-    );
+    return <ItSettingsSkeleton />;
   }
 
   if (isError || !data) {
-    return (
-      <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
-        The IT settings could not be loaded.{" "}
-        <button
-          type="button"
-          onClick={() => refetch()}
-          className="font-semibold underline"
-        >
-          Try again
-        </button>
-      </div>
-    );
+    return <LoadError what="IT settings" onRetry={() => refetch()} />;
   }
 
   return (

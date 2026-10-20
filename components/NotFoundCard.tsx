@@ -16,7 +16,7 @@ export default function NotFoundCard({
   return (
     <div className="flex flex-1 items-center justify-center py-8">
       <div className="rounded-surface shadow-floating w-full border border-slate-200 bg-white p-6 text-center sm:p-7">
-        <div className="ring-brand-50 bg-brand-50 text-brand-600 mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full ring-4">
+        <div className="ring-brand-50 bg-brand-50 text-brand-600 rounded-control mx-auto mb-4 flex h-12 w-12 items-center justify-center ring-4">
           <Search className="h-5 w-5" />
         </div>
 

@@ -5,16 +5,16 @@ export default function ITReqPdfSkeleton() {
     <div className="relative py-4 font-sans">
       <div className="relative z-10 mx-auto max-w-180 animate-pulse">
         {/* Toolbar Skeleton */}
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-gray-100 bg-white/70 px-6 py-4 shadow-[0_8px_16px_rgba(160,60,60,0.06)]">
-          <div className="h-4 w-48 rounded-lg bg-rose-100/70" />
-          <div className="h-10 w-36 rounded-[14px] bg-slate-200/70" />
+        <div className="rounded-surface mb-6 flex flex-wrap items-center justify-between gap-4 border border-gray-100 bg-white/70 px-6 py-4 shadow-[0_8px_16px_rgba(160,60,60,0.06)]">
+          <div className="rounded-compact h-4 w-48 bg-rose-100/70" />
+          <div className="rounded-control h-10 w-36 bg-slate-200/70" />
         </div>
 
         {/* Document Shell */}
-        <div className="rounded-3xl border border-white/85 bg-white/65 px-10 py-10 shadow-[0_24px_48px_rgba(160,60,60,0.10)]">
+        <div className="rounded-surface border border-white/85 bg-white/65 px-10 py-10 shadow-[0_24px_48px_rgba(160,60,60,0.10)]">
           {/* Header */}
           <div className="mb-8 border-b border-[rgba(240,180,180,0.4)] pb-6">
-            <div className="mb-3 h-8 w-72 rounded-lg bg-rose-100/70" />
+            <div className="rounded-control mb-3 h-8 w-72 bg-rose-100/70" />
             <div className="h-4 w-60 rounded-full bg-rose-100/50" />
           </div>
 
@@ -25,7 +25,7 @@ export default function ITReqPdfSkeleton() {
               {[1, 2, 3, 4].map((i) => (
                 <div key={i} className="flex flex-col gap-2">
                   <div className="h-3 w-24 rounded-full bg-rose-100/50" />
-                  <div className="h-4 w-36 rounded-lg bg-rose-100/60" />
+                  <div className="rounded-compact h-4 w-36 bg-rose-100/60" />
                 </div>
               ))}
             </div>
@@ -38,7 +38,7 @@ export default function ITReqPdfSkeleton() {
               {[1, 2].map((i) => (
                 <div key={i} className="flex flex-col gap-2">
                   <div className="h-3 w-28 rounded-full bg-rose-100/50" />
-                  <div className="h-4 w-40 rounded-lg bg-rose-100/60" />
+                  <div className="rounded-compact h-4 w-40 bg-rose-100/60" />
                 </div>
               ))}
             </div>
@@ -71,9 +71,9 @@ export default function ITReqPdfSkeleton() {
             <div className="mb-5 h-3.5 w-32 rounded-full bg-rose-100/70" />
             <div className="grid grid-cols-2 gap-6 max-sm:grid-cols-1">
               {/* HOD Card Skeleton */}
-              <div className="rounded-2xl border border-[rgba(240,180,180,0.4)] bg-white/60 px-5 py-5">
+              <div className="rounded-surface border border-[rgba(240,180,180,0.4)] bg-white/60 px-5 py-5">
                 <div className="mb-3 h-3 w-24 rounded-full bg-rose-100/50" />
-                <div className="mb-4 h-4 w-36 rounded-lg bg-rose-100/70" />
+                <div className="rounded-compact mb-4 h-4 w-36 bg-rose-100/70" />
                 <div className="mb-4 h-6 w-20 rounded-full bg-rose-100/60" />
                 <div className="mt-3 flex flex-col gap-1.5">
                   <div className="h-2.5 w-full rounded-full bg-rose-100/40" />
@@ -82,9 +82,9 @@ export default function ITReqPdfSkeleton() {
               </div>
 
               {/* IT Card Skeleton */}
-              <div className="rounded-2xl border border-[rgba(240,180,180,0.4)] bg-white/60 px-5 py-5">
+              <div className="rounded-surface border border-[rgba(240,180,180,0.4)] bg-white/60 px-5 py-5">
                 <div className="mb-3 h-3 w-20 rounded-full bg-rose-100/50" />
-                <div className="mb-4 h-4 w-40 rounded-lg bg-rose-100/70" />
+                <div className="rounded-compact mb-4 h-4 w-40 bg-rose-100/70" />
                 <div className="mb-4 h-6 w-20 rounded-full bg-rose-100/60" />
                 <div className="mt-3 flex flex-col gap-1.5">
                   <div className="h-2.5 w-full rounded-full bg-rose-100/40" />

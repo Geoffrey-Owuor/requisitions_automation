@@ -55,9 +55,9 @@ const DashboardAlert = () => {
   return (
     <ClientPortal>
       <div
-        className={`fixed right-6 bottom-6 z-100 hidden w-88 max-w-[calc(100vw-3rem)] items-start gap-3 rounded-2xl border border-white/10 bg-neutral-900/95 p-4 text-white shadow-2xl backdrop-blur-md sm:flex ${isExiting ? "animate-slide-out-bottom-right" : "animate-slide-in-bottom-right"} `}
+        className={`rounded-surface fixed right-6 bottom-6 z-100 hidden w-88 max-w-[calc(100vw-3rem)] items-start gap-3 border border-white/10 bg-neutral-900/95 p-4 text-white shadow-2xl backdrop-blur-md sm:flex ${isExiting ? "animate-slide-out-bottom-right" : "animate-slide-in-bottom-right"} `}
       >
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-amber-400/25 to-orange-500/25">
+        <div className="rounded-control flex h-10 w-10 shrink-0 items-center justify-center bg-linear-to-br from-amber-400/25 to-orange-500/25">
           <SmileIcon className="h-5 w-5 text-amber-300" />
         </div>
         <div className="flex-1 pt-1">
@@ -70,7 +70,7 @@ const DashboardAlert = () => {
         </div>
         <button
           onClick={handleClose}
-          className="shrink-0 rounded-full p-1 text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
+          className="rounded-compact shrink-0 p-1 text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
         >
           <X className="h-4 w-4" />
         </button>

@@ -41,7 +41,7 @@ export const TablePagination = ({
           <button
             type="button"
             onClick={() => setIsRowsMenuOpen((prev) => !prev)}
-            className="flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white/60 px-2.5 py-1.5 text-[12px] font-medium text-slate-600 shadow-sm transition-colors hover:bg-white"
+            className="rounded-compact flex items-center gap-1.5 border border-gray-300 bg-white/60 px-2.5 py-1.5 text-[12px] font-medium text-slate-600 shadow-sm transition-colors hover:bg-white"
           >
             {itemsPerPage} / page
             <ChevronDown
@@ -60,7 +60,7 @@ export const TablePagination = ({
                 onClick={() => setIsRowsMenuOpen(false)}
               />
               {/* Dropdown Menu — opens upward since pagination sits at the bottom of the table */}
-              <div className="absolute bottom-[calc(100%+4px)] left-0 z-50 min-w-full overflow-hidden rounded-xl border border-slate-200 bg-white p-1 shadow-lg">
+              <div className="rounded-control absolute bottom-[calc(100%+4px)] left-0 z-50 min-w-full overflow-hidden border border-slate-200 bg-white p-1 shadow-lg">
                 {rowsPerPageOptions.map((option) => (
                   <div
                     key={option}
@@ -68,7 +68,7 @@ export const TablePagination = ({
                       onItemsPerPageChange(option);
                       setIsRowsMenuOpen(false);
                     }}
-                    className={`cursor-pointer rounded-lg px-3 py-2 text-[13px] whitespace-nowrap transition-all duration-200 ${
+                    className={`rounded-control cursor-pointer px-3 py-2 text-[13px] whitespace-nowrap transition-all duration-200 ${
                       itemsPerPage === option
                         ? "bg-rose-50 font-medium text-rose-700"
                         : "text-slate-700 hover:bg-slate-50 hover:text-slate-900"
@@ -88,14 +88,14 @@ export const TablePagination = ({
           <button
             onClick={() => onPageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className="rounded-full bg-slate-900 p-2 text-white shadow-sm transition-all active:scale-95 disabled:opacity-50"
+            className="rounded-control bg-slate-900 p-2 text-white shadow-sm transition-all active:scale-95 disabled:opacity-50"
           >
             <ChevronLeft size={18} />
           </button>
           <button
             onClick={() => onPageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className="rounded-full bg-slate-900 p-2 text-white shadow-sm transition-all active:scale-95 disabled:opacity-50"
+            className="rounded-control bg-slate-900 p-2 text-white shadow-sm transition-all active:scale-95 disabled:opacity-50"
           >
             <ChevronRight size={18} />
           </button>

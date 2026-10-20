@@ -203,7 +203,7 @@ function WhyHubSection() {
             key={title}
             className="rounded-surface border border-slate-200 bg-white p-4"
           >
-            <div className="bg-brand-50 text-brand-600 flex h-10 w-10 items-center justify-center rounded-full">
+            <div className="bg-brand-50 text-brand-600 rounded-control flex h-10 w-10 items-center justify-center">
               <Icon size={18} />
             </div>
             <h3 className="mt-3 text-sm font-semibold tracking-tight text-slate-900">
@@ -377,7 +377,7 @@ function QuickLinksCard() {
               href={href}
               className="rounded-control hover:border-brand-200 hover:bg-brand-50/60 focus-visible:outline-brand-600 group flex h-full items-center gap-2.5 border border-slate-100 p-2 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
             >
-              <span className="group-hover:bg-brand-600 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-colors group-hover:text-white">
+              <span className="group-hover:bg-brand-600 rounded-control flex h-8 w-8 shrink-0 items-center justify-center bg-slate-100 text-slate-600 transition-colors group-hover:text-white">
                 <Icon size={16} />
               </span>
 
@@ -439,11 +439,11 @@ function AppCard({ entry }: { entry: AppEntry }) {
   return (
     <div className="rounded-surface shadow-raised hover:border-brand-200 hover:shadow-floating group relative flex flex-col border border-slate-200 bg-white p-4 transition-[border-color,box-shadow]">
       <div className="mb-3 flex items-start justify-between gap-3">
-        <div className="group-hover:bg-brand-600 flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600 transition-colors group-hover:text-white">
+        <div className="group-hover:bg-brand-600 rounded-control flex h-12 w-12 shrink-0 items-center justify-center bg-slate-100 text-slate-600 transition-colors group-hover:text-white">
           <Icon size={17} />
         </div>
         <span
-          className={`rounded-lg border px-2 py-1 text-[10px] font-bold tracking-wider uppercase ${ownerTone[entry.owner]}`}
+          className={`rounded-compact border px-2 py-1 text-[10px] font-bold tracking-wider uppercase ${ownerTone[entry.owner]}`}
         >
           {entry.owner}
         </span>
@@ -473,7 +473,7 @@ function AppCard({ entry }: { entry: AppEntry }) {
                 {index > 0 && (
                   <ArrowRight className="h-3 w-3 shrink-0 text-slate-300" />
                 )}
-                <span className="bg-brand-50 text-brand-700 rounded-lg px-2 py-1 text-xs font-medium">
+                <span className="bg-brand-50 text-brand-700 rounded-compact px-2 py-1 text-xs font-medium">
                   {step}
                 </span>
               </Fragment>
@@ -496,7 +496,7 @@ function AppCard({ entry }: { entry: AppEntry }) {
         {entry.action && (
           <Link
             href={entry.action.href}
-            className="hover:border-brand-200 hover:text-brand-700 relative z-10 rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-700 transition-colors"
+            className="hover:border-brand-200 hover:text-brand-700 rounded-compact relative z-10 border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-700 transition-colors"
           >
             {entry.action.label}
           </Link>

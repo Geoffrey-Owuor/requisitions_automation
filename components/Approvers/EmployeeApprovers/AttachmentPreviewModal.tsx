@@ -56,7 +56,7 @@ export default function AttachmentPreviewModal({
         <a
           href={downloadUrl}
           download={label}
-          className="flex items-center justify-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50 max-sm:flex-1 max-sm:py-2.5 max-sm:text-sm"
+          className="rounded-compact flex items-center justify-center gap-1.5 border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50 max-sm:flex-1 max-sm:py-2.5 max-sm:text-sm"
         >
           <Download className="h-3.5 w-3.5" />
           Download
