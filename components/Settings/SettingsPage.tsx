@@ -2,15 +2,21 @@ import Link from "next/link";
 import { Fragment, type ComponentType } from "react";
 import {
   BadgeCheck,
+  BriefcaseBusiness,
+  Building2,
   HardHat,
   Monitor,
+  UserRoundPlus,
   UsersRound,
   type LucideIcon,
 } from "lucide-react";
 import { SETTINGS_PAGE } from "@/lib/configAdmin";
 import ApproversSettings from "./ApproversSettings";
 import CasualSettings from "./CasualSettings";
+import DepartmentsSettings from "./DepartmentsSettings";
+import EmployeeSettings from "./EmployeeSettings";
 import ItSettings from "./ItSettings";
+import TravelSettings from "./TravelSettings";
 import UsersSettings from "./UsersSettings";
 
 type SettingsTab = {
@@ -43,8 +49,26 @@ const TAB_GROUPS: { label: string; tabs: SettingsTab[] }[] = [
   {
     label: "Requisitions",
     tabs: [
+      {
+        key: "departments",
+        label: "Departments",
+        Icon: Building2,
+        Panel: DepartmentsSettings,
+      },
+      {
+        key: "travel",
+        label: "Travel",
+        Icon: BriefcaseBusiness,
+        Panel: TravelSettings,
+      },
       { key: "casual", label: "Casual", Icon: HardHat, Panel: CasualSettings },
       { key: "it", label: "IT", Icon: Monitor, Panel: ItSettings },
+      {
+        key: "employee",
+        label: "Employee",
+        Icon: UserRoundPlus,
+        Panel: EmployeeSettings,
+      },
     ],
   },
 ];

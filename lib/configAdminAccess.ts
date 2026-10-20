@@ -68,6 +68,9 @@ export function cleanConfigName(value: unknown, label: string): string {
   return name;
 }
 
+// Today's date in Africa/Nairobi, for SQL comparing effective-from dates
+export const NAIROBI_TODAY_SQL = `(CURRENT_TIMESTAMP AT TIME ZONE 'Africa/Nairobi')::date`;
+
 export const isConfigId = (value: unknown): value is number =>
   typeof value === "number" && Number.isInteger(value) && value > 0;
 

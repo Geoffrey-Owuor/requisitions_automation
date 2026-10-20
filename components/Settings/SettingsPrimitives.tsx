@@ -9,6 +9,12 @@ import type { ConfigActionResult } from "@/lib/configAdminAccess";
 
 // Building blocks shared by the Settings tabs
 
+// YYYY-MM-DD plus one day, in UTC so no local time zone shifts the date
+export const nextDay = (date: string) =>
+  new Date(Date.parse(`${date}T00:00:00Z`) + 86_400_000)
+    .toISOString()
+    .slice(0, 10);
+
 // Runs a Settings action, reports its outcome as a toast and reloads the
 // tab's data (`adminKey`) plus any form caches of the same data
 // (`relatedKeys`). `run` resolves to whether it succeeded, so forms can
