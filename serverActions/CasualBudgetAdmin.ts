@@ -303,24 +303,23 @@ async function snapshot(
   department: string,
   financialYear: string,
 ) {
-  const [budgets, statutory, baselines] = await Promise.all([
-    client.query(
-      `SELECT budget_unit, budget_month, budget_amount FROM casual_department_budgets
-       WHERE department_name = $1 AND financial_year = $2
-       ORDER BY budget_unit, budget_month`,
-      [department, financialYear],
-    ),
-    client.query(
-      `SELECT statutory_cost_per_casual FROM casual_department_statutory_costs
-       WHERE department_name = $1 AND financial_year = $2`,
-      [department, financialYear],
-    ),
-    client.query(
-      `SELECT budget_unit, baseline_amount FROM casual_department_baseline_spend
-       WHERE department_name = $1 AND financial_year = $2 ORDER BY budget_unit`,
-      [department, financialYear],
-    ),
-  ]);
+  // One after the other: a client runs one query at a time
+  const budgets = await client.query(
+    `SELECT budget_unit, budget_month, budget_amount FROM casual_department_budgets
+     WHERE department_name = $1 AND financial_year = $2
+     ORDER BY budget_unit, budget_month`,
+    [department, financialYear],
+  );
+  const statutory = await client.query(
+    `SELECT statutory_cost_per_casual FROM casual_department_statutory_costs
+     WHERE department_name = $1 AND financial_year = $2`,
+    [department, financialYear],
+  );
+  const baselines = await client.query(
+    `SELECT budget_unit, baseline_amount FROM casual_department_baseline_spend
+     WHERE department_name = $1 AND financial_year = $2 ORDER BY budget_unit`,
+    [department, financialYear],
+  );
   return {
     budgets: budgets.rows,
     statutory: statutory.rows[0]?.statutory_cost_per_casual ?? null,

@@ -117,15 +117,16 @@ async function loadUserAndRole(
   if (!isConfigId(userId) || !isConfigId(roleId)) {
     throw new ConfigInputError("Choose a user and a role");
   }
-  const [user, role] = await Promise.all([
-    client.query(
-      `SELECT user_id, email, username FROM users WHERE user_id = $1`,
-      [userId],
-    ),
-    client.query(`SELECT role_id, role_name FROM roles WHERE role_id = $1`, [
-      roleId,
-    ]),
-  ]);
+  // One after the other: a client runs one query at a time (pg deprecates
+  // queueing a second one while the first runs)
+  const user = await client.query(
+    `SELECT user_id, email, username FROM users WHERE user_id = $1`,
+    [userId],
+  );
+  const role = await client.query(
+    `SELECT role_id, role_name FROM roles WHERE role_id = $1`,
+    [roleId],
+  );
   if (user.rows.length === 0 || role.rows.length === 0) {
     throw new ConfigInputError(
       "That user or role no longer exists - reload to see the latest",
