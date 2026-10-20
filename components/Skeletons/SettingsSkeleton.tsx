@@ -427,3 +427,26 @@ export function AdvanceSettingsSkeleton() {
     </SettingsSkeletonFrame>
   );
 }
+
+// Audit log entries inside an already-rendered card
+export function AuditLogSkeleton() {
+  return (
+    <div className="animate-pulse" aria-busy="true">
+      <span className="sr-only">Loading the audit log</span>
+      <div className="divide-y divide-neutral-100" aria-hidden="true">
+        {Array.from({ length: 6 }, (_, i) => (
+          <div
+            key={i}
+            className="flex items-start justify-between gap-3 py-2.5"
+          >
+            <div className="flex-1 space-y-1.5">
+              <div className={`h-3.5 w-3/4 ${bar}`} />
+              <div className={`h-3 w-64 ${softBar}`} />
+            </div>
+            <div className="h-5 w-16 rounded-full bg-neutral-100" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}

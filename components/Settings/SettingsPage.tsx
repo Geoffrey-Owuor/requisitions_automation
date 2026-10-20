@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Fragment, type ComponentType } from "react";
+import { type ComponentType } from "react";
 import {
   BadgeCheck,
   BriefcaseBusiness,
@@ -7,6 +7,7 @@ import {
   HandCoins,
   PiggyBank,
   HardHat,
+  History,
   Monitor,
   UserRoundPlus,
   UsersRound,
@@ -15,6 +16,7 @@ import {
 import { SETTINGS_PAGE } from "@/lib/configAdmin";
 import ApproversSettings from "./ApproversSettings";
 import AdvanceSettings from "./AdvanceSettings";
+import AuditLogSettings from "./AuditLogSettings";
 import CasualBudgetsSettings from "./CasualBudgetsSettings";
 import CasualSettings from "./CasualSettings";
 import DepartmentsSettings from "./DepartmentsSettings";
@@ -92,6 +94,17 @@ const TAB_GROUPS: { label: string; tabs: SettingsTab[] }[] = [
       },
     ],
   },
+  {
+    label: "Audit",
+    tabs: [
+      {
+        key: "audit",
+        label: "Audit log",
+        Icon: History,
+        Panel: AuditLogSettings,
+      },
+    ],
+  },
 ];
 
 const TABS = TAB_GROUPS.flatMap((group) => group.tabs);
@@ -113,39 +126,38 @@ export default function SettingsPage({ tab }: { tab?: string }) {
         </p>
       </div>
 
+      {/* Each group wraps as a unit, under its own label */}
       <nav
         aria-label="Settings sections"
-        className="flex flex-wrap items-center gap-x-1.5 gap-y-2"
+        className="flex flex-wrap items-end gap-x-5 gap-y-3"
       >
-        {TAB_GROUPS.map((group, index) => (
-          <Fragment key={group.label}>
-            {index > 0 && (
-              <span
-                aria-hidden="true"
-                className="mx-1 hidden h-5 w-px bg-neutral-200 sm:block"
-              />
-            )}
-            <span className="sr-only">{group.label}</span>
-            {group.tabs.map(({ key, label, Icon }) => {
-              const isActive = key === activeTab.key;
-              return (
-                <Link
-                  key={key}
-                  href={`${SETTINGS_PAGE.href}?tab=${key}`}
-                  scroll={false}
-                  aria-current={isActive ? "page" : undefined}
-                  className={`rounded-compact inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold transition-colors ${
-                    isActive
-                      ? "bg-slate-900 text-white"
-                      : "border border-neutral-200 bg-white text-neutral-700 hover:border-neutral-400"
-                  }`}
-                >
-                  <Icon className="h-3.5 w-3.5" />
-                  {label}
-                </Link>
-              );
-            })}
-          </Fragment>
+        {TAB_GROUPS.map((group) => (
+          <div key={group.label} className="space-y-1.5">
+            <p className="text-[10px] font-bold tracking-widest text-neutral-400 uppercase">
+              {group.label}
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {group.tabs.map(({ key, label, Icon }) => {
+                const isActive = key === activeTab.key;
+                return (
+                  <Link
+                    key={key}
+                    href={`${SETTINGS_PAGE.href}?tab=${key}`}
+                    scroll={false}
+                    aria-current={isActive ? "page" : undefined}
+                    className={`rounded-compact inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold transition-colors ${
+                      isActive
+                        ? "bg-slate-900 text-white"
+                        : "border border-neutral-200 bg-white text-neutral-700 hover:border-neutral-400"
+                    }`}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                    {label}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
         ))}
       </nav>
 
