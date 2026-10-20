@@ -136,6 +136,12 @@ export async function runConfigChange(
       return { ok: false, message: error.message };
     }
     if ((error as { code?: string }).code === "23505") {
+      // Logged so a collision that isn't a real duplicate (e.g. a primary
+      // key sequence behind the table) shows which constraint fired
+      console.warn(
+        `Unique violation while changing the settings (${tag}):`,
+        (error as { constraint?: string }).constraint,
+      );
       return { ok: false, message: "That already exists" };
     }
     console.error(`Error while changing the settings (${tag}):`, error);
