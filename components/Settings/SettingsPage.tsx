@@ -4,6 +4,8 @@ import {
   BadgeCheck,
   BriefcaseBusiness,
   Building2,
+  HandCoins,
+  PiggyBank,
   HardHat,
   Monitor,
   UserRoundPlus,
@@ -12,6 +14,8 @@ import {
 } from "lucide-react";
 import { SETTINGS_PAGE } from "@/lib/configAdmin";
 import ApproversSettings from "./ApproversSettings";
+import AdvanceSettings from "./AdvanceSettings";
+import CasualBudgetsSettings from "./CasualBudgetsSettings";
 import CasualSettings from "./CasualSettings";
 import DepartmentsSettings from "./DepartmentsSettings";
 import EmployeeSettings from "./EmployeeSettings";
@@ -62,12 +66,29 @@ const TAB_GROUPS: { label: string; tabs: SettingsTab[] }[] = [
         Panel: TravelSettings,
       },
       { key: "casual", label: "Casual", Icon: HardHat, Panel: CasualSettings },
+      {
+        key: "casual-budgets",
+        label: "Casual budgets",
+        Icon: PiggyBank,
+        Panel: CasualBudgetsSettings,
+      },
       { key: "it", label: "IT", Icon: Monitor, Panel: ItSettings },
       {
         key: "employee",
         label: "Employee",
         Icon: UserRoundPlus,
         Panel: EmployeeSettings,
+      },
+    ],
+  },
+  {
+    label: "Salary advance",
+    tabs: [
+      {
+        key: "advance",
+        label: "Salary advance",
+        Icon: HandCoins,
+        Panel: AdvanceSettings,
       },
     ],
   },

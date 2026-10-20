@@ -369,3 +369,61 @@ export function EmployeeSettingsSkeleton() {
     </SettingsSkeletonFrame>
   );
 }
+
+export function CasualBudgetsSettingsSkeleton() {
+  return (
+    <SettingsSkeletonFrame label="Loading the casual budgets">
+      <CardSkeleton>
+        <div className="w-full sm:w-56">
+          <FieldSkeleton />
+        </div>
+        <div className="divide-y divide-neutral-100">
+          {Array.from({ length: 6 }, (_, i) => (
+            <div key={i} className="flex items-center gap-4 py-2.5">
+              <div className={`h-3.5 w-32 ${bar}`} />
+              <div className={`h-3.5 w-24 ${softBar}`} />
+              <div className={`h-3.5 w-20 ${softBar}`} />
+              <div className="h-5 w-16 rounded-full bg-neutral-100" />
+              <div className="rounded-compact ml-auto h-6 w-14 border border-neutral-200" />
+            </div>
+          ))}
+        </div>
+      </CardSkeleton>
+      <CardSkeleton>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-6">
+          {Array.from({ length: 12 }, (_, i) => (
+            <FieldSkeleton key={i} />
+          ))}
+        </div>
+        <div className="flex justify-end">
+          <div className="rounded-control h-10 w-32 bg-neutral-200" />
+        </div>
+      </CardSkeleton>
+    </SettingsSkeletonFrame>
+  );
+}
+
+export function AdvanceSettingsSkeleton() {
+  return (
+    <SettingsSkeletonFrame label="Loading the salary advance settings">
+      <CardSkeleton>
+        <div className="rounded-control flex items-center gap-3 bg-neutral-50 p-3">
+          <div className="h-5 w-5 rounded-full bg-neutral-200" />
+          <div className="flex-1 space-y-1.5">
+            <div className={`h-3.5 w-64 ${bar}`} />
+            <div className={`h-3 w-40 ${softBar}`} />
+          </div>
+          <div className="h-5 w-20 rounded-full bg-neutral-100" />
+        </div>
+        <div className="rounded-control h-14 bg-neutral-50" />
+        <div className="flex items-end gap-2">
+          <div className="w-64">
+            <FieldSkeleton />
+          </div>
+          <div className="rounded-control h-10 w-24 bg-neutral-200" />
+        </div>
+      </CardSkeleton>
+      <ChangesSkeleton />
+    </SettingsSkeletonFrame>
+  );
+}
