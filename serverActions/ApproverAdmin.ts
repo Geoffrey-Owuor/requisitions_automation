@@ -66,11 +66,12 @@ const stageLabel = (stage: ApproverStageKey) =>
 export async function getApproverAdminData(): Promise<ApproverAdminData | null> {
   if (!(await getConfigAdminSession())) return null;
 
-  const client = await pool.connect();
-  try {
-    const lists = await Promise.all(
+  // Through the pool, not one client: a client runs one query at a time, and
+  // these reads don't need a transaction
+  const [lists, departments, hodPending, changes] = await Promise.all([
+    Promise.all(
       APPROVER_STAGES.map(({ key }) =>
-        client.query<AdminApprover>(
+        pool.query<AdminApprover>(
           key === "hod"
             ? `SELECT h.id, h.hod_name AS name, h.hod_email AS email,
                NULLIF(h.hod_department, '${NO_DEPARTMENT}') AS department,
@@ -84,36 +85,32 @@ export async function getApproverAdminData(): Promise<ApproverAdminData | null> 
                FROM ${key}_array ORDER BY LOWER(${key}_name)`,
         ),
       ),
-    );
-    const [departments, hodPending, changes] = await Promise.all([
-      client.query<{ name: string }>(
-        `SELECT department_name AS name FROM base_departments
-         WHERE is_active ORDER BY department_name`,
-      ),
-      hodPendingCounts(client),
-      loadConfigChanges(APPROVER_TABLES),
-    ]);
+    ),
+    pool.query<{ name: string }>(
+      `SELECT department_name AS name FROM base_departments
+       WHERE is_active ORDER BY department_name`,
+    ),
+    hodPendingCounts(pool),
+    loadConfigChanges(APPROVER_TABLES),
+  ]);
 
-    const approvers = Object.fromEntries(
-      APPROVER_STAGES.map(({ key }, index) => [
-        key,
-        key === "hod"
-          ? lists[index].rows.map((row) => ({
-              ...row,
-              pendingAsHod: hodPending.get(row.email) ?? 0,
-            }))
-          : lists[index].rows,
-      ]),
-    ) as Record<ApproverStageKey, AdminApprover[]>;
+  const approvers = Object.fromEntries(
+    APPROVER_STAGES.map(({ key }, index) => [
+      key,
+      key === "hod"
+        ? lists[index].rows.map((row) => ({
+            ...row,
+            pendingAsHod: hodPending.get(row.email) ?? 0,
+          }))
+        : lists[index].rows,
+    ]),
+  ) as Record<ApproverStageKey, AdminApprover[]>;
 
-    return {
-      approvers,
-      departments: departments.rows.map((row) => row.name),
-      changes,
-    };
-  } finally {
-    client.release();
-  }
+  return {
+    approvers,
+    departments: departments.rows.map((row) => row.name),
+    changes,
+  };
 }
 
 // The approver `id` of `stage`, locked, or a ConfigInputError
