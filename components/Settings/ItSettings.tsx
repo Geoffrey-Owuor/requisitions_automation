@@ -14,6 +14,7 @@ import {
   ChangesCard,
   ConfirmDialog,
   type Confirmation,
+  LoadError,
   ToggleList,
   useSettingsRunner,
 } from "./SettingsPrimitives";
@@ -37,18 +38,7 @@ export default function ItSettings() {
   }
 
   if (isError || !data) {
-    return (
-      <div className="rounded-surface border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
-        The IT settings could not be loaded.{" "}
-        <button
-          type="button"
-          onClick={() => refetch()}
-          className="font-semibold underline"
-        >
-          Try again
-        </button>
-      </div>
-    );
+    return <LoadError what="IT settings" onRetry={() => refetch()} />;
   }
 
   return (
