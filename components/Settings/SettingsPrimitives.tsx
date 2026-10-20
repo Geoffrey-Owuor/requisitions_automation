@@ -84,7 +84,9 @@ export type Confirmation = {
   title: string;
   message: string;
   confirmLabel: string;
-  action: () => Promise<ConfigActionResult>;
+  // An optional free-text field (e.g. a reason), passed to `action`
+  input?: { label: string; maxLength: number };
+  action: (input: string) => Promise<ConfigActionResult>;
 };
 
 export function Card({
@@ -237,12 +239,20 @@ export function ConfirmDialog({
   confirmation: Confirmation | null;
   busy: boolean;
   onClose: () => void;
-  onConfirm: (action: Confirmation["action"]) => void;
+  onConfirm: (action: () => Promise<ConfigActionResult>) => void;
 }) {
   const titleId = useId();
   const messageId = useId();
+  const inputId = useId();
   // Keep the last content while the dialog animates closed
   const shown = useLastDefined(confirmation);
+  // Each new confirmation starts with an empty input
+  const [input, setInput] = useState("");
+  const [inputFor, setInputFor] = useState(confirmation);
+  if (confirmation !== inputFor) {
+    setInputFor(confirmation);
+    if (confirmation) setInput("");
+  }
 
   return (
     <AlertDialog
@@ -257,6 +267,20 @@ export function ConfirmDialog({
       <p id={messageId} className="mt-2 text-sm text-neutral-600">
         {shown?.message}
       </p>
+      {shown?.input && (
+        <div className="mt-4">
+          <Field label={shown.input.label} htmlFor={inputId}>
+            <textarea
+              id={inputId}
+              rows={3}
+              maxLength={shown.input.maxLength}
+              className={`${inputClass} h-auto resize-none py-2`}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+            />
+          </Field>
+        </div>
+      )}
       <div className="mt-6 flex justify-end gap-2">
         <button
           type="button"
@@ -268,7 +292,7 @@ export function ConfirmDialog({
         <button
           type="button"
           disabled={busy}
-          onClick={() => shown && onConfirm(shown.action)}
+          onClick={() => shown && onConfirm(() => shown.action(input))}
           className="rounded-control bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700 disabled:opacity-50"
         >
           {shown?.confirmLabel}

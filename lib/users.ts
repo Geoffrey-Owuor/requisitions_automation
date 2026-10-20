@@ -18,3 +18,22 @@ export async function recordSignIn(email: string, name: string) {
     console.error("Error while recording a sign-in:", error);
   }
 }
+
+// Whether a config admin has deactivated this account (migration 031). Read
+// on every getSession and at sign-in. A lookup failure counts as active: a
+// database blip must not sign everyone out (proxy.ts deletes the cookie of a
+// /dashboard request without a session), and a deactivated user can't do
+// anything while the database is unreachable anyway.
+export async function isUserDeactivated(email: string) {
+  try {
+    const rows = await query<{ deactivated: boolean }>(
+      `SELECT deactivated_at IS NOT NULL AS deactivated
+       FROM users WHERE email = LOWER(TRIM($1))`,
+      [email],
+    );
+    return rows[0]?.deactivated === true;
+  } catch (error) {
+    console.error("Error while checking whether a user is deactivated:", error);
+    return false;
+  }
+}

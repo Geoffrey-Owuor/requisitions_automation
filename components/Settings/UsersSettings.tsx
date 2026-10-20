@@ -6,7 +6,9 @@ import { Check, Pencil, Plus, Search, X } from "lucide-react";
 import {
   addUser,
   assignRole,
+  deactivateUser,
   getUserRoleAdminData,
+  reactivateUser,
   removeRole,
   setRoleDescription,
   type UserRoleAdminData,
@@ -24,6 +26,7 @@ import {
   LoadError,
   primaryButtonClass,
   smallButtonClass,
+  StatusBadge,
   useSettingsRunner,
 } from "./SettingsPrimitives";
 
@@ -32,6 +35,11 @@ const PAGE_SIZE = 25;
 // Role filter values besides a role id
 const ANY_ROLE = "";
 const NO_ROLE = "none";
+const STATUS_OPTIONS = [
+  { value: "", label: "Any status" },
+  { value: "active", label: "Active" },
+  { value: "deactivated", label: "Deactivated" },
+];
 
 type User = UserRoleAdminData["users"][number];
 type Role = UserRoleAdminData["roles"][number];
@@ -95,6 +103,7 @@ function UsersCard({
 }) {
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState(ANY_ROLE);
+  const [statusFilter, setStatusFilter] = useState("");
   const [shown, setShown] = useState(PAGE_SIZE);
 
   const rolesById = useMemo(
@@ -105,6 +114,8 @@ function UsersCard({
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
     return data.users.filter((user) => {
+      if (statusFilter === "active" && user.deactivation) return false;
+      if (statusFilter === "deactivated" && !user.deactivation) return false;
       if (roleFilter === NO_ROLE && user.roleIds.length > 0) return false;
       if (
         roleFilter !== ANY_ROLE &&
@@ -119,12 +130,12 @@ function UsersCard({
         user.email.includes(term)
       );
     });
-  }, [data.users, search, roleFilter]);
+  }, [data.users, search, roleFilter, statusFilter]);
 
   return (
     <Card
       title={`Users (${data.users.length})`}
-      description="Everyone who has signed in, plus anyone added below. Role changes apply on the user's next page load. Approver access isn't a role - it comes from the Approvers tab."
+      description="Everyone who has signed in, plus anyone added below. Role changes and deactivations apply on the user's next page load; a deactivated user can't sign in until reactivated, and keeps their roles. Approver access isn't a role - it comes from the Approvers tab."
     >
       <div className="flex flex-wrap gap-2">
         <div className="relative min-w-48 flex-1">
@@ -156,6 +167,17 @@ function UsersCard({
                 label: role.name,
               })),
             ]}
+          />
+        </div>
+        <div className="w-full sm:w-40">
+          <Select
+            aria-label="Filter by status"
+            value={statusFilter}
+            onChange={(value) => {
+              setStatusFilter(value);
+              setShown(PAGE_SIZE);
+            }}
+            options={STATUS_OPTIONS}
           />
         </div>
       </div>
@@ -212,23 +234,25 @@ function UserRow({
   confirm: (confirmation: Confirmation) => void;
 }) {
   const unheld = roles.filter((role) => !user.roleIds.includes(role.id));
+  const { deactivation } = user;
 
   return (
     <li className="flex flex-wrap items-center gap-x-3 gap-y-2 py-2.5">
       <span
         aria-hidden="true"
-        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-[11px] font-semibold text-slate-700"
+        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold ${deactivation ? "bg-neutral-100 text-neutral-400" : "bg-slate-100 text-slate-700"}`}
       >
         {initials(user.name) || "?"}
       </span>
       <div className="min-w-0 flex-1 basis-48">
-        <p className="truncate text-sm font-medium text-neutral-900">
-          {user.name}
+        <p
+          className={`flex items-center gap-1.5 text-sm font-medium ${deactivation ? "text-neutral-400" : "text-neutral-900"}`}
+        >
+          <span className="truncate">{user.name}</span>
           {isViewer && (
-            <span className="ml-1.5 text-xs font-normal text-neutral-400">
-              (you)
-            </span>
+            <span className="text-xs font-normal text-neutral-400">(you)</span>
           )}
+          {deactivation && <StatusBadge tone="grey">Deactivated</StatusBadge>}
         </p>
         <p className="truncate text-xs text-neutral-500">
           {user.email} ·{" "}
@@ -236,6 +260,13 @@ function UserRow({
             ? `Last signed in ${user.lastSignIn}`
             : "Not signed in yet"}
         </p>
+        {deactivation && (
+          <p className="text-xs break-words text-neutral-500">
+            Deactivated {deactivation.at}
+            {deactivation.byEmail && ` by ${deactivation.byEmail}`}
+            {deactivation.reason && ` · ${deactivation.reason}`}
+          </p>
+        )}
       </div>
 
       <div className="flex flex-wrap items-center gap-1.5">
@@ -289,6 +320,43 @@ function UserRow({
               }))}
             />
           </div>
+        )}
+        {deactivation ? (
+          <button
+            type="button"
+            disabled={busy}
+            className={smallButtonClass}
+            onClick={() =>
+              confirm({
+                title: `Reactivate ${user.name}?`,
+                message: `${user.name} (${user.email}) will be able to sign in again, with the roles listed here.`,
+                confirmLabel: "Reactivate",
+                action: () => reactivateUser(user.id),
+              })
+            }
+          >
+            Reactivate
+          </button>
+        ) : (
+          <button
+            type="button"
+            disabled={busy || isViewer}
+            title={
+              isViewer ? "You can't deactivate your own account" : undefined
+            }
+            className={`${smallButtonClass} disabled:cursor-not-allowed`}
+            onClick={() =>
+              confirm({
+                title: `Deactivate ${user.name}?`,
+                message: `${user.name} (${user.email}) won't be able to sign in, and is signed out on their next page load. Their requisitions carry on through approval. If they're an approver, remove them on the Approvers tab first.`,
+                confirmLabel: "Deactivate",
+                input: { label: "Reason (optional)", maxLength: 500 },
+                action: (reason) => deactivateUser(user.id, reason),
+              })
+            }
+          >
+            Deactivate
+          </button>
         )}
       </div>
     </li>
