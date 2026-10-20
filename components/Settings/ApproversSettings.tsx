@@ -31,10 +31,13 @@ import {
   type Confirmation,
   Field,
   inputClass,
+  ListPagination,
   LoadError,
   primaryButtonClass,
+  SearchBox,
   smallButtonClass,
   StatusBadge,
+  useListPage,
   useSettingsRunner,
 } from "./SettingsPrimitives";
 
@@ -113,19 +116,16 @@ export default function ApproversSettings() {
               No {active.label} approvers yet.
             </p>
           ) : (
-            <ul className="divide-y divide-neutral-100">
-              {approvers.map((approver) => (
-                <ApproverRow
-                  key={approver.id}
-                  stage={stage}
-                  approver={approver}
-                  data={data}
-                  busy={busy}
-                  run={run}
-                  confirm={setConfirmation}
-                />
-              ))}
-            </ul>
+            <ApproverList
+              // Each stage starts from its first page with no search
+              key={`list-${stage}`}
+              stage={stage}
+              approvers={approvers}
+              data={data}
+              busy={busy}
+              run={run}
+              confirm={setConfirmation}
+            />
           )}
 
           <AddApproverForm
@@ -148,6 +148,70 @@ export default function ApproversSettings() {
           if (await run(action)) setConfirmation(null);
         }}
       />
+    </div>
+  );
+}
+
+function ApproverList({
+  stage,
+  approvers,
+  data,
+  busy,
+  run,
+  confirm,
+}: Omit<RowProps, "approver"> & {
+  stage: ApproverStageKey;
+  approvers: AdminApprover[];
+  data: ApproverAdminData;
+}) {
+  const [search, setSearch] = useState("");
+  const term = search.trim().toLowerCase();
+  const filtered = term
+    ? approvers.filter(
+        (approver) =>
+          approver.name.toLowerCase().includes(term) ||
+          approver.email.includes(term) ||
+          !!approver.department?.toLowerCase().includes(term),
+      )
+    : approvers;
+  const { pageItems, pagination, resetPage } = useListPage(filtered);
+
+  return (
+    <div>
+      <div className="flex">
+        <SearchBox
+          value={search}
+          onChange={(value) => {
+            setSearch(value);
+            resetPage();
+          }}
+          placeholder={
+            stage === "hod"
+              ? "Search by name, email or department"
+              : "Search by name or email"
+          }
+        />
+      </div>
+      {filtered.length === 0 ? (
+        <p className="py-6 text-center text-sm text-neutral-500">
+          No approvers match.
+        </p>
+      ) : (
+        <ul className="divide-y divide-neutral-100">
+          {pageItems.map((approver) => (
+            <ApproverRow
+              key={approver.id}
+              stage={stage}
+              approver={approver}
+              data={data}
+              busy={busy}
+              run={run}
+              confirm={confirm}
+            />
+          ))}
+        </ul>
+      )}
+      <ListPagination pagination={pagination} />
     </div>
   );
 }
