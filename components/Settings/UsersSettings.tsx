@@ -23,15 +23,16 @@ import {
   type Confirmation,
   Field,
   inputClass,
+  ListPagination,
   LoadError,
   primaryButtonClass,
   smallButtonClass,
   StatusBadge,
+  useListPage,
   useSettingsRunner,
 } from "./SettingsPrimitives";
 
 const ADMIN_KEY = ["UserRoleAdmin"];
-const PAGE_SIZE = 25;
 // Role filter values besides a role id
 const ANY_ROLE = "";
 const NO_ROLE = "none";
@@ -104,7 +105,6 @@ function UsersCard({
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState(ANY_ROLE);
   const [statusFilter, setStatusFilter] = useState("");
-  const [shown, setShown] = useState(PAGE_SIZE);
 
   const rolesById = useMemo(
     () => new Map(data.roles.map((role) => [role.id, role])),
@@ -131,6 +131,7 @@ function UsersCard({
       );
     });
   }, [data.users, search, roleFilter, statusFilter]);
+  const { pageItems, pagination, resetPage } = useListPage(filtered);
 
   return (
     <Card
@@ -147,7 +148,7 @@ function UsersCard({
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
-              setShown(PAGE_SIZE);
+              resetPage();
             }}
           />
         </div>
@@ -157,7 +158,7 @@ function UsersCard({
             value={roleFilter}
             onChange={(value) => {
               setRoleFilter(value);
-              setShown(PAGE_SIZE);
+              resetPage();
             }}
             options={[
               { value: ANY_ROLE, label: "Any role" },
@@ -175,7 +176,7 @@ function UsersCard({
             value={statusFilter}
             onChange={(value) => {
               setStatusFilter(value);
-              setShown(PAGE_SIZE);
+              resetPage();
             }}
             options={STATUS_OPTIONS}
           />
@@ -188,7 +189,7 @@ function UsersCard({
         </p>
       ) : (
         <ul className="divide-y divide-neutral-100">
-          {filtered.slice(0, shown).map((user) => (
+          {pageItems.map((user) => (
             <UserRow
               key={user.id}
               user={user}
@@ -203,17 +204,7 @@ function UsersCard({
         </ul>
       )}
 
-      {filtered.length > shown && (
-        <div className="flex justify-center">
-          <button
-            type="button"
-            className={smallButtonClass}
-            onClick={() => setShown((count) => count + PAGE_SIZE)}
-          >
-            Show more ({filtered.length - shown} left)
-          </button>
-        </div>
-      )}
+      <ListPagination pagination={pagination} />
     </Card>
   );
 }

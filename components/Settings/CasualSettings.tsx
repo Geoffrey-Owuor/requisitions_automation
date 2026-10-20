@@ -12,10 +12,12 @@ import {
   Field,
   nextDay,
   inputClass,
+  ListPagination,
   primaryButtonClass,
   smallButtonClass,
   StatusBadge,
   ToggleList,
+  useListPage,
   useSettingsRunner,
 } from "./SettingsPrimitives";
 import { DatePicker } from "@/components/DatePicker";
@@ -142,6 +144,14 @@ function RatesCard({ data, busy, run, confirm }: CardProps) {
   const superseded = rules.filter(
     (rate) => rate.effectiveFrom <= data.today && !currentIds.has(rate.id),
   );
+  const listed = [
+    ...current.map((rate) => ({ rate, status: "current" as const })),
+    ...scheduled.map((rate) => ({ rate, status: "scheduled" as const })),
+    ...(showSuperseded
+      ? superseded.map((rate) => ({ rate, status: "superseded" as const }))
+      : []),
+  ];
+  const { pageItems, pagination } = useListPage(listed);
 
   const activeLocations = data.locations.filter(
     (location) => location.isActive,
@@ -236,11 +246,9 @@ function RatesCard({ data, busy, run, confirm }: CardProps) {
       description="Where more than one rate matches a requisition, the most specific wins: department, then location, then category. A change is a new rate from a future date - rates already in effect are never edited, and each requisition keeps the rate it was priced at."
     >
       <ul className="divide-y divide-neutral-100">
-        {current.map((rate) => rateRow(rate, "current"))}
-        {scheduled.map((rate) => rateRow(rate, "scheduled"))}
-        {showSuperseded &&
-          superseded.map((rate) => rateRow(rate, "superseded"))}
+        {pageItems.map(({ rate, status }) => rateRow(rate, status))}
       </ul>
+      <ListPagination pagination={pagination} />
       {superseded.length > 0 && (
         <button
           type="button"

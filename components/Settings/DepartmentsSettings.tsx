@@ -16,9 +16,12 @@ import {
   ChangesCard,
   ConfirmDialog,
   type Confirmation,
+  ListPagination,
   LoadError,
+  SearchBox,
   smallButtonClass,
   StatusBadge,
+  useListPage,
   useSettingsRunner,
 } from "./SettingsPrimitives";
 
@@ -30,11 +33,21 @@ export default function DepartmentsSettings() {
   const { busy, run } = useSettingsRunner(ADMIN_KEY, RELATED_KEYS);
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
   const [name, setName] = useState("");
+  const [search, setSearch] = useState("");
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ADMIN_KEY,
     queryFn: getDepartmentAdminData,
   });
+
+  const term = search.trim().toLowerCase();
+  const filtered = (data?.departments ?? []).filter(
+    (department) =>
+      !term ||
+      department.name.toLowerCase().includes(term) ||
+      department.hodNames.some((hod) => hod.toLowerCase().includes(term)),
+  );
+  const { pageItems, pagination, resetPage } = useListPage(filtered);
 
   if (isLoading) return <DepartmentsSettingsSkeleton />;
   if (isError || !data) {
@@ -47,8 +60,23 @@ export default function DepartmentsSettings() {
         title="Departments"
         description="The department list on every form. A setting applies to requisitions submitted or amended after it changes; departments can't be renamed or deleted since requisitions store the name."
       >
+        <div className="flex">
+          <SearchBox
+            value={search}
+            onChange={(value) => {
+              setSearch(value);
+              resetPage();
+            }}
+            placeholder="Search by department or HOD"
+          />
+        </div>
+        {filtered.length === 0 && (
+          <p className="py-6 text-center text-sm text-neutral-500">
+            No departments match.
+          </p>
+        )}
         <ul className="divide-y divide-neutral-100">
-          {data.departments.map((department) => (
+          {pageItems.map((department) => (
             <li
               key={department.id}
               className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 py-3"
@@ -126,6 +154,7 @@ export default function DepartmentsSettings() {
             </li>
           ))}
         </ul>
+        <ListPagination pagination={pagination} />
         <AddRow
           placeholder="New department"
           value={name}

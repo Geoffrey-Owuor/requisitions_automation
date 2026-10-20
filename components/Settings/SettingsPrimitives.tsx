@@ -3,8 +3,9 @@
 import { ReactNode, useId, useState } from "react";
 import { QueryKey, useQueryClient } from "@tanstack/react-query";
 import { useAlertStore } from "@/store/useAlertStore";
-import { History, Plus } from "lucide-react";
+import { History, Plus, Search, X } from "lucide-react";
 import { AlertDialog, useLastDefined } from "@/components/Modal";
+import { TablePagination } from "@/components/Dashboard/TablePagination";
 import type { ConfigActionResult } from "@/lib/configAdminAccess";
 
 // Building blocks shared by the Settings tabs
@@ -80,6 +81,83 @@ export function Field({
   );
 }
 
+export function SearchBox({
+  value,
+  onChange,
+  placeholder,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+}) {
+  return (
+    <div className="relative min-w-48 flex-1">
+      <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+      <input
+        aria-label={placeholder}
+        className={`${inputClass} pr-9 pl-9`}
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
+      {value && (
+        <button
+          type="button"
+          aria-label="Clear search"
+          onClick={() => onChange("")}
+          className="rounded-compact absolute top-1/2 right-2 -translate-y-1/2 p-1 text-neutral-500 hover:bg-neutral-100"
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
+      )}
+    </div>
+  );
+}
+
+const LIST_PAGE_SIZES = [10, 25, 50];
+
+// Pages a Settings list in the browser, since each tab loads its data
+// whole. The page is clamped rather than reset when the list shrinks, so
+// removing the last row of the last page shows the page before it.
+export function useListPage<T>(items: T[]) {
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(LIST_PAGE_SIZES[0]);
+  const pageCount = Math.max(1, Math.ceil(items.length / pageSize));
+  const currentPage = Math.min(page, pageCount);
+
+  return {
+    pageItems: items.slice(
+      (currentPage - 1) * pageSize,
+      currentPage * pageSize,
+    ),
+    // For filters and searches, which start again from the first page
+    resetPage: () => setPage(1),
+    pagination: {
+      currentPage,
+      totalItems: items.length,
+      itemsPerPage: pageSize,
+      onPageChange: setPage,
+      onItemsPerPageChange: (size: number) => {
+        setPageSize(size);
+        setPage(1);
+      },
+    },
+  };
+}
+
+// The pager under a `useListPage` list, hidden while it fits on one
+// page of the smallest size
+export function ListPagination({
+  pagination,
+}: {
+  pagination: ReturnType<typeof useListPage>["pagination"];
+}) {
+  if (pagination.totalItems <= LIST_PAGE_SIZES[0]) return null;
+  return (
+    <TablePagination {...pagination} rowsPerPageOptions={LIST_PAGE_SIZES} />
+  );
+}
+
 export type Confirmation = {
   title: string;
   message: string;
@@ -147,46 +225,53 @@ export function ToggleList({
   setActive: (id: number, isActive: boolean) => Promise<ConfigActionResult>;
   run: (action: () => Promise<ConfigActionResult>) => Promise<boolean>;
 }) {
+  const { pageItems, pagination } = useListPage(items);
+
   return (
-    <ul className="divide-y divide-neutral-100">
-      {items.map((item) => (
-        <li
-          key={item.id}
-          className="flex items-center justify-between gap-3 py-2"
-        >
-          <div className="min-w-0">
-            <p
-              className={`truncate text-sm ${item.isActive ? "text-neutral-900" : "text-neutral-400 line-through"}`}
-            >
-              {item.name}
-            </p>
-            {item.detail && (
-              <p className="text-xs text-neutral-500">{item.detail}</p>
-            )}
-          </div>
-          <div className="flex shrink-0 items-center gap-2">
-            {!item.isActive && <StatusBadge tone="grey">Inactive</StatusBadge>}
-            <button
-              type="button"
-              disabled={busy}
-              className={smallButtonClass}
-              onClick={() =>
-                item.isActive
-                  ? confirm({
-                      title: `Deactivate "${item.name}"?`,
-                      message: `It won't be offered on new requisitions. Requisitions that already use this ${label} keep it, and you can reactivate it later.`,
-                      confirmLabel: "Deactivate",
-                      action: () => setActive(item.id, false),
-                    })
-                  : run(() => setActive(item.id, true))
-              }
-            >
-              {item.isActive ? "Deactivate" : "Reactivate"}
-            </button>
-          </div>
-        </li>
-      ))}
-    </ul>
+    <div>
+      <ul className="divide-y divide-neutral-100">
+        {pageItems.map((item) => (
+          <li
+            key={item.id}
+            className="flex items-center justify-between gap-3 py-2"
+          >
+            <div className="min-w-0">
+              <p
+                className={`truncate text-sm ${item.isActive ? "text-neutral-900" : "text-neutral-400 line-through"}`}
+              >
+                {item.name}
+              </p>
+              {item.detail && (
+                <p className="text-xs text-neutral-500">{item.detail}</p>
+              )}
+            </div>
+            <div className="flex shrink-0 items-center gap-2">
+              {!item.isActive && (
+                <StatusBadge tone="grey">Inactive</StatusBadge>
+              )}
+              <button
+                type="button"
+                disabled={busy}
+                className={smallButtonClass}
+                onClick={() =>
+                  item.isActive
+                    ? confirm({
+                        title: `Deactivate "${item.name}"?`,
+                        message: `It won't be offered on new requisitions. Requisitions that already use this ${label} keep it, and you can reactivate it later.`,
+                        confirmLabel: "Deactivate",
+                        action: () => setActive(item.id, false),
+                      })
+                    : run(() => setActive(item.id, true))
+                }
+              >
+                {item.isActive ? "Deactivate" : "Reactivate"}
+              </button>
+            </div>
+          </li>
+        ))}
+      </ul>
+      <ListPagination pagination={pagination} />
+    </div>
   );
 }
 

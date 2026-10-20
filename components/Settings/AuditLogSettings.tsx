@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Download, History, Search, X } from "lucide-react";
+import { Download, History } from "lucide-react";
 import {
   type ConfigChangeEntry,
   getConfigChangeLog,
@@ -13,7 +13,7 @@ import { useServerPagination } from "@/hooks/useServerPagination";
 import { Select } from "@/components/Select";
 import { TablePagination } from "@/components/Dashboard/TablePagination";
 import { AuditLogSkeleton } from "@/components/Skeletons/SettingsSkeleton";
-import { Card, inputClass, LoadError, StatusBadge } from "./SettingsPrimitives";
+import { Card, LoadError, SearchBox, StatusBadge } from "./SettingsPrimitives";
 
 type Source = "changes" | "downloads";
 
@@ -66,41 +66,6 @@ export default function AuditLogSettings() {
   );
 }
 
-function SearchBox({
-  value,
-  onChange,
-  onClear,
-  placeholder,
-}: {
-  value: string;
-  onChange: (value: string) => void;
-  onClear: () => void;
-  placeholder: string;
-}) {
-  return (
-    <div className="relative min-w-48 flex-1">
-      <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-neutral-400" />
-      <input
-        aria-label={placeholder}
-        className={`${inputClass} pr-9 pl-9`}
-        placeholder={placeholder}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-      />
-      {value && (
-        <button
-          type="button"
-          aria-label="Clear search"
-          onClick={onClear}
-          className="rounded-compact absolute top-1/2 right-2 -translate-y-1/2 p-1 text-neutral-500 hover:bg-neutral-100"
-        >
-          <X className="h-3.5 w-3.5" />
-        </button>
-      )}
-    </div>
-  );
-}
-
 function ChangeLog() {
   const [tableName, setTableName] = useState("");
   const { data: tables } = useQuery({
@@ -125,7 +90,6 @@ function ChangeLog() {
         <SearchBox
           value={log.searchTerm}
           onChange={log.setSearchTerm}
-          onClear={log.clearSearch}
           placeholder="Search changes or people"
         />
         <div className="w-full sm:w-64">
@@ -241,7 +205,6 @@ function DownloadLog() {
         <SearchBox
           value={log.searchTerm}
           onChange={log.setSearchTerm}
-          onClear={log.clearSearch}
           placeholder="Search report or person"
         />
       </div>
