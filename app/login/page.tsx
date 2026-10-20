@@ -26,6 +26,8 @@ const SSO_ERROR_MESSAGES: Record<string, string> = {
     "We couldn't reach Microsoft to complete your sign-in. Please try again in a moment.",
   auth_failed: "Microsoft sign-in didn't complete. Please try again.",
   invalid_state: "Your sign-in session expired. Please try again.",
+  account_deactivated:
+    "Your account has been deactivated. Please contact your administrator if you need access.",
 };
 
 export default async function LoginPage({ searchParams }: Props) {

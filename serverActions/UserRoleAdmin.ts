@@ -2,6 +2,7 @@
 import type { PoolClient } from "pg";
 import { query } from "@/lib/db";
 import { CONFIG_ADMIN_ROLE } from "@/lib/configAdmin";
+import { APPROVER_STAGES } from "@/lib/approverStages";
 import {
   cleanConfigEmail,
   cleanConfigName,
@@ -20,6 +21,8 @@ import {
 // assigned, removed and described here - never created or renamed. Approver
 // access isn't a role: it comes from the approver arrays (Approvers tab).
 // Roles aren't cached - every request reads them - so no tag is expired.
+// Users are deactivated rather than deleted (migration 031): a deactivated
+// user can't sign in and their sessions stop working (lib/session.ts).
 
 const USER_TABLES = ["users", "user_roles", "roles"];
 
@@ -30,11 +33,18 @@ export interface UserRoleAdminData {
     name: string;
     lastSignIn: string | null;
     roleIds: number[];
+    // Null while the account is active
+    deactivation: {
+      at: string;
+      byEmail: string | null;
+      reason: string | null;
+    } | null;
   }[];
   roles: {
     id: number;
     name: string;
     description: string;
+    // Active holders only
     holders: number;
   }[];
   changes: ConfigChangeRow[];
@@ -51,14 +61,19 @@ export async function getUserRoleAdminData(): Promise<UserRoleAdminData | null> 
       `SELECT u.user_id AS id, u.email, u.username AS name,
        TO_CHAR(u.last_sign_in_at AT TIME ZONE 'Africa/Nairobi', 'DD Mon YYYY, HH24:MI') AS "lastSignIn",
        COALESCE(ARRAY_AGG(ur.role_id ORDER BY ur.role_id)
-         FILTER (WHERE ur.role_id IS NOT NULL), '{}') AS "roleIds"
+         FILTER (WHERE ur.role_id IS NOT NULL), '{}') AS "roleIds",
+       CASE WHEN u.deactivated_at IS NOT NULL THEN JSON_BUILD_OBJECT(
+         'at', TO_CHAR(u.deactivated_at AT TIME ZONE 'Africa/Nairobi', 'DD Mon YYYY, HH24:MI'),
+         'byEmail', u.deactivated_by,
+         'reason', u.deactivation_reason) END AS deactivation
        FROM users u LEFT JOIN user_roles ur ON ur.user_id = u.user_id
        GROUP BY u.user_id ORDER BY LOWER(u.username), u.email`,
     ),
     query<UserRoleAdminData["roles"][number]>(
       `SELECT r.role_id AS id, r.role_name AS name, r.description,
-       COUNT(ur.user_id)::int AS holders
+       COUNT(u.user_id)::int AS holders
        FROM roles r LEFT JOIN user_roles ur ON ur.role_id = r.role_id
+       LEFT JOIN users u ON u.user_id = ur.user_id AND u.deactivated_at IS NULL
        GROUP BY r.role_id ORDER BY r.role_name`,
     ),
     loadConfigChanges(USER_TABLES),
@@ -154,21 +169,16 @@ export async function removeRole(userId: unknown, roleId: unknown) {
     const { user, role } = await loadUserAndRole(client, userId, roleId);
 
     // Settings must always keep someone who can manage it: no removing your
-    // own config-admin role, nor the last one. The holders are locked so two
-    // admins removing each other at once can't both pass the check.
+    // own config-admin role, nor the last active one's.
     if (role.role_name === CONFIG_ADMIN_ROLE) {
       if (user.email === actor.email) {
         throw new ConfigInputError(
           `You can't remove your own ${CONFIG_ADMIN_ROLE} role - ask another config admin`,
         );
       }
-      const holders = await client.query(
-        `SELECT user_id FROM user_roles WHERE role_id = $1 FOR UPDATE`,
-        [role.role_id],
-      );
-      if (holders.rows.length <= 1) {
+      if ((await otherActiveConfigAdmins(client, user.user_id)) === 0) {
         throw new ConfigInputError(
-          `${user.username} is the last ${CONFIG_ADMIN_ROLE} and can't be removed`,
+          `${user.username} is the last active ${CONFIG_ADMIN_ROLE} and can't lose the role`,
         );
       }
     }
@@ -190,6 +200,153 @@ export async function removeRole(userId: unknown, roleId: unknown) {
       action: "delete",
       summary,
       before: { email: user.email, role: role.role_name },
+    });
+    return summary;
+  });
+}
+
+// How many active config admins there are besides `userId`. Every holder's
+// user_roles row is locked first, so two admins removing or deactivating each
+// other at once can't both pass; the count is a separate statement so it sees
+// what the transaction that held the lock committed.
+async function otherActiveConfigAdmins(client: PoolClient, userId: number) {
+  await client.query(
+    `SELECT ur.user_id FROM user_roles ur
+     WHERE ur.role_id = (SELECT role_id FROM roles WHERE role_name = $1)
+     FOR UPDATE`,
+    [CONFIG_ADMIN_ROLE],
+  );
+  const { rows } = await client.query(
+    `SELECT COUNT(*)::int AS count FROM user_roles ur
+     JOIN roles r ON r.role_id = ur.role_id
+     JOIN users u ON u.user_id = ur.user_id
+     WHERE r.role_name = $1 AND u.deactivated_at IS NULL AND u.user_id <> $2`,
+    [CONFIG_ADMIN_ROLE, userId],
+  );
+  return rows[0].count as number;
+}
+
+// The user a (de)activation is about, locked, or a ConfigInputError
+async function lockUser(client: PoolClient, userId: unknown) {
+  if (!isConfigId(userId)) throw new ConfigInputError("Choose a user");
+  const { rows } = await client.query(
+    `SELECT user_id, email, username, deactivated_at IS NOT NULL AS deactivated,
+     deactivated_by, deactivation_reason
+     FROM users WHERE user_id = $1 FOR UPDATE`,
+    [userId],
+  );
+  if (rows.length === 0) {
+    throw new ConfigInputError(
+      "That user no longer exists - reload to see the latest",
+    );
+  }
+  return rows[0] as {
+    user_id: number;
+    email: string;
+    username: string;
+    deactivated: boolean;
+    deactivated_by: string | null;
+    deactivation_reason: string | null;
+  };
+}
+
+export async function deactivateUser(userId: unknown, reason: unknown) {
+  return runConfigChange(null, async (client, actor) => {
+    const user = await lockUser(client, userId);
+    if (user.deactivated) {
+      throw new ConfigInputError(`${user.username} is already deactivated`);
+    }
+    if (user.email === actor.email) {
+      throw new ConfigInputError(
+        "You can't deactivate your own account - ask another config admin",
+      );
+    }
+    const text = typeof reason === "string" ? reason.trim() : "";
+    if (text.length > 500) {
+      throw new ConfigInputError(
+        "A reason cannot be longer than 500 characters",
+      );
+    }
+
+    // Approval links work without signing in, so an approver must be removed
+    // on the Approvers tab first - where removing one that would strand
+    // pending work is refused. addApprover refuses deactivated users under a
+    // share lock on this row, so neither can slip past the other.
+    const { rows: stages } = await client.query<{ stage: string }>(
+      APPROVER_STAGES.map(
+        ({ key }) =>
+          `SELECT '${key}' AS stage FROM ${key}_array WHERE ${key}_email = $1`,
+      ).join(" UNION "),
+      [user.email],
+    );
+    if (stages.length > 0) {
+      const labels = APPROVER_STAGES.filter(({ key }) =>
+        stages.some((row) => row.stage === key),
+      ).map(({ label }) => label);
+      throw new ConfigInputError(
+        `${user.username} is still an approver (${labels.join(", ")}) - remove them on the Approvers tab first, since approval links work without signing in`,
+      );
+    }
+
+    const isConfigAdmin = await client.query(
+      `SELECT 1 FROM user_roles ur JOIN roles r ON r.role_id = ur.role_id
+       WHERE ur.user_id = $1 AND r.role_name = $2`,
+      [user.user_id, CONFIG_ADMIN_ROLE],
+    );
+    if (
+      isConfigAdmin.rows.length > 0 &&
+      (await otherActiveConfigAdmins(client, user.user_id)) === 0
+    ) {
+      throw new ConfigInputError(
+        `${user.username} is the last active ${CONFIG_ADMIN_ROLE} and can't be deactivated`,
+      );
+    }
+
+    await client.query(
+      `UPDATE users SET deactivated_at = NOW(), deactivated_by = $2,
+       deactivation_reason = $3 WHERE user_id = $1`,
+      [user.user_id, actor.email, text || null],
+    );
+
+    const summary = `Deactivated ${user.username} (${user.email})`;
+    await recordConfigChange(client, actor, {
+      table: "users",
+      key: user.user_id,
+      action: "update",
+      summary,
+      before: { email: user.email, active: true },
+      after: { email: user.email, active: false, reason: text || null },
+    });
+    return summary;
+  });
+}
+
+export async function reactivateUser(userId: unknown) {
+  return runConfigChange(null, async (client, actor) => {
+    const user = await lockUser(client, userId);
+    if (!user.deactivated) {
+      throw new ConfigInputError(`${user.username} is already active`);
+    }
+
+    await client.query(
+      `UPDATE users SET deactivated_at = NULL, deactivated_by = NULL,
+       deactivation_reason = NULL WHERE user_id = $1`,
+      [user.user_id],
+    );
+
+    const summary = `Reactivated ${user.username} (${user.email})`;
+    await recordConfigChange(client, actor, {
+      table: "users",
+      key: user.user_id,
+      action: "update",
+      summary,
+      before: {
+        email: user.email,
+        active: false,
+        deactivatedBy: user.deactivated_by,
+        reason: user.deactivation_reason,
+      },
+      after: { email: user.email, active: true },
     });
     return summary;
   });

@@ -2,7 +2,7 @@
 import { MicrosoftEntraId } from "arctic";
 import { cookies } from "next/headers";
 import { createSession } from "@/lib/session";
-import { recordSignIn } from "@/lib/users";
+import { isUserDeactivated, recordSignIn } from "@/lib/users";
 import { getRequestOrigin } from "@/lib/getRequestOrigin";
 import {
   fetchMicrosoftProfile,
@@ -62,6 +62,14 @@ export async function GET(req: Request) {
     if (!email) {
       console.error("Authentication handshake error: profile has no email");
       return Response.redirect(new URL("/login?error=auth_failed", origin));
+    }
+
+    // Checked before any session is issued, and before recordSignIn so a
+    // refused attempt doesn't count as a sign-in
+    if (await isUserDeactivated(email)) {
+      return Response.redirect(
+        new URL("/login?error=account_deactivated", origin),
+      );
     }
 
     // Store user data in the secure cookie using our jose helper

@@ -183,6 +183,19 @@ export async function addApprover(
       const name = cleanConfigName(input.name, "approver");
       const email = cleanConfigEmail(input.email);
 
+      // A deactivated user can't be an approver (deactivateUser refuses
+      // approvers); the share lock waits out a deactivation in progress
+      const user = await client.query(
+        `SELECT deactivated_at IS NOT NULL AS deactivated
+         FROM users WHERE email = $1 FOR SHARE`,
+        [email],
+      );
+      if (user.rows[0]?.deactivated) {
+        throw new ConfigInputError(
+          `${email} is deactivated - reactivate them on the Users & roles tab first`,
+        );
+      }
+
       const existing = await client.query(
         `SELECT 1 FROM ${key}_array WHERE ${key}_email = $1`,
         [email],
