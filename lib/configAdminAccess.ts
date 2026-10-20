@@ -71,7 +71,7 @@ export function cleanConfigName(value: unknown, label: string): string {
 export const isConfigId = (value: unknown): value is number =>
   typeof value === "number" && Number.isInteger(value) && value > 0;
 
-const EMAIL_PATTERN = /^[^s@]+@[^s@]+.[^s@]+$/;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // A trimmed, lowercase email address - every email the app stores is
 // lowercase (migration 020)

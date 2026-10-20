@@ -60,12 +60,7 @@ export default function UsersSettings() {
 
   return (
     <div className="space-y-4">
-      <UsersCard
-        data={data}
-        busy={busy}
-        run={run}
-        confirm={setConfirmation}
-      />
+      <UsersCard data={data} busy={busy} run={run} confirm={setConfirmation} />
       <div className="grid gap-4 lg:grid-cols-2">
         <RolesCard roles={data.roles} busy={busy} run={run} />
         <AddUserCard busy={busy} run={run} />
@@ -285,7 +280,9 @@ function UserRow({
               value=""
               placeholder="Add role"
               disabled={busy}
-              onChange={(value) => run(() => assignRole(user.id, Number(value)))}
+              onChange={(value) =>
+                run(() => assignRole(user.id, Number(value)))
+              }
               options={unheld.map((role) => ({
                 value: String(role.id),
                 label: role.name,

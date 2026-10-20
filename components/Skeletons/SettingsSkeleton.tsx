@@ -251,3 +251,35 @@ export function UsersSettingsSkeleton() {
     </SettingsSkeletonFrame>
   );
 }
+
+export function ApproversSettingsSkeleton() {
+  return (
+    <SettingsSkeletonFrame label="Loading the approvers">
+      <CardSkeleton>
+        <div className="flex flex-wrap gap-1.5">
+          {["w-14", "w-12", "w-28", "w-28", "w-10", "w-16", "w-16"].map(
+            (width, i) => (
+              <div
+                key={i}
+                className={`rounded-compact h-7 ${width} bg-neutral-100`}
+              />
+            ),
+          )}
+        </div>
+        <PersonRowsSkeleton rows={5} />
+        <div className="rounded-control space-y-3 bg-neutral-50 p-3">
+          <div className={`h-3 w-28 ${bar}`} />
+          <div className="grid gap-2 sm:grid-cols-3">
+            {Array.from({ length: 3 }, (_, i) => (
+              <FieldSkeleton key={i} />
+            ))}
+          </div>
+          <div className="flex justify-end">
+            <div className="rounded-control h-10 w-36 bg-neutral-200" />
+          </div>
+        </div>
+      </CardSkeleton>
+      <ChangesSkeleton />
+    </SettingsSkeletonFrame>
+  );
+}

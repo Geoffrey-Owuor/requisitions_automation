@@ -195,7 +195,10 @@ export async function removeRole(userId: unknown, roleId: unknown) {
   });
 }
 
-export async function setRoleDescription(roleId: unknown, description: unknown) {
+export async function setRoleDescription(
+  roleId: unknown,
+  description: unknown,
+) {
   return runConfigChange(null, async (client, actor) => {
     if (!isConfigId(roleId)) throw new ConfigInputError("Choose a role");
     const text = typeof description === "string" ? description.trim() : "";
