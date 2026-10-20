@@ -306,3 +306,21 @@ export function ChangesCard({ changes }: { changes: ConfigChange[] }) {
     </Card>
   );
 }
+
+// A tab whose data failed to load, with a retry
+export function LoadError({
+  what,
+  onRetry,
+}: {
+  what: string;
+  onRetry: () => void;
+}) {
+  return (
+    <div className="rounded-surface border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+      The {what} could not be loaded.{" "}
+      <button type="button" onClick={onRetry} className="font-semibold underline">
+        Try again
+      </button>
+    </div>
+  );
+}

@@ -200,3 +200,54 @@ export function ItSettingsSkeleton() {
     </SettingsSkeletonFrame>
   );
 }
+
+// A list row with an initials avatar, two lines and trailing chips
+function PersonRowsSkeleton({ rows }: { rows: number }) {
+  const widths = ["w-32", "w-40", "w-28", "w-36"];
+  return (
+    <div className="divide-y divide-neutral-100">
+      {Array.from({ length: rows }, (_, i) => (
+        <div key={i} className="flex flex-wrap items-center gap-3 py-2.5">
+          <div className="h-8 w-8 shrink-0 rounded-full bg-neutral-200" />
+          <div className="min-w-0 flex-1 space-y-1.5">
+            <div className={`h-3.5 ${widths[i % widths.length]} ${bar}`} />
+            <div className={`h-3 w-48 ${softBar}`} />
+          </div>
+          <div className="flex gap-1.5">
+            <div className="h-5 w-20 rounded-full bg-neutral-100" />
+            <div className="rounded-control h-10 w-48 border border-neutral-200" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function UsersSettingsSkeleton() {
+  return (
+    <SettingsSkeletonFrame label="Loading the users and roles">
+      <CardSkeleton>
+        <div className="flex flex-wrap gap-2">
+          <div className="rounded-control h-10 min-w-48 flex-1 border border-neutral-200" />
+          <div className="rounded-control h-10 w-44 border border-neutral-200" />
+        </div>
+        <PersonRowsSkeleton rows={6} />
+      </CardSkeleton>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <CardSkeleton>
+          <ToggleRowsSkeleton rows={4} withDetail />
+        </CardSkeleton>
+        <CardSkeleton>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <FieldSkeleton />
+            <FieldSkeleton />
+          </div>
+          <div className="flex justify-end">
+            <div className="rounded-control h-10 w-28 bg-neutral-200" />
+          </div>
+        </CardSkeleton>
+      </div>
+      <ChangesSkeleton />
+    </SettingsSkeletonFrame>
+  );
+}
