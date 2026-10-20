@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { Fragment, type ComponentType } from "react";
 import {
+  BadgeCheck,
   HardHat,
   Monitor,
   UsersRound,
   type LucideIcon,
 } from "lucide-react";
 import { SETTINGS_PAGE } from "@/lib/configAdmin";
+import ApproversSettings from "./ApproversSettings";
 import CasualSettings from "./CasualSettings";
 import ItSettings from "./ItSettings";
 import UsersSettings from "./UsersSettings";
@@ -29,6 +31,12 @@ const TAB_GROUPS: { label: string; tabs: SettingsTab[] }[] = [
         label: "Users & roles",
         Icon: UsersRound,
         Panel: UsersSettings,
+      },
+      {
+        key: "approvers",
+        label: "Approvers",
+        Icon: BadgeCheck,
+        Panel: ApproversSettings,
       },
     ],
   },
