@@ -38,18 +38,15 @@ import {
   currentCasualRates,
   describeCasualRateScope,
 } from "@/lib/casualConfig";
-import type { CasualBudgetUnit } from "@/lib/casualBudgetRules";
+import {
+  BUDGET_UNIT_LABELS,
+  type CasualBudgetUnit,
+} from "@/lib/casualBudgetRules";
 import type { ConfigActionResult } from "@/lib/configAdminAccess";
 
 const ADMIN_KEY = ["CasualConfigAdmin"];
 // The form and guideline caches of the same data, refreshed after a change
 const RELATED_KEYS = [["CasualConfigData"], ["PublicCasualRates"]];
-
-const BUDGET_UNIT_LABELS: Record<CasualBudgetUnit, string> = {
-  default: "Department budget",
-  warehouse: "Warehouse budget",
-  bond: "Bond budget",
-};
 
 export default function CasualSettings() {
   const { busy, run } = useSettingsRunner(ADMIN_KEY, RELATED_KEYS);
