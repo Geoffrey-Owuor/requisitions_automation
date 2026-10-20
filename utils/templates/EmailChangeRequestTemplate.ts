@@ -129,3 +129,44 @@ export function EmailChangeOnFileNoticeTemplate(
   `,
   );
 }
+
+// Resolution emails, sent when HR resolves a request from the salary advance
+// HR dashboard. Like the others, none carries data beyond the request itself.
+
+// To the newly applied address
+export function EmailChangeApprovedTemplate(
+  staffName: string,
+  newEmail: string,
+) {
+  return layout(
+    "Your Staff Record Email Was Updated",
+    `
+    ${box(`<p style="margin: 0; font-size: 15px; color: #1e293b; line-height: 1.6;">Hello ${escapeHtml(staffName)}, HR has approved your request. The email address on your staff record is now <strong>${escapeHtml(newEmail)}</strong>, so salary advance verification codes will be sent here from now on.</p>`)}
+    ${warning("If you did not make this request, please contact HR immediately.")}
+  `,
+  );
+}
+
+// To the address the change replaced, so its owner can object
+export function EmailChangeAppliedNoticeTemplate(
+  staffName: string,
+  newEmail: string,
+) {
+  return layout(
+    "The Email On Your Staff Record Was Changed",
+    `
+    ${box(`<p style="margin: 0; font-size: 15px; color: #1e293b; line-height: 1.6;">Hello ${escapeHtml(staffName)}, HR has changed the email address on your staff record to <strong>${escapeHtml(newEmail)}</strong>. Salary advance verification codes will no longer be sent to this address.</p>`)}
+    ${warning("If you did not request this change, please contact HR immediately.")}
+  `,
+  );
+}
+
+// To the requested address when HR declines the change
+export function EmailChangeRejectedTemplate(staffName: string) {
+  return layout(
+    "Email Change Request Not Approved",
+    `
+    ${box(`<p style="margin: 0; font-size: 15px; color: #1e293b; line-height: 1.6;">Hello ${escapeHtml(staffName)}, HR has reviewed your request to change the email address on your staff record and has not approved it. The email on your record is unchanged. Please contact HR if you have any questions.</p>`)}
+  `,
+  );
+}
