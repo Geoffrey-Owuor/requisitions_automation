@@ -5,6 +5,7 @@ import {
   ConfigInputError,
   getConfigAdminSession,
   isConfigId,
+  NAIROBI_TODAY_SQL,
   recordConfigChange,
   runConfigChange as runChange,
   type ConfigActionResult,
@@ -64,7 +65,6 @@ const CASUAL_TABLES_SQL = [
 
 const BUDGET_UNITS: CasualBudgetUnit[] = ["default", "warehouse", "bond"];
 const MAX_RATE_PER_DAY = 1_000_000;
-const NAIROBI_TODAY_SQL = `(CURRENT_TIMESTAMP AT TIME ZONE 'Africa/Nairobi')::date`;
 
 export async function getCasualConfigAdminData(): Promise<CasualConfigAdminData | null> {
   if (!(await getConfigAdminSession())) return null;

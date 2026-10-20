@@ -10,6 +10,7 @@ import {
   ConfirmDialog,
   type Confirmation,
   Field,
+  nextDay,
   inputClass,
   primaryButtonClass,
   smallButtonClass,
@@ -49,12 +50,6 @@ const BUDGET_UNIT_LABELS: Record<CasualBudgetUnit, string> = {
   warehouse: "Warehouse budget",
   bond: "Bond budget",
 };
-
-// YYYY-MM-DD plus one day, in UTC so no local time zone shifts the date
-const nextDay = (date: string) =>
-  new Date(Date.parse(`${date}T00:00:00Z`) + 86_400_000)
-    .toISOString()
-    .slice(0, 10);
 
 export default function CasualSettings() {
   const { busy, run } = useSettingsRunner(ADMIN_KEY, RELATED_KEYS);

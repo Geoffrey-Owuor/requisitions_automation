@@ -283,3 +283,89 @@ export function ApproversSettingsSkeleton() {
     </SettingsSkeletonFrame>
   );
 }
+
+export function DepartmentsSettingsSkeleton() {
+  return (
+    <SettingsSkeletonFrame label="Loading the departments">
+      <CardSkeleton>
+        <div className="divide-y divide-neutral-100">
+          {Array.from({ length: 6 }, (_, i) => (
+            <div
+              key={i}
+              className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 py-3"
+            >
+              <div className="space-y-1.5">
+                <div className={`h-3.5 w-36 ${bar}`} />
+                <div className={`h-3 w-44 ${softBar}`} />
+              </div>
+              <div className="flex gap-1.5">
+                {["w-24", "w-28", "w-28", "w-20"].map((width, j) => (
+                  <div
+                    key={j}
+                    className={`rounded-compact h-6 ${width} border border-neutral-200`}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+        <AddRowSkeleton />
+      </CardSkeleton>
+      <ChangesSkeleton />
+    </SettingsSkeletonFrame>
+  );
+}
+
+export function TravelSettingsSkeleton() {
+  return (
+    <SettingsSkeletonFrame label="Loading the travel settings">
+      <CardSkeleton>
+        <div className="divide-y divide-neutral-100">
+          {Array.from({ length: 2 }, (_, i) => (
+            <div
+              key={i}
+              className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 py-2.5"
+            >
+              <div className="grid flex-1 grid-cols-3 gap-2">
+                {Array.from({ length: 3 }, (_, j) => (
+                  <div key={j} className="space-y-1.5">
+                    <div className={`h-3 w-12 ${softBar}`} />
+                    <div className={`h-3.5 w-28 ${bar}`} />
+                  </div>
+                ))}
+              </div>
+              <div className="flex items-center gap-2">
+                <div className={`h-3 w-24 ${softBar}`} />
+                <div className="h-5 w-16 rounded-full bg-neutral-100" />
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="rounded-control space-y-3 bg-neutral-50 p-3">
+          <div className={`h-3 w-36 ${bar}`} />
+          <div className="grid gap-2 sm:grid-cols-3">
+            {Array.from({ length: 3 }, (_, i) => (
+              <FieldSkeleton key={i} />
+            ))}
+          </div>
+          <div className="flex justify-end">
+            <div className="rounded-control h-10 w-40 bg-neutral-200" />
+          </div>
+        </div>
+      </CardSkeleton>
+      <ChangesSkeleton />
+    </SettingsSkeletonFrame>
+  );
+}
+
+export function EmployeeSettingsSkeleton() {
+  return (
+    <SettingsSkeletonFrame label="Loading the employee settings">
+      <CardSkeleton>
+        <ToggleRowsSkeleton rows={9} />
+        <AddRowSkeleton />
+      </CardSkeleton>
+      <ChangesSkeleton />
+    </SettingsSkeletonFrame>
+  );
+}
