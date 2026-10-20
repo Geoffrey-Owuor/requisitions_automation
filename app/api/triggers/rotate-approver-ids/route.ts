@@ -13,7 +13,16 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const approvers = ["hod", "it", "hr", "director"];
+  // Every {approver}_array table with an approval token
+  const approvers = [
+    "hod",
+    "it",
+    "hr",
+    "director",
+    "security",
+    "finance",
+    "retail_director",
+  ];
 
   try {
     // get a pool client

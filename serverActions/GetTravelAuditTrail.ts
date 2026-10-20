@@ -1,7 +1,7 @@
 "use server";
 import { query } from "@/lib/db";
 import { getSession } from "@/lib/session";
-import { getUserRoles } from "@/serverActions/GetUserRoles";
+import { getApproverMemberships } from "@/serverActions/GetApproverMemberships";
 import { isHodViewer } from "@/lib/hodAssignment";
 import {
   TravelPushbackValues,
@@ -51,8 +51,8 @@ export async function getTravelAuditTrail(
       }));
 
     if (!isSubmitter && !isHod) {
-      const roles = await getUserRoles(user.email);
-      if (!roles.includes("hr-travel") && !roles.includes("director")) {
+      const memberships = await getApproverMemberships();
+      if (!memberships.hrForms.includes("travel") && !memberships.isDirector) {
         return EMPTY_TRAIL;
       }
     }

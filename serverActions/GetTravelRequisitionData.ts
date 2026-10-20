@@ -4,7 +4,7 @@ import "server-only";
 import { query } from "@/lib/db";
 import { getSession } from "@/lib/session";
 import { hodHistoryScopeSql, hodPendingScopeSql } from "@/lib/hodAssignment";
-import { getUserRoles } from "@/serverActions/GetUserRoles";
+import { getApproverMemberships } from "@/serverActions/GetApproverMemberships";
 import {
   PaginatedResult,
   emptyPaginatedResult,
@@ -46,11 +46,11 @@ export const getTravelRequisitionData = async ({
   const user = await getSession();
   if (!user) return emptyPaginatedResult(page, pageSize);
 
-  // Travel HR/Director dashboard access is role-based — verify the role
-  // server-side rather than trusting the dashboard's role gate.
-  const roles = await getUserRoles(user.email);
-  const isHr = roles.includes("hr-travel");
-  const isDirector = roles.includes("director");
+  // Travel HR (hr_array scoped to travel) and Director (director_array)
+  // access is verified server-side rather than trusting the dashboard's gate.
+  const memberships = await getApproverMemberships();
+  const isHr = memberships.hrForms.includes("travel");
+  const isDirector = memberships.isDirector;
   if (dataFlag === "hrPending" && !isHr) {
     return emptyPaginatedResult(page, pageSize);
   }
