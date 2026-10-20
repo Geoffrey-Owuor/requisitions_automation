@@ -9,8 +9,8 @@ export default function PushbackUnavailable({ reason }: { reason: string }) {
 
   return (
     <div className="relative flex min-h-full flex-1 items-center justify-center p-5">
-      <div className="mx-auto max-w-md rounded-3xl border border-gray-100 bg-white/65 p-10 text-center shadow-[0_24px_48px_rgba(160,60,60,0.10)]">
-        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100">
+      <div className="rounded-surface mx-auto max-w-md border border-gray-100 bg-white/65 p-10 text-center shadow-[0_24px_48px_rgba(160,60,60,0.10)]">
+        <div className="rounded-control mx-auto mb-5 flex h-16 w-16 items-center justify-center bg-amber-100">
           <Ban className="h-7 w-7 text-amber-600" />
         </div>
 
@@ -31,7 +31,7 @@ export default function PushbackUnavailable({ reason }: { reason: string }) {
         {!isSignedIn && (
           <Link
             href="/"
-            className="block w-full cursor-pointer rounded-[14px] bg-slate-900 py-4 text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(30,27,27,0.3)]"
+            className="rounded-control block w-full cursor-pointer bg-slate-900 py-4 text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(30,27,27,0.3)]"
           >
             Go to Homepage
           </Link>

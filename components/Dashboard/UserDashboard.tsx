@@ -16,7 +16,7 @@ import DashboardAlert from "./DashboardAlert";
 import DashboardQuickActions from "./DashboardQuickActions";
 
 const CARD_CLASS =
-  "group flex flex-col gap-3 rounded-2xl border bg-white/50 p-4 shadow-[0_12px_24px_rgba(160,60,60,0.05)] transition-all hover:bg-white/80";
+  "group flex flex-col gap-3 rounded-surface border bg-white/50 p-4 shadow-[0_12px_24px_rgba(160,60,60,0.05)] transition-all hover:bg-white/80";
 const GRID_CLASS =
   "grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5";
 
@@ -203,13 +203,13 @@ const UserDashboard = () => {
         </header>
 
         {isError && !data && (
-          <div className="flex flex-wrap items-center gap-3 rounded-xl border border-red-200 bg-red-50/60 px-4 py-3 text-sm text-red-700">
+          <div className="rounded-control flex flex-wrap items-center gap-3 border border-red-200 bg-red-50/60 px-4 py-3 text-sm text-red-700">
             <span className="flex-1">
               Couldn&apos;t load your requisition counts.
             </span>
             <button
               onClick={() => refetch()}
-              className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-3 py-1.5 text-xs text-white hover:bg-slate-800"
+              className="rounded-compact inline-flex items-center gap-2 bg-slate-900 px-3 py-1.5 text-xs text-white hover:bg-slate-800"
             >
               <RotateCcw className="h-3.5 w-3.5" />
               Try again

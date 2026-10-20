@@ -2,6 +2,7 @@ import "server-only";
 import { cookies } from "next/headers";
 import { SignJWT, jwtVerify } from "jose";
 import { cache } from "react";
+import { isUserDeactivated } from "@/lib/users";
 
 const SECRET_KEY = new TextEncoder().encode(process.env.SESSION_SECRET);
 const COOKIE_NAME = "requisitions_session";
@@ -52,12 +53,16 @@ export async function createSession(user: SessionPayload) {
   });
 }
 
-// 4. Extract user details from active cookie
+// 4. Extract user details from active cookie. The JWT alone would stay valid
+// for 7 days, so a deactivated account (migration 031) is also refused here -
+// every gate (proxy, layouts, API routes, server actions) goes through this.
 async function requireSession(): Promise<SessionPayload | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get(COOKIE_NAME)?.value;
   if (!token) return null;
-  return await decrypt(token);
+  const session = await decrypt(token);
+  if (!session || (await isUserDeactivated(session.email))) return null;
+  return session;
 }
 
 export const getSession = cache(requireSession);

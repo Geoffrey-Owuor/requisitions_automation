@@ -49,7 +49,7 @@ export default function EmployeeConfirmationModal({
   );
 
   return (
-    <div className="mx-auto max-w-3xl rounded-3xl border border-gray-100 bg-white p-10 shadow-[0_24px_48px_rgba(160,60,60,0.10)]">
+    <div className="rounded-surface mx-auto max-w-3xl border border-gray-100 bg-white p-10 shadow-[0_24px_48px_rgba(160,60,60,0.10)]">
       {/* Header */}
       <div className="mb-6">
         <p className="text-[11px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
@@ -66,7 +66,7 @@ export default function EmployeeConfirmationModal({
       </div>
 
       {isAmendment && reason && (
-        <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3.5">
+        <div className="rounded-surface mb-6 border border-amber-200 bg-amber-50 px-4 py-3.5">
           <p className="mb-1 text-[11px] font-semibold tracking-[0.4px] text-amber-700 uppercase">
             Reason for Amendment
           </p>
@@ -77,7 +77,7 @@ export default function EmployeeConfirmationModal({
       )}
 
       {/* User account card */}
-      <div className="mb-6 flex items-center gap-3 rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white px-4 py-3">
+      <div className="rounded-surface mb-6 flex items-center gap-3 border border-[rgba(240,180,180,0.5)] bg-white px-4 py-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-rose-100 text-[13px] font-semibold text-rose-700">
           {initialsHelper(nameString)}
         </div>
@@ -85,7 +85,7 @@ export default function EmployeeConfirmationModal({
           <p className="text-[14px] font-semibold text-[#1e1b1b]">{userName}</p>
           <p className="text-[12px] text-[#a18080]">{userEmail}</p>
         </div>
-        <span className="ml-auto rounded-lg bg-rose-100 px-3 py-1 text-[11px] font-medium text-rose-700">
+        <span className="rounded-compact ml-auto bg-rose-100 px-3 py-1 text-[11px] font-medium text-rose-700">
           Requestor
         </span>
       </div>
@@ -114,7 +114,7 @@ export default function EmployeeConfirmationModal({
           {formData.positions.map((position, index) => (
             <div
               key={position.clientId}
-              className="rounded-2xl border border-[rgba(240,180,180,0.4)] bg-white p-5"
+              className="rounded-surface border border-[rgba(240,180,180,0.4)] bg-white p-5"
             >
               <h3 className="mb-3 flex items-center gap-2 text-[13px] font-semibold text-[#1e1b1b]">
                 {position.title || `Position ${index + 1}`}
@@ -233,11 +233,11 @@ export default function EmployeeConfirmationModal({
           Overall Summary
         </p>
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-          <div className="flex items-center justify-between rounded-2xl border border-rose-700/30 bg-linear-to-r from-rose-900/80 to-rose-800/80 px-5 py-5 font-semibold text-rose-50">
+          <div className="rounded-surface flex items-center justify-between border border-rose-700/30 bg-linear-to-r from-rose-900/80 to-rose-800/80 px-5 py-5 font-semibold text-rose-50">
             <span>Positions</span>
             <span className="text-xl">{formData.positions.length}</span>
           </div>
-          <div className="flex items-center justify-between rounded-2xl bg-linear-to-r from-slate-800 to-rose-900 px-5 py-5 font-semibold text-white shadow-lg">
+          <div className="rounded-surface flex items-center justify-between bg-linear-to-r from-slate-800 to-rose-900 px-5 py-5 font-semibold text-white shadow-lg">
             <span>Total Headcount Requested</span>
             <span className="text-xl">{overallTotalRequired}</span>
           </div>
@@ -249,7 +249,7 @@ export default function EmployeeConfirmationModal({
         <button
           type="button"
           onClick={onBack}
-          className="flex cursor-pointer items-center gap-2 rounded-[14px] border border-[rgba(240,180,180,0.6)] bg-transparent px-6 py-4 text-[14px] font-semibold text-[#1e1b1b] transition-all duration-200 hover:bg-rose-50"
+          className="rounded-control flex cursor-pointer items-center gap-2 border border-[rgba(240,180,180,0.6)] bg-transparent px-6 py-4 text-[14px] font-semibold text-[#1e1b1b] transition-all duration-200 hover:bg-rose-50"
         >
           <ArrowLeft className="h-4 w-4" />
           Back
@@ -258,7 +258,7 @@ export default function EmployeeConfirmationModal({
           type="button"
           onClick={onSubmit}
           disabled={submitting}
-          className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-[14px] border-none bg-slate-900 py-4 text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)] disabled:opacity-50"
+          className="rounded-control flex flex-1 cursor-pointer items-center justify-center gap-2 border-none bg-slate-900 py-4 text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)] disabled:opacity-50"
         >
           {submitting
             ? "Submitting..."

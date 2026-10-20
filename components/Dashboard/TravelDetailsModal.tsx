@@ -218,7 +218,7 @@ export const TravelDetailsModal = ({
           value={data.travel_cost_center}
         />
 
-        <div className="col-span-full mt-4 rounded-2xl bg-neutral-50 p-4 text-black">
+        <div className="rounded-surface col-span-full mt-4 bg-neutral-50 p-4 text-black">
           <div className="mb-2 flex items-center gap-2 text-rose-400">
             <MessageSquare size={16} className="text-rose-500" />
             <span className="text-xs font-bold tracking-tighter uppercase">
@@ -256,7 +256,7 @@ export const TravelDetailsModal = ({
             ].map((step, idx) => (
               <div
                 key={idx}
-                className="flex items-center justify-between rounded-xl bg-neutral-50 p-3"
+                className="rounded-control flex items-center justify-between bg-neutral-50 p-3"
               >
                 <span className="text-sm text-[#1e1b1b]">
                   {step.label} Status
@@ -290,7 +290,7 @@ type DetailItemProps = {
 };
 
 const DetailItem = ({ label, value, icon: Icon }: DetailItemProps) => (
-  <div className="flex items-start gap-3 rounded-xl bg-neutral-50 p-3">
+  <div className="rounded-control flex items-start gap-3 bg-neutral-50 p-3">
     <Icon size={16} className="mt-1 shrink-0 text-rose-500" />
     <div>
       <p className="text-[10px] font-bold tracking-wider text-rose-400 uppercase">

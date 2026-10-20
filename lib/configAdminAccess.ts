@@ -68,15 +68,51 @@ export function cleanConfigName(value: unknown, label: string): string {
   return name;
 }
 
+// Today's date in Africa/Nairobi, for SQL comparing effective-from dates
+export const NAIROBI_TODAY_SQL = `(CURRENT_TIMESTAMP AT TIME ZONE 'Africa/Nairobi')::date`;
+
 export const isConfigId = (value: unknown): value is number =>
   typeof value === "number" && Number.isInteger(value) && value > 0;
 
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+// A trimmed, lowercase email address - every email the app stores is
+// lowercase (migration 020)
+export function cleanConfigEmail(value: unknown): string {
+  const email = typeof value === "string" ? value.trim().toLowerCase() : "";
+  if (!EMAIL_PATTERN.test(email) || email.length > 255) {
+    throw new ConfigInputError("Enter a valid email address");
+  }
+  return email;
+}
+
+// A config_changes row as the Settings tabs list it (ChangesCard)
+export type ConfigChangeRow = {
+  id: string;
+  summary: string;
+  changedByName: string;
+  changedAt: string;
+};
+
+// The last 30 Settings changes to any of `tables`
+export async function loadConfigChanges(tables: string[]) {
+  const { rows } = await pool.query<ConfigChangeRow>(
+    `SELECT id::text, summary, changed_by_name AS "changedByName",
+     TO_CHAR(changed_at AT TIME ZONE 'Africa/Nairobi', 'DD Mon YYYY, HH24:MI') AS "changedAt"
+     FROM config_changes WHERE table_name = ANY($1::text[])
+     ORDER BY changed_at DESC, id DESC LIMIT 30`,
+    [tables],
+  );
+  return rows;
+}
+
 // Runs a Settings change for a config admin: one transaction for the change
 // and its config_changes row, then expires `tag` (updateTag - so only from
-// a server action) so the forms load the change. ConfigInputError messages
+// a server action) so the forms load the change; null for data that isn't
+// cached (e.g. roles, read on every request). ConfigInputError messages
 // go back to the admin; anything else is logged and reported generically.
 export async function runConfigChange(
-  tag: string,
+  tag: string | null,
   work: (client: PoolClient, actor: SessionPayload) => Promise<string>,
 ): Promise<ConfigActionResult> {
   const actor = await getConfigAdminSession();
@@ -92,7 +128,7 @@ export async function runConfigChange(
     await client.query("BEGIN");
     const message = await work(client, actor);
     await client.query("COMMIT");
-    updateTag(tag);
+    if (tag) updateTag(tag);
     return { ok: true, message };
   } catch (error) {
     await client.query("ROLLBACK");

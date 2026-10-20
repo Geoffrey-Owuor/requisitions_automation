@@ -54,7 +54,8 @@ export async function VerifyAdvanceCode(
 
     const staffResult = await query<StaffDetails>(
       `SELECT staff_number, staff_name, staff_email, staff_department, staff_location
-       FROM company_staff_data WHERE LOWER(staff_email) = $1 LIMIT 1`,
+       FROM company_staff_data
+       WHERE LOWER(staff_email) = $1 AND deactivated_at IS NULL LIMIT 1`,
       [normalizedEmail],
     );
 

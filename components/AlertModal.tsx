@@ -47,17 +47,17 @@ export default function AlertModal({
 
   return (
     <div className="relative z-10 mx-auto flex min-h-[80vh] max-w-md items-center justify-center px-5 py-10">
-      <div className="w-full rounded-3xl border border-gray-100 bg-white/65 p-10 text-center shadow-[0_24px_48px_rgba(160,60,60,0.10)]">
+      <div className="rounded-surface w-full border border-gray-100 bg-white/65 p-10 text-center shadow-[0_24px_48px_rgba(160,60,60,0.10)]">
         {/* Icon */}
         <div
-          className={`mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl ${config.iconBg}`}
+          className={`rounded-surface mx-auto mb-5 flex h-16 w-16 items-center justify-center ${config.iconBg}`}
         >
           <Icon size={32} className={config.iconColor} />
         </div>
 
         {/* Badge */}
         <span
-          className={`inline-block rounded-lg px-3 py-1 text-[11px] font-semibold tracking-[0.5px] uppercase ${config.badgeColor}`}
+          className={`rounded-compact inline-block px-3 py-1 text-[11px] font-semibold tracking-[0.5px] uppercase ${config.badgeColor}`}
         >
           {config.badge}
         </span>
@@ -79,7 +79,7 @@ export default function AlertModal({
               onBack();
               scrollPageToTop();
             }}
-            className={`mt-8 mb-3 flex w-full cursor-pointer items-center justify-center gap-2 rounded-[14px] border-none py-4 text-[14px] font-semibold transition-all duration-200 hover:-translate-y-0.5 ${config.buttonStyle}`}
+            className={`rounded-control mt-8 mb-3 flex w-full cursor-pointer items-center justify-center gap-2 border-none py-4 text-[14px] font-semibold transition-all duration-200 hover:-translate-y-0.5 ${config.buttonStyle}`}
           >
             {config.buttonLabel}
           </button>

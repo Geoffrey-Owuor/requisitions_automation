@@ -13,16 +13,22 @@ export const metadata: Metadata = {
 
 // Only for config-admin holders; the nav hides the link from everyone else,
 // and every Settings action re-checks the role
-const page = async () => {
+const page = async ({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string | string[] }>;
+}) => {
   const session = await getSession();
   if (!session) redirect("/login");
 
   const roles = await getUserRoles(session.email);
   if (!canManageSettings(roles)) redirect("/dashboard");
 
+  const { tab } = await searchParams;
+
   return (
     <RequisitionPagesWrapper>
-      <SettingsPage />
+      <SettingsPage tab={typeof tab === "string" ? tab : undefined} />
     </RequisitionPagesWrapper>
   );
 };

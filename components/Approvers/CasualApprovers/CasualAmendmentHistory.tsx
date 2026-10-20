@@ -10,11 +10,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function ChangedValuePill({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export function ChangedValuePill({ children }: { children: React.ReactNode }) {
   return (
     <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-amber-400 px-2.5 py-1 text-[11px] font-semibold whitespace-nowrap text-amber-950 shadow-sm">
       <Pencil className="h-3 w-3" />
@@ -67,7 +63,7 @@ const CasualAmendmentHistory = ({
         {amendments.map((amendment) => (
           <div
             key={amendment.amendmentid}
-            className="rounded-2xl border border-amber-200 bg-amber-50/60 p-4"
+            className="rounded-surface border border-amber-200 bg-amber-50/60 p-4"
           >
             <div className="mb-2 flex items-start justify-between gap-2">
               <div>
@@ -80,7 +76,7 @@ const CasualAmendmentHistory = ({
                 </p>
               </div>
             </div>
-            <p className="mb-3 rounded-xl border border-dashed border-amber-300 bg-white/60 px-3 py-2 text-[12px] leading-relaxed text-[#7c5a5a] italic">
+            <p className="rounded-control mb-3 border border-dashed border-amber-300 bg-white/60 px-3 py-2 text-[12px] leading-relaxed text-[#7c5a5a] italic">
               &quot;{amendment.amendmentreason}&quot;
             </p>
 
@@ -112,7 +108,7 @@ const CasualAmendmentHistory = ({
                 {amendment.sections.map((section) => (
                   <div
                     key={section.sectionName}
-                    className="rounded-xl bg-white/70 p-3"
+                    className="rounded-control bg-white/70 p-3"
                   >
                     <p className="mb-1.5 text-[12px] font-semibold text-[#1e1b1b]">
                       {section.sectionName}{" "}

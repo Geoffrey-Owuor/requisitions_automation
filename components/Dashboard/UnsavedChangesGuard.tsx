@@ -145,14 +145,14 @@ export function UnsavedChangesProvider({
           <button
             type="button"
             onClick={() => setPendingLeave(null)}
-            className="flex-1 cursor-pointer rounded-[14px] bg-slate-900 py-3 text-[14px] font-semibold text-white transition-colors hover:bg-slate-800"
+            className="rounded-control flex-1 cursor-pointer bg-slate-900 py-3 text-[14px] font-semibold text-white transition-colors hover:bg-slate-800"
           >
             Keep editing
           </button>
           <button
             type="button"
             onClick={discardAndLeave}
-            className="flex-1 cursor-pointer rounded-[14px] border border-rose-200 bg-rose-50 py-3 text-[14px] font-semibold text-rose-700 transition-colors hover:bg-rose-100"
+            className="rounded-control flex-1 cursor-pointer border border-rose-200 bg-rose-50 py-3 text-[14px] font-semibold text-rose-700 transition-colors hover:bg-rose-100"
           >
             Discard
           </button>

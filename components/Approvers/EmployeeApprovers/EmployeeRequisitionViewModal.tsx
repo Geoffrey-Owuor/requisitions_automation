@@ -74,7 +74,7 @@ const PositionCard = ({
 }: {
   position: EmployeeEmailDataValues["positions"][number];
 }) => (
-  <div className="mb-4 rounded-2xl border border-[rgba(240,180,180,0.4)] bg-white/60 p-5">
+  <div className="rounded-surface mb-4 border border-[rgba(240,180,180,0.4)] bg-white/60 p-5">
     <h3 className="mb-3 text-[13px] font-semibold text-[#1e1b1b]">
       {position.positiontitle}
     </h3>
@@ -128,14 +128,14 @@ const EmployeeRequisitionViewModal = ({
     <div className="relative p-4 font-sans">
       <div className="relative z-10 mx-auto max-w-3xl">
         {/* Toolbar */}
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-gray-100 bg-white/70 px-6 py-4 shadow-[0_8px_16px_rgba(160,60,60,0.06)]">
+        <div className="rounded-surface mb-6 flex flex-wrap items-center justify-between gap-4 border border-gray-100 bg-white/70 px-6 py-4 shadow-[0_8px_16px_rgba(160,60,60,0.06)]">
           <span className="text-[13px] font-medium text-[#7c5a5a]">
             Employee Requisition - {viewData.submittername}
           </span>
         </div>
 
         {/* Document */}
-        <div className="rounded-3xl border border-white/85 bg-white/65 px-6 py-8 shadow-[0_24px_48px_rgba(160,60,60,0.10)] sm:px-8">
+        <div className="rounded-surface border border-white/85 bg-white/65 px-6 py-8 shadow-[0_24px_48px_rgba(160,60,60,0.10)] sm:px-8">
           {/* Doc header */}
           <div className="mb-8 border-b border-[rgba(240,180,180,0.4)] pb-6">
             <h1 className="text-[26px] font-semibold tracking-[-0.5px] text-[#1e1b1b]">
@@ -174,7 +174,7 @@ const EmployeeRequisitionViewModal = ({
           <div className="mb-8 border-t border-[rgba(240,180,180,0.4)] pt-8">
             <SectionHeading title="Overall Summary" />
 
-            <div className="my-6 rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white/60 p-6">
+            <div className="rounded-surface my-6 border border-[rgba(240,180,180,0.5)] bg-white/60 p-6">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-[#7c5a5a]">
                   Positions Requested
@@ -211,7 +211,7 @@ const EmployeeRequisitionViewModal = ({
                 ({ role, approverKey, emailKey, statusKey, commentsKey }) => (
                   <div
                     key={role}
-                    className="rounded-2xl border border-[rgba(240,180,180,0.4)] bg-white/60 px-5 py-5"
+                    className="rounded-surface border border-[rgba(240,180,180,0.4)] bg-white/60 px-5 py-5"
                   >
                     <p className="mb-3 text-[11px] font-semibold tracking-[0.4px] text-[#b0a0a0] uppercase">
                       {role}

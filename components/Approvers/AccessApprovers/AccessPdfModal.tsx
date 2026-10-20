@@ -37,7 +37,7 @@ const AccessPdfModal = ({ pdfData }: { pdfData: AccessPdfValues }) => {
     <div className="relative p-4 font-sans">
       <div className="relative z-10 mx-auto max-w-180">
         {/* Toolbar */}
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-gray-100 bg-white/70 px-6 py-4 shadow-[0_8px_16px_rgba(160,60,60,0.06)]">
+        <div className="rounded-surface mb-6 flex flex-wrap items-center justify-between gap-4 border border-gray-100 bg-white/70 px-6 py-4 shadow-[0_8px_16px_rgba(160,60,60,0.06)]">
           <span className="text-[13px] font-medium text-[#7c5a5a]">
             Access Requisition - {pdfData.employeename}
           </span>
@@ -46,7 +46,7 @@ const AccessPdfModal = ({ pdfData }: { pdfData: AccessPdfValues }) => {
             <PDFDownloadLink
               document={<AccessRequisitionPdf pdfData={pdfData} />}
               fileName={`Access_Requisition_${pdfData.employeename.replace(/\s+/g, "_")}.pdf`}
-              className="flex cursor-pointer items-center gap-2 rounded-[14px] border-none bg-slate-900 px-5 py-2.5 text-[13px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)]"
+              className="rounded-control flex cursor-pointer items-center gap-2 border-none bg-slate-900 px-5 py-2.5 text-[13px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)]"
             >
               <Printer size={14} />
               <span>Download PDF</span>
@@ -54,7 +54,7 @@ const AccessPdfModal = ({ pdfData }: { pdfData: AccessPdfValues }) => {
           ) : (
             <button
               disabled
-              className="flex cursor-not-allowed items-center gap-2 rounded-[14px] border-none bg-slate-700 px-5 py-2.5 text-[13px] font-semibold text-white/70"
+              className="rounded-control flex cursor-not-allowed items-center gap-2 border-none bg-slate-700 px-5 py-2.5 text-[13px] font-semibold text-white/70"
             >
               <Printer size={14} />
               Download PDF
@@ -63,7 +63,7 @@ const AccessPdfModal = ({ pdfData }: { pdfData: AccessPdfValues }) => {
         </div>
 
         {/* HTML Document Preview */}
-        <div className="rounded-3xl border border-white/85 bg-white/65 px-6 py-8 shadow-[0_24px_48px_rgba(160,60,60,0.10)] sm:px-8">
+        <div className="rounded-surface border border-white/85 bg-white/65 px-6 py-8 shadow-[0_24px_48px_rgba(160,60,60,0.10)] sm:px-8">
           {/* Header */}
           <div className="mb-8 border-b border-[rgba(240,180,180,0.4)] pb-6">
             <h1 className="text-[26px] font-semibold tracking-[-0.5px] text-[#1e1b1b]">
@@ -122,7 +122,7 @@ const AccessPdfModal = ({ pdfData }: { pdfData: AccessPdfValues }) => {
             <SectionHeading title="Approval Chain" />
             <div className="grid grid-cols-2 gap-6 max-sm:grid-cols-1">
               {/* HOD Card */}
-              <div className="rounded-2xl border border-[rgba(240,180,180,0.4)] bg-white/60 px-5 py-5">
+              <div className="rounded-surface border border-[rgba(240,180,180,0.4)] bg-white/60 px-5 py-5">
                 <p className="mb-3 text-[11px] font-semibold tracking-[0.4px] text-[#b0a0a0] uppercase">
                   HOD Approval
                 </p>
@@ -138,7 +138,7 @@ const AccessPdfModal = ({ pdfData }: { pdfData: AccessPdfValues }) => {
               </div>
 
               {/* Security Card */}
-              <div className="rounded-2xl border border-[rgba(240,180,180,0.4)] bg-white/60 px-5 py-5">
+              <div className="rounded-surface border border-[rgba(240,180,180,0.4)] bg-white/60 px-5 py-5">
                 <p className="mb-3 text-[11px] font-semibold tracking-[0.4px] text-[#b0a0a0] uppercase">
                   Security Approval
                 </p>

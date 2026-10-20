@@ -138,7 +138,7 @@ function SubmissionsClosedNotice({
 }) {
   if (loadFailed) {
     return (
-      <div className="flex items-start gap-3 rounded-3xl border border-rose-200 bg-rose-50 px-6 py-6 text-rose-700">
+      <div className="rounded-surface flex items-start gap-3 border border-rose-200 bg-rose-50 px-6 py-6 text-rose-700">
         <CircleAlert size={18} className="mt-0.5 shrink-0" />
         <p className="text-sm leading-relaxed">
           We couldn&apos;t load the request form. Refresh the page to try again,
@@ -149,8 +149,8 @@ function SubmissionsClosedNotice({
   }
 
   return (
-    <div className="rounded-3xl border border-white/85 bg-white/65 px-6 py-10 text-center shadow-[0_24px_48px_rgba(160,60,60,0.10)] sm:px-8">
-      <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-50 text-rose-600">
+    <div className="rounded-surface border border-white/85 bg-white/65 px-6 py-10 text-center shadow-[0_24px_48px_rgba(160,60,60,0.10)] sm:px-8">
+      <div className="rounded-surface mx-auto mb-4 flex h-12 w-12 items-center justify-center bg-rose-50 text-rose-600">
         <CalendarClock size={22} />
       </div>
       <h2 className="mb-2 text-lg font-semibold text-slate-900">
@@ -171,14 +171,14 @@ function SubmissionsClosedNotice({
         <button
           type="button"
           onClick={onShowHistory}
-          className="cursor-pointer rounded-xl bg-slate-900 px-4 py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-slate-800"
+          className="rounded-control cursor-pointer bg-slate-900 px-4 py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-slate-800"
         >
           View my request history
         </button>
         <button
           type="button"
           onClick={onShowAlter}
-          className="cursor-pointer rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-[13px] font-semibold text-slate-700 transition-colors hover:bg-slate-50"
+          className="rounded-control cursor-pointer border border-slate-200 bg-white px-4 py-2.5 text-[13px] font-semibold text-slate-700 transition-colors hover:bg-slate-50"
         >
           Modify an existing request
         </button>
@@ -193,7 +193,7 @@ function StaffInfoField({ label, value }: { label: string; value: string }) {
       <label className="text-[13px] font-medium text-[#7c5a5a]">
         {label} <span className="text-red-500">*</span>
       </label>
-      <div className="flex h-10 w-full cursor-not-allowed items-center rounded-xl border border-[rgba(240,180,180,0.6)] bg-gray-100 px-3.5 text-sm text-slate-700 select-none">
+      <div className="rounded-control flex h-10 w-full cursor-not-allowed items-center border border-[rgba(240,180,180,0.6)] bg-gray-100 px-3.5 text-sm text-slate-700 select-none">
         {value}
       </div>
     </div>
@@ -603,7 +603,7 @@ export default function SalaryAdvanceClient() {
                   {VERIFICATION_STEPS.map((item, index) => (
                     <li key={item.title} className="flex items-start gap-3.5">
                       <span
-                        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ring-1 ${
+                        className={`rounded-compact flex h-7 w-7 shrink-0 items-center justify-center text-[11px] font-bold ring-1 ${
                           index === 0
                             ? "bg-rose-600 text-white ring-rose-300"
                             : "bg-white text-slate-400 ring-slate-200"
@@ -623,7 +623,7 @@ export default function SalaryAdvanceClient() {
                   ))}
                 </ol>
 
-                <div className="flex max-w-md items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-900">
+                <div className="rounded-surface flex max-w-md items-start gap-3 border border-amber-200 bg-amber-50 px-4 py-3 text-amber-900">
                   <Lightbulb size={16} className="mt-0.5 shrink-0" />
                   <p className="text-xs leading-relaxed">
                     Verification requires access to that mailbox. If you no
@@ -633,7 +633,7 @@ export default function SalaryAdvanceClient() {
                 </div>
 
                 {submissionWindow && !submissionWindow.isOpen && (
-                  <div className="mt-3 flex max-w-md items-start gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-700">
+                  <div className="rounded-surface mt-3 flex max-w-md items-start gap-3 border border-slate-200 bg-white px-4 py-3 text-slate-700">
                     <CalendarClock size={16} className="mt-0.5 shrink-0" />
                     <p className="text-xs leading-relaxed">
                       New requests can be submitted from the 1st to the 10th of
@@ -647,7 +647,7 @@ export default function SalaryAdvanceClient() {
                 <button
                   type="button"
                   onClick={() => setEmailChangeOpen(true)}
-                  className="mt-4 flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-rose-600 transition-colors hover:bg-rose-50"
+                  className="rounded-compact mt-4 flex cursor-pointer items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold text-rose-600 transition-colors hover:bg-rose-50"
                 >
                   <Mail size={13} />
                   Need to change your email on record?
@@ -656,7 +656,7 @@ export default function SalaryAdvanceClient() {
 
               {/* ── Verification card ── */}
               <div className="relative order-1 lg:order-2">
-                <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+                <div className="rounded-surface border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
                   {/* Stage progress */}
                   <div className="mb-6 flex items-center gap-3">
                     <div className="flex flex-1 gap-1.5">
@@ -674,7 +674,7 @@ export default function SalaryAdvanceClient() {
                     </span>
                   </div>
 
-                  <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-rose-600 text-white">
+                  <div className="rounded-control mb-5 flex h-11 w-11 items-center justify-center bg-rose-600 text-white">
                     {verifyStage === "code" ? (
                       <ShieldCheck size={20} />
                     ) : (
@@ -695,7 +695,7 @@ export default function SalaryAdvanceClient() {
                       {verifyError && (
                         <div
                           role="alert"
-                          className="mb-5 flex items-start gap-2.5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-rose-700"
+                          className="rounded-surface mb-5 flex items-start gap-2.5 border border-rose-200 bg-rose-50 px-4 py-3 text-rose-700"
                         >
                           <CircleAlert size={16} className="mt-0.5 shrink-0" />
                           <p className="text-[13px] leading-relaxed">
@@ -727,7 +727,7 @@ export default function SalaryAdvanceClient() {
                               required
                               autoFocus
                               autoComplete="email"
-                              className="h-13 w-full rounded-2xl border border-slate-200 bg-white pr-4 pl-11 text-sm text-slate-900 transition-all duration-200 outline-none placeholder:text-slate-400 focus:border-rose-400 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.12)]"
+                              className="rounded-surface h-13 w-full border border-slate-200 bg-white pr-4 pl-11 text-sm text-slate-900 transition-all duration-200 outline-none placeholder:text-slate-400 focus:border-rose-400 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.12)]"
                               placeholder="you@example.com"
                               value={email}
                               onChange={(e) => setEmail(e.target.value)}
@@ -743,7 +743,7 @@ export default function SalaryAdvanceClient() {
                         <button
                           type="submit"
                           disabled={submitting}
-                          className="group flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-rose-600 px-6 py-3.5 text-sm font-semibold text-white transition-colors duration-200 hover:bg-rose-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+                          className="group rounded-surface flex w-full cursor-pointer items-center justify-center gap-2 bg-rose-600 px-6 py-3.5 text-sm font-semibold text-white transition-colors duration-200 hover:bg-rose-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           {submitting ? "Sending code..." : "Send my code"}
                           <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
@@ -767,7 +767,7 @@ export default function SalaryAdvanceClient() {
                       {verifyError && (
                         <div
                           role="alert"
-                          className="mb-5 flex items-start gap-2.5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-rose-700"
+                          className="rounded-surface mb-5 flex items-start gap-2.5 border border-rose-200 bg-rose-50 px-4 py-3 text-rose-700"
                         >
                           <CircleAlert size={16} className="mt-0.5 shrink-0" />
                           <p className="text-[13px] leading-relaxed">
@@ -801,7 +801,7 @@ export default function SalaryAdvanceClient() {
                               onKeyDown={(e) => handleDigitKeyDown(slot, e)}
                               onFocus={() => handleDigitFocus(slot)}
                               onPaste={handleCodePaste}
-                              className={`h-14 w-full min-w-0 rounded-2xl border bg-white text-center text-xl font-semibold text-slate-900 transition-all duration-200 outline-none focus:border-rose-400 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.12)] ${
+                              className={`rounded-surface h-14 w-full min-w-0 border bg-white text-center text-xl font-semibold text-slate-900 transition-all duration-200 outline-none focus:border-rose-400 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.12)] ${
                                 code[slot]
                                   ? "border-rose-300"
                                   : "border-slate-200"
@@ -813,7 +813,7 @@ export default function SalaryAdvanceClient() {
                         <button
                           type="submit"
                           disabled={submitting || code.length < CODE_LENGTH}
-                          className="group flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-rose-600 px-6 py-3.5 text-sm font-semibold text-white transition-colors duration-200 hover:bg-rose-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+                          className="group rounded-surface flex w-full cursor-pointer items-center justify-center gap-2 bg-rose-600 px-6 py-3.5 text-sm font-semibold text-white transition-colors duration-200 hover:bg-rose-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           {submitting ? "Verifying..." : "Verify & proceed"}
                           <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
@@ -829,7 +829,7 @@ export default function SalaryAdvanceClient() {
                             autoSubmittedCodeRef.current = "";
                             setVerifyError("");
                           }}
-                          className="flex cursor-pointer items-center gap-1.5 rounded-full px-2.5 py-1.5 text-xs font-semibold text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800"
+                          className="rounded-compact flex cursor-pointer items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800"
                         >
                           <PencilLine size={13} />
                           Change email
@@ -838,7 +838,7 @@ export default function SalaryAdvanceClient() {
                           type="button"
                           onClick={handleResendCode}
                           disabled={resendSecondsLeft > 0 || submitting}
-                          className="flex cursor-pointer items-center gap-1.5 rounded-full px-2.5 py-1.5 text-xs font-semibold text-rose-600 transition-colors hover:bg-rose-50 disabled:cursor-not-allowed disabled:text-slate-400 disabled:hover:bg-transparent"
+                          className="rounded-compact flex cursor-pointer items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold text-rose-600 transition-colors hover:bg-rose-50 disabled:cursor-not-allowed disabled:text-slate-400 disabled:hover:bg-transparent"
                         >
                           <RotateCw size={13} />
                           {resendSecondsLeft > 0
@@ -863,11 +863,11 @@ export default function SalaryAdvanceClient() {
       {step === 2 && (
         <div className="relative z-10 mx-auto max-w-225">
           {/* Form Image */}
-          <div className="mb-4 overflow-hidden rounded-2xl sm:rounded-3xl">
+          <div className="rounded-surface sm:rounded-surface mb-4 overflow-hidden">
             <Image
               src={assets.advance_form_image}
               sizes="100vh"
-              className="rounded-xl object-contain object-center"
+              className="rounded-control object-contain object-center"
               priority
               alt="Form Image"
             />
@@ -888,7 +888,7 @@ export default function SalaryAdvanceClient() {
           <button
             type="button"
             onClick={() => setEmailChangeOpen(true)}
-            className="mb-4 flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800"
+            className="rounded-compact mb-4 flex cursor-pointer items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800"
           >
             <Mail size={13} />
             Request an email change
@@ -897,7 +897,7 @@ export default function SalaryAdvanceClient() {
           <div
             role="tablist"
             aria-label="Salary advance action"
-            className="mb-6 inline-flex rounded-2xl border border-slate-200 bg-slate-100 p-1"
+            className="rounded-surface mb-6 inline-flex border border-slate-200 bg-slate-100 p-1"
           >
             {MODE_OPTIONS.map((option) => (
               <button
@@ -906,7 +906,7 @@ export default function SalaryAdvanceClient() {
                 role="tab"
                 aria-selected={mode === option.value}
                 onClick={() => setMode(option.value)}
-                className={`cursor-pointer rounded-xl px-4 py-2 text-[13px] font-semibold transition-all ${
+                className={`rounded-control cursor-pointer px-4 py-2 text-[13px] font-semibold transition-all ${
                   mode === option.value
                     ? "bg-white text-slate-900 shadow-sm"
                     : "text-slate-500 hover:text-slate-800"
@@ -931,7 +931,7 @@ export default function SalaryAdvanceClient() {
           )}
 
           {mode === "submit" && submissionWindow?.isOpen && (
-            <div className="rounded-3xl border border-white/85 bg-white/65 px-6 py-8 shadow-[0_24px_48px_rgba(160,60,60,0.10)] sm:px-8">
+            <div className="rounded-surface border border-white/85 bg-white/65 px-6 py-8 shadow-[0_24px_48px_rgba(160,60,60,0.10)] sm:px-8">
               <form
                 className="flex flex-col gap-8"
                 onSubmit={(e) => {
@@ -956,7 +956,7 @@ export default function SalaryAdvanceClient() {
                         handleEndSession();
                       }}
                       onBlur={() => setConfirmingEndSession(false)}
-                      className={`flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors ${
+                      className={`rounded-compact flex cursor-pointer items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold transition-colors ${
                         confirmingEndSession
                           ? "bg-rose-50 text-rose-700 hover:bg-rose-100"
                           : "text-slate-500 hover:bg-slate-100 hover:text-slate-800"
@@ -1013,7 +1013,7 @@ export default function SalaryAdvanceClient() {
                         type="number"
                         required
                         min={1}
-                        className="h-10 rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
+                        className="rounded-control h-10 border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
                         value={formData.requestAmount}
                         onChange={(e) =>
                           updateField("requestAmount", e.target.value)
@@ -1035,6 +1035,7 @@ export default function SalaryAdvanceClient() {
                         <span className="text-red-500">*</span>
                       </label>
                       <DatePicker
+                        tone="rose"
                         value={formData.repaymentStartDate}
                         onChange={(v) => updateField("repaymentStartDate", v)}
                         minDate={submissionWindow?.repaymentMinDate}
@@ -1049,7 +1050,7 @@ export default function SalaryAdvanceClient() {
                         <label className="text-[13px] font-medium text-[#7c5a5a]">
                           No. of Installments
                         </label>
-                        <div className="flex h-10 items-center rounded-xl border border-[rgba(240,180,180,0.6)] bg-gray-100 px-3.5 text-[13px] text-slate-600">
+                        <div className="rounded-control flex h-10 items-center border border-[rgba(240,180,180,0.6)] bg-gray-100 px-3.5 text-[13px] text-slate-600">
                           Continuous requests are repaid in a single
                           installment.
                         </div>
@@ -1079,7 +1080,7 @@ export default function SalaryAdvanceClient() {
                             inputMode="tel"
                             required
                             placeholder="07XX XXX XXX"
-                            className="h-10 rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
+                            className="rounded-control h-10 border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
                             value={formData.phoneNumber}
                             onChange={(e) =>
                               updateField("phoneNumber", e.target.value)
@@ -1103,7 +1104,7 @@ export default function SalaryAdvanceClient() {
                             inputMode="tel"
                             required
                             placeholder="Re-enter your phone number"
-                            className="h-10 rounded-xl border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
+                            className="rounded-control h-10 border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
                             value={phoneNumberConfirm}
                             onChange={(e) =>
                               setPhoneNumberConfirm(e.target.value)
@@ -1117,7 +1118,7 @@ export default function SalaryAdvanceClient() {
                             )}
                         </div>
                       </div>
-                      <div className="mt-4 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-900">
+                      <div className="rounded-surface mt-4 flex items-start gap-3 border border-amber-200 bg-amber-50 px-4 py-3 text-amber-900">
                         <Lightbulb size={16} className="mt-0.5 shrink-0" />
                         <p className="text-xs leading-relaxed">
                           Make sure the above number is correct and belongs to
@@ -1132,7 +1133,7 @@ export default function SalaryAdvanceClient() {
                 </div>
 
                 {/* Policy & Disclaimer */}
-                <div className="mt-4 rounded-2xl bg-red-50/30 p-6 text-sm text-slate-700 shadow-inner">
+                <div className="rounded-surface mt-4 bg-red-50/30 p-6 text-sm text-slate-700 shadow-inner">
                   <h4 className="mb-3 flex items-center gap-2 font-semibold text-slate-900">
                     <FileText size={18} /> Salary Advance Policy Guidelines
                   </h4>
@@ -1194,7 +1195,7 @@ export default function SalaryAdvanceClient() {
                     )}
                   </ul>
 
-                  <label className="flex cursor-pointer items-start gap-3 rounded-xl p-4 transition-all hover:bg-red-50">
+                  <label className="rounded-control flex cursor-pointer items-start gap-3 p-4 transition-all hover:bg-red-50">
                     <span
                       className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-all ${policyAccepted ? "border-rose-500 bg-rose-500 text-white" : "border-slate-300 bg-white"}`}
                     >
@@ -1219,7 +1220,7 @@ export default function SalaryAdvanceClient() {
                 <button
                   type="submit"
                   disabled={!isFormValid}
-                  className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-slate-900 py-4 font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-control flex w-full cursor-pointer items-center justify-center gap-2 bg-slate-900 py-4 font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Proceed to Confirmation
                   <ArrowRight className="h-4 w-4" />

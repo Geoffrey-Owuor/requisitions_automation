@@ -113,10 +113,11 @@ export type DashboardTableEntry = {
 
 const always = () => true;
 const isHod = ({ memberships }: DashboardViewer) => memberships.isHodApprover;
-const hasRole =
-  (role: string) =>
-  ({ roles }: DashboardViewer) =>
-    roles.includes(role);
+const isTravelHr = ({ memberships }: DashboardViewer) =>
+  memberships.hrForms.includes("travel");
+const isDirector = ({ memberships }: DashboardViewer) => memberships.isDirector;
+const isItApprover = ({ memberships }: DashboardViewer) =>
+  memberships.isITApprover;
 
 function table(
   type: DashboardRequisitionType,
@@ -138,36 +139,36 @@ function table(
 }
 
 export const DASHBOARD_TABLES: DashboardTableEntry[] = [
-  // Travel — HR/Director are role-based ("hr-travel"/"director")
+  // Travel — HR is form-scoped (hr_array.hr_forms), Director is director_array
   table("travel", "userData", "mine", "Yours", always),
   table("travel", "hodPending", "pending", "HOD", isHod),
-  table("travel", "hrPending", "pending", "HR", hasRole("hr-travel")),
+  table("travel", "hrPending", "pending", "HR", isTravelHr),
   table(
     "travel",
     "directorPending",
     "pending",
     "Director",
-    hasRole("director"),
+    isDirector,
   ),
   table(
     "travel",
     "history",
     "history",
     "History",
-    (v) => isHod(v) || hasRole("hr-travel")(v) || hasRole("director")(v),
+    (v) => isHod(v) || isTravelHr(v) || isDirector(v),
   ),
 
-  // IT — IT admins already get the full history (with export) from itAll,
+  // IT — it_array members already get the full history (with export) from itAll,
   // so their IT history tab holds that table instead of the HOD history.
   table("it", "userData", "mine", "Yours", always),
   table("it", "hodPending", "pending", "HOD", isHod),
-  table("it", "itPending", "pending", "IT", hasRole("it")),
+  table("it", "itPending", "pending", "IT", isItApprover),
   table(
     "it",
     "itAll",
     "history",
     "All",
-    hasRole("it"),
+    isItApprover,
     "No IT requisitions have been submitted yet.",
   ),
   table(
@@ -175,7 +176,7 @@ export const DASHBOARD_TABLES: DashboardTableEntry[] = [
     "history",
     "history",
     "History",
-    (v) => isHod(v) && !hasRole("it")(v),
+    (v) => isHod(v) && !isItApprover(v),
   ),
 
   // Key & Access

@@ -66,7 +66,7 @@ export default function CasualBudgetEstimate({
         Budget Impact
       </p>
 
-      <div className="mb-3 flex items-start gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-slate-600">
+      <div className="rounded-control mb-3 flex items-start gap-2 border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-slate-600">
         <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
         <p className="text-[11.5px] leading-relaxed">
           These are projected figures, not actual recorded spend - only
@@ -91,7 +91,7 @@ export default function CasualBudgetEstimate({
           return (
             <div
               key={`${estimate.unit}-${estimate.financialYear}`}
-              className="rounded-2xl border border-[rgba(240,180,180,0.4)] bg-white/60 p-5"
+              className="rounded-surface border border-[rgba(240,180,180,0.4)] bg-white/60 p-5"
             >
               <div className="mb-3 flex items-center justify-between">
                 <h3 className="text-[13px] font-semibold text-[#1e1b1b]">
@@ -108,7 +108,7 @@ export default function CasualBudgetEstimate({
                   return (
                     <div
                       key={month.calendarMonth}
-                      className="flex items-center justify-between rounded-xl border border-gray-100 bg-gray-50 px-4 py-2.5 text-[13px]"
+                      className="rounded-control flex items-center justify-between border border-gray-100 bg-gray-50 px-4 py-2.5 text-[13px]"
                     >
                       <span className="text-[#7c5a5a]">
                         {MONTH_NAMES[month.calendarMonth - 1]} budget
@@ -126,7 +126,7 @@ export default function CasualBudgetEstimate({
                 })}
               </div>
 
-              <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-linear-to-r from-slate-800 to-rose-900 px-4 py-3 text-white">
+              <div className="rounded-control flex flex-wrap items-center justify-between gap-2 bg-linear-to-r from-slate-800 to-rose-900 px-4 py-3 text-white">
                 <span className="flex items-center gap-1.5 text-[12px] text-white/70">
                   <TrendingUp className="h-3.5 w-3.5" />
                   Yearly projected / budget

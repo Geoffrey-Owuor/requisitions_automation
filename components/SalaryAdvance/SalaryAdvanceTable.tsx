@@ -53,12 +53,12 @@ function FilterChipGroup<T extends string>({
       <span className="text-[11px] font-semibold tracking-wide text-gray-400 uppercase">
         {label}
       </span>
-      <div className="flex items-center gap-1 rounded-xl border border-gray-200 bg-white/60 p-1">
+      <div className="rounded-control flex items-center gap-1 border border-gray-200 bg-white/60 p-1">
         {options.map((option) => (
           <button
             key={option.value}
             onClick={() => onChange(option.value)}
-            className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-colors ${
+            className={`rounded-compact px-2.5 py-1 text-xs font-medium transition-colors ${
               value === option.value
                 ? "bg-slate-900 text-white"
                 : "text-gray-600 hover:bg-gray-100"
@@ -176,12 +176,12 @@ export default function SalaryAdvanceTable() {
               placeholder="Search employee, department or status..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full rounded-xl border border-gray-300 bg-white/60 py-2.5 pr-4 pl-12 text-sm shadow-[0_8px_16px_rgba(60,100,160,0.02)] outline-hidden transition-all focus:border-red-400 focus:ring-4 focus:ring-red-500/5"
+              className="rounded-control w-full border border-gray-300 bg-white/60 py-2.5 pr-4 pl-12 text-sm shadow-[0_8px_16px_rgba(60,100,160,0.02)] outline-hidden transition-all focus:border-red-400 focus:ring-4 focus:ring-red-500/5"
             />
             {searchTerm && (
               <button
                 onClick={clearSearch}
-                className="absolute top-1/2 right-4 z-10 -translate-y-1/2 rounded-full p-1 hover:bg-gray-200"
+                className="rounded-compact absolute top-1/2 right-4 z-10 -translate-y-1/2 p-1 hover:bg-gray-200"
               >
                 <X className="h-3 w-3" />
               </button>
@@ -189,7 +189,7 @@ export default function SalaryAdvanceTable() {
           </div>
           <button
             onClick={() => refetch()}
-            className="mr-2 inline-flex items-center gap-2 rounded-xl bg-slate-900 px-3 py-2.5 text-sm text-white hover:bg-slate-800"
+            className="rounded-control mr-2 inline-flex items-center gap-2 bg-slate-900 px-3 py-2.5 text-sm text-white hover:bg-slate-800"
           >
             <RotateCcw className="h-4 w-4" />
             Refresh
@@ -197,7 +197,7 @@ export default function SalaryAdvanceTable() {
 
           <button
             onClick={() => setIsExportModalOpen(true)}
-            className="rounded-xl border border-neutral-300 bg-neutral-200/50 p-2.5 text-sm font-medium text-gray-800 transition-colors hover:bg-neutral-200/80 hover:text-gray-900"
+            className="rounded-control border border-neutral-300 bg-neutral-200/50 p-2.5 text-sm font-medium text-gray-800 transition-colors hover:bg-neutral-200/80 hover:text-gray-900"
           >
             <FileSpreadsheet className="h-4.5 w-4.5" />
           </button>
@@ -222,14 +222,14 @@ export default function SalaryAdvanceTable() {
               </span>
               <button
                 onClick={() => setBatchStatus("declined")}
-                className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-600 transition-colors hover:bg-red-100"
+                className="rounded-control inline-flex items-center gap-2 border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-600 transition-colors hover:bg-red-100"
               >
                 <X className="h-4 w-4" />
                 Batch Decline
               </button>
               <button
                 onClick={() => setBatchStatus("approved")}
-                className="inline-flex items-center gap-2 rounded-xl bg-slate-800 px-3 py-2.5 text-sm text-white transition-colors hover:bg-slate-900"
+                className="rounded-control inline-flex items-center gap-2 bg-slate-800 px-3 py-2.5 text-sm text-white transition-colors hover:bg-slate-900"
               >
                 <Check className="h-4 w-4" />
                 Batch Approve
@@ -239,7 +239,7 @@ export default function SalaryAdvanceTable() {
         </div>
 
         {/* Table Container */}
-        <div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white/50 shadow-[0_24px_48px_rgba(160,60,60,0.08)]">
+        <div className="rounded-surface relative overflow-hidden border border-gray-200 bg-white/50 shadow-[0_24px_48px_rgba(160,60,60,0.08)]">
           {/* Refetch in progress: a thin bar, and the stale rows dim */}
           {isFetching && (
             <div
@@ -413,7 +413,7 @@ export default function SalaryAdvanceTable() {
                   <tr>
                     <td colSpan={10} className="px-6 py-20">
                       <div className="flex flex-col items-center justify-center text-center">
-                        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/80 bg-white/40 text-red-300 shadow-[0_8px_16px_rgba(60,100,160,0.05)]">
+                        <div className="rounded-surface mb-4 flex h-16 w-16 items-center justify-center border border-white/80 bg-white/40 text-red-300 shadow-[0_8px_16px_rgba(60,100,160,0.05)]">
                           <CircleDollarSign size={32} strokeWidth={1.5} />
                         </div>
                         <h3 className="text-base font-semibold text-[#1e1b1b]">

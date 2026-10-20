@@ -1,23 +1,117 @@
-"use client";
-
-import { useState } from "react";
-import { HardHat, Monitor } from "lucide-react";
+import Link from "next/link";
+import { type ComponentType } from "react";
+import {
+  BadgeCheck,
+  BriefcaseBusiness,
+  Building2,
+  HandCoins,
+  PiggyBank,
+  HardHat,
+  History,
+  Monitor,
+  UserRoundPlus,
+  UsersRound,
+  type LucideIcon,
+} from "lucide-react";
 import { SETTINGS_PAGE } from "@/lib/configAdmin";
+import ApproversSettings from "./ApproversSettings";
+import AdvanceSettings from "./AdvanceSettings";
+import AuditLogSettings from "./AuditLogSettings";
+import CasualBudgetsSettings from "./CasualBudgetsSettings";
 import CasualSettings from "./CasualSettings";
+import DepartmentsSettings from "./DepartmentsSettings";
+import EmployeeSettings from "./EmployeeSettings";
 import ItSettings from "./ItSettings";
+import TravelSettings from "./TravelSettings";
+import UsersSettings from "./UsersSettings";
 
-// One tab per area whose configuration is managed here. Travel tiers and
-// job grades live in the database too but are set there by hand.
-const TABS = [
-  { key: "casual", label: "Casual", Icon: HardHat, Panel: CasualSettings },
-  { key: "it", label: "IT", Icon: Monitor, Panel: ItSettings },
-] as const;
+type SettingsTab = {
+  key: string;
+  label: string;
+  Icon: LucideIcon;
+  Panel: ComponentType;
+};
 
-type TabKey = (typeof TABS)[number]["key"];
+// One tab per area whose configuration is managed here, grouped, and kept
+// in the URL (?tab=) so a tab can be linked to and survives a reload.
+const TAB_GROUPS: { label: string; tabs: SettingsTab[] }[] = [
+  {
+    label: "Access",
+    tabs: [
+      {
+        key: "users",
+        label: "Users & roles",
+        Icon: UsersRound,
+        Panel: UsersSettings,
+      },
+      {
+        key: "approvers",
+        label: "Approvers",
+        Icon: BadgeCheck,
+        Panel: ApproversSettings,
+      },
+    ],
+  },
+  {
+    label: "Requisitions",
+    tabs: [
+      {
+        key: "departments",
+        label: "Departments",
+        Icon: Building2,
+        Panel: DepartmentsSettings,
+      },
+      {
+        key: "travel",
+        label: "Travel",
+        Icon: BriefcaseBusiness,
+        Panel: TravelSettings,
+      },
+      { key: "casual", label: "Casual", Icon: HardHat, Panel: CasualSettings },
+      {
+        key: "casual-budgets",
+        label: "Casual budgets",
+        Icon: PiggyBank,
+        Panel: CasualBudgetsSettings,
+      },
+      { key: "it", label: "IT", Icon: Monitor, Panel: ItSettings },
+      {
+        key: "employee",
+        label: "Employee",
+        Icon: UserRoundPlus,
+        Panel: EmployeeSettings,
+      },
+    ],
+  },
+  {
+    label: "Salary advance",
+    tabs: [
+      {
+        key: "advance",
+        label: "Salary advance",
+        Icon: HandCoins,
+        Panel: AdvanceSettings,
+      },
+    ],
+  },
+  {
+    label: "Audit",
+    tabs: [
+      {
+        key: "audit",
+        label: "Audit log",
+        Icon: History,
+        Panel: AuditLogSettings,
+      },
+    ],
+  },
+];
 
-export default function SettingsPage() {
-  const [activeKey, setActiveKey] = useState<TabKey>("casual");
-  const activeTab = TABS.find((tab) => tab.key === activeKey) ?? TABS[0];
+const TABS = TAB_GROUPS.flatMap((group) => group.tabs);
+
+export default function SettingsPage({ tab }: { tab?: string }) {
+  // An unknown or missing tab falls back to the first
+  const activeTab = TABS.find((entry) => entry.key === tab) ?? TABS[0];
 
   return (
     <div className="space-y-5 px-2 pt-4 pb-6">
@@ -27,37 +121,47 @@ export default function SettingsPage() {
           Settings
         </h1>
         <p className="mt-1 text-sm text-neutral-500">
-          Manage the options and rates the requisition forms use. Every change
-          is recorded with your name.
+          Manage who can do what and the options the requisition forms use.
+          Every change is recorded with your name.
         </p>
       </div>
 
-      <div role="tablist" className="flex flex-wrap gap-1.5">
-        {TABS.map(({ key, label, Icon }) => {
-          const isActive = key === activeTab.key;
-          return (
-            <button
-              key={key}
-              type="button"
-              role="tab"
-              aria-selected={isActive}
-              onClick={() => setActiveKey(key)}
-              className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors ${
-                isActive
-                  ? "bg-slate-900 text-white"
-                  : "border border-neutral-200 bg-white text-neutral-700 hover:border-neutral-400"
-              }`}
-            >
-              <Icon className="h-3.5 w-3.5" />
-              {label}
-            </button>
-          );
-        })}
-      </div>
+      {/* Each group wraps as a unit, under its own label */}
+      <nav
+        aria-label="Settings sections"
+        className="flex flex-wrap items-end gap-x-5 gap-y-3"
+      >
+        {TAB_GROUPS.map((group) => (
+          <div key={group.label} className="space-y-1.5">
+            <p className="text-[10px] font-bold tracking-widest text-neutral-400 uppercase">
+              {group.label}
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {group.tabs.map(({ key, label, Icon }) => {
+                const isActive = key === activeTab.key;
+                return (
+                  <Link
+                    key={key}
+                    href={`${SETTINGS_PAGE.href}?tab=${key}`}
+                    scroll={false}
+                    aria-current={isActive ? "page" : undefined}
+                    className={`rounded-compact inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold transition-colors ${
+                      isActive
+                        ? "bg-slate-900 text-white"
+                        : "border border-neutral-200 bg-white text-neutral-700 hover:border-neutral-400"
+                    }`}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                    {label}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </nav>
 
-      <div role="tabpanel">
-        <activeTab.Panel />
-      </div>
+      <activeTab.Panel />
     </div>
   );
 }

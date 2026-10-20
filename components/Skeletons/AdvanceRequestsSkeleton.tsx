@@ -20,7 +20,7 @@ export function AdvanceRequestsSkeleton({
         {Array.from({ length: variant === "history" ? 3 : 1 }, (_, i) => (
           <div
             key={i}
-            className="rounded-2xl border border-slate-200 bg-white p-5"
+            className="rounded-surface border border-slate-200 bg-white p-5"
           >
             <div className="flex items-center justify-between gap-3">
               <div className="space-y-2">
@@ -34,7 +34,7 @@ export function AdvanceRequestsSkeleton({
             {variant === "alteration" && (
               <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
                 <div className="h-3 w-56 max-w-full rounded-full bg-slate-100" />
-                <div className="h-10 w-36 rounded-xl bg-slate-200" />
+                <div className="rounded-control h-10 w-36 bg-slate-200" />
               </div>
             )}
           </div>

@@ -64,7 +64,7 @@ const PreviousApprovalsSection = ({
           return (
             <div
               key={approval.label}
-              className="rounded-2xl border border-[rgba(240,180,180,0.5)] bg-white/70 p-4"
+              className="rounded-surface border border-[rgba(240,180,180,0.5)] bg-white/70 p-4"
             >
               <div className="mb-2.5 flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2.5">
@@ -81,12 +81,12 @@ const PreviousApprovalsSection = ({
                   </div>
                 </div>
                 <span
-                  className={`shrink-0 rounded-lg border px-2.5 py-1 text-[10px] font-semibold uppercase ${styles.color} ${styles.bg} ${styles.border}`}
+                  className={`rounded-compact shrink-0 border px-2.5 py-1 text-[10px] font-semibold uppercase ${styles.color} ${styles.bg} ${styles.border}`}
                 >
                   {approval.status || "Pending"}
                 </span>
               </div>
-              <p className="rounded-xl border border-dashed border-[rgba(240,180,180,0.5)] bg-white/60 px-3 py-2 text-[12px] leading-relaxed text-[#7c5a5a] italic">
+              <p className="rounded-control border border-dashed border-[rgba(240,180,180,0.5)] bg-white/60 px-3 py-2 text-[12px] leading-relaxed text-[#7c5a5a] italic">
                 &quot;{approval.comments || "No comments"}&quot;
               </p>
             </div>

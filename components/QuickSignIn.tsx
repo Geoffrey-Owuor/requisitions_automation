@@ -84,7 +84,7 @@ export default function QuickSignIn() {
             </div>
             <button
               onClick={handleDismiss}
-              className="rounded-control hover:bg-brand-50 hover:text-brand-700 cursor-pointer p-1.5 text-slate-400 transition-colors"
+              className="rounded-compact hover:bg-brand-50 hover:text-brand-700 cursor-pointer p-1.5 text-slate-400 transition-colors"
               aria-label="Dismiss"
             >
               <X size={15} strokeWidth={2.5} />

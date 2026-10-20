@@ -116,7 +116,7 @@ export default function RequisitionTypeDashboard({
                 key={entry.type}
                 href={`${entry.href}?tab=${activeTab}`}
                 aria-current={isActive ? "page" : undefined}
-                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
+                className={`rounded-compact inline-flex items-center gap-1.5 border px-3 py-1.5 text-xs font-semibold transition-colors ${
                   isActive
                     ? "border-slate-900 bg-slate-900 text-white"
                     : "border-neutral-300 bg-white/60 text-neutral-600 hover:border-neutral-400 hover:text-neutral-900"
@@ -137,7 +137,7 @@ export default function RequisitionTypeDashboard({
           </h1>
           <Link
             href={newRequisitionHref(type)}
-            className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-3 py-2 text-sm text-white hover:bg-slate-800"
+            className="rounded-control inline-flex items-center gap-2 bg-slate-900 px-3 py-2 text-sm text-white hover:bg-slate-800"
           >
             <Plus className="h-4 w-4" />
             New {label} Requisition
@@ -149,7 +149,7 @@ export default function RequisitionTypeDashboard({
           <div
             role="tablist"
             aria-label={`${label} requisition views`}
-            className="flex w-fit gap-1 rounded-xl border border-neutral-300 bg-white/60 p-1"
+            className="rounded-control flex w-fit gap-1 border border-neutral-300 bg-white/60 p-1"
           >
             {tabs.map(({ tab, label: tabLabel }) => {
               const isActive = tab === activeTab;
@@ -161,7 +161,7 @@ export default function RequisitionTypeDashboard({
                   scroll={false}
                   role="tab"
                   aria-selected={isActive}
-                  className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+                  className={`rounded-compact inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors ${
                     isActive
                       ? "bg-slate-900 text-white"
                       : "text-neutral-600 hover:bg-neutral-200/70 hover:text-neutral-900"
