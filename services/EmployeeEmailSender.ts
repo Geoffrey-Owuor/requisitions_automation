@@ -52,6 +52,9 @@ export interface EmployeeEmailDataValues {
   hrapprover: string;
   hremail: string;
   hrcomments: string;
+  // HOD -> Retail Director -> HR -> CEO when true, else the original order
+  // with HR last (lib/employeeApprovalOrder.ts)
+  hrbeforedirector: boolean;
   amendmentcount: number;
   positions: EmployeePositionValues[];
   totalpositions: number;
@@ -81,6 +84,7 @@ export const employeeDataQuery = `
        employee_hr_approver AS hrapprover,
        employee_hr_email AS hremail,
        employee_hr_comments AS hrcomments,
+       hr_before_director AS hrbeforedirector,
        amendment_count AS amendmentcount
        FROM employee_requisitions WHERE request_id = $1
 `;

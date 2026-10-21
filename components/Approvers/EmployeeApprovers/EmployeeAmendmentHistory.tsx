@@ -11,6 +11,10 @@ import {
   EmployeeAmendmentValues,
 } from "@/lib/employeeAmendment";
 import AttachmentLink from "./AttachmentLink";
+import {
+  EMPLOYEE_STAGE_SHORT_LABELS,
+  employeeStageOrder,
+} from "@/lib/employeeApprovalOrder";
 
 const OLD_FILE_CLASS =
   "flex cursor-pointer items-center gap-1.5 rounded-compact border border-dashed border-[rgba(240,180,180,0.6)] bg-white/50 px-2.5 py-1 text-[11px] text-[#a18080] line-through hover:bg-rose-50";
@@ -288,15 +292,16 @@ const EmployeeAmendmentHistory = ({
 
           <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-amber-200 pt-3 text-[11px] text-[#a18080]">
             <span>Decisions reset by this amendment:</span>
-            {[
-              { label: "HOD", status: amendment.nullifiedhodstatus },
-              {
-                label: "Retail Director",
-                status: amendment.nullifiedretaildirectorstatus,
-              },
-              { label: "CEO", status: amendment.nullifieddirectorstatus },
-              { label: "HR", status: amendment.nullifiedhrstatus },
-            ]
+            {employeeStageOrder(amendment.nullifiedhrbeforedirector)
+              .map((stage) => ({
+                label: EMPLOYEE_STAGE_SHORT_LABELS[stage],
+                status: {
+                  hod: amendment.nullifiedhodstatus,
+                  retail_director: amendment.nullifiedretaildirectorstatus,
+                  hr: amendment.nullifiedhrstatus,
+                  director: amendment.nullifieddirectorstatus,
+                }[stage],
+              }))
               .filter((step) => step.status && step.status !== "N/A")
               .map((step) => (
                 <span key={step.label} className="flex items-center gap-1">

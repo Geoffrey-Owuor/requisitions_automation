@@ -2,6 +2,7 @@ import "server-only";
 import type { PoolClient } from "pg";
 import type { HrForm } from "@/public/assets";
 import type { ApproverStageKey } from "@/lib/approverStages";
+import { employeeStageReachedSql } from "@/lib/employeeApprovalOrder";
 
 // What removing an approver (or narrowing an HR approver's forms) would
 // leave with nobody able to act - the Approvers tab refuses such changes.
@@ -43,8 +44,7 @@ const STAGE_PENDING_SQL: Record<
       AND travel_hr_approval_status = 'approved'
       AND travel_director_approval_status = 'pending')
   + (SELECT COUNT(*) FROM employee_requisitions
-      WHERE employee_hod_approval_status = 'approved'
-      AND employee_retail_director_approval_status IN ('approved', 'N/A')
+      WHERE ${employeeStageReachedSql("employee_requisitions", "director")}
       AND employee_director_approval_status = 'pending')
   AS count`,
   retail_director: `SELECT COUNT(*) AS count FROM employee_requisitions
@@ -62,9 +62,7 @@ const HR_PENDING_SQL: Record<HrForm, string> = {
     WHERE casual_hod_approval_status = 'approved'
     AND casual_hr_approval_status = 'pending'`,
   employee: `SELECT COUNT(*) AS count FROM employee_requisitions
-    WHERE employee_hod_approval_status = 'approved'
-    AND employee_retail_director_approval_status IN ('approved', 'N/A')
-    AND employee_director_approval_status = 'approved'
+    WHERE ${employeeStageReachedSql("employee_requisitions", "hr")}
     AND employee_hr_approval_status = 'pending'`,
 };
 

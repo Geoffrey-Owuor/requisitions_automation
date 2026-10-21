@@ -26,22 +26,28 @@ type QuickAction = {
 const DashboardQuickActions = () => {
   const actions: QuickAction[] = [
     {
-      label: "IT Requisition",
-      description: "Submit an IT Requisition",
-      Icon: Monitor,
-      href: newRequisitionHref("it"),
+      label: "IT HelpDesk",
+      description: "Log or track an IT support ticket",
+      Icon: LaptopMinimalCheck,
+      href: "/dashboard/helpdesk",
+    },
+    {
+      label: "Staff Purchase",
+      description: "Submit a purchase request",
+      Icon: ShoppingBag,
+      href: "/dashboard/staffproductpurchase",
+    },
+    {
+      label: "Salary Advance",
+      description: "Apply for a salary advance",
+      Icon: CircleDollarSign,
+      href: "/dashboard/advance",
     },
     {
       label: "Travel Requisition",
       description: "Submit a travel request",
       Icon: BriefcaseBusiness,
       href: newRequisitionHref("travel"),
-    },
-    {
-      label: "Access / Key Requisition",
-      description: "Request physical access or keys",
-      Icon: LockKeyhole,
-      href: newRequisitionHref("access"),
     },
     {
       label: "Casual Requisition",
@@ -56,22 +62,16 @@ const DashboardQuickActions = () => {
       href: newRequisitionHref("employee"),
     },
     {
-      label: "Salary Advance",
-      description: "Apply for a salary advance",
-      Icon: CircleDollarSign,
-      href: "/dashboard/advance",
+      label: "IT Requisition",
+      description: "Submit an IT Requisition",
+      Icon: Monitor,
+      href: newRequisitionHref("it"),
     },
     {
-      label: "Staff Purchase",
-      description: "Submit a purchase request",
-      Icon: ShoppingBag,
-      href: "/dashboard/staffproductpurchase",
-    },
-    {
-      label: "IT HelpDesk",
-      description: "Log or track an IT support ticket",
-      Icon: LaptopMinimalCheck,
-      href: "/dashboard/helpdesk",
+      label: "Access / Key Requisition",
+      description: "Request physical access or keys",
+      Icon: LockKeyhole,
+      href: newRequisitionHref("access"),
     },
   ];
 

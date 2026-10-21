@@ -67,7 +67,7 @@ export default function EmployeeRequisitionGuideline() {
             tier="All Requests"
             type="Standard Approval Chain"
             cost="Applies to every employee requisition"
-            approvers={["HOD Approval", "CEO Approval", "HR Approval"]}
+            approvers={["HOD Approval", "HR Approval", "CEO Approval"]}
             icon={<UserRoundPlus size={22} />}
           />
         </div>
@@ -82,8 +82,8 @@ export default function EmployeeRequisitionGuideline() {
             title="Who & When"
             items={[
               "Only the original submitter can amend their own requisition.",
-              "Allowed any time until HR approves it - a decline at any stage can still be amended.",
-              "Once HR has approved, the requisition is locked and can no longer be changed.",
+              "Allowed any time until the CEO approves it - a decline at any stage can still be amended.",
+              "Once the CEO has approved, the requisition is locked and can no longer be changed.",
             ]}
           />
           <InfoCard

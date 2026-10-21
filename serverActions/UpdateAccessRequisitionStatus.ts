@@ -8,7 +8,7 @@ import { AlertInfo } from "@/components/TravelRequisitionPage";
 import { AccessEmailSender } from "@/services/AccessEmailSender";
 import { securityApprovalStage } from "@/utils/AccessApprovalStages/securityApprovalStage";
 import { hodApprovalStage } from "@/utils/AccessApprovalStages/hodApprovalStage";
-import { isValidAccessStage } from "@/public/assets";
+import { isValidAccessStage, ACCESS_STAGE_LABELS } from "@/public/assets";
 
 export const UpdateAccessRequisitionStatus = async (
   payload: UpdateRequestStatusProps,
@@ -50,7 +50,7 @@ export const UpdateAccessRequisitionStatus = async (
       `
       SELECT ${payload.stage}_approver_status AS approval_status,
       ${payload.stage}_approver_name AS approver,
-      submitter_email, hod_approver_email,
+      submitter_email, hod_approver_email, hod_approver_status,
       COALESCE(hod_actioned_by_email, hod_approver_email) AS hod_actioned_by_email
       FROM access_requisitions WHERE request_id = $1 FOR UPDATE
       `,
@@ -110,6 +110,20 @@ export const UpdateAccessRequisitionStatus = async (
       return {
         alertType: "error",
         alertMessage: `This requisition has already been acted upon by ${previousApprover}, no further action is required`,
+      };
+    }
+
+    // The Security stage follows the HOD's approval - an approver's token
+    // works on any requisition, so a hand-made link must not let them act
+    // before the HOD has approved.
+    if (
+      payload.stage === "security" &&
+      reviewedResult[0].hod_approver_status !== "approved"
+    ) {
+      await client.query("ROLLBACK");
+      return {
+        alertType: "error",
+        alertMessage: `This requisition hasn't reached the ${ACCESS_STAGE_LABELS.security} approval stage yet, no action is required`,
       };
     }
 

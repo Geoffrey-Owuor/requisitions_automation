@@ -8,7 +8,7 @@ import { AlertInfo } from "@/components/TravelRequisitionPage";
 import { ITEmailSender } from "@/services/ITEmailSender";
 import { itApprovalStage } from "@/utils/ITApprovalStages/itApprovalStage";
 import { hodApprovalStage } from "@/utils/ITApprovalStages/hodApprovalStage";
-import { isValidItStage } from "@/public/assets";
+import { isValidItStage, IT_STAGE_LABELS } from "@/public/assets";
 
 export async function UpdateITRequisitionStatus(
   payload: UpdateRequestStatusProps,
@@ -50,7 +50,7 @@ export async function UpdateITRequisitionStatus(
       `
       SELECT ${payload.stage}_approver_status AS approval_status,
       ${payload.stage}_approver_name AS approver,
-      submitter_email, hod_approver_email,
+      submitter_email, hod_approver_email, hod_approver_status,
       COALESCE(hod_actioned_by_email, hod_approver_email) AS hod_actioned_by_email
       FROM it_requisitions WHERE request_id = $1 FOR UPDATE
       `,
@@ -110,6 +110,20 @@ export async function UpdateITRequisitionStatus(
       return {
         alertType: "error",
         alertMessage: `This requisition has already been acted upon by ${previousApprover}, no further action is required`,
+      };
+    }
+
+    // The IT stage follows the HOD's approval - an approver's token
+    // works on any requisition, so a hand-made link must not let them act
+    // before the HOD has approved.
+    if (
+      payload.stage === "it" &&
+      reviewedResult[0].hod_approver_status !== "approved"
+    ) {
+      await client.query("ROLLBACK");
+      return {
+        alertType: "error",
+        alertMessage: `This requisition hasn't reached the ${IT_STAGE_LABELS.it} approval stage yet, no action is required`,
       };
     }
 

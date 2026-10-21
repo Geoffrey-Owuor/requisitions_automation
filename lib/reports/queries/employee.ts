@@ -17,14 +17,18 @@ import type { ReportQueryParams } from "./types";
 
 // Employee Requisitions: one row per position; the requisition's header,
 // approvals and amendment summary repeat on each of its positions.
-// HOD -> Retail Director (retail departments only, 'N/A' otherwise) ->
-// Director (labelled CEO, as in the dashboard and emails) -> HR.
+// HOD -> Retail Director (retail departments only, 'N/A' otherwise) -> HR
+// -> Director (labelled CEO, as in the dashboard and emails). Requisitions
+// from before migration 034 ran CEO -> HR instead (hr_before_director =
+// FALSE, shown in the Approval Order column); the stage columns are in the
+// current order either way.
 //
 // - Removed positions have no row; their removal still shows in the full
 //   amendment history. Attachment columns list the current files' names
 //   (the files themselves stay in the app).
-// - Days to HR Decision counts from the last amendment, since an amendment
-//   restarts the approval chain.
+// - Days to Final Decision runs from the last amendment (an amendment
+//   restarts the approval chain) to the last action on a requisition that
+//   was fully approved or declined.
 
 const STAGES = [
   "r.employee_hod_approval_status",
@@ -100,8 +104,11 @@ amendment_summary AS (
            ), '')
         || ' | Approvals reset (HOD ' || ${stageStatus("COALESCE(a.nullified_hod_status, '-')")}
         || ', Retail Director ' || ${stageStatus("COALESCE(a.nullified_retail_director_status, '-')")}
-        || ', CEO ' || ${stageStatus("COALESCE(a.nullified_director_status, '-')")}
-        || ', HR ' || ${stageStatus("COALESCE(a.nullified_hr_status, '-')")} || ')',
+        || CASE WHEN a.nullified_hr_before_director
+                THEN ', HR ' || ${stageStatus("COALESCE(a.nullified_hr_status, '-')")}
+                  || ', CEO ' || ${stageStatus("COALESCE(a.nullified_director_status, '-')")}
+                ELSE ', CEO ' || ${stageStatus("COALESCE(a.nullified_director_status, '-')")}
+                  || ', HR ' || ${stageStatus("COALESCE(a.nullified_hr_status, '-')")} END || ')',
       E'\\n' ORDER BY a.amendment_number
     ) AS amendment_history
   FROM employee_requisition_amendments a
@@ -175,10 +182,13 @@ SELECT
     WHEN r.employee_hr_approval_status              = 'declined' THEN 'Declined by HR'
     WHEN r.employee_hod_approval_status             = 'pending'  THEN 'Pending HOD'
     WHEN r.employee_retail_director_approval_status = 'pending'  THEN 'Pending Retail Director'
+    WHEN r.hr_before_director
+     AND r.employee_hr_approval_status              = 'pending'  THEN 'Pending HR'
     WHEN r.employee_director_approval_status        = 'pending'  THEN 'Pending CEO'
     WHEN r.employee_hr_approval_status              = 'pending'  THEN 'Pending HR'
     ELSE 'Approved'
   END                                                AS overall_status,
+  CASE WHEN r.hr_before_director THEN 'HR -> CEO' ELSE 'CEO -> HR (original)' END AS approval_order,
 
   ${stageStatus("r.employee_hod_approval_status")}   AS hod_status,
   r.employee_hod_email                               AS assigned_hod_email,
@@ -192,19 +202,23 @@ SELECT
   ${excelDateTime("r.employee_retail_director_approval_date")} AS retail_director_action_date,
   r.employee_retail_director_comments                AS retail_director_comments,
 
+  ${stageStatus("r.employee_hr_approval_status")}    AS hr_status,
+  r.employee_hr_approver                             AS hr_actioned_by,
+  ${excelDateTime("r.employee_hr_approval_date")}    AS hr_action_date,
+  r.employee_hr_comments                             AS hr_comments,
+
   ${stageStatus("r.employee_director_approval_status")} AS director_status,
   r.employee_director_approver                       AS director_actioned_by,
   ${excelDateTime("r.employee_director_approval_date")} AS director_action_date,
   r.employee_director_comments                       AS director_comments,
 
-  ${stageStatus("r.employee_hr_approval_status")}    AS hr_status,
-  r.employee_hr_approver                             AS hr_actioned_by,
-  ${excelDateTime("r.employee_hr_approval_date")}    AS hr_action_date,
-  r.employee_hr_comments                             AS hr_comments,
-  CASE WHEN r.employee_hr_approval_date IS NOT NULL
-       THEN ROUND((EXTRACT(EPOCH FROM r.employee_hr_approval_date
+  -- GREATEST skips NULLs: the latest action is the final approval or the decline
+  CASE WHEN ${STATUS_BUCKET} <> 'pending'
+       THEN ROUND((EXTRACT(EPOCH FROM GREATEST(r.employee_hod_approval_date,
+                    r.employee_retail_director_approval_date,
+                    r.employee_hr_approval_date, r.employee_director_approval_date)
                   - COALESCE(r.last_amended_at, r.request_created_at)) / 86400.0)::numeric, 1)
-  END                                                AS days_to_hr_decision,
+  END                                                AS days_to_final_decision,
 
   CASE WHEN r.amendment_count > 0 THEN 'Yes' ELSE 'No' END AS amended,
   r.amendment_count,
@@ -244,6 +258,7 @@ const COLUMNS: ReportColumn[] = [
   { key: "position_count", header: "Positions in Requisition", kind: "integer" },
   { key: "total_required", header: "Requisition Total Required", kind: "integer" },
   { key: "overall_status", header: "Overall Status" },
+  { key: "approval_order", header: "Approval Order" },
   { key: "hod_status", header: "HOD Status" },
   { key: "assigned_hod_email", header: "Assigned HOD Email" },
   { key: "hod_actioned_by", header: "HOD Actioned By" },
@@ -254,15 +269,15 @@ const COLUMNS: ReportColumn[] = [
   { key: "retail_director_actioned_by", header: "Retail Director Actioned By" },
   { key: "retail_director_action_date", header: "Retail Director Action Date", kind: "datetime" },
   { key: "retail_director_comments", header: "Retail Director Comments", kind: "longtext" },
-  { key: "director_status", header: "CEO Status" },
-  { key: "director_actioned_by", header: "CEO Actioned By" },
-  { key: "director_action_date", header: "CEO Action Date", kind: "datetime" },
-  { key: "director_comments", header: "CEO Comments", kind: "longtext" },
   { key: "hr_status", header: "HR Status" },
   { key: "hr_actioned_by", header: "HR Actioned By" },
   { key: "hr_action_date", header: "HR Action Date", kind: "datetime" },
   { key: "hr_comments", header: "HR Comments", kind: "longtext" },
-  { key: "days_to_hr_decision", header: "Days to HR Decision", kind: "decimal" },
+  { key: "director_status", header: "CEO Status" },
+  { key: "director_actioned_by", header: "CEO Actioned By" },
+  { key: "director_action_date", header: "CEO Action Date", kind: "datetime" },
+  { key: "director_comments", header: "CEO Comments", kind: "longtext" },
+  { key: "days_to_final_decision", header: "Days to Final Decision", kind: "decimal" },
   { key: "amended", header: "Amended?" },
   { key: "amendment_count", header: "Amendment Count", kind: "integer" },
   { key: "last_amended_on", header: "Last Amended On", kind: "datetime" },

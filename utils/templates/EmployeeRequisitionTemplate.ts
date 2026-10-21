@@ -10,6 +10,8 @@ import {
   formatJobGrade,
 } from "@/public/assets";
 import { escapeHtml } from "@/utils/escapeHtml";
+import { employeeDisplayStages } from "@/lib/employeeApprovalOrder";
+import type { EmployeeStage } from "@/public/assets";
 
 interface EmployeeRequisitionProps
   extends Omit<EmployeeEmailDataProps, "to"> {
@@ -103,14 +105,7 @@ export function EmployeeRequisitionTemplate({
 
           <p style="font-size: 11px; font-weight: 700; color: #a31d1d; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px;">Approval Workflow</p>
           <div style="border-radius: 16px; border: 1px solid #f0e6e6; overflow: hidden;">
-             ${statusCard("Head of Department", emailData.hodapprovalstatus, emailData.hodapprover, emailData.hodemail, emailData.hodcomments)}
-             ${
-               emailData.retaildirectorapprovalstatus !== "N/A"
-                 ? statusCard("Retail Director", emailData.retaildirectorapprovalstatus, emailData.retaildirectorapprover, emailData.retaildirectoremail, emailData.retaildirectorcomments)
-                 : ""
-             }
-             ${statusCard("CEO", emailData.directorapprovalstatus, emailData.directorapprover, emailData.directoremail, emailData.directorcomments)}
-             ${statusCard("Human Resources", emailData.hrapprovalstatus, emailData.hrapprover, emailData.hremail, emailData.hrcomments, true)}
+             ${approvalWorkflowCards(emailData)}
           </div>
 
           <div style="margin-top: 32px; text-align: center;">
@@ -184,6 +179,30 @@ function positionCard(position: EmployeePositionValues, reviewLink?: string) {
 /**
  * HELPER: STATUS CARD (INTEGRATED)
  */
+// One card per stage, in the requisition's order (HR before the CEO since
+// migration 034)
+function approvalWorkflowCards(emailData: EmployeeEmailDataValues) {
+  const stages = employeeDisplayStages(
+    emailData.hrbeforedirector,
+    emailData.retaildirectorapprovalstatus,
+  );
+  const card = (stage: EmployeeStage, isLast: boolean) => {
+    switch (stage) {
+      case "hod":
+        return statusCard("Head of Department", emailData.hodapprovalstatus, emailData.hodapprover, emailData.hodemail, emailData.hodcomments, isLast);
+      case "retail_director":
+        return statusCard("Retail Director", emailData.retaildirectorapprovalstatus, emailData.retaildirectorapprover, emailData.retaildirectoremail, emailData.retaildirectorcomments, isLast);
+      case "hr":
+        return statusCard("Human Resources", emailData.hrapprovalstatus, emailData.hrapprover, emailData.hremail, emailData.hrcomments, isLast);
+      case "director":
+        return statusCard("CEO", emailData.directorapprovalstatus, emailData.directorapprover, emailData.directoremail, emailData.directorcomments, isLast);
+    }
+  };
+  return stages
+    .map((stage, index) => card(stage, index === stages.length - 1))
+    .join("");
+}
+
 function statusCard(
   title: string,
   status: string,

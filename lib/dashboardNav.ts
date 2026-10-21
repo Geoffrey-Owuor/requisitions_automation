@@ -77,17 +77,39 @@ const requisitionItem = (
 export function getDashboardNavGroups(roles: string[]): DashboardNavGroup[] {
   const groups: DashboardNavGroup[] = [
     {
+      key: "services",
+      label: "Services",
+      items: [
+        {
+          key: "helpdesk",
+          href: "/dashboard/helpdesk",
+          label: "HelpDesk",
+          shortLabel: "Helpdesk",
+          Icon: LaptopMinimalCheck,
+          keywords: ["support", "ticket", "issue", "problem"],
+        },
+        {
+          key: "staffpurchase",
+          href: "/dashboard/staffproductpurchase",
+          label: "Staff Purchase",
+          shortLabel: "Purchase",
+          Icon: ShoppingBag,
+          keywords: ["shop", "buy", "product", "discount"],
+        },
+        {
+          key: "advance",
+          href: "/dashboard/advance",
+          label: "Salary Advance",
+          shortLabel: "Advance",
+          Icon: CircleDollarSign,
+          keywords: ["salary", "money", "loan", "cash", "pay"],
+        },
+      ],
+    },
+    {
       key: "requisitions",
       label: "Requisitions",
       items: [
-        requisitionItem("it", "IT Requisition", "IT", [
-          "laptop",
-          "computer",
-          "hardware",
-          "software",
-          "equipment",
-          "phone",
-        ]),
         requisitionItem("travel", "Travel Requisition", "Travel", [
           "trip",
           "flight",
@@ -109,6 +131,14 @@ export function getDashboardNavGroups(roles: string[]): DashboardNavGroup[] {
           "position",
           "vacancy",
         ]),
+        requisitionItem("it", "IT Requisition", "IT", [
+          "laptop",
+          "computer",
+          "hardware",
+          "software",
+          "equipment",
+          "phone",
+        ]),
         requisitionItem("access", "Key & Access", "Access", [
           "keys",
           "door",
@@ -116,36 +146,6 @@ export function getDashboardNavGroups(roles: string[]): DashboardNavGroup[] {
           "building",
           "security",
         ]),
-      ],
-    },
-    {
-      key: "services",
-      label: "Services",
-      items: [
-        {
-          key: "advance",
-          href: "/dashboard/advance",
-          label: "Salary Advance",
-          shortLabel: "Advance",
-          Icon: CircleDollarSign,
-          keywords: ["salary", "money", "loan", "cash", "pay"],
-        },
-        {
-          key: "staffpurchase",
-          href: "/dashboard/staffproductpurchase",
-          label: "Staff Purchase",
-          shortLabel: "Purchase",
-          Icon: ShoppingBag,
-          keywords: ["shop", "buy", "product", "discount"],
-        },
-        {
-          key: "helpdesk",
-          href: "/dashboard/helpdesk",
-          label: "HelpDesk",
-          shortLabel: "Helpdesk",
-          Icon: LaptopMinimalCheck,
-          keywords: ["support", "ticket", "issue", "problem"],
-        },
       ],
     },
   ];
