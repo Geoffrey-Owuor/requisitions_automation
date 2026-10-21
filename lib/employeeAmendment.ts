@@ -58,6 +58,8 @@ export interface EmployeeAmendmentValues {
   nullifiedretaildirectorstatus: string | null;
   nullifieddirectorstatus: string | null;
   nullifiedhrstatus: string | null;
+  // The order those decisions were made in (lib/employeeApprovalOrder.ts)
+  nullifiedhrbeforedirector: boolean;
   positions: EmployeeAmendmentPositionValues[];
 }
 
@@ -81,6 +83,7 @@ export const employeeAmendmentsQuery = `
     a.nullified_retail_director_status AS nullifiedretaildirectorstatus,
     a.nullified_director_status AS nullifieddirectorstatus,
     a.nullified_hr_status AS nullifiedhrstatus,
+    a.nullified_hr_before_director AS nullifiedhrbeforedirector,
     COALESCE(
       (SELECT json_agg(json_build_object(
           'positionTitle', p.position_title,

@@ -7,6 +7,15 @@ import type { EmployeeStage } from "@/public/assets";
 // "has this stage been reached" and "is it final" goes through here (or the
 // SQL twin below), so the two orders can't drift apart. Client-safe.
 
+// Compact stage names for status chips, tables and emails - the Director
+// role is "CEO" (EMPLOYEE_STAGE_LABELS in public/assets.ts has the long ones)
+export const EMPLOYEE_STAGE_SHORT_LABELS: Record<EmployeeStage, string> = {
+  hod: "HOD",
+  retail_director: "Retail Director",
+  hr: "HR",
+  director: "CEO",
+};
+
 export interface EmployeeChainStatuses {
   hrBeforeDirector: boolean;
   hod: string;
@@ -41,6 +50,19 @@ export function employeeStageOrder(hrBeforeDirector: boolean): EmployeeStage[] {
   return hrBeforeDirector
     ? ["hod", "retail_director", "hr", "director"]
     : ["hod", "retail_director", "director", "hr"];
+}
+
+// The stages a requisition shows, in its order - Retail Director only when
+// it applies (stored as 'N/A' otherwise)
+export function employeeDisplayStages(
+  hrBeforeDirector: boolean,
+  retailDirectorStatus: string | null | undefined,
+): EmployeeStage[] {
+  return employeeStageOrder(hrBeforeDirector).filter(
+    (stage) =>
+      stage !== "retail_director" ||
+      (!!retailDirectorStatus && retailDirectorStatus !== "N/A"),
+  );
 }
 
 // The stage whose approval completes the requisition

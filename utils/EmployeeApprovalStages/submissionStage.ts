@@ -61,7 +61,8 @@ export async function applySubmissionAutoApprovals(
   // Never ask the same person to approve their own requisition twice under
   // two different roles
   if (!hasRetailDirectorStage) return "hr";
-  if (!(await isRetailDirectorEmail(client, hodEmail))) return "retail_director";
+  if (!(await isRetailDirectorEmail(client, hodEmail)))
+    return "retail_director";
 
   await client.query(
     `
