@@ -222,15 +222,15 @@ export const DASHBOARD_TABLES: DashboardTableEntry[] = [
     "Retail Director",
     ({ memberships }) => memberships.isRetailDirector,
   ),
+  table("employee", "hrPending", "pending", "HR", ({ memberships }) =>
+    memberships.hrForms.includes("employee"),
+  ),
   table(
     "employee",
     "directorPending",
     "pending",
     "CEO",
     ({ memberships }) => memberships.isDirector,
-  ),
-  table("employee", "hrPending", "pending", "HR", ({ memberships }) =>
-    memberships.hrForms.includes("employee"),
   ),
   table(
     "employee",

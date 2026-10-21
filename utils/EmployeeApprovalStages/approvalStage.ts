@@ -6,6 +6,7 @@ import {
 } from "@/lib/loadApprovers";
 import { EmployeeStage } from "@/public/assets";
 import {
+  EMPLOYEE_STAGE_SHORT_LABELS as STAGE_LABELS,
   EmployeeChainStatuses,
   currentEmployeeStage,
   employeeStageOrder,
@@ -14,21 +15,13 @@ import {
 type ArrayStage = Exclude<EmployeeStage, "hod">;
 
 // How each array stage is named in emails - the Director role is "CEO"
-const STAGE_NAMES: Record<ArrayStage, { role: string; forwardedTo: string }> =
-  {
-    retail_director: {
-      role: "Retail Director",
-      forwardedTo: "the Retail Director",
-    },
-    director: { role: "CEO", forwardedTo: "the CEO" },
-    hr: { role: "HR", forwardedTo: "HR" },
-  };
-
-const STAGE_LABELS: Record<EmployeeStage, string> = {
-  hod: "HOD",
-  retail_director: "Retail Director",
-  director: "CEO",
-  hr: "HR",
+const STAGE_NAMES: Record<ArrayStage, { role: string; forwardedTo: string }> = {
+  retail_director: {
+    role: "Retail Director",
+    forwardedTo: "the Retail Director",
+  },
+  director: { role: "CEO", forwardedTo: "the CEO" },
+  hr: { role: "HR", forwardedTo: "HR" },
 };
 
 // The role an approver also holds that auto-approved a later stage

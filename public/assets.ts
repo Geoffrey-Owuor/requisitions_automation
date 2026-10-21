@@ -60,11 +60,13 @@ export const ALLOWED_TRAVEL_STAGES = ["hod", "hr", "director"] as const;
 export const ALLOWED_ACCESS_STAGES = ["hod", "security"] as const;
 export const ALLOWED_IT_STAGES = ["hod", "it"] as const;
 export const ALLOWED_CASUAL_STAGES = ["hod", "hr"] as const;
+// In the current approval order (lib/employeeApprovalOrder.ts has the
+// order each requisition actually follows)
 export const ALLOWED_EMPLOYEE_STAGES = [
   "hod",
   "retail_director",
-  "director",
   "hr",
+  "director",
 ] as const;
 
 // Create a TypeScript union type: "manager" | "director" | "hr" | "finance"
@@ -134,8 +136,8 @@ export const CASUAL_STAGE_LABELS: Record<string, string> = {
 export const EMPLOYEE_STAGE_LABELS: Record<string, string> = {
   hod: "Head of Department",
   retail_director: "Retail Director",
-  director: "CEO",
   hr: "Human Resources",
+  director: "CEO",
 } satisfies Record<EmployeeStage, string>;
 
 // Human-readable labels for salary advance self-service alteration types

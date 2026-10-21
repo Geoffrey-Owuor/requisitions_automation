@@ -5,6 +5,7 @@ import StatusFormatter from "@/components/Dashboard/StatusFormatter";
 import { dateFormatter, formatJobGrade } from "@/public/assets";
 import AttachmentTypeGroups from "./AttachmentTypeGroups";
 import EmployeeAmendmentHistory from "./EmployeeAmendmentHistory";
+import { employeeDisplayStages } from "@/lib/employeeApprovalOrder";
 
 const Field = ({ label, value }: { label: string; value: string | number }) => (
   <div className="flex flex-col gap-1">
@@ -23,51 +24,37 @@ const SectionHeading = ({ title }: { title: string }) => (
   </h2>
 );
 
-const baseApprovalStages = [
-  {
+// Keyed by stage, shown in the requisition's order (employeeDisplayStages)
+const APPROVAL_STAGES = {
+  hod: {
     role: "HOD Approval",
-    approverKey: "hodapprover" as const,
-    emailKey: "hodemail" as const,
-    statusKey: "hodapprovalstatus" as const,
-    commentsKey: "hodcomments" as const,
+    approverKey: "hodapprover",
+    emailKey: "hodemail",
+    statusKey: "hodapprovalstatus",
+    commentsKey: "hodcomments",
   },
-];
-
-const retailDirectorApprovalStage = {
-  role: "Retail Director Approval",
-  approverKey: "retaildirectorapprover" as const,
-  emailKey: "retaildirectoremail" as const,
-  statusKey: "retaildirectorapprovalstatus" as const,
-  commentsKey: "retaildirectorcomments" as const,
-};
-
-const remainingApprovalStages = [
-  {
-    role: "CEO Approval",
-    approverKey: "directorapprover" as const,
-    emailKey: "directoremail" as const,
-    statusKey: "directorapprovalstatus" as const,
-    commentsKey: "directorcomments" as const,
+  retail_director: {
+    role: "Retail Director Approval",
+    approverKey: "retaildirectorapprover",
+    emailKey: "retaildirectoremail",
+    statusKey: "retaildirectorapprovalstatus",
+    commentsKey: "retaildirectorcomments",
   },
-  {
+  hr: {
     role: "HR Approval",
-    approverKey: "hrapprover" as const,
-    emailKey: "hremail" as const,
-    statusKey: "hrapprovalstatus" as const,
-    commentsKey: "hrcomments" as const,
+    approverKey: "hrapprover",
+    emailKey: "hremail",
+    statusKey: "hrapprovalstatus",
+    commentsKey: "hrcomments",
   },
-];
-
-// The Retail Director stage is stored as 'N/A' when it doesn't apply
-function getApprovalStages(retailDirectorStatus: string) {
-  return retailDirectorStatus !== "N/A"
-    ? [
-        ...baseApprovalStages,
-        retailDirectorApprovalStage,
-        ...remainingApprovalStages,
-      ]
-    : [...baseApprovalStages, ...remainingApprovalStages];
-}
+  director: {
+    role: "CEO Approval",
+    approverKey: "directorapprover",
+    emailKey: "directoremail",
+    statusKey: "directorapprovalstatus",
+    commentsKey: "directorcomments",
+  },
+} as const;
 
 const PositionCard = ({
   position,
@@ -207,30 +194,35 @@ const EmployeeRequisitionViewModal = ({
                   : "grid-cols-3"
               }`}
             >
-              {getApprovalStages(viewData.retaildirectorapprovalstatus).map(
-                ({ role, approverKey, emailKey, statusKey, commentsKey }) => (
-                  <div
-                    key={role}
-                    className="rounded-surface border border-[rgba(240,180,180,0.4)] bg-white/60 px-5 py-5"
-                  >
-                    <p className="mb-3 text-[11px] font-semibold tracking-[0.4px] text-[#b0a0a0] uppercase">
-                      {role}
-                    </p>
-                    <p className="text-[14px] font-semibold text-wrap text-[#1e1b1b]">
-                      {viewData[approverKey] || "—"}
-                    </p>
-                    <p className="mb-3 max-w-50 truncate text-[12px] text-[#7c5a5a]">
-                      {viewData[emailKey] || "—"}
-                    </p>
-                    <StatusFormatter status={viewData[statusKey]} />
-                    {viewData[commentsKey] && (
-                      <p className="mt-3 text-[12px] leading-relaxed text-wrap text-[#7c5a5a]">
-                        &ldquo;{viewData[commentsKey]}&rdquo;
+              {employeeDisplayStages(
+                viewData.hrbeforedirector,
+                viewData.retaildirectorapprovalstatus,
+              )
+                .map((stage) => APPROVAL_STAGES[stage])
+                .map(
+                  ({ role, approverKey, emailKey, statusKey, commentsKey }) => (
+                    <div
+                      key={role}
+                      className="rounded-surface border border-[rgba(240,180,180,0.4)] bg-white/60 px-5 py-5"
+                    >
+                      <p className="mb-3 text-[11px] font-semibold tracking-[0.4px] text-[#b0a0a0] uppercase">
+                        {role}
                       </p>
-                    )}
-                  </div>
-                ),
-              )}
+                      <p className="text-[14px] font-semibold text-wrap text-[#1e1b1b]">
+                        {viewData[approverKey] || "—"}
+                      </p>
+                      <p className="mb-3 max-w-50 truncate text-[12px] text-[#7c5a5a]">
+                        {viewData[emailKey] || "—"}
+                      </p>
+                      <StatusFormatter status={viewData[statusKey]} />
+                      {viewData[commentsKey] && (
+                        <p className="mt-3 text-[12px] leading-relaxed text-wrap text-[#7c5a5a]">
+                          &ldquo;{viewData[commentsKey]}&rdquo;
+                        </p>
+                      )}
+                    </div>
+                  ),
+                )}
             </div>
           </div>
 

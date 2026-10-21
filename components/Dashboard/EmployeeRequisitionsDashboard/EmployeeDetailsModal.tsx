@@ -13,8 +13,10 @@ import { useQuery } from "@tanstack/react-query";
 import StatusFormatter from "../StatusFormatter";
 import { dateFormatter, formatJobGrade } from "@/public/assets";
 import {
+  EMPLOYEE_STAGE_SHORT_LABELS,
   EmployeeStageColumns,
   employeeChainFromRow,
+  employeeDisplayStages,
   isEmployeeAmendable,
 } from "@/lib/employeeApprovalOrder";
 import Link from "next/link";
@@ -92,10 +94,6 @@ export const EmployeeDetailsModal = ({
 
   if (!data) return null;
 
-  // Stored as 'N/A' when the Retail Director stage doesn't apply
-  const hasRetailDirectorStage =
-    data.employee_retail_director_approval_status !== "N/A";
-
   // Visibility only - the amend form and the amendment route re-check
   // ownership and that the final stage hasn't approved
   const canAmend =
@@ -103,19 +101,14 @@ export const EmployeeDetailsModal = ({
     data.submitter_email === email &&
     isEmployeeAmendable(employeeChainFromRow(data as EmployeeStageColumns));
 
-  const approvalChain = [
-    { label: "HOD", status: data.employee_hod_approval_status },
-    ...(hasRetailDirectorStage
-      ? [
-          {
-            label: "Retail Director",
-            status: data.employee_retail_director_approval_status,
-          },
-        ]
-      : []),
-    { label: "CEO", status: data.employee_director_approval_status },
-    { label: "HR", status: data.employee_hr_approval_status },
-  ];
+  // In this requisition's order - HR before the CEO since migration 034
+  const approvalChain = employeeDisplayStages(
+    data.hr_before_director,
+    data.employee_retail_director_approval_status,
+  ).map((stage) => ({
+    label: EMPLOYEE_STAGE_SHORT_LABELS[stage],
+    status: data[`employee_${stage}_approval_status`],
+  }));
 
   return (
     <Modal
