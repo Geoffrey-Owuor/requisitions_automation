@@ -226,12 +226,6 @@ export function parseSalaryRange(
 // Longest amendment reason an employee requisition amendment accepts
 export const MAX_AMENDMENT_REASON_LENGTH = 1000;
 
-// An employee requisition stays amendable by its submitter until HR approves
-// it - a decline at any stage can be corrected by amending.
-export function isEmployeeAmendableHrStatus(hrStatus: string): boolean {
-  return hrStatus === "pending" || hrStatus === "declined";
-}
-
 export const EMPLOYEE_ATTACHMENT_TYPES = [
   "job-description",
   "kpis",

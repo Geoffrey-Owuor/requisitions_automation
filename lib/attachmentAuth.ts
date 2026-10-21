@@ -16,6 +16,8 @@ export type AttachmentRow = {
   employee_hod_approval_status: string;
   employee_retail_director_approval_status: string;
   employee_director_approval_status: string;
+  employee_hr_approval_status: string;
+  hr_before_director: boolean;
 };
 
 export type AttachmentAuthResult =
@@ -50,7 +52,8 @@ export async function authorizeAttachmentRequest(
     SELECT a.original_filename, a.file_path, a.mime_type, r.submitter_email,
     r.request_id, r.employee_hod_email, r.employee_hod_actioned_by_email,
     r.employee_hod_approval_status,
-    r.employee_retail_director_approval_status, r.employee_director_approval_status
+    r.employee_retail_director_approval_status, r.employee_director_approval_status,
+    r.employee_hr_approval_status, r.hr_before_director
     FROM ${attachmentTable} a
     JOIN employee_requisitions r ON r.request_id = a.request_id
     WHERE a.attachment_id = $1
@@ -103,6 +106,8 @@ export async function authorizeAttachmentRequest(
       retailDirectorApprovalStatus:
         attachment.employee_retail_director_approval_status,
       directorApprovalStatus: attachment.employee_director_approval_status,
+      hrApprovalStatus: attachment.employee_hr_approval_status,
+      hrBeforeDirector: attachment.hr_before_director,
     });
   }
 

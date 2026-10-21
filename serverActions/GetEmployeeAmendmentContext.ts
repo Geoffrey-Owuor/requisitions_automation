@@ -7,13 +7,17 @@ import { isUuid } from "@/lib/uuid";
 import { sameEmail } from "@/lib/hodAssignment";
 import {
   EmployeeAttachmentType,
-  isEmployeeAmendableHrStatus,
   parseSalaryRange,
 } from "@/public/assets";
 import {
   employeeAmendmentsQuery,
   EmployeeAmendmentValues,
 } from "@/lib/employeeAmendment";
+import {
+  EmployeeStageColumns,
+  employeeChainFromRow,
+  isEmployeeAmendable,
+} from "@/lib/employeeApprovalOrder";
 import { EmployeeFormData } from "@/components/Modules/Retail/EmployeeRequisitionForm";
 
 export interface EmployeeAmendmentContext {
@@ -23,8 +27,9 @@ export interface EmployeeAmendmentContext {
   history: EmployeeAmendmentValues[];
 }
 
-// Amendments are only allowed for the original submitter, before HR approves
-// - a decline at any stage is still amendable. Returns null when the
+// Amendments are only allowed for the original submitter, before the final
+// stage approves (lib/employeeApprovalOrder.ts) - a decline at any stage is
+// still amendable. Returns null when the
 // requisition doesn't exist, isn't owned by the current user, or is no
 // longer within that window. The amendment route re-checks everything.
 export async function getEmployeeAmendmentContext(
@@ -36,15 +41,18 @@ export async function getEmployeeAmendmentContext(
   const session = await getSession();
   if (!session) return null;
 
-  const headerResult = await query<{
-    submitter_email: string;
-    employee_hr_approval_status: string;
-    amendment_count: number;
-    employee_department: string;
-    employee_hod_email: string;
-  }>(
-    `SELECT submitter_email, employee_hr_approval_status, amendment_count,
-     employee_department, employee_hod_email
+  const headerResult = await query<
+    EmployeeStageColumns & {
+      submitter_email: string;
+      amendment_count: number;
+      employee_department: string;
+      employee_hod_email: string;
+    }
+  >(
+    `SELECT submitter_email, amendment_count, employee_department,
+     employee_hod_email, hr_before_director, employee_hod_approval_status,
+     employee_retail_director_approval_status, employee_director_approval_status,
+     employee_hr_approval_status
      FROM employee_requisitions WHERE request_id = $1`,
     [requestId],
   );
@@ -55,7 +63,7 @@ export async function getEmployeeAmendmentContext(
 
   const isAmendable =
     sameEmail(header.submitter_email, session.email) &&
-    isEmployeeAmendableHrStatus(header.employee_hr_approval_status);
+    isEmployeeAmendable(employeeChainFromRow(header));
 
   if (!isAmendable) return null;
 

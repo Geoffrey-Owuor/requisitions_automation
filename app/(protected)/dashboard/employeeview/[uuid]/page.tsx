@@ -42,6 +42,8 @@ const page = async ({ params }: ViewRequisitionProps) => {
       hodApprovalStatus: viewData.hodapprovalstatus,
       retailDirectorApprovalStatus: viewData.retaildirectorapprovalstatus,
       directorApprovalStatus: viewData.directorapprovalstatus,
+      hrApprovalStatus: viewData.hrapprovalstatus,
+      hrBeforeDirector: viewData.hrbeforedirector,
     }));
 
   if (!isOwner && !isApprover) return <NotFoundRequest />;
