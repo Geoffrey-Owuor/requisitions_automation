@@ -9,7 +9,7 @@ import { hodApprovalStage } from "@/utils/TravelApprovalStages/hodApprovalStage"
 import { hrApprovalStage } from "@/utils/TravelApprovalStages/hrApprovalStage";
 import { directorApprovalStage } from "@/utils/TravelApprovalStages/directorApprovalStage";
 import { EmailSender } from "@/services/EmailSender";
-import { isValidTravelStage } from "@/public/assets";
+import { isValidTravelStage, TRAVEL_STAGE_LABELS } from "@/public/assets";
 import { isDirectorEmail } from "@/utils/isDirectorEmail";
 
 export type UpdateRequestStatusProps = {
@@ -69,6 +69,7 @@ export async function UpdateTravelStatus(
       `SELECT travel_${payload.stage}_approval_status AS approval_status,
        travel_${payload.stage}_approver AS approver,
        travel_approval_tier, submitter_email, travel_hod_email, travel_hod_approver, travel_hr_email,
+       travel_hod_approval_status, travel_hr_approval_status,
        COALESCE(travel_hod_actioned_by_email, travel_hod_email) AS travel_hod_actioned_by_email,
        amendment_count
         FROM travel_requisitions WHERE request_id = $1 FOR UPDATE`,
@@ -157,6 +158,22 @@ export async function UpdateTravelStatus(
         alertType: "error",
         alertMessage:
           "This requisition was amended while you were reviewing it - please reload and try again",
+      };
+    }
+
+    // Stages are acted on in order - HR after the HOD, the Tier 3 Director
+    // after HR. An approver's token works on any requisition, so a hand-made
+    // link must not let them act before the earlier stages have approved.
+    const reachedStage =
+      payload.stage === "hod" ||
+      (reviewedResult[0].travel_hod_approval_status === "approved" &&
+        (payload.stage === "hr" ||
+          reviewedResult[0].travel_hr_approval_status === "approved"));
+    if (!reachedStage) {
+      await client.query("ROLLBACK");
+      return {
+        alertType: "error",
+        alertMessage: `This requisition hasn't reached the ${TRAVEL_STAGE_LABELS[payload.stage]} approval stage yet, no action is required`,
       };
     }
 

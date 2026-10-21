@@ -12,6 +12,7 @@ import AlreadyProcessed from "@/components/Approvers/TravelApprovers/AlreadyProc
 import InvalidToken from "@/components/Approvers/TravelApprovers/InvalidToken";
 import NotFoundRequest from "@/components/Approvers/TravelApprovers/NotFoundRequest";
 import NotAssignedHod from "@/components/Approvers/NotAssignedHod";
+import StageNotReached from "@/components/Approvers/StageNotReached";
 import { getHodPageAccess } from "@/lib/hodAssignment";
 import { isValidCasualStage, CASUAL_STAGE_LABELS } from "@/public/assets";
 
@@ -108,6 +109,16 @@ const ApprovalPageContent = async ({
   if (result.length === 0) return <NotFoundRequest />;
 
   const requestData = result[0];
+
+  // A token works on any requisition, so a hand-made link could open the HR
+  // stage before the HOD has approved - an already-processed stage was
+  // reached. Checked before the sections are loaded.
+  if (
+    stage === "hr" &&
+    requestData.approval_status === "pending" &&
+    requestData.casual_hod_approval_status !== "approved"
+  )
+    return <StageNotReached stageLabel={CASUAL_STAGE_LABELS.hr} />;
 
   const [sectionsResult, amendmentsResult] = await Promise.all([
     query(

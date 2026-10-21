@@ -8,6 +8,7 @@ import AlreadyProcessed from "@/components/Approvers/TravelApprovers/AlreadyProc
 import InvalidToken from "@/components/Approvers/TravelApprovers/InvalidToken";
 import NotFoundRequest from "@/components/Approvers/TravelApprovers/NotFoundRequest";
 import NotAssignedHod from "@/components/Approvers/NotAssignedHod";
+import StageNotReached from "@/components/Approvers/StageNotReached";
 import { getHodPageAccess } from "@/lib/hodAssignment";
 import PushbackUnavailable from "@/components/Approvers/TravelApprovers/PushbackUnavailable";
 import { isValidTravelStage, TRAVEL_STAGE_LABELS } from "@/public/assets";
@@ -142,6 +143,21 @@ const ApprovalPageContent = async ({
   // Check if request is already processed
   const approvalStatus = requestData.approval_status;
   const approverName = requestData.approver_name;
+
+  // A token works on any requisition, so a hand-made link could open a stage
+  // before the earlier ones have approved: HR needs the HOD, and the Tier 3
+  // Director needs the HOD and HR. An already-processed stage was reached,
+  // and a push-back only acts on a decision HR has already made.
+  const reachedStage =
+    stage === "hod" ||
+    (requestData.travel_hod_approval_status === "approved" &&
+      (stage === "hr" || requestData.travel_hr_approval_status === "approved"));
+  if (
+    !isPushback &&
+    (approvalStatus === "pending" || approvalStatus === "N/A") &&
+    !reachedStage
+  )
+    return <StageNotReached stageLabel={TRAVEL_STAGE_LABELS[stage]} />;
 
   if (isPushback) {
     const blocker = getTravelPushbackBlocker({

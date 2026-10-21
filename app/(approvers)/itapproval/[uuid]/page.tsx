@@ -6,6 +6,7 @@ import InvalidToken from "@/components/Approvers/TravelApprovers/InvalidToken";
 import AlreadyProcessed from "@/components/Approvers/TravelApprovers/AlreadyProcessed";
 import NotFoundRequest from "@/components/Approvers/TravelApprovers/NotFoundRequest";
 import NotAssignedHod from "@/components/Approvers/NotAssignedHod";
+import StageNotReached from "@/components/Approvers/StageNotReached";
 import { getHodPageAccess } from "@/lib/hodAssignment";
 import ITApprovalModal, {
   ITRequisitionData,
@@ -102,6 +103,16 @@ const ApprovalPageContent = async ({
   // Check if request is already processed
   const approvalStatus = requestData.approval_status;
   const approverName = requestData.approver_name;
+
+  // A token works on any requisition, so a hand-made link could open the
+  // IT stage before the HOD has approved - an already-processed
+  // stage was reached
+  if (
+    stage === "it" &&
+    approvalStatus === "pending" &&
+    requestData.hod_approver_status !== "approved"
+  )
+    return <StageNotReached stageLabel={IT_STAGE_LABELS.it} />;
 
   if (approvalStatus !== "pending")
     return (
