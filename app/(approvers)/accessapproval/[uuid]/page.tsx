@@ -10,6 +10,7 @@ import AccessApprovalModal, {
 import { PreviousApproval } from "@/components/Approvers/PreviousApprovalsSection";
 import NotFoundRequest from "@/components/Approvers/TravelApprovers/NotFoundRequest";
 import NotAssignedHod from "@/components/Approvers/NotAssignedHod";
+import StageNotReached from "@/components/Approvers/StageNotReached";
 import { getHodPageAccess } from "@/lib/hodAssignment";
 import { isValidAccessStage, ACCESS_STAGE_LABELS } from "@/public/assets";
 
@@ -101,6 +102,16 @@ const ApprovalPageContent = async ({
   // Check if request is already processed
   const approvalStatus = requestData.approval_status;
   const approverName = requestData.approver_name;
+
+  // A token works on any requisition, so a hand-made link could open the
+  // Security stage before the HOD has approved - an already-processed
+  // stage was reached
+  if (
+    stage === "security" &&
+    approvalStatus === "pending" &&
+    requestData.hod_approver_status !== "approved"
+  )
+    return <StageNotReached stageLabel={ACCESS_STAGE_LABELS.security} />;
 
   if (approvalStatus !== "pending")
     return (

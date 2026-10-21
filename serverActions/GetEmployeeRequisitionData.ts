@@ -11,6 +11,7 @@ import {
   toSafeOffsetLimit,
 } from "@/lib/pagination";
 import { QueryResultRow } from "pg";
+import { employeeStageReachedSql } from "@/lib/employeeApprovalOrder";
 
 export interface EmployeeRequisitionDataProps {
   dataFlag:
@@ -92,23 +93,22 @@ export const getEmployeeRequisitionData = async ({
       );
       baseParams.push(user.email, "pending");
       break;
+    // Each array stage's queue: the requisition has reached that stage (on
+    // its own stage order, lib/employeeApprovalOrder.ts) and it's pending
     case "retailDirectorPending":
       conditions.push(
-        `e.employee_hod_approval_status = $${baseParams.length + 1} AND e.employee_retail_director_approval_status = $${baseParams.length + 2}`,
+        `${employeeStageReachedSql("e", "retail_director")} AND e.employee_retail_director_approval_status = 'pending'`,
       );
-      baseParams.push("approved", "pending");
       break;
     case "directorPending":
       conditions.push(
-        `e.employee_hod_approval_status = $${baseParams.length + 1} AND e.employee_retail_director_approval_status IN ($${baseParams.length + 2}, $${baseParams.length + 3}) AND e.employee_director_approval_status = $${baseParams.length + 4}`,
+        `${employeeStageReachedSql("e", "director")} AND e.employee_director_approval_status = 'pending'`,
       );
-      baseParams.push("approved", "approved", "N/A", "pending");
       break;
     case "hrPending":
       conditions.push(
-        `e.employee_hod_approval_status = $${baseParams.length + 1} AND e.employee_retail_director_approval_status IN ($${baseParams.length + 2}, $${baseParams.length + 3}) AND e.employee_director_approval_status = $${baseParams.length + 4} AND e.employee_hr_approval_status = $${baseParams.length + 5}`,
+        `${employeeStageReachedSql("e", "hr")} AND e.employee_hr_approval_status = 'pending'`,
       );
-      baseParams.push("approved", "approved", "N/A", "approved", "pending");
       break;
     case "history": {
       // Their own HOD rows, plus every request that has reached (or been
@@ -125,21 +125,14 @@ export const getEmployeeRequisitionData = async ({
       baseParams.push(user.email);
       if (isRetailDirector) {
         scopes.push(
-          `(e.employee_hod_approval_status = $${baseParams.length + 1} AND e.employee_retail_director_approval_status <> $${baseParams.length + 2})`,
+          `(${employeeStageReachedSql("e", "retail_director")} AND e.employee_retail_director_approval_status <> 'N/A')`,
         );
-        baseParams.push("approved", "N/A");
       }
       if (isDirector) {
-        scopes.push(
-          `(e.employee_hod_approval_status = $${baseParams.length + 1} AND e.employee_retail_director_approval_status IN ($${baseParams.length + 2}, $${baseParams.length + 3}))`,
-        );
-        baseParams.push("approved", "approved", "N/A");
+        scopes.push(`(${employeeStageReachedSql("e", "director")})`);
       }
       if (isHr) {
-        scopes.push(
-          `(e.employee_hod_approval_status = $${baseParams.length + 1} AND e.employee_retail_director_approval_status IN ($${baseParams.length + 2}, $${baseParams.length + 3}) AND e.employee_director_approval_status = $${baseParams.length + 4})`,
-        );
-        baseParams.push("approved", "approved", "N/A", "approved");
+        scopes.push(`(${employeeStageReachedSql("e", "hr")})`);
       }
       conditions.push(`(${scopes.join(" OR ")})`);
       break;
@@ -176,7 +169,7 @@ export const getEmployeeRequisitionData = async ({
         e.employee_retail_director_approval_status, e.employee_retail_director_approver,
         e.employee_director_approval_status, e.employee_director_approver,
         e.employee_hr_approval_status, e.employee_hr_approver,
-        e.amendment_count, e.last_amended_at,
+        e.hr_before_director, e.amendment_count, e.last_amended_at,
         agg.total_positions, agg.total_headcount,
         COUNT(*) OVER() AS total_count
         FROM employee_requisitions e

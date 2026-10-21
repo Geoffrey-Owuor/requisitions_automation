@@ -1,5 +1,6 @@
 import { query } from "@/lib/db";
 import { isHodViewer } from "@/lib/hodAssignment";
+import { hasReachedEmployeeStage } from "@/lib/employeeApprovalOrder";
 
 interface EmployeeChainStatus {
   // The HOD selected at submission, and whoever acted on the HOD stage
@@ -9,6 +10,8 @@ interface EmployeeChainStatus {
   hodApprovalStatus: string;
   retailDirectorApprovalStatus: string;
   directorApprovalStatus: string;
+  hrApprovalStatus: string;
+  hrBeforeDirector: boolean;
 }
 
 // Whether `email` is authorized to view a given employee requisition's
@@ -52,11 +55,16 @@ export async function isEmployeeRequisitionApprover(
     return true;
   }
 
-  const retailDirectorDone =
-    chain.retailDirectorApprovalStatus === "approved" ||
-    chain.retailDirectorApprovalStatus === "N/A";
-  if (!retailDirectorDone) return false;
-
-  if (director.length > 0) return true;
-  return chain.directorApprovalStatus === "approved" && hr.length > 0;
+  // CEO and HR come in either order (lib/employeeApprovalOrder.ts)
+  const stages = {
+    hrBeforeDirector: chain.hrBeforeDirector,
+    hod: chain.hodApprovalStatus,
+    retailDirector: chain.retailDirectorApprovalStatus,
+    director: chain.directorApprovalStatus,
+    hr: chain.hrApprovalStatus,
+  };
+  if (director.length > 0 && hasReachedEmployeeStage(stages, "director")) {
+    return true;
+  }
+  return hr.length > 0 && hasReachedEmployeeStage(stages, "hr");
 }

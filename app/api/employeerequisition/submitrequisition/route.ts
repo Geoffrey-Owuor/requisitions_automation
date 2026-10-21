@@ -182,8 +182,8 @@ export async function POST(request: NextRequest) {
         (request_id, submitter_email, submitter_name, employee_department,
         employee_hod_approval_status, employee_retail_director_approval_status,
         employee_director_approval_status, employee_hr_approval_status,
-        employee_hod_approver, employee_hod_email)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        employee_hod_approver, employee_hod_email, hr_before_director)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, TRUE)
         `,
         [
           requestId,

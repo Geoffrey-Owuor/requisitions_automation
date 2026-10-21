@@ -8,7 +8,7 @@ import { AlertInfo } from "@/components/TravelRequisitionPage";
 import { hodApprovalStage } from "@/utils/CasualApprovalStages/hodApprovalStage";
 import { hrApprovalStage } from "@/utils/CasualApprovalStages/hrApprovalStage";
 import { CasualEmailSender } from "@/services/CasualEmailSender";
-import { isValidCasualStage } from "@/public/assets";
+import { isValidCasualStage, CASUAL_STAGE_LABELS } from "@/public/assets";
 
 export type UpdateRequestStatusProps = {
   uuid: string;
@@ -63,7 +63,7 @@ export async function UpdateCasualStatus(
     const { rows: reviewedResult } = await client.query(
       `SELECT casual_${payload.stage}_approval_status AS approval_status,
        casual_${payload.stage}_approver AS approver,
-       submitter_email, casual_hod_email, amendment_count,
+       submitter_email, casual_hod_email, casual_hod_approval_status, amendment_count,
        COALESCE(casual_hod_actioned_by_email, casual_hod_email) AS casual_hod_actioned_by_email
         FROM casual_requisitions WHERE request_id = $1 FOR UPDATE`,
       [payload.uuid],
@@ -132,6 +132,20 @@ export async function UpdateCasualStatus(
       return {
         alertType: "error",
         alertMessage: `This requisition has already been acted upon by ${previousApprover}, no further action is required`,
+      };
+    }
+
+    // The HR stage follows the HOD's approval - an HR token works on any
+    // requisition, so a hand-made link must not let HR act before the HOD
+    // has approved.
+    if (
+      payload.stage === "hr" &&
+      reviewedResult[0].casual_hod_approval_status !== "approved"
+    ) {
+      await client.query("ROLLBACK");
+      return {
+        alertType: "error",
+        alertMessage: `This requisition hasn't reached the ${CASUAL_STAGE_LABELS.hr} approval stage yet, no action is required`,
       };
     }
 

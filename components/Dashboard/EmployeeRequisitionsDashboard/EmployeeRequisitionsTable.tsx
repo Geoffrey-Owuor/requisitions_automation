@@ -13,8 +13,8 @@ const dynamicTitles: Record<EmployeeRequisitionDataProps["dataFlag"], string> =
     hodPending: "Employee Requisitions Pending Your Approval (HOD)",
     retailDirectorPending:
       "Employee Requisitions Pending Your Approval (Retail Director)",
-    directorPending: "Employee Requisitions Pending Your Approval (CEO)",
     hrPending: "Employee Requisitions Pending Your Approval (HR)",
+    directorPending: "Employee Requisitions Pending Your Approval (CEO)",
     history: "Employee Requisitions Approval History",
   };
 
@@ -23,8 +23,10 @@ const COLUMNS = [
   { key: "positions", label: "Positions / Headcount" },
   { key: "hod", label: "HOD Status" },
   { key: "retailDirector", label: "Retail Director" },
-  { key: "director", label: "CEO Status" },
+  // HR before the CEO, as requisitions since migration 034 run (older ones
+  // went CEO -> HR, but each column still shows its own stage's status)
   { key: "hr", label: "HR Status" },
+  { key: "director", label: "CEO Status" },
 ];
 
 export default function EmployeeRequisitionsTable({
@@ -81,11 +83,11 @@ export default function EmployeeRequisitionsTable({
             />
           </td>
           <td className="px-6 py-5">
-            <StatusFormatter status={req.employee_director_approval_status} />
+            <StatusFormatter status={req.employee_hr_approval_status} />
           </td>
           <td className="px-6 py-5">
             <div className="flex items-center justify-between gap-4">
-              <StatusFormatter status={req.employee_hr_approval_status} />
+              <StatusFormatter status={req.employee_director_approval_status} />
               <Info
                 size={14}
                 className="text-violet-200 transition-colors group-hover:text-violet-400"

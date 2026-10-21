@@ -44,20 +44,6 @@ export const REQUISITION_TYPES: RequisitionTypeEntry[] = [
     Icon: BriefcaseBusiness,
   },
   {
-    type: "it",
-    label: "IT",
-    noun: "IT",
-    href: "/dashboard/it",
-    Icon: Monitor,
-  },
-  {
-    type: "access",
-    label: "Key & Access",
-    noun: "access",
-    href: "/dashboard/access",
-    Icon: LockKeyhole,
-  },
-  {
     type: "casual",
     label: "Casual",
     noun: "casual",
@@ -70,6 +56,20 @@ export const REQUISITION_TYPES: RequisitionTypeEntry[] = [
     noun: "employee",
     href: "/dashboard/employee",
     Icon: UserRoundPlus,
+  },
+  {
+    type: "it",
+    label: "IT",
+    noun: "IT",
+    href: "/dashboard/it",
+    Icon: Monitor,
+  },
+  {
+    type: "access",
+    label: "Key & Access",
+    noun: "access",
+    href: "/dashboard/access",
+    Icon: LockKeyhole,
   },
 ];
 
@@ -222,15 +222,15 @@ export const DASHBOARD_TABLES: DashboardTableEntry[] = [
     "Retail Director",
     ({ memberships }) => memberships.isRetailDirector,
   ),
+  table("employee", "hrPending", "pending", "HR", ({ memberships }) =>
+    memberships.hrForms.includes("employee"),
+  ),
   table(
     "employee",
     "directorPending",
     "pending",
     "CEO",
     ({ memberships }) => memberships.isDirector,
-  ),
-  table("employee", "hrPending", "pending", "HR", ({ memberships }) =>
-    memberships.hrForms.includes("employee"),
   ),
   table(
     "employee",

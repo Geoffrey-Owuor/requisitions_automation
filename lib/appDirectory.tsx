@@ -99,11 +99,11 @@ export const appDirectory: AppEntry[] = [
     slug: "employee",
     label: "Employee Requisition",
     description:
-      "Request one or more open positions to be filled. Routed to your HOD, then the CEO, then HR.",
+      "Request one or more open positions to be filled. Routed to your HOD, then HR, then the CEO.",
     icon: UserRoundPlus,
     owner: "HR",
     group: "form",
-    chain: ["HOD", "CEO", "HR"],
+    chain: ["HOD", "HR", "CEO"],
     action: {
       href: newRequisitionHref("employee"),
       label: "Open form",
