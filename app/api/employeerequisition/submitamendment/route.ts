@@ -24,14 +24,18 @@ import {
 import {
   formatSalaryRange,
   parseSalaryRange,
-  isEmployeeAmendableHrStatus,
   EmployeeAttachmentType,
   MAX_AMENDMENT_REASON_LENGTH,
 } from "@/public/assets";
+import {
+  EMPLOYEE_NOT_AMENDABLE_MESSAGE,
+  employeeChainFromRow,
+  isEmployeeAmendable,
+} from "@/lib/employeeApprovalOrder";
 import { loadJobGrades } from "@/lib/loadRequisitionOptions";
 import { INVALID_DEPARTMENT_MESSAGE, resolveDepartment } from "@/lib/departments";
 
-// Amends an employee requisition: the original submitter only, until HR
+// Amends an employee requisition: the original submitter only, until the final stage
 // approves it. Sent as multipart like the submission - `metadata` JSON plus
 // positionFiles_{index}_{type} files. An existing position (one with a
 // positionId) keeps every attachment it isn't sent a new file for; a newly
@@ -265,10 +269,16 @@ export async function POST(request: NextRequest) {
     // re-checked under the row lock below.
     const precheck = await query<{
       submitter_email: string;
+      employee_hod_approval_status: string;
+      employee_retail_director_approval_status: string;
+      employee_director_approval_status: string;
       employee_hr_approval_status: string;
+      hr_before_director: boolean;
       position_ids: string[];
     }>(
-      `SELECT r.submitter_email, r.employee_hr_approval_status,
+      `SELECT r.submitter_email, r.employee_hod_approval_status,
+       r.employee_retail_director_approval_status, r.employee_director_approval_status,
+       r.employee_hr_approval_status, r.hr_before_director,
        COALESCE(ARRAY(SELECT position_id::text FROM employee_requisition_positions p
          WHERE p.request_id = r.request_id), '{}') AS position_ids
        FROM employee_requisitions r WHERE r.request_id = $1`,
@@ -285,12 +295,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!isEmployeeAmendableHrStatus(precheck[0].employee_hr_approval_status)) {
+    if (!isEmployeeAmendable(employeeChainFromRow(precheck[0]))) {
       return NextResponse.json(
-        {
-          message:
-            "This requisition can no longer be amended - HR has already approved it",
-        },
+        { message: EMPLOYEE_NOT_AMENDABLE_MESSAGE },
         { status: 409 },
       );
     }
@@ -367,7 +374,7 @@ export async function POST(request: NextRequest) {
        employee_director_approval_status, employee_director_approver,
        employee_director_comments, employee_director_approval_date,
        employee_hr_approval_status, employee_hr_approver,
-       employee_hr_comments, employee_hr_approval_date
+       employee_hr_comments, employee_hr_approval_date, hr_before_director
        FROM employee_requisitions WHERE request_id = $1 FOR UPDATE`,
       [requestId],
     );
@@ -389,11 +396,8 @@ export async function POST(request: NextRequest) {
       return rejectWith("You are not authorized to amend this requisition", 403);
     }
 
-    if (!isEmployeeAmendableHrStatus(header.employee_hr_approval_status)) {
-      return rejectWith(
-        "This requisition can no longer be amended - HR has already approved it",
-        409,
-      );
+    if (!isEmployeeAmendable(employeeChainFromRow(header))) {
+      return rejectWith(EMPLOYEE_NOT_AMENDABLE_MESSAGE, 409);
     }
 
     if (header.amendment_count !== expectedAmendmentCount) {
@@ -548,9 +552,10 @@ export async function POST(request: NextRequest) {
         nullified_retail_director_comments, nullified_retail_director_date,
         nullified_director_status, nullified_director_approver,
         nullified_director_comments, nullified_director_date,
-        nullified_hr_status, nullified_hr_approver, nullified_hr_comments, nullified_hr_date)
+        nullified_hr_status, nullified_hr_approver, nullified_hr_comments, nullified_hr_date,
+        nullified_hr_before_director)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,
-               $21,$22,$23,$24,$25,$26,$27,$28,$29)
+               $21,$22,$23,$24,$25,$26,$27,$28,$29,$30)
        RETURNING amendment_id`,
       [
         requestId,
@@ -585,6 +590,7 @@ export async function POST(request: NextRequest) {
         header.employee_hr_approver,
         header.employee_hr_comments,
         header.employee_hr_approval_date,
+        header.hr_before_director,
       ],
     );
 
@@ -703,6 +709,7 @@ export async function POST(request: NextRequest) {
        employee_hr_approval_status = 'pending',
        employee_hr_approver = NULL, employee_hr_email = NULL,
        employee_hr_comments = NULL, employee_hr_approval_date = NULL,
+       hr_before_director = TRUE,
        amendment_count = $5, last_amended_at = CURRENT_TIMESTAMP
        WHERE request_id = $6`,
       [

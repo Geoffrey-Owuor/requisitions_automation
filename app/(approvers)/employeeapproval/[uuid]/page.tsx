@@ -8,12 +8,19 @@ import AlreadyProcessed from "@/components/Approvers/TravelApprovers/AlreadyProc
 import InvalidToken from "@/components/Approvers/TravelApprovers/InvalidToken";
 import NotFoundRequest from "@/components/Approvers/TravelApprovers/NotFoundRequest";
 import NotAssignedHod from "@/components/Approvers/NotAssignedHod";
+import StageNotReached from "@/components/Approvers/StageNotReached";
 import { getHodPageAccess } from "@/lib/hodAssignment";
 import {
   employeeAmendmentsQuery,
   EmployeeAmendmentValues,
 } from "@/lib/employeeAmendment";
 import { isValidEmployeeStage, EMPLOYEE_STAGE_LABELS } from "@/public/assets";
+import {
+  EmployeeStageColumns,
+  employeeChainFromRow,
+  employeeStageOrder,
+  hasReachedEmployeeStage,
+} from "@/lib/employeeApprovalOrder";
 
 type ApprovalPageProps = {
   params: Promise<{ uuid: string }>;
@@ -100,7 +107,9 @@ const ApprovalPageContent = async ({
         employee_retail_director_approver, employee_retail_director_approval_status,
         employee_retail_director_comments,
         employee_director_approver, employee_director_approval_status,
-        employee_director_comments, amendment_count
+        employee_director_comments,
+        employee_hr_approver, employee_hr_approval_status, employee_hr_comments,
+        hr_before_director, amendment_count
         FROM employee_requisitions
         WHERE request_id = $1
       `;
@@ -120,34 +129,32 @@ const ApprovalPageContent = async ({
   if (stage === "retail_director" && !hasRetailDirectorStage)
     return <NotFoundRequest />;
 
-  // Build the list of stages that precede the current one. Retail Director
-  // only ever sits between HOD and CEO, and only when the requisition has
-  // that stage.
-  const previousApprovals: PreviousApproval[] = [];
-  if (stage !== "hod") {
-    previousApprovals.push({
-      label: EMPLOYEE_STAGE_LABELS.hod,
-      approverName: requestData.employee_hod_approver,
-      status: requestData.employee_hod_approval_status,
-      comments: requestData.employee_hod_comments,
-    });
+  const chain = employeeChainFromRow(requestData as EmployeeStageColumns);
+
+  // A token works on any requisition, so a hand-made link could open a stage
+  // the requisition hasn't reached - an already-processed stage was reached
+  const approvalStatus = requestData.approval_status;
+  const approverName = requestData.approver_name;
+  if (
+    (approvalStatus === "pending" || approvalStatus === "N/A") &&
+    !hasReachedEmployeeStage(chain, stage)
+  ) {
+    return <StageNotReached stageLabel={EMPLOYEE_STAGE_LABELS[stage]} />;
   }
-  if (hasRetailDirectorStage && (stage === "director" || stage === "hr")) {
-    previousApprovals.push({
-      label: EMPLOYEE_STAGE_LABELS.retail_director,
-      approverName: requestData.employee_retail_director_approver,
-      status: requestData.employee_retail_director_approval_status,
-      comments: requestData.employee_retail_director_comments,
-    });
-  }
-  if (stage === "hr") {
-    previousApprovals.push({
-      label: EMPLOYEE_STAGE_LABELS.director,
-      approverName: requestData.employee_director_approver,
-      status: requestData.employee_director_approval_status,
-      comments: requestData.employee_director_comments,
-    });
-  }
+
+  // The stages that precede the current one, in this requisition's order
+  // (CEO and HR swapped places - lib/employeeApprovalOrder.ts). Retail
+  // Director only applies when the requisition has that stage.
+  const order = employeeStageOrder(chain.hrBeforeDirector);
+  const previousApprovals: PreviousApproval[] = order
+    .slice(0, order.indexOf(stage))
+    .filter((earlier) => earlier !== "retail_director" || hasRetailDirectorStage)
+    .map((earlier) => ({
+      label: EMPLOYEE_STAGE_LABELS[earlier],
+      approverName: requestData[`employee_${earlier}_approver`],
+      status: requestData[`employee_${earlier}_approval_status`],
+      comments: requestData[`employee_${earlier}_comments`],
+    }));
 
   const positionsResult = await query(
     `
@@ -179,9 +186,6 @@ const ApprovalPageContent = async ({
   );
 
   // Check if request is already processed
-  const approvalStatus = requestData.approval_status;
-  const approverName = requestData.approver_name;
-
   if (approvalStatus !== "pending" && approvalStatus !== "N/A")
     return (
       <AlreadyProcessed processedBy={approverName} status={approvalStatus} />

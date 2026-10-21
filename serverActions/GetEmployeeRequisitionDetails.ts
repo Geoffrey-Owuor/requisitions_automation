@@ -26,6 +26,8 @@ export async function getEmployeeRequisitionDetails(
       hodApprovalStatus: data.hodapprovalstatus,
       retailDirectorApprovalStatus: data.retaildirectorapprovalstatus,
       directorApprovalStatus: data.directorapprovalstatus,
+      hrApprovalStatus: data.hrapprovalstatus,
+      hrBeforeDirector: data.hrbeforedirector,
     }));
 
   if (!isSubmitter && !isApprover) return null;
