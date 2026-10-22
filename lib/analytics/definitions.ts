@@ -1,6 +1,7 @@
 import {
   BriefcaseBusiness,
   ChartColumnBig,
+  HardHat,
   UserRoundPlus,
   type LucideIcon,
 } from "lucide-react";
@@ -20,9 +21,9 @@ export const ANALYTICS_PAGE = {
   Icon: ChartColumnBig,
 };
 
-// Migration 035 also seeds analytics-casual and analytics-it; their
-// dashboards join this list as they're built. Listed in the nav's order.
-export type AnalyticsType = "travel" | "employee";
+// Migration 035 also seeds analytics-it; its dashboard joins this list
+// when it's built. Listed in the nav's order.
+export type AnalyticsType = "travel" | "casual" | "employee";
 
 export type AnalyticsDefinition = {
   type: AnalyticsType;
@@ -37,6 +38,12 @@ export const ANALYTICS: AnalyticsDefinition[] = [
     label: "Travel",
     role: "analytics-travel",
     Icon: BriefcaseBusiness,
+  },
+  {
+    type: "casual",
+    label: "Casual",
+    role: "analytics-casual",
+    Icon: HardHat,
   },
   {
     type: "employee",
@@ -92,4 +99,19 @@ export function defaultAnalyticsRange(today: string) {
     from: start.toISOString().slice(0, 10),
     to: today,
   };
+}
+
+// Casual budgets run by financial year, April -> March, keyed by the
+// calendar year its April falls in ("2026-2027"), as in
+// lib/casualBudgetRules.ts
+export const isFinancialYear = (value: string) => {
+  const match = /^(\d{4})-(\d{4})$/.exec(value);
+  return !!match && Number(match[2]) === Number(match[1]) + 1;
+};
+
+// The financial year `today` (YYYY-MM-DD, Nairobi) falls in
+export function currentFinancialYear(today: string) {
+  const [year, month] = today.split("-").map(Number);
+  const startYear = month >= 4 ? year : year - 1;
+  return `${startYear}-${startYear + 1}`;
 }

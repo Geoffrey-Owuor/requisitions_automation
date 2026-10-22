@@ -4,10 +4,16 @@ import type {
   AnalyticsFilters,
   AnalyticsType,
 } from "@/lib/analytics/definitions";
-import type { EmployeeAnalytics, TravelAnalytics } from "@/lib/analytics/types";
+import type {
+  CasualAnalytics,
+  CasualBudget,
+  EmployeeAnalytics,
+  TravelAnalytics,
+} from "@/lib/analytics/types";
 
 export type AnalyticsData = {
   travel: TravelAnalytics;
+  casual: CasualAnalytics;
   employee: EmployeeAnalytics;
 };
 
@@ -28,6 +34,25 @@ export async function fetchAnalytics<T extends AnalyticsType>(
     throw new Error(
       `Failed to load the ${type} analytics (${response.status})`,
     );
+  }
+  return response.json();
+}
+
+export const casualBudgetQueryKey = (
+  financialYear: string,
+  department: string,
+) => ["Analytics", "casual-budget", financialYear, department];
+
+export async function fetchCasualBudget(
+  financialYear: string,
+  department: string,
+): Promise<CasualBudget> {
+  const params = new URLSearchParams({ fy: financialYear, department });
+  const response = await fetch(`/api/analytics/casual/budget?${params}`, {
+    cache: "no-store",
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to load the casual budget (${response.status})`);
   }
   return response.json();
 }

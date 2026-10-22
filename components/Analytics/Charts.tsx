@@ -4,6 +4,8 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
+  ComposedChart,
+  Line,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -12,7 +14,10 @@ import {
 import {
   CHART_INK,
   ChartTooltip,
+  SERIES,
+  formatCompact,
   formatCount,
+  formatKesExact,
   formatMonth,
 } from "./AnalyticsPrimitives";
 
@@ -140,6 +145,80 @@ export function DepartmentBars<Row extends { department: string }>({
             />
           ))}
         </BarChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+// The budget line: a reference, not a series, so it's drawn in ink
+export const BUDGET_LINE = { color: "#52514e", dash: "6 4" } as const;
+
+// Spend per month against budget: approved and awaiting-approval spend
+// stacked, with the month's budget as a dashed line on the same KES scale
+export function BudgetMonthlyChart({
+  data,
+}: {
+  data: {
+    month: string;
+    budget: number;
+    approvedSpend: number;
+    pendingSpend: number;
+  }[];
+}) {
+  return (
+    <div className="h-64">
+      <ResponsiveContainer width="100%" height="100%">
+        <ComposedChart
+          data={data}
+          margin={{ top: 4, right: 4, bottom: 0, left: 0 }}
+        >
+          <CartesianGrid vertical={false} stroke={CHART_INK.grid} />
+          <XAxis dataKey="month" tickFormatter={formatMonth} {...axisProps} />
+          <YAxis
+            axisLine={false}
+            width={48}
+            tickFormatter={formatCompact}
+            {...axisProps}
+          />
+          <Tooltip
+            cursor={{ fill: CHART_INK.cursor }}
+            content={
+              <ChartTooltip
+                formatLabel={(month) => formatMonth(String(month))}
+                formatValue={formatKesExact}
+              />
+            }
+          />
+          <Bar
+            dataKey="approvedSpend"
+            name="Approved"
+            stackId="spend"
+            fill={SERIES.approved}
+            stroke="#ffffff"
+            strokeWidth={2}
+            maxBarSize={28}
+          />
+          <Bar
+            dataKey="pendingSpend"
+            name="Awaiting approval"
+            stackId="spend"
+            fill={SERIES.pending}
+            stroke="#ffffff"
+            strokeWidth={2}
+            radius={[4, 4, 0, 0]}
+            maxBarSize={28}
+          />
+          <Line
+            dataKey="budget"
+            name="Budget"
+            type="step"
+            stroke={BUDGET_LINE.color}
+            strokeWidth={2}
+            strokeDasharray={BUDGET_LINE.dash}
+            dot={false}
+            activeDot={{ r: 4 }}
+          />
+        </ComposedChart>
       </ResponsiveContainer>
     </div>
   );

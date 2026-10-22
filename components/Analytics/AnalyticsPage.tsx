@@ -16,6 +16,7 @@ import {
   type AnalyticsFilters,
   type AnalyticsType,
 } from "@/lib/analytics/definitions";
+import CasualAnalytics from "./CasualAnalytics";
 import EmployeeAnalytics from "./EmployeeAnalytics";
 import TravelAnalytics from "./TravelAnalytics";
 
@@ -224,6 +225,7 @@ export default function AnalyticsPage({
       </section>
 
       {type === "travel" && <TravelAnalytics filters={filters} />}
+      {type === "casual" && <CasualAnalytics filters={filters} today={today} />}
       {type === "employee" && <EmployeeAnalytics filters={filters} />}
     </div>
   );

@@ -3,6 +3,7 @@ import type {
   AnalyticsFilters,
   AnalyticsType,
 } from "@/lib/analytics/definitions";
+import { loadCasualAnalytics } from "@/lib/analytics/queries/casual";
 import { loadEmployeeAnalytics } from "@/lib/analytics/queries/employee";
 import { loadTravelAnalytics } from "@/lib/analytics/queries/travel";
 
@@ -12,5 +13,6 @@ export const ANALYTICS_LOADERS: Record<
   (filters: AnalyticsFilters) => Promise<unknown>
 > = {
   travel: loadTravelAnalytics,
+  casual: loadCasualAnalytics,
   employee: loadEmployeeAnalytics,
 };
