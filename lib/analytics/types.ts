@@ -129,3 +129,79 @@ export type TravelAnalytics = {
     totalCost: number;
   }[];
 };
+
+export type CasualStage = "hod" | "hr";
+
+// Amounts are the sections' stored totals (rate x days x casuals) as
+// currently stored, without statutory costs — CasualBudget adds those.
+export type CasualAnalytics = {
+  totals: {
+    requisitions: number;
+    casualsRequested: number;
+    requestedAmount: number;
+    approvedRequisitions: number;
+    approvedCasuals: number;
+    // Casuals x engagement days of approved sections
+    approvedCasualDays: number;
+    approvedAmount: number;
+    pendingRequisitions: number;
+    pendingAmount: number;
+    declinedRequisitions: number;
+    // Approved amount per casual-day; null when nothing is approved
+    avgDailyRate: number | null;
+    // Calendar days from submission (or the latest amendment, which
+    // restarts the chain) to the final decision; null when none are decided
+    avgDaysToDecision: number | null;
+    amendedRequisitions: number;
+  };
+  // One entry per calendar month of the range (YYYY-MM), by submission month
+  monthly: { month: string; requestedAmount: number; approvedAmount: number }[];
+  byDepartment: {
+    department: string;
+    approvedAmount: number;
+    pendingAmount: number;
+  }[];
+  // Approved sections
+  byLocation: { location: string; casualDays: number; amount: number }[];
+  byCategory: { category: string; casualDays: number; amount: number }[];
+  topSections: {
+    section: string;
+    department: string;
+    casualDays: number;
+    amount: number;
+  }[];
+  pipeline: { stage: CasualStage; requisitions: number; amount: number }[];
+  declines: { stage: CasualStage; requisitions: number }[];
+};
+
+// Casual budgets against spend for one financial year (April -> March), the
+// way the casual form's budget estimate counts it (GetCasualBudgetEstimate):
+// a section's amount plus casuals x the department's statutory cost, in the
+// month its engagement starts. Departments' budget units are summed.
+export type CasualBudget = {
+  financialYear: string;
+  // Years with budgets, plus the current one, newest first
+  financialYears: string[];
+  totals: {
+    budget: number;
+    // Spend recorded outside the app for the year
+    baseline: number;
+    approvedSpend: number;
+    // Sections still awaiting approval, if all were approved
+    pendingSpend: number;
+  };
+  // The year's 12 months (YYYY-MM), April first
+  monthly: {
+    month: string;
+    budget: number;
+    approvedSpend: number;
+    pendingSpend: number;
+  }[];
+  byDepartment: {
+    department: string;
+    budget: number;
+    // Approved spend plus the baseline
+    spent: number;
+    pendingSpend: number;
+  }[];
+};
