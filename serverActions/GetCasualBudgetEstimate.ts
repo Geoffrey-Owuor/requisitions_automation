@@ -130,15 +130,16 @@ export async function getCasualBudgetEstimate({
            SUM(s.casual_total_amount + s.number_of_casuals * $4::numeric) AS spend
          FROM casual_requisition_sections s
          JOIN casual_requisitions c ON c.request_id = s.request_id
+         -- The SQL twin of getBudgetUnitForSection: the section's configured
+         -- unit (inactive sections included), 'default' when it has none
+         LEFT JOIN casual_department_sections ds
+           ON ds.department_name = c.employee_department
+          AND ds.section_name = s.section_name
          WHERE c.employee_department = $1
            AND c.casual_hod_approval_status = 'approved'
            AND c.casual_hr_approval_status = 'approved'
            AND s.engagement_period_from BETWEEN $2 AND $3
-           AND (
-             $5 = 'default'
-             OR ($5 = 'bond' AND s.section_name = 'Bond')
-             OR ($5 = 'warehouse' AND s.section_name != 'Bond')
-           )
+           AND COALESCE(ds.budget_unit, 'default') = $5
          GROUP BY 1`,
         [department, start, end, statutoryCostPerCasual, unit],
       );

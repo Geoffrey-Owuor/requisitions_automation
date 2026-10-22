@@ -14,6 +14,15 @@ export interface DepartmentRules {
 export const INVALID_DEPARTMENT_MESSAGE =
   "The selected department is not available, please select another department";
 
+// Every department name, inactive ones included since requisitions keep
+// theirs — for filters over past requisitions (the Analytics page)
+export async function loadAllDepartmentNames(): Promise<string[]> {
+  const rows = await query<{ department_name: string }>(
+    `SELECT department_name FROM base_departments ORDER BY department_name`,
+  );
+  return rows.map((row) => row.department_name);
+}
+
 // Resolves a submitted department to its rules, or null when it may not be
 // used: unknown, or inactive. An amendment passes the department its
 // requisition already has as `currentDepartment`, so it can keep that one
