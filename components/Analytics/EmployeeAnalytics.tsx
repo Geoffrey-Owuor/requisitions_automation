@@ -2,15 +2,6 @@
 
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
-import {
   CircleCheck,
   CircleX,
   Hourglass,
@@ -30,9 +21,7 @@ import AnalyticsSkeleton from "@/components/Skeletons/AnalyticsSkeleton";
 import { DetailsLoadError } from "@/components/Dashboard/DetailsLoadError";
 import {
   BarList,
-  CHART_INK,
   ChartCard,
-  ChartTooltip,
   SERIES,
   StatTile,
   formatCompact,
@@ -41,12 +30,7 @@ import {
   formatMonth,
   percent,
 } from "./AnalyticsPrimitives";
-
-const axisProps = {
-  stroke: CHART_INK.baseline,
-  tick: { fill: CHART_INK.axis, fontSize: 12 },
-  tickLine: false,
-} as const;
+import { DepartmentBars, MonthlyBars } from "./Charts";
 
 export default function EmployeeAnalytics({
   filters,
@@ -148,43 +132,21 @@ export default function EmployeeAnalytics({
           ]),
         }}
       >
-        <div className="h-64">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={data.monthly}
-              barGap={2}
-              margin={{ top: 4, right: 4, bottom: 0, left: -20 }}
-            >
-              <CartesianGrid vertical={false} stroke={CHART_INK.grid} />
-              <XAxis
-                dataKey="month"
-                tickFormatter={formatMonth}
-                {...axisProps}
-              />
-              <YAxis allowDecimals={false} axisLine={false} {...axisProps} />
-              <Tooltip
-                cursor={{ fill: CHART_INK.cursor }}
-                content={
-                  <ChartTooltip formatLabel={(m) => formatMonth(String(m))} />
-                }
-              />
-              <Bar
-                dataKey="requestedHeadcount"
-                name="Requested"
-                fill={SERIES.requested}
-                radius={[4, 4, 0, 0]}
-                maxBarSize={24}
-              />
-              <Bar
-                dataKey="approvedHeadcount"
-                name="Approved"
-                fill={SERIES.approved}
-                radius={[4, 4, 0, 0]}
-                maxBarSize={24}
-              />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+        <MonthlyBars
+          data={data.monthly}
+          series={[
+            {
+              key: "requestedHeadcount",
+              label: "Requested",
+              color: SERIES.requested,
+            },
+            {
+              key: "approvedHeadcount",
+              label: "Approved",
+              color: SERIES.approved,
+            },
+          ]}
+        />
       </ChartCard>
 
       <div className="grid gap-4 lg:grid-cols-2">
@@ -207,52 +169,21 @@ export default function EmployeeAnalytics({
               ]),
             }}
           >
-            <div
-              style={{
-                height: Math.max(120, data.byDepartment.length * 36 + 32),
-              }}
-            >
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={data.byDepartment}
-                  layout="vertical"
-                  margin={{ top: 0, right: 8, bottom: 0, left: 0 }}
-                >
-                  <CartesianGrid horizontal={false} stroke={CHART_INK.grid} />
-                  <XAxis type="number" allowDecimals={false} {...axisProps} />
-                  <YAxis
-                    type="category"
-                    dataKey="department"
-                    width={140}
-                    axisLine={false}
-                    {...axisProps}
-                  />
-                  <Tooltip
-                    cursor={{ fill: CHART_INK.cursor }}
-                    content={<ChartTooltip />}
-                  />
-                  <Bar
-                    dataKey="approvedHeadcount"
-                    name="Approved"
-                    stackId="headcount"
-                    fill={SERIES.approved}
-                    stroke="#ffffff"
-                    strokeWidth={2}
-                    maxBarSize={20}
-                  />
-                  <Bar
-                    dataKey="pendingHeadcount"
-                    name="Awaiting approval"
-                    stackId="headcount"
-                    fill={SERIES.pending}
-                    stroke="#ffffff"
-                    strokeWidth={2}
-                    radius={[0, 4, 4, 0]}
-                    maxBarSize={20}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            <DepartmentBars
+              data={data.byDepartment}
+              series={[
+                {
+                  key: "approvedHeadcount",
+                  label: "Approved",
+                  color: SERIES.approved,
+                },
+                {
+                  key: "pendingHeadcount",
+                  label: "Awaiting approval",
+                  color: SERIES.pending,
+                },
+              ]}
+            />
           </ChartCard>
         )}
 

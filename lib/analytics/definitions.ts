@@ -1,4 +1,9 @@
-import { ChartColumnBig, UserRoundPlus, type LucideIcon } from "lucide-react";
+import {
+  BriefcaseBusiness,
+  ChartColumnBig,
+  UserRoundPlus,
+  type LucideIcon,
+} from "lucide-react";
 import { getReportRangeError } from "@/lib/reports/definitions";
 
 // The analytics dashboards on the dashboard's Analytics page. Shared by the
@@ -15,9 +20,9 @@ export const ANALYTICS_PAGE = {
   Icon: ChartColumnBig,
 };
 
-// Migration 035 also seeds analytics-travel, analytics-casual and
-// analytics-it; their dashboards join this list as they're built.
-export type AnalyticsType = "employee";
+// Migration 035 also seeds analytics-casual and analytics-it; their
+// dashboards join this list as they're built. Listed in the nav's order.
+export type AnalyticsType = "travel" | "employee";
 
 export type AnalyticsDefinition = {
   type: AnalyticsType;
@@ -27,6 +32,12 @@ export type AnalyticsDefinition = {
 };
 
 export const ANALYTICS: AnalyticsDefinition[] = [
+  {
+    type: "travel",
+    label: "Travel",
+    role: "analytics-travel",
+    Icon: BriefcaseBusiness,
+  },
   {
     type: "employee",
     label: "Employee",

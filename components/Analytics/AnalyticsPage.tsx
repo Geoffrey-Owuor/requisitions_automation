@@ -17,6 +17,7 @@ import {
   type AnalyticsType,
 } from "@/lib/analytics/definitions";
 import EmployeeAnalytics from "./EmployeeAnalytics";
+import TravelAnalytics from "./TravelAnalytics";
 
 // YYYY-MM-DD arithmetic on Nairobi calendar dates, in UTC so the viewer's
 // own time zone can't shift a day
@@ -222,6 +223,7 @@ export default function AnalyticsPage({
         )}
       </section>
 
+      {type === "travel" && <TravelAnalytics filters={filters} />}
       {type === "employee" && <EmployeeAnalytics filters={filters} />}
     </div>
   );

@@ -34,6 +34,7 @@ const compact = new Intl.NumberFormat("en-KE", {
 export const formatCount = (value: number) => integer.format(value);
 export const formatCompact = (value: number) => compact.format(value);
 export const formatKes = (value: number) => `KES ${compact.format(value)}`;
+export const formatKesExact = (value: number) => `KES ${integer.format(value)}`;
 
 // "2026-03" -> "Mar 26"
 export const formatMonth = (month: string) => {
@@ -242,11 +243,13 @@ export function ChartTooltip({
   label,
   payload,
   formatLabel = (value) => String(value),
+  formatValue = formatCount,
 }: {
   active?: boolean;
   label?: string | number;
   payload?: { name?: string; value?: number; color?: string }[];
   formatLabel?: (label: string | number) => string;
+  formatValue?: (value: number) => string;
 }) {
   if (!active || !payload?.length || label === undefined) return null;
   return (
@@ -268,7 +271,7 @@ export function ChartTooltip({
             {entry.name}
           </span>
           <span className="font-semibold text-neutral-900 tabular-nums">
-            {formatCount(entry.value ?? 0)}
+            {formatValue(entry.value ?? 0)}
           </span>
         </p>
       ))}
