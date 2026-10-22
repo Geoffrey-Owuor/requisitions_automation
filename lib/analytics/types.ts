@@ -69,3 +69,63 @@ export type EmployeeDepartmentOverview = {
   replacementOrNew: EmployeeAnalytics["replacementOrNew"];
   recentApproved: EmployeeAnalytics["recentApproved"];
 };
+
+export type TravelStage = "hod" | "hr" | "director";
+
+// Amounts are KES totals of the trips' travel_total_cost (or one of its
+// parts), as currently stored — an amendment replaces the figures.
+export type TravelAnalytics = {
+  totals: {
+    trips: number;
+    requestedSpend: number;
+    approvedTrips: number;
+    approvedSpend: number;
+    pendingTrips: number;
+    pendingSpend: number;
+    declinedTrips: number;
+    // Average total cost of an approved trip; null when none are
+    avgApprovedCost: number | null;
+    // Approved trips the submitter marked as within budget
+    approvedWithinBudget: number;
+    // Calendar days from submission (or the latest amendment, which
+    // restarts the chain) to the final decision; null when none are decided
+    avgDaysToDecision: number | null;
+    // HR decisions reversed, and trips amended at least once
+    pushbacks: number;
+    amendedTrips: number;
+  };
+  // Approved spend split into its parts
+  approvedCostParts: { transport: number; perDiem: number; other: number };
+  // One entry per calendar month of the range (YYYY-MM), by submission month
+  monthly: { month: string; requestedSpend: number; approvedSpend: number }[];
+  byDepartment: {
+    department: string;
+    approvedSpend: number;
+    pendingSpend: number;
+  }[];
+  // Every trip in range, by approval tier
+  byTier: {
+    tier: string;
+    trips: number;
+    approvedTrips: number;
+    approvedSpend: number;
+  }[];
+  // Approved trips
+  byMode: { mode: string; trips: number }[];
+  byCategory: { category: string; trips: number }[];
+  topDestinations: { destination: string; trips: number; spend: number }[];
+  // Pending trips by the stage they wait on, declined trips by the stage
+  // that declined them, both in approval order
+  pipeline: { stage: TravelStage; trips: number; spend: number }[];
+  declines: { stage: TravelStage; trips: number }[];
+  largestApproved: {
+    requestId: string;
+    employeeName: string;
+    department: string;
+    destination: string;
+    // YYYY-MM-DD
+    departureDate: string;
+    tier: string;
+    totalCost: number;
+  }[];
+};

@@ -1,6 +1,7 @@
 import "server-only";
 import { query } from "@/lib/db";
 import { createdInRange, nairobi } from "@/lib/reports/sql";
+import { MONTHS, daysBetween, nairobiMonth } from "@/lib/analytics/sql";
 import {
   defaultAnalyticsRange,
   type AnalyticsFilters,
@@ -83,7 +84,7 @@ const TOTALS_SQL = `${WITH}
     (SELECT COUNT(*) FROM req WHERE outcome = 'approved')::int AS approved_requisitions,
     (SELECT COUNT(*) FROM req WHERE outcome = 'pending')::int AS pending_requisitions,
     (SELECT COUNT(*) FROM req WHERE outcome = 'declined')::int AS declined_requisitions,
-    (SELECT AVG(EXTRACT(EPOCH FROM decided_at - request_created_at) / 86400)
+    (SELECT AVG(${daysBetween("request_created_at", "decided_at")})
        FROM req WHERE outcome <> 'pending' AND decided_at IS NOT NULL)::float8
       AS avg_days_to_decision,
     COALESCE(SUM(number_required), 0)::int AS headcount_requested,
@@ -99,14 +100,9 @@ const TOTALS_SQL = `${WITH}
       AS unpriced_approved_positions
   FROM pos`;
 
-const MONTHLY_SQL = `${WITH},
-  months AS (
-    SELECT generate_series(DATE_TRUNC('month', $1::date),
-                           DATE_TRUNC('month', $2::date),
-                           INTERVAL '1 month')::date AS month
-  ),
+const MONTHLY_SQL = `${WITH}, ${MONTHS},
   pos_month AS (
-    SELECT DATE_TRUNC('month', ${nairobi("req.request_created_at")})::date AS month,
+    SELECT ${nairobiMonth("req.request_created_at")} AS month,
            pos.number_required, pos.outcome
     FROM pos JOIN req ON req.request_id = pos.request_id
   )

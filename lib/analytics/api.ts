@@ -4,9 +4,10 @@ import type {
   AnalyticsFilters,
   AnalyticsType,
 } from "@/lib/analytics/definitions";
-import type { EmployeeAnalytics } from "@/lib/analytics/types";
+import type { EmployeeAnalytics, TravelAnalytics } from "@/lib/analytics/types";
 
 export type AnalyticsData = {
+  travel: TravelAnalytics;
   employee: EmployeeAnalytics;
 };
 
