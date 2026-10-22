@@ -150,19 +150,25 @@ function parseIsoDate(value: string): Date | null {
  * Why a from/to pair can't be used, or null when it can. Both dates are
  * inclusive Africa/Nairobi calendar days, and the range may span at most
  * MAX_REPORT_RANGE_MONTHS (1 Jan to 31 Dec is fine; 1 Jan to 1 Jan is not).
+ * The Analytics page applies the same rule, naming itself as `subject`.
  */
-export function getReportRangeError(from: string, to: string): string | null {
+export function getReportRangeError(
+  from: string,
+  to: string,
+  subject = "A report",
+): string | null {
   if (!from || !to) return "Choose both a from date and a to date";
 
   const fromDate = parseIsoDate(from);
   const toDate = parseIsoDate(to);
   if (!fromDate || !toDate) return "Dates must be valid YYYY-MM-DD dates";
-  if (fromDate > toDate) return "The from date must be on or before the to date";
+  if (fromDate > toDate)
+    return "The from date must be on or before the to date";
 
   const limit = new Date(fromDate);
   limit.setUTCMonth(limit.getUTCMonth() + MAX_REPORT_RANGE_MONTHS);
   if (toDate >= limit) {
-    return `A report can cover at most ${MAX_REPORT_RANGE_MONTHS} months`;
+    return `${subject} can cover at most ${MAX_REPORT_RANGE_MONTHS} months`;
   }
   return null;
 }
