@@ -205,3 +205,39 @@ export type CasualBudget = {
     pendingSpend: number;
   }[];
 };
+
+export type ItStage = "hod" | "it";
+
+// IT requests: HOD approves, then IT accepts or rejects. Accepted requests
+// are marked completed later by the itrequisition-completion trigger.
+export type ItAnalytics = {
+  totals: {
+    requests: number;
+    newHires: number;
+    replacements: number;
+    acceptedRequests: number;
+    pendingRequests: number;
+    declinedRequests: number;
+    // Accepted requests IT accepted on or before the joining date
+    acceptedBeforeJoining: number;
+    // Average days from submission to the joining date (the notice IT
+    // gets); null when there are no requests
+    avgNoticeDays: number | null;
+    // Average days from submission to IT's decision; null when none
+    avgDaysToItDecision: number | null;
+    completed: number;
+  };
+  // One entry per calendar month of the range (YYYY-MM), by submission month
+  monthly: { month: string; requested: number; accepted: number }[];
+  byDepartment: {
+    department: string;
+    accepted: number;
+    pending: number;
+  }[];
+  // Requirement items on accepted requests, most requested first
+  requirementItems: { item: string; requests: number }[];
+  // Accepted requests
+  replacementOrNew: { kind: string; requests: number }[];
+  pipeline: { stage: ItStage; requests: number }[];
+  declines: { stage: ItStage; requests: number }[];
+};

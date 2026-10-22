@@ -8,6 +8,7 @@ import type {
   CasualAnalytics,
   CasualBudget,
   EmployeeAnalytics,
+  ItAnalytics,
   TravelAnalytics,
 } from "@/lib/analytics/types";
 
@@ -15,6 +16,7 @@ export type AnalyticsData = {
   travel: TravelAnalytics;
   casual: CasualAnalytics;
   employee: EmployeeAnalytics;
+  it: ItAnalytics;
 };
 
 export const analyticsQueryKey = (

@@ -2,6 +2,7 @@ import {
   BriefcaseBusiness,
   ChartColumnBig,
   HardHat,
+  Monitor,
   UserRoundPlus,
   type LucideIcon,
 } from "lucide-react";
@@ -21,9 +22,8 @@ export const ANALYTICS_PAGE = {
   Icon: ChartColumnBig,
 };
 
-// Migration 035 also seeds analytics-it; its dashboard joins this list
-// when it's built. Listed in the nav's order.
-export type AnalyticsType = "travel" | "casual" | "employee";
+// Listed in the nav's order
+export type AnalyticsType = "travel" | "casual" | "employee" | "it";
 
 export type AnalyticsDefinition = {
   type: AnalyticsType;
@@ -50,6 +50,12 @@ export const ANALYTICS: AnalyticsDefinition[] = [
     label: "Employee",
     role: "analytics-employee",
     Icon: UserRoundPlus,
+  },
+  {
+    type: "it",
+    label: "IT",
+    role: "analytics-it",
+    Icon: Monitor,
   },
 ];
 
