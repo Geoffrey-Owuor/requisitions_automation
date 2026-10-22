@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import {
   Building2,
   CalendarDays,
@@ -33,6 +33,10 @@ import { EmployeeAmendmentValues } from "@/lib/employeeAmendment";
 import PreviousApprovalsSection, {
   PreviousApproval,
 } from "@/components/Approvers/PreviousApprovalsSection";
+import DepartmentOverview, {
+  DepartmentOverviewSkeleton,
+} from "./DepartmentOverview";
+import type { EmployeeDepartmentOverview } from "@/lib/analytics/types";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -69,6 +73,8 @@ export interface EmployeeApprovalModalProps {
   previousApprovals: PreviousApproval[];
   amendmentCount: number;
   amendments: EmployeeAmendmentValues[];
+  // Streamed in after the page renders; null when it failed to load
+  departmentOverview: Promise<EmployeeDepartmentOverview | null>;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -122,6 +128,7 @@ const EmployeeApprovalModal = ({
   previousApprovals,
   amendmentCount,
   amendments,
+  departmentOverview,
 }: EmployeeApprovalModalProps) => {
   const [comments, setComments] = useState("");
   const [approving, setApproving] = useState(false);
@@ -288,6 +295,20 @@ const EmployeeApprovalModal = ({
                   />
                 </div>
               </div>
+            </div>
+
+            {/* ── Department context ── */}
+            <div className="mb-6 border-t border-[rgba(240,180,180,0.4)] pt-6">
+              <Suspense
+                fallback={
+                  <DepartmentOverviewSkeleton department={department} />
+                }
+              >
+                <DepartmentOverview
+                  overview={departmentOverview}
+                  department={department}
+                />
+              </Suspense>
             </div>
 
             {/* ── Positions ── */}

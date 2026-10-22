@@ -1,12 +1,19 @@
 import "server-only";
 import { query } from "@/lib/db";
 import { createdInRange, nairobi } from "@/lib/reports/sql";
-import type { AnalyticsFilters } from "@/lib/analytics/definitions";
-import type { EmployeeAnalytics } from "@/lib/analytics/types";
+import {
+  defaultAnalyticsRange,
+  type AnalyticsFilters,
+} from "@/lib/analytics/definitions";
+import type {
+  EmployeeAnalytics,
+  EmployeeDepartmentOverview,
+} from "@/lib/analytics/types";
 import type { EmployeeStage } from "@/public/assets";
 
 // Employee Requisition analytics. Every query takes $1 from, $2 to
-// (inclusive Nairobi submission dates) and $3 department ('' = all).
+// (inclusive Nairobi submission dates), $3 department ('' = all) and $4 a
+// requisition to leave out (NULL = none) — the one an approver is reviewing.
 
 // One row per requisition in range, with its outcome, the stage it waits on
 // (pending) or was declined at (declined) — the first stage in its own
@@ -44,6 +51,7 @@ const REQUISITIONS = `
     FROM employee_requisitions e
     WHERE ${createdInRange("e.request_created_at")}
       AND ($3 = '' OR e.employee_department = $3)
+      AND ($4::uuid IS NULL OR e.request_id <> $4::uuid)
   )`;
 
 // Salary ranges are stored as text, "<min> - <max>" (or "<min> to <max>"
@@ -174,12 +182,11 @@ const STAGE_ORDER: EmployeeStage[] = [
   "director",
 ];
 
-export async function loadEmployeeAnalytics({
-  from,
-  to,
-  department,
-}: AnalyticsFilters): Promise<EmployeeAnalytics> {
-  const params = [from, to, department];
+export async function loadEmployeeAnalytics(
+  { from, to, department }: AnalyticsFilters,
+  { excludeRequestId = null }: { excludeRequestId?: string | null } = {},
+): Promise<EmployeeAnalytics> {
+  const params = [from, to, department, excludeRequestId];
 
   const [
     totalsRows,
@@ -291,5 +298,26 @@ export async function loadEmployeeAnalytics({
       salaryRange: row.position_salary_range,
       approvedOn: row.approved_on,
     })),
+  };
+}
+
+export async function loadEmployeeDepartmentOverview(
+  department: string,
+  excludeRequestId: string,
+): Promise<EmployeeDepartmentOverview> {
+  const today = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Africa/Nairobi",
+  }).format(new Date());
+  const range = defaultAnalyticsRange(today);
+
+  const { totals, byGrade, replacementOrNew, recentApproved } =
+    await loadEmployeeAnalytics({ ...range, department }, { excludeRequestId });
+
+  return {
+    from: range.from,
+    totals,
+    byGrade,
+    replacementOrNew,
+    recentApproved: recentApproved.slice(0, 5),
   };
 }

@@ -56,3 +56,16 @@ export type EmployeeAnalytics = {
     approvedOn: string;
   }[];
 };
+
+// The "department at a glance" panel on the Employee approval page: the
+// requisition's department over the last 12 months, leaving out the
+// requisition under review. Only what the panel shows, since that page is
+// reached by token, without a session.
+export type EmployeeDepartmentOverview = {
+  // First submission date covered (YYYY-MM-DD, Nairobi)
+  from: string;
+  totals: EmployeeAnalytics["totals"];
+  byGrade: EmployeeAnalytics["byGrade"];
+  replacementOrNew: EmployeeAnalytics["replacementOrNew"];
+  recentApproved: EmployeeAnalytics["recentApproved"];
+};
