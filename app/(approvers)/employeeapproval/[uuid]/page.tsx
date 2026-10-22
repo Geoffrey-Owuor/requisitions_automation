@@ -10,6 +10,7 @@ import NotFoundRequest from "@/components/Approvers/TravelApprovers/NotFoundRequ
 import NotAssignedHod from "@/components/Approvers/NotAssignedHod";
 import StageNotReached from "@/components/Approvers/StageNotReached";
 import { getHodPageAccess } from "@/lib/hodAssignment";
+import { loadEmployeeDepartmentOverview } from "@/lib/analytics/queries/employee";
 import {
   employeeAmendmentsQuery,
   EmployeeAmendmentValues,
@@ -194,6 +195,16 @@ const ApprovalPageContent = async ({
   // Our current approver
   const currentApprover = approverDetails.name;
 
+  // The department's last 12 months, streamed into the page rather than
+  // awaited: a slow or failed overview never holds up or blocks the review
+  const departmentOverview = loadEmployeeDepartmentOverview(
+    requestData.employee_department,
+    uuid,
+  ).catch((error) => {
+    console.error("Error while loading the department overview:", error);
+    return null;
+  });
+
   return (
     <EmployeeApprovalModal
       uuid={uuid}
@@ -207,6 +218,7 @@ const ApprovalPageContent = async ({
       previousApprovals={previousApprovals}
       amendmentCount={requestData.amendment_count}
       amendments={amendments}
+      departmentOverview={departmentOverview}
       positions={positionsResult.map((position) => ({
         positionId: position.position_id,
         positionTitle: position.position_title,
