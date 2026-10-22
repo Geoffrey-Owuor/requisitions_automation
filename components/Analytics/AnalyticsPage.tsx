@@ -18,6 +18,7 @@ import {
 } from "@/lib/analytics/definitions";
 import CasualAnalytics from "./CasualAnalytics";
 import EmployeeAnalytics from "./EmployeeAnalytics";
+import ItAnalytics from "./ItAnalytics";
 import TravelAnalytics from "./TravelAnalytics";
 
 // YYYY-MM-DD arithmetic on Nairobi calendar dates, in UTC so the viewer's
@@ -227,6 +228,7 @@ export default function AnalyticsPage({
       {type === "travel" && <TravelAnalytics filters={filters} />}
       {type === "casual" && <CasualAnalytics filters={filters} today={today} />}
       {type === "employee" && <EmployeeAnalytics filters={filters} />}
+      {type === "it" && <ItAnalytics filters={filters} />}
     </div>
   );
 }
