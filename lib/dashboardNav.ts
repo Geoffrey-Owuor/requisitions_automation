@@ -9,6 +9,7 @@ import {
 import type { DashboardRequisitionType } from "@/lib/dashboardApi";
 import { getRequisitionType, newRequisitionHref } from "@/lib/dashboardTables";
 import { REPORTS_PAGE, canViewReports } from "@/lib/reports/definitions";
+import { ANALYTICS_PAGE, canViewAnalytics } from "@/lib/analytics/definitions";
 import { SETTINGS_PAGE, canManageSettings } from "@/lib/configAdmin";
 
 // The dashboard navigation shared by the desktop rail (DashboardSidebar) and
@@ -150,8 +151,18 @@ export function getDashboardNavGroups(roles: string[]): DashboardNavGroup[] {
     },
   ];
 
-  // Report role and config-admin holders only
+  // Analytics, report role and config-admin holders only
   const adminItems: DashboardNavItem[] = [];
+  if (canViewAnalytics(roles)) {
+    adminItems.push({
+      key: "analytics",
+      href: ANALYTICS_PAGE.href,
+      label: ANALYTICS_PAGE.label,
+      shortLabel: ANALYTICS_PAGE.label,
+      Icon: ANALYTICS_PAGE.Icon,
+      keywords: ["dashboard", "charts", "kpi", "statistics", "insights"],
+    });
+  }
   if (canViewReports(roles)) {
     adminItems.push({
       key: "reports",
