@@ -148,7 +148,7 @@ export async function hrApprovalStage({
         EmailSender({
           to: userEmail,
           requestId: uuid,
-          message: `Your travel requisition has been approved by ${approverName} and has been forwaded to Director Approval for the next approval stage`,
+          message: `Your travel requisition has been approved by ${approverName} and has been forwarded to Director Approval for the next approval stage`,
           title: `Update: Travel Requisition Approved By ${approverName}`,
           role: "user",
         });
@@ -157,7 +157,7 @@ export async function hrApprovalStage({
         EmailSender({
           to: hodEmail,
           requestId: uuid,
-          message: `This travel requisition has been approved by ${approverName} and has been forwaded to Director Approval for the next approval stage`,
+          message: `This travel requisition has been approved by ${approverName} and has been forwarded to Director Approval for the next approval stage`,
           title: `Update: Travel Requisition Approved By ${approverName}`,
           role: "user",
         });
@@ -166,7 +166,7 @@ export async function hrApprovalStage({
         EmailSender({
           to: userEmail,
           requestId: uuid,
-          message: `Your travel requisition has been approved by ${approverName} and has been forwaded to Director Approval for the next approval stage`,
+          message: `Your travel requisition has been approved by ${approverName} and has been forwarded to Director Approval for the next approval stage`,
           title: `Update: Travel Requisition Approved By ${approverName}`,
           role: "user",
         });

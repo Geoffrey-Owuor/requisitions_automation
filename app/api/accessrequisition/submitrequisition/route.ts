@@ -189,7 +189,7 @@ export async function POST(request: NextRequest) {
         to: email,
         requestId: requestId,
         message:
-          "Your Access requisition has been submitted successfully and forwaded to Security for review",
+          "Your Access requisition has been submitted successfully and forwarded to Security for review",
         title: "Update: Access Requisition Submitted Successfully",
         role: "user",
       });
@@ -224,7 +224,7 @@ export async function POST(request: NextRequest) {
         to: email,
         requestId: requestId,
         message:
-          "Your Access requisition has been submitted successfully and forwaded to the HOD for review",
+          "Your Access requisition has been submitted successfully and forwarded to the HOD for review",
         title: "Update: Access Requisition Submitted Successfully",
         role: "user",
       });
