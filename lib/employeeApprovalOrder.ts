@@ -109,18 +109,33 @@ export function currentEmployeeStage(
   return null;
 }
 
-// The submitter may amend until the final stage approves - a decline at any
-// stage is still amendable
-export function isEmployeeAmendable(chain: EmployeeChainStatuses): boolean {
+// Why the submitter can't amend this requisition, or null when they can:
+// until the final stage approves - a decline at any stage is still
+// amendable - and never for one imported from before the app (migration
+// 036), which an amendment would reopen in the live approval chain.
+// `imported` is employee_requisitions.imported_at IS NOT NULL.
+export function employeeNotAmendableReason(
+  chain: EmployeeChainStatuses,
+  imported: boolean,
+): string | null {
+  if (imported) {
+    return "This requisition was imported from before the Apps Hub and can't be amended - please submit a new requisition instead";
+  }
   const finalStatus = stageStatus(
     chain,
     employeeFinalStage(chain.hrBeforeDirector),
   );
-  return finalStatus === "pending" || finalStatus === "declined";
+  return finalStatus === "pending" || finalStatus === "declined"
+    ? null
+    : "This requisition can no longer be amended - it has already been fully approved";
 }
 
-export const EMPLOYEE_NOT_AMENDABLE_MESSAGE =
-  "This requisition can no longer be amended - it has already been fully approved";
+export function isEmployeeAmendable(
+  chain: EmployeeChainStatuses,
+  imported: boolean,
+): boolean {
+  return employeeNotAmendableReason(chain, imported) === null;
+}
 
 // SQL twin of hasReachedEmployeeStage for a row of employee_requisitions
 // aliased `alias` - used by the dashboard queues/history and the approver

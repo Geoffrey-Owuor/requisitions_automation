@@ -457,7 +457,8 @@ export default function EmployeeRequisitionForm({
     return (
       <div className="rounded-surface mx-auto max-w-md border border-rose-200 bg-rose-50 p-6 text-center text-sm text-rose-700">
         This requisition can no longer be amended. It may have already been
-        approved by HR, or you may not be its original submitter.
+        fully approved or imported from before the Apps Hub, or you may not be
+        its original submitter.
       </div>
     );
   }
