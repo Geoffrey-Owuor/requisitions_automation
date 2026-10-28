@@ -20,11 +20,16 @@ import {
   UserRound,
   MapPin,
   Key,
+  BadgeCheck,
 } from "lucide-react";
 import SubmittingOverlay from "@/components/SubmittingOverlay";
 import { AlertInfo } from "@/components/TravelRequisitionPage";
 import ApprovalAlert from "../TravelApprovers/ApprovalAlert";
 import { UpdateAccessRequisitionStatus } from "@/serverActions/UpdateAccessRequisitionStatus";
+import {
+  ACCESS_LOCATIONS_LABEL,
+  ACCESS_REQUIREMENTS_LABEL,
+} from "@/lib/accessRequisition";
 import PreviousApprovalsSection, {
   PreviousApproval,
 } from "@/components/Approvers/PreviousApprovalsSection";
@@ -43,6 +48,7 @@ export interface AccessRequisitionData {
   employeeName: string;
   employeeDepartment: string;
   employeeStaffNumber: string;
+  employeeStatus: string;
   issuanceDate: string;
   accessLocations: string;
   accessRequirements: string;
@@ -99,6 +105,7 @@ const AccessApprovalModal = ({ data }: { data: AccessRequisitionData }) => {
     employeeName,
     employeeDepartment,
     employeeStaffNumber,
+    employeeStatus,
     issuanceDate,
     accessLocations,
     accessRequirements,
@@ -242,6 +249,11 @@ const AccessApprovalModal = ({ data }: { data: AccessRequisitionData }) => {
                     value={employeeStaffNumber}
                   />
                   <DetailRow
+                    icon={BadgeCheck}
+                    label="Employee Status"
+                    value={employeeStatus}
+                  />
+                  <DetailRow
                     icon={Clock}
                     label="Submitted"
                     value={dateFormatter(requestCreatedAt)}
@@ -278,7 +290,7 @@ const AccessApprovalModal = ({ data }: { data: AccessRequisitionData }) => {
               <div>
                 <div className="flex items-center gap-1.5">
                   <MapPin className="mb-2.5 h-3.5 w-3.5 text-rose-400" />
-                  <SectionLabel>Locations</SectionLabel>
+                  <SectionLabel>{ACCESS_LOCATIONS_LABEL}</SectionLabel>
                 </div>
 
                 <span className="px-5 py-1.5 text-[12px] font-medium wrap-break-word whitespace-pre-wrap text-slate-800">
@@ -290,7 +302,7 @@ const AccessApprovalModal = ({ data }: { data: AccessRequisitionData }) => {
               <div>
                 <div className="flex items-center gap-1.5">
                   <Key className="mb-2.5 h-3.5 w-3.5 text-rose-400" />
-                  <SectionLabel>Requirements / Justification</SectionLabel>
+                  <SectionLabel>{ACCESS_REQUIREMENTS_LABEL}</SectionLabel>
                 </div>
                 <span className="px-5 py-1.5 text-[12px] font-medium wrap-break-word whitespace-pre-wrap text-slate-800">
                   {accessRequirements}

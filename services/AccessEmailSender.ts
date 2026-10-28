@@ -8,6 +8,7 @@ export interface AccessMailTemplateValues {
   submittername: string;
   employeename: string;
   employeestaffnumber: string;
+  employeestatus: string;
   employeedepartment: string;
   issuancedate: string;
   requirements: string;
@@ -25,6 +26,7 @@ export const AccessDataQuery = `
    submitter_name AS submittername,
    employee_name AS employeename,
    employee_staff_number AS employeestaffnumber,
+   employee_status AS employeestatus,
    employee_department AS employeedepartment,
    issuance_date AS issuancedate,
    access_requirements AS requirements,
