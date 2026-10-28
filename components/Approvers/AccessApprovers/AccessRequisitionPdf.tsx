@@ -53,7 +53,7 @@ const AccessRequisitionPdf = ({ pdfData }: { pdfData: AccessPdfValues }) => {
             Access Requisition
           </Text>
           <Text style={tw("mt-1 text-[10px] text-[#7c5a5a]")}>
-            Submitted by: {pdfData.submittername} on{" "}
+            Submitted by: {pdfData.submittername} ({pdfData.submitteremail}) on{" "}
             {dateFormatter(pdfData.datesubmitted)}
           </Text>
         </View>

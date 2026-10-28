@@ -73,9 +73,9 @@ const AccessPdfModal = ({ pdfData }: { pdfData: AccessPdfValues }) => {
             <h1 className="text-[26px] font-semibold tracking-[-0.5px] text-[#1e1b1b]">
               Access Requisition
             </h1>
-            <p className="mt-1 text-[13px] text-[#7c5a5a]">
-              Submitted by: {pdfData.submittername} on{" "}
-              {dateFormatter(pdfData.datesubmitted)}
+            <p className="mt-1 text-[13px] wrap-break-word text-[#7c5a5a]">
+              Submitted by: {pdfData.submittername} ({pdfData.submitteremail})
+              on {dateFormatter(pdfData.datesubmitted)}
             </p>
           </div>
 

@@ -85,7 +85,7 @@ function DetailRow({
         <Icon className="h-3.5 w-3.5 text-rose-400" />
         {label}
       </span>
-      <span className="max-w-50 truncate text-right font-medium text-[#1e1b1b]">
+      <span className="min-w-0 text-right font-medium wrap-break-word text-[#1e1b1b]">
         {value}
       </span>
     </div>
