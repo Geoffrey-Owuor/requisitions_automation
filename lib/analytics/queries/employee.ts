@@ -20,7 +20,9 @@ import type { EmployeeStage } from "@/public/assets";
 // (pending) or was declined at (declined) — the first stage in its own
 // approval order (lib/employeeApprovalOrder.ts) that isn't approved — and
 // its latest decision, which for a decided requisition is the final one
-// (an amendment resets every stage's date).
+// (an amendment resets every stage's date). Requisitions imported from
+// before the app (migration 036) count everywhere except the average days
+// to a decision, since their dates were entered by hand.
 const REQUISITIONS = `
   req AS (
     SELECT
@@ -48,7 +50,8 @@ const REQUISITIONS = `
       GREATEST(e.employee_hod_approval_date,
                e.employee_retail_director_approval_date,
                e.employee_director_approval_date,
-               e.employee_hr_approval_date) AS decided_at
+               e.employee_hr_approval_date) AS decided_at,
+      e.imported_at IS NOT NULL AS imported
     FROM employee_requisitions e
     WHERE ${createdInRange("e.request_created_at")}
       AND ($3 = '' OR e.employee_department = $3)
@@ -85,7 +88,8 @@ const TOTALS_SQL = `${WITH}
     (SELECT COUNT(*) FROM req WHERE outcome = 'pending')::int AS pending_requisitions,
     (SELECT COUNT(*) FROM req WHERE outcome = 'declined')::int AS declined_requisitions,
     (SELECT AVG(${daysBetween("request_created_at", "decided_at")})
-       FROM req WHERE outcome <> 'pending' AND decided_at IS NOT NULL)::float8
+       FROM req WHERE outcome <> 'pending' AND decided_at IS NOT NULL
+         AND NOT imported)::float8
       AS avg_days_to_decision,
     COALESCE(SUM(number_required), 0)::int AS headcount_requested,
     COALESCE(SUM(number_required) FILTER (WHERE outcome = 'approved'), 0)::int

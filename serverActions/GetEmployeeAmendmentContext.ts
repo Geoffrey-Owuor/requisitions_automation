@@ -29,7 +29,7 @@ export interface EmployeeAmendmentContext {
 
 // Amendments are only allowed for the original submitter, before the final
 // stage approves (lib/employeeApprovalOrder.ts) - a decline at any stage is
-// still amendable. Returns null when the
+// still amendable - and never for an imported one. Returns null when the
 // requisition doesn't exist, isn't owned by the current user, or is no
 // longer within that window. The amendment route re-checks everything.
 export async function getEmployeeAmendmentContext(
@@ -47,10 +47,12 @@ export async function getEmployeeAmendmentContext(
       amendment_count: number;
       employee_department: string;
       employee_hod_email: string;
+      imported: boolean;
     }
   >(
     `SELECT submitter_email, amendment_count, employee_department,
-     employee_hod_email, hr_before_director, employee_hod_approval_status,
+     employee_hod_email, imported_at IS NOT NULL AS imported,
+     hr_before_director, employee_hod_approval_status,
      employee_retail_director_approval_status, employee_director_approval_status,
      employee_hr_approval_status
      FROM employee_requisitions WHERE request_id = $1`,
@@ -63,7 +65,7 @@ export async function getEmployeeAmendmentContext(
 
   const isAmendable =
     sameEmail(header.submitter_email, session.email) &&
-    isEmployeeAmendable(employeeChainFromRow(header));
+    isEmployeeAmendable(employeeChainFromRow(header), header.imported);
 
   if (!isAmendable) return null;
 

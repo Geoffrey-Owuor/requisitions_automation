@@ -58,8 +58,10 @@ const APPROVAL_STAGES = {
 
 const PositionCard = ({
   position,
+  imported,
 }: {
   position: EmployeeEmailDataValues["positions"][number];
+  imported: boolean;
 }) => (
   <div className="rounded-surface mb-4 border border-[rgba(240,180,180,0.4)] bg-white/60 p-5">
     <h3 className="mb-3 text-[13px] font-semibold text-[#1e1b1b]">
@@ -95,6 +97,7 @@ const PositionCard = ({
       </span>
       <div className="mt-2">
         <AttachmentTypeGroups
+          imported={imported}
           attachments={position.attachments.map((attachment) => ({
             attachmentId: attachment.attachmentid,
             originalFilename: attachment.originalfilename,
@@ -131,6 +134,11 @@ const EmployeeRequisitionViewModal = ({
             <p className="mt-1 text-[13px] text-[#7c5a5a]">
               Reference: {viewData.emailaddress}
             </p>
+            {viewData.imported && (
+              <span className="mt-3 mr-2 inline-block rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold text-slate-600">
+                Imported &middot; Legacy Ref {viewData.legacyreference}
+              </span>
+            )}
             {viewData.amendmentcount > 0 && (
               <span className="mt-3 inline-block rounded-full bg-amber-100 px-3 py-1 text-[11px] font-semibold text-amber-700">
                 Amended &middot; Version {viewData.amendmentcount + 1}
@@ -153,7 +161,11 @@ const EmployeeRequisitionViewModal = ({
           <div className="mb-8 border-t border-[rgba(240,180,180,0.4)] pt-8">
             <SectionHeading title="Positions" />
             {viewData.positions.map((position) => (
-              <PositionCard key={position.positionid} position={position} />
+              <PositionCard
+                key={position.positionid}
+                position={position}
+                imported={viewData.imported}
+              />
             ))}
           </div>
 

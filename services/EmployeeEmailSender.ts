@@ -56,6 +56,9 @@ export interface EmployeeEmailDataValues {
   // with HR last (lib/employeeApprovalOrder.ts)
   hrbeforedirector: boolean;
   amendmentcount: number;
+  // Imported from before the app (migration 036) - no attachments
+  imported: boolean;
+  legacyreference: string | null;
   positions: EmployeePositionValues[];
   totalpositions: number;
   totalnumberrequired: number;
@@ -85,7 +88,9 @@ export const employeeDataQuery = `
        employee_hr_email AS hremail,
        employee_hr_comments AS hrcomments,
        hr_before_director AS hrbeforedirector,
-       amendment_count AS amendmentcount
+       amendment_count AS amendmentcount,
+       imported_at IS NOT NULL AS imported,
+       legacy_reference AS legacyreference
        FROM employee_requisitions WHERE request_id = $1
 `;
 

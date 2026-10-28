@@ -99,7 +99,10 @@ export const EmployeeDetailsModal = ({
   const canAmend =
     dataFlag === "userData" &&
     data.submitter_email === email &&
-    isEmployeeAmendable(employeeChainFromRow(data as EmployeeStageColumns));
+    isEmployeeAmendable(
+      employeeChainFromRow(data as EmployeeStageColumns),
+      data.imported,
+    );
 
   // In this requisition's order - HR before the CEO since migration 034
   const approvalChain = employeeDisplayStages(
@@ -116,7 +119,13 @@ export const EmployeeDetailsModal = ({
       onClose={onClose}
       icon={<UserRoundPlus size={18} className="text-violet-400" />}
       title="Employee Requisition"
-      subtitle={<>ID: {data.request_id}</>}
+      subtitle={
+        data.imported ? (
+          <>Imported &middot; Legacy Ref: {data.legacy_reference}</>
+        ) : (
+          <>ID: {data.request_id}</>
+        )
+      }
       actions={
         <>
           {canAmend && (
@@ -241,6 +250,7 @@ export const EmployeeDetailsModal = ({
                 </p>
                 <div className="mt-3">
                   <AttachmentTypeGroups
+                    imported={data.imported}
                     attachments={position.attachments.map((attachment) => ({
                       attachmentId: attachment.attachmentid,
                       originalFilename: attachment.originalfilename,
