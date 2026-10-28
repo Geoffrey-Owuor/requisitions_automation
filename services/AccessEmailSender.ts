@@ -20,6 +20,8 @@ export interface AccessMailTemplateValues {
   securityapprover: string;
   securityapprovalstatus: string;
   securitycomments: string;
+  termsversion: number;
+  termsacceptedat: string;
 }
 
 export const AccessDataQuery = `
@@ -38,7 +40,9 @@ export const AccessDataQuery = `
    hod_approver_comments AS hodcomments,
    security_approver_name AS securityapprover,
    security_approver_status AS securityapprovalstatus,
-   security_approver_comments AS securitycomments
+   security_approver_comments AS securitycomments,
+   terms_version AS termsversion,
+   terms_accepted_at AS termsacceptedat
    FROM access_requisitions WHERE request_id = $1
 `;
 

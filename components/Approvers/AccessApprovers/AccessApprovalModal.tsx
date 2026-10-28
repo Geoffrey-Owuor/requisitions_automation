@@ -21,6 +21,8 @@ import {
   MapPin,
   Key,
   BadgeCheck,
+  ShieldAlert,
+  ChevronDown,
 } from "lucide-react";
 import SubmittingOverlay from "@/components/SubmittingOverlay";
 import { AlertInfo } from "@/components/TravelRequisitionPage";
@@ -29,7 +31,9 @@ import { UpdateAccessRequisitionStatus } from "@/serverActions/UpdateAccessRequi
 import {
   ACCESS_LOCATIONS_LABEL,
   ACCESS_REQUIREMENTS_LABEL,
+  getAccessPolicy,
 } from "@/lib/accessRequisition";
+import AccessPolicyConditions from "./AccessPolicyConditions";
 import PreviousApprovalsSection, {
   PreviousApproval,
 } from "@/components/Approvers/PreviousApprovalsSection";
@@ -52,6 +56,9 @@ export interface AccessRequisitionData {
   issuanceDate: string;
   accessLocations: string;
   accessRequirements: string;
+  // The policy version the submitter agreed to, and when
+  termsVersion: number;
+  termsAcceptedAt: string;
   requestCreatedAt: string;
   previousApprovals: PreviousApproval[];
 }
@@ -109,6 +116,8 @@ const AccessApprovalModal = ({ data }: { data: AccessRequisitionData }) => {
     issuanceDate,
     accessLocations,
     accessRequirements,
+    termsVersion,
+    termsAcceptedAt,
     requestCreatedAt,
     previousApprovals,
   } = data;
@@ -123,6 +132,7 @@ const AccessApprovalModal = ({ data }: { data: AccessRequisitionData }) => {
   const [step, setStep] = useState(1);
 
   const roleLabel = stageLabel[stage] ?? "Approver";
+  const policy = getAccessPolicy(termsVersion);
 
   const handleApproval = async (status: "approved" | "declined") => {
     const setSubmitting = status === "approved" ? setApproving : setDeclining;
@@ -308,6 +318,33 @@ const AccessApprovalModal = ({ data }: { data: AccessRequisitionData }) => {
                   {accessRequirements}
                 </span>
               </div>
+            </div>
+
+            {/* ── Key Custody & Access Policy ── */}
+            <div className="mb-6 border-t border-[rgba(240,180,180,0.4)] pt-6">
+              <div className="flex items-center gap-1.5">
+                <ShieldAlert className="mb-2.5 h-3.5 w-3.5 text-rose-400" />
+                <SectionLabel>Key Custody & Access Policy</SectionLabel>
+              </div>
+              <p className="flex items-start gap-2 text-[13px] text-[#1e1b1b]">
+                <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+                <span>
+                  Acknowledged by <strong>{submitterName}</strong> when
+                  submitting on {dateFormatter(termsAcceptedAt)}.
+                </span>
+              </p>
+              <details className="group rounded-control mt-3 border border-[rgba(240,180,180,0.5)] bg-rose-50/30">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-[13px] font-medium text-[#7c5a5a] [&::-webkit-details-marker]:hidden">
+                  View the policy and acknowledgement
+                  <ChevronDown className="h-4 w-4 shrink-0 transition-transform group-open:rotate-180" />
+                </summary>
+                <div className="px-4 pb-4">
+                  <AccessPolicyConditions policy={policy} />
+                  <p className="mt-4 border-t border-[rgba(240,180,180,0.4)] pt-3 text-[13px] leading-relaxed text-[#5c4a4a] italic">
+                    &ldquo;{policy.acknowledgement}&rdquo;
+                  </p>
+                </div>
+              </details>
             </div>
 
             {/* ── Previous Approvals ── */}
