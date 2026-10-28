@@ -4,6 +4,10 @@ import {
   AccessMailTemplateValues,
 } from "@/services/AccessEmailSender";
 import { BASE_URL } from "@/public/assets";
+import {
+  ACCESS_LOCATIONS_LABEL,
+  ACCESS_REQUIREMENTS_LABEL,
+} from "@/lib/accessRequisition";
 
 interface AccessRequisitionProps extends Omit<AccessDataProps, "to"> {
   emailData: AccessMailTemplateValues;
@@ -76,6 +80,7 @@ export function AccessRequisitionTemplate({
             <table width="100%" style="border-collapse: collapse;">
               ${accessRow("Employee Name", emailData.employeename)}
               ${accessRow("Staff Number", emailData.employeestaffnumber)}
+              ${accessRow("Employee Status", emailData.employeestatus)}
               ${accessRow("Department", emailData.employeedepartment)}
               ${accessRow("Issuance Date", formattedIssuanceDate)}
 
@@ -87,11 +92,11 @@ export function AccessRequisitionTemplate({
             <p style="margin: 0 0 16px; font-size: 10px; font-weight: 800; color: #f87171; text-transform: uppercase; letter-spacing: 2px;">Requirement Details</p>
             <table width="100%">
               <tr>
-                <td style="padding-bottom: 12px; font-size: 12px; color: #94a3b8;">Requirements</td>
+                <td style="padding-bottom: 12px; font-size: 12px; color: #94a3b8; vertical-align: top;">${ACCESS_REQUIREMENTS_LABEL}</td>
                 <td style="padding-bottom: 12px; font-size: 12px; color: #ffffff; text-align: right; font-weight: 600; overflow-wrap: break-word; white-space: pre-wrap;">${emailData.requirements || "—"}</td>
               </tr>
               <tr>
-                <td style="padding-bottom: 12px; font-size: 12px; color: #94a3b8; vertical-align: top;">Locations</td>
+                <td style="padding-bottom: 12px; font-size: 12px; color: #94a3b8; vertical-align: top;">${ACCESS_LOCATIONS_LABEL}</td>
                 <td style="padding-bottom: 12px; font-size: 12px; color: #ffffff; text-align: right; font-weight: 600; overflow-wrap: break-word; white-space: pre-wrap;">${emailData.locations || "—"}</td>
               </tr>
               

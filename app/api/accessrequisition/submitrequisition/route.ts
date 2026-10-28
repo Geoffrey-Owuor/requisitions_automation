@@ -8,6 +8,10 @@ import {
   INVALID_DEPARTMENT_MESSAGE,
   resolveDepartment,
 } from "@/lib/departments";
+import {
+  CURRENT_ACCESS_POLICY_VERSION,
+  isAccessEmployeeStatus,
+} from "@/lib/accessRequisition";
 
 export async function POST(request: NextRequest) {
   // Check if we have a valid session
@@ -24,7 +28,7 @@ export async function POST(request: NextRequest) {
 
   try {
     // Getting our payload
-    const { formData } = await request.json();
+    const { formData, agreedToTerms, termsVersion } = await request.json();
 
     // The submitter is always the signed-in user - never client-supplied, or
     // anyone could submit as their own HOD and be auto-approved
@@ -34,6 +38,7 @@ export async function POST(request: NextRequest) {
     const {
       employeeName,
       staffNumber,
+      employeeStatus,
       department,
       hodApprover,
       issuanceDate,
@@ -45,6 +50,7 @@ export async function POST(request: NextRequest) {
     const requiredFields = [
       employeeName,
       staffNumber,
+      employeeStatus,
       department,
       hodApprover,
       issuanceDate,
@@ -62,6 +68,32 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { message: "Your requisition is missing some required form fields" },
         { status: 400 },
+      );
+    }
+
+    if (!isAccessEmployeeStatus(employeeStatus)) {
+      return NextResponse.json(
+        { message: "Select a valid employee status" },
+        { status: 400 },
+      );
+    }
+
+    // The policy agreement is recorded with the wording agreed to; a form
+    // loaded before the policy was reworded must be reloaded first
+    if (agreedToTerms !== true) {
+      return NextResponse.json(
+        { message: "You must agree to the Key Custody & Access Policy" },
+        { status: 400 },
+      );
+    }
+
+    if (termsVersion !== CURRENT_ACCESS_POLICY_VERSION) {
+      return NextResponse.json(
+        {
+          message:
+            "The Key Custody & Access Policy has been updated. Reload the page and review it before submitting",
+        },
+        { status: 409 },
       );
     }
 
@@ -92,9 +124,9 @@ export async function POST(request: NextRequest) {
     INSERT INTO access_requisitions
     (submitter_email, submitter_name, employee_name, employee_department, employee_staff_number, 
     issuance_date, access_locations, access_requirements, hod_approver_name,
-    hod_approver_email)
+    hod_approver_email, employee_status, terms_version, terms_accepted_at)
     VALUES
-    ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+    ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, CURRENT_TIMESTAMP)
     RETURNING request_id
     `;
 
@@ -110,6 +142,8 @@ export async function POST(request: NextRequest) {
       requirements,
       hodName,
       hodEmail,
+      employeeStatus,
+      CURRENT_ACCESS_POLICY_VERSION,
     ];
 
     // Run the query

@@ -10,6 +10,7 @@ import {
   LockKeyhole,
   ShieldUser,
   LucideIcon,
+  BadgeCheck,
 } from "lucide-react";
 import { QueryResultRow } from "pg";
 import StatusFormatter from "../StatusFormatter";
@@ -19,6 +20,10 @@ import { Modal, ModalActionSkeleton, modalActionClass } from "../../Modal";
 import Link from "next/link";
 import { useUser } from "@/context/UserContext";
 import { getAccessApproverLink } from "@/serverActions/GetAccessApproverLink";
+import {
+  ACCESS_LOCATIONS_LABEL,
+  ACCESS_REQUIREMENTS_LABEL,
+} from "@/lib/accessRequisition";
 
 interface ModalProps {
   data: QueryResultRow | null;
@@ -110,6 +115,11 @@ export const AccessDetailsModal = ({
           value={data.employee_staff_number}
         />
         <DetailItem
+          icon={BadgeCheck}
+          label="Employee Status"
+          value={data.employee_status}
+        />
+        <DetailItem
           icon={UserRound}
           label="Department"
           value={data.employee_department}
@@ -121,7 +131,7 @@ export const AccessDetailsModal = ({
         />
         <DetailItem
           icon={MapPin}
-          label="Locations"
+          label={ACCESS_LOCATIONS_LABEL}
           value={data.access_locations}
         />
 
@@ -129,7 +139,7 @@ export const AccessDetailsModal = ({
           <div className="mb-2 flex items-center gap-2 text-amber-500">
             <ClipboardList size={16} className="text-amber-500" />
             <span className="text-xs font-bold tracking-tighter uppercase">
-              Access Requirements
+              {ACCESS_REQUIREMENTS_LABEL}
             </span>
           </div>
           <p className="text-sm leading-relaxed opacity-90">

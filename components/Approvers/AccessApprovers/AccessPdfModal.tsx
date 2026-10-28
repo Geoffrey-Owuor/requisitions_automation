@@ -7,6 +7,10 @@ import { dateFormatter } from "@/public/assets";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import AccessRequisitionPdf from "./AccessRequisitionPdf";
 import { useEffect, useState } from "react";
+import {
+  ACCESS_LOCATIONS_LABEL,
+  ACCESS_REQUIREMENTS_LABEL,
+} from "@/lib/accessRequisition";
 
 // Helper components for the web view
 const Field = ({ label, value }: { label: string; value: string | number }) => (
@@ -82,6 +86,7 @@ const AccessPdfModal = ({ pdfData }: { pdfData: AccessPdfValues }) => {
               <Field label="Employee Name" value={pdfData.employeename} />
               <Field label="Staff Number" value={pdfData.employeestaffnumber} />
               <Field label="Department" value={pdfData.employeedepartment} />
+              <Field label="Employee Status" value={pdfData.employeestatus} />
             </div>
           </div>
 
@@ -95,20 +100,20 @@ const AccessPdfModal = ({ pdfData }: { pdfData: AccessPdfValues }) => {
               />
             </div>
 
-            {/* Access Locations */}
+            {/* Locations / Access Level */}
             <div className="mb-6">
               <span className="mb-2 block text-[11px] font-medium tracking-[0.4px] text-[#b0a0a0] uppercase">
-                Access Locations
+                {ACCESS_LOCATIONS_LABEL}
               </span>
               <p className="text-[13px] leading-relaxed wrap-break-word whitespace-pre-wrap text-[#1e1b1b]">
                 {pdfData.locations || "No locations specified"}
               </p>
             </div>
 
-            {/* Access Requirements / Keys */}
+            {/* Requirements & Justification */}
             <div className="mb-6">
               <span className="mb-2 block text-[11px] font-medium tracking-[0.4px] text-[#b0a0a0] uppercase">
-                Requirements / Justification
+                {ACCESS_REQUIREMENTS_LABEL}
               </span>
               <p className="text-[13px] leading-relaxed wrap-break-word whitespace-pre-wrap text-[#1e1b1b]">
                 {pdfData.requirements ||

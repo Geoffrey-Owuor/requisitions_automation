@@ -4,6 +4,10 @@ import { Document, Page, Text, View } from "@react-pdf/renderer";
 import { createTw } from "react-pdf-tailwind";
 import { AccessMailTemplateValues as AccessPdfValues } from "@/services/AccessEmailSender";
 import { dateFormatter } from "@/public/assets";
+import {
+  ACCESS_LOCATIONS_LABEL,
+  ACCESS_REQUIREMENTS_LABEL,
+} from "@/lib/accessRequisition";
 
 const tw = createTw({
   theme: {
@@ -64,6 +68,7 @@ const AccessRequisitionPdf = ({ pdfData }: { pdfData: AccessPdfValues }) => {
               value={pdfData.employeestaffnumber}
             />
             <PdfField label="Department" value={pdfData.employeedepartment} />
+            <PdfField label="Employee Status" value={pdfData.employeestatus} />
           </View>
         </View>
 
@@ -85,7 +90,7 @@ const AccessRequisitionPdf = ({ pdfData }: { pdfData: AccessPdfValues }) => {
                 "text-[8px] font-medium text-[#b0a0a0] uppercase mb-1.5",
               )}
             >
-              Access Locations
+              {ACCESS_LOCATIONS_LABEL}
             </Text>
             <Text style={tw("text-[10px] leading-relaxed text-[#1e1b1b]")}>
               {pdfData.locations || "No locations specified"}
@@ -95,7 +100,7 @@ const AccessRequisitionPdf = ({ pdfData }: { pdfData: AccessPdfValues }) => {
           {/* Requirements / Permissions */}
           <View style={tw("mt-2")}>
             <Text style={tw("text-[8px] font-medium text-[#b0a0a0] uppercase")}>
-              Requirements / Justification
+              {ACCESS_REQUIREMENTS_LABEL}
             </Text>
             <Text style={tw("mt-1 text-[10px] leading-relaxed text-[#1e1b1b]")}>
               {pdfData.requirements || "No specific requirements/keys provided"}
