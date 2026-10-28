@@ -11,6 +11,7 @@ import {
   ShieldUser,
   LucideIcon,
   BadgeCheck,
+  Mail,
 } from "lucide-react";
 import { QueryResultRow } from "pg";
 import StatusFormatter from "../StatusFormatter";
@@ -125,6 +126,16 @@ export const AccessDetailsModal = ({
           value={data.employee_department}
         />
         <DetailItem
+          icon={UserRound}
+          label="Submitted By"
+          value={data.submitter_name}
+        />
+        <DetailItem
+          icon={Mail}
+          label="Submitter Email"
+          value={data.submitter_email}
+        />
+        <DetailItem
           icon={Calendar}
           label="Issuance Date"
           value={dateFormatter(data.issuance_date)}
@@ -184,11 +195,13 @@ type DetailItemProps = {
 const DetailItem = ({ label, value, icon: Icon }: DetailItemProps) => (
   <div className="rounded-control flex items-start gap-3 bg-neutral-50 p-3">
     <Icon size={16} className="mt-1 shrink-0 text-amber-500" />
-    <div>
+    <div className="min-w-0">
       <p className="text-[10px] font-bold tracking-wider text-amber-500 uppercase">
         {label}
       </p>
-      <p className="text-sm font-medium text-[#1e1b1b]">{value || "N/A"}</p>
+      <p className="text-sm font-medium wrap-break-word text-[#1e1b1b]">
+        {value || "N/A"}
+      </p>
     </div>
   </div>
 );

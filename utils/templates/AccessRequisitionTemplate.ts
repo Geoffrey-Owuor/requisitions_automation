@@ -68,8 +68,8 @@ export function AccessRequisitionTemplate({
                 <td style="font-size: 11px; color: #a31d1d; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; text-align: right;">Date Submitted</td>
               </tr>
               <tr>
-                <td style="font-size: 14px; color: #3b0a0a; font-weight: 600; padding-top: 2px;">${emailData.submittername || "—"}</td>
-                <td style="font-size: 14px; color: #3b0a0a; font-weight: 600; padding-top: 2px; text-align: right;">${formattedDateSubmitted}</td>
+                <td style="font-size: 14px; color: #3b0a0a; font-weight: 600; padding-top: 2px; vertical-align: top;">${emailData.submittername || "—"}<br /><span style="font-size: 12px; color: #5a3a3a; font-weight: 400;">${emailData.submitteremail || ""}</span></td>
+                <td style="font-size: 14px; color: #3b0a0a; font-weight: 600; padding-top: 2px; text-align: right; vertical-align: top;">${formattedDateSubmitted}</td>
               </tr>
             </table>
           </div>

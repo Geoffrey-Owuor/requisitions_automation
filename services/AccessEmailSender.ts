@@ -6,6 +6,7 @@ import { AccessRequisitionTemplate } from "@/utils/templates/AccessRequisitionTe
 export interface AccessMailTemplateValues {
   datesubmitted: string;
   submittername: string;
+  submitteremail: string;
   employeename: string;
   employeestaffnumber: string;
   employeestatus: string;
@@ -24,6 +25,7 @@ export interface AccessMailTemplateValues {
 export const AccessDataQuery = `
    SELECT request_created_at AS datesubmitted,
    submitter_name AS submittername,
+   submitter_email AS submitteremail,
    employee_name AS employeename,
    employee_staff_number AS employeestaffnumber,
    employee_status AS employeestatus,
