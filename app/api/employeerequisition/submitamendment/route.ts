@@ -28,9 +28,8 @@ import {
   MAX_AMENDMENT_REASON_LENGTH,
 } from "@/public/assets";
 import {
-  EMPLOYEE_NOT_AMENDABLE_MESSAGE,
   employeeChainFromRow,
-  isEmployeeAmendable,
+  employeeNotAmendableReason,
 } from "@/lib/employeeApprovalOrder";
 import { loadJobGrades } from "@/lib/loadRequisitionOptions";
 import { INVALID_DEPARTMENT_MESSAGE, resolveDepartment } from "@/lib/departments";
@@ -274,11 +273,13 @@ export async function POST(request: NextRequest) {
       employee_director_approval_status: string;
       employee_hr_approval_status: string;
       hr_before_director: boolean;
+      imported: boolean;
       position_ids: string[];
     }>(
       `SELECT r.submitter_email, r.employee_hod_approval_status,
        r.employee_retail_director_approval_status, r.employee_director_approval_status,
        r.employee_hr_approval_status, r.hr_before_director,
+       r.imported_at IS NOT NULL AS imported,
        COALESCE(ARRAY(SELECT position_id::text FROM employee_requisition_positions p
          WHERE p.request_id = r.request_id), '{}') AS position_ids
        FROM employee_requisitions r WHERE r.request_id = $1`,
@@ -295,11 +296,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!isEmployeeAmendable(employeeChainFromRow(precheck[0]))) {
-      return NextResponse.json(
-        { message: EMPLOYEE_NOT_AMENDABLE_MESSAGE },
-        { status: 409 },
-      );
+    const precheckBlock = employeeNotAmendableReason(
+      employeeChainFromRow(precheck[0]),
+      precheck[0].imported,
+    );
+    if (precheckBlock) {
+      return NextResponse.json({ message: precheckBlock }, { status: 409 });
     }
 
     const precheckPositionIds = new Set(precheck[0].position_ids);
@@ -374,7 +376,8 @@ export async function POST(request: NextRequest) {
        employee_director_approval_status, employee_director_approver,
        employee_director_comments, employee_director_approval_date,
        employee_hr_approval_status, employee_hr_approver,
-       employee_hr_comments, employee_hr_approval_date, hr_before_director
+       employee_hr_comments, employee_hr_approval_date, hr_before_director,
+       imported_at IS NOT NULL AS imported
        FROM employee_requisitions WHERE request_id = $1 FOR UPDATE`,
       [requestId],
     );
@@ -396,9 +399,11 @@ export async function POST(request: NextRequest) {
       return rejectWith("You are not authorized to amend this requisition", 403);
     }
 
-    if (!isEmployeeAmendable(employeeChainFromRow(header))) {
-      return rejectWith(EMPLOYEE_NOT_AMENDABLE_MESSAGE, 409);
-    }
+    const amendmentBlock = employeeNotAmendableReason(
+      employeeChainFromRow(header),
+      header.imported,
+    );
+    if (amendmentBlock) return rejectWith(amendmentBlock, 409);
 
     if (header.amendment_count !== expectedAmendmentCount) {
       return rejectWith(
