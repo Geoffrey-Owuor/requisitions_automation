@@ -457,7 +457,8 @@ export default function EmployeeRequisitionForm({
     return (
       <div className="rounded-surface mx-auto max-w-md border border-rose-200 bg-rose-50 p-6 text-center text-sm text-rose-700">
         This requisition can no longer be amended. It may have already been
-        approved by HR, or you may not be its original submitter.
+        fully approved or imported from before the Apps Hub, or you may not be
+        its original submitter.
       </div>
     );
   }
@@ -544,7 +545,8 @@ export default function EmployeeRequisitionForm({
             <div className="rounded-surface mb-6 flex items-start gap-2.5 border border-amber-200 bg-amber-50 px-4 py-3.5 text-[13px] text-amber-800">
               <Info className="mt-0.5 h-4 w-4 shrink-0" />
               <p>
-                Amendments are only possible until HR approves this requisition.
+                Amendments are only possible until this requisition is fully
+                approved.
                 Submitting this amendment resets every approval stage, so it
                 will need to be re-approved from the HOD stage onward.
                 Attachments you don&apos;t replace are kept as they are;

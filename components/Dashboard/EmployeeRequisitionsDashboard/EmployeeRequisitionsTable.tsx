@@ -62,6 +62,11 @@ export default function EmployeeRequisitionsTable({
               <span className="text-sm text-[#1e1b1b]">
                 {req.employee_department}
               </span>
+              {req.imported && (
+                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
+                  Imported
+                </span>
+              )}
               {req.amendment_count > 0 && (
                 <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
                   Amended ×{req.amendment_count}

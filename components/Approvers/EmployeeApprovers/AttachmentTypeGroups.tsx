@@ -13,14 +13,25 @@ export interface AttachmentTypeGroupsAttachment {
 
 // Shared by EmployeeApprovalModal and EmployeeRequisitionViewModal so both
 // surfaces group a position's attachments under their Job Description /
-// KPIs / Org Chart label the same way.
+// KPIs / Org Chart label the same way. Requisitions imported from before the
+// app (migration 036) have no documents, so they get a note instead.
 export default function AttachmentTypeGroups({
   attachments,
   queryString,
+  imported = false,
 }: {
   attachments: AttachmentTypeGroupsAttachment[];
   queryString?: string;
+  imported?: boolean;
 }) {
+  if (imported && attachments.length === 0) {
+    return (
+      <p className="text-[12px] text-neutral-500 italic">
+        Imported record — no documents
+      </p>
+    );
+  }
+
   return (
     <div className="flex flex-wrap gap-4">
       {EMPLOYEE_ATTACHMENT_TYPES.map((type) => {

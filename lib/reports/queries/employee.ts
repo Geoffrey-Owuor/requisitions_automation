@@ -226,7 +226,9 @@ SELECT
   am.latest_amended_by,
   am.latest_reason,
   pc.position_change_history,
-  am.amendment_history
+  am.amendment_history,
+  CASE WHEN r.imported_at IS NOT NULL THEN 'Yes' ELSE 'No' END AS imported,
+  r.legacy_reference
 FROM scoped r
 JOIN employee_requisition_positions p ON p.request_id  = r.request_id
 JOIN request_totals rt                ON rt.request_id = r.request_id
@@ -285,6 +287,8 @@ const COLUMNS: ReportColumn[] = [
   { key: "latest_reason", header: "Latest Amendment Reason", kind: "longtext" },
   { key: "position_change_history", header: "Position Amendment History", kind: "longtext" },
   { key: "amendment_history", header: "Full Amendment History", kind: "longtext" },
+  { key: "imported", header: "Imported?" },
+  { key: "legacy_reference", header: "Legacy Ref" },
 ];
 
 export async function buildEmployeeReport({

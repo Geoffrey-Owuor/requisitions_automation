@@ -170,6 +170,7 @@ export const getEmployeeRequisitionData = async ({
         e.employee_director_approval_status, e.employee_director_approver,
         e.employee_hr_approval_status, e.employee_hr_approver,
         e.hr_before_director, e.amendment_count, e.last_amended_at,
+        e.imported_at IS NOT NULL AS imported, e.legacy_reference,
         agg.total_positions, agg.total_headcount,
         COUNT(*) OVER() AS total_count
         FROM employee_requisitions e
