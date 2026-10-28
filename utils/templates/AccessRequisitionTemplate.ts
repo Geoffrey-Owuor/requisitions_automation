@@ -4,6 +4,10 @@ import {
   AccessMailTemplateValues,
 } from "@/services/AccessEmailSender";
 import { BASE_URL } from "@/public/assets";
+import {
+  ACCESS_LOCATIONS_LABEL,
+  ACCESS_REQUIREMENTS_LABEL,
+} from "@/lib/accessRequisition";
 
 interface AccessRequisitionProps extends Omit<AccessDataProps, "to"> {
   emailData: AccessMailTemplateValues;
@@ -64,8 +68,8 @@ export function AccessRequisitionTemplate({
                 <td style="font-size: 11px; color: #a31d1d; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; text-align: right;">Date Submitted</td>
               </tr>
               <tr>
-                <td style="font-size: 14px; color: #3b0a0a; font-weight: 600; padding-top: 2px;">${emailData.submittername || "—"}</td>
-                <td style="font-size: 14px; color: #3b0a0a; font-weight: 600; padding-top: 2px; text-align: right;">${formattedDateSubmitted}</td>
+                <td style="font-size: 14px; color: #3b0a0a; font-weight: 600; padding-top: 2px; vertical-align: top;">${emailData.submittername || "—"}<br /><span style="font-size: 12px; color: #5a3a3a; font-weight: 400;">${emailData.submitteremail || ""}</span></td>
+                <td style="font-size: 14px; color: #3b0a0a; font-weight: 600; padding-top: 2px; text-align: right; vertical-align: top;">${formattedDateSubmitted}</td>
               </tr>
             </table>
           </div>
@@ -76,6 +80,7 @@ export function AccessRequisitionTemplate({
             <table width="100%" style="border-collapse: collapse;">
               ${accessRow("Employee Name", emailData.employeename)}
               ${accessRow("Staff Number", emailData.employeestaffnumber)}
+              ${accessRow("Employee Status", emailData.employeestatus)}
               ${accessRow("Department", emailData.employeedepartment)}
               ${accessRow("Issuance Date", formattedIssuanceDate)}
 
@@ -87,11 +92,11 @@ export function AccessRequisitionTemplate({
             <p style="margin: 0 0 16px; font-size: 10px; font-weight: 800; color: #f87171; text-transform: uppercase; letter-spacing: 2px;">Requirement Details</p>
             <table width="100%">
               <tr>
-                <td style="padding-bottom: 12px; font-size: 12px; color: #94a3b8;">Requirements</td>
+                <td style="padding-bottom: 12px; font-size: 12px; color: #94a3b8; vertical-align: top;">${ACCESS_REQUIREMENTS_LABEL}</td>
                 <td style="padding-bottom: 12px; font-size: 12px; color: #ffffff; text-align: right; font-weight: 600; overflow-wrap: break-word; white-space: pre-wrap;">${emailData.requirements || "—"}</td>
               </tr>
               <tr>
-                <td style="padding-bottom: 12px; font-size: 12px; color: #94a3b8; vertical-align: top;">Locations</td>
+                <td style="padding-bottom: 12px; font-size: 12px; color: #94a3b8; vertical-align: top;">${ACCESS_LOCATIONS_LABEL}</td>
                 <td style="padding-bottom: 12px; font-size: 12px; color: #ffffff; text-align: right; font-weight: 600; overflow-wrap: break-word; white-space: pre-wrap;">${emailData.locations || "—"}</td>
               </tr>
               

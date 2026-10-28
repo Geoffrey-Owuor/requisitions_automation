@@ -36,7 +36,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} antialiased`}
     >
       <head>
-        <meta name="apple-mobile-web-app-title" content="Requisition" />
+        <meta name="apple-mobile-web-app-title" content="Apps Hub" />
       </head>
       <body className="bg-canvas flex min-h-screen flex-col">
         <LoadingLine />

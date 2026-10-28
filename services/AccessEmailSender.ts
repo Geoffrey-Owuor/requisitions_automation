@@ -6,8 +6,10 @@ import { AccessRequisitionTemplate } from "@/utils/templates/AccessRequisitionTe
 export interface AccessMailTemplateValues {
   datesubmitted: string;
   submittername: string;
+  submitteremail: string;
   employeename: string;
   employeestaffnumber: string;
+  employeestatus: string;
   employeedepartment: string;
   issuancedate: string;
   requirements: string;
@@ -18,13 +20,17 @@ export interface AccessMailTemplateValues {
   securityapprover: string;
   securityapprovalstatus: string;
   securitycomments: string;
+  termsversion: number;
+  termsacceptedat: string;
 }
 
 export const AccessDataQuery = `
    SELECT request_created_at AS datesubmitted,
    submitter_name AS submittername,
+   submitter_email AS submitteremail,
    employee_name AS employeename,
    employee_staff_number AS employeestaffnumber,
+   employee_status AS employeestatus,
    employee_department AS employeedepartment,
    issuance_date AS issuancedate,
    access_requirements AS requirements,
@@ -34,7 +40,9 @@ export const AccessDataQuery = `
    hod_approver_comments AS hodcomments,
    security_approver_name AS securityapprover,
    security_approver_status AS securityapprovalstatus,
-   security_approver_comments AS securitycomments
+   security_approver_comments AS securitycomments,
+   terms_version AS termsversion,
+   terms_accepted_at AS termsacceptedat
    FROM access_requisitions WHERE request_id = $1
 `;
 
