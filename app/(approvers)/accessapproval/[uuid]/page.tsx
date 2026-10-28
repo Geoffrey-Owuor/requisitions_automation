@@ -84,8 +84,9 @@ const ApprovalPageContent = async ({
   const baseQuery = `
           SELECT
           request_created_at, submitter_email, submitter_name,
-          employee_name, employee_department, employee_staff_number, 
-          issuance_date, access_locations, access_requirements,
+          employee_name, employee_department, employee_staff_number,
+          employee_status, issuance_date, access_locations, access_requirements,
+          terms_version, terms_accepted_at,
           ${stage}_approver_name AS approver_name,
           ${stage}_approver_status AS approval_status,
           hod_approver_name, hod_approver_status, hod_approver_comments
@@ -144,9 +145,12 @@ const ApprovalPageContent = async ({
     employeeName: requestData.employee_name,
     employeeDepartment: requestData.employee_department,
     employeeStaffNumber: requestData.employee_staff_number,
+    employeeStatus: requestData.employee_status,
     issuanceDate: requestData.issuance_date,
     accessLocations: requestData.access_locations,
     accessRequirements: requestData.access_requirements,
+    termsVersion: requestData.terms_version,
+    termsAcceptedAt: requestData.terms_accepted_at,
     previousApprovals,
   };
 

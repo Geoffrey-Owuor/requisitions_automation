@@ -5,6 +5,10 @@ import { KeyAccessFormData } from "./KeyAccessRequisitionForm";
 import { dateFormatter } from "@/public/assets";
 import { useUser } from "@/context/UserContext";
 import { initialsHelper } from "@/public/assets";
+import {
+  ACCESS_LOCATIONS_LABEL,
+  ACCESS_REQUIREMENTS_LABEL,
+} from "@/lib/accessRequisition";
 
 interface KeyConfirmationModalProps {
   formData: KeyAccessFormData;
@@ -30,6 +34,7 @@ export default function KeyConfirmationModal({
     { label: "Staff Name", value: formData.employeeName },
     { label: "Department", value: formData.department },
     { label: "Staff Number", value: formData.staffNumber },
+    { label: "Employee Status", value: formData.employeeStatus },
     { label: "HOD Approver", value: hodApproverName },
   ];
 
@@ -101,20 +106,20 @@ export default function KeyConfirmationModal({
         </div>
       </div>
 
-      {/* Locations to Access */}
+      {/* Locations / Access Level */}
       <div className="mb-5 border-t border-[rgba(240,180,180,0.4)] pt-5">
         <p className="mb-2 text-[11px] font-semibold tracking-[0.4px] text-[#b0a0a0] uppercase">
-          Locations to be Accessed
+          {ACCESS_LOCATIONS_LABEL}
         </p>
         <p className="rounded-control bg-white py-3 text-[13px] leading-relaxed whitespace-pre-wrap text-[#1e1b1b]">
           {formData.locations || "No locations specified"}
         </p>
       </div>
 
-      {/* Requirements / Justification */}
+      {/* Requirements & Justification */}
       <div className="mb-5 border-t border-[rgba(240,180,180,0.4)] pt-5">
         <p className="mb-2 text-[11px] font-semibold tracking-[0.4px] text-[#b0a0a0] uppercase">
-          Requirements / Justification
+          {ACCESS_REQUIREMENTS_LABEL}
         </p>
         <p className="rounded-control bg-white py-3 text-[13px] leading-relaxed whitespace-pre-wrap text-[#1e1b1b]">
           {formData.requirements || "No justification provided"}

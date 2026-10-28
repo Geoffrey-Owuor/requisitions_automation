@@ -36,7 +36,7 @@ export default function AccessRequisitionGuideline() {
             icon={<UserCircle size={18} />}
             title="Employee Information"
             items={[
-              "Employee Name, Department, and Staff Number.",
+              "Employee Name, Department, Staff Number, and Employee Status (Permanent, Contract, or Probation).",
               "Their reporting HOD.",
             ]}
           />
@@ -45,8 +45,8 @@ export default function AccessRequisitionGuideline() {
             title="Access Details"
             items={[
               "The intended issuance date for the access.",
-              "Specific physical locations or facilities requiring access.",
-              "Details of the exact permissions, keys, or security levels needed.",
+              "Locations/Access Level: the specific locations or facilities requiring access, and the level of access needed.",
+              "Requirements & Justification: the keys or permissions needed, and why.",
             ]}
           />
         </div>

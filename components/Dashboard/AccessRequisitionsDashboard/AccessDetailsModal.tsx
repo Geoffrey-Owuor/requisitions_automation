@@ -10,6 +10,8 @@ import {
   LockKeyhole,
   ShieldUser,
   LucideIcon,
+  BadgeCheck,
+  Mail,
 } from "lucide-react";
 import { QueryResultRow } from "pg";
 import StatusFormatter from "../StatusFormatter";
@@ -19,6 +21,10 @@ import { Modal, ModalActionSkeleton, modalActionClass } from "../../Modal";
 import Link from "next/link";
 import { useUser } from "@/context/UserContext";
 import { getAccessApproverLink } from "@/serverActions/GetAccessApproverLink";
+import {
+  ACCESS_LOCATIONS_LABEL,
+  ACCESS_REQUIREMENTS_LABEL,
+} from "@/lib/accessRequisition";
 
 interface ModalProps {
   data: QueryResultRow | null;
@@ -110,9 +116,24 @@ export const AccessDetailsModal = ({
           value={data.employee_staff_number}
         />
         <DetailItem
+          icon={BadgeCheck}
+          label="Employee Status"
+          value={data.employee_status}
+        />
+        <DetailItem
           icon={UserRound}
           label="Department"
           value={data.employee_department}
+        />
+        <DetailItem
+          icon={UserRound}
+          label="Submitted By"
+          value={data.submitter_name}
+        />
+        <DetailItem
+          icon={Mail}
+          label="Submitter Email"
+          value={data.submitter_email}
         />
         <DetailItem
           icon={Calendar}
@@ -121,7 +142,7 @@ export const AccessDetailsModal = ({
         />
         <DetailItem
           icon={MapPin}
-          label="Locations"
+          label={ACCESS_LOCATIONS_LABEL}
           value={data.access_locations}
         />
 
@@ -129,7 +150,7 @@ export const AccessDetailsModal = ({
           <div className="mb-2 flex items-center gap-2 text-amber-500">
             <ClipboardList size={16} className="text-amber-500" />
             <span className="text-xs font-bold tracking-tighter uppercase">
-              Access Requirements
+              {ACCESS_REQUIREMENTS_LABEL}
             </span>
           </div>
           <p className="text-sm leading-relaxed opacity-90">
@@ -174,11 +195,13 @@ type DetailItemProps = {
 const DetailItem = ({ label, value, icon: Icon }: DetailItemProps) => (
   <div className="rounded-control flex items-start gap-3 bg-neutral-50 p-3">
     <Icon size={16} className="mt-1 shrink-0 text-amber-500" />
-    <div>
+    <div className="min-w-0">
       <p className="text-[10px] font-bold tracking-wider text-amber-500 uppercase">
         {label}
       </p>
-      <p className="text-sm font-medium text-[#1e1b1b]">{value || "N/A"}</p>
+      <p className="text-sm font-medium wrap-break-word text-[#1e1b1b]">
+        {value || "N/A"}
+      </p>
     </div>
   </div>
 );

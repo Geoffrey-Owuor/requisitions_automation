@@ -24,6 +24,13 @@ import { scrollPageToTop } from "@/utils/scrollPageToTop";
 import { myRequisitionsHref } from "@/lib/dashboardTables";
 import { isSameFormValue } from "@/lib/formChanges";
 import {
+  ACCESS_EMPLOYEE_STATUSES,
+  ACCESS_LOCATIONS_LABEL,
+  ACCESS_REQUIREMENTS_LABEL,
+  CURRENT_ACCESS_POLICY_VERSION,
+  getAccessPolicy,
+} from "@/lib/accessRequisition";
+import {
   FormSelect,
   findHodForDepartment,
   hodNameLabel,
@@ -34,6 +41,7 @@ import {
 export interface KeyAccessFormData {
   employeeName: string;
   staffNumber: string;
+  employeeStatus: string;
   department: string;
   hodApprover: string;
   issuanceDate: string;
@@ -44,6 +52,7 @@ export interface KeyAccessFormData {
 const InitialFormState: KeyAccessFormData = {
   employeeName: "",
   staffNumber: "",
+  employeeStatus: "",
   department: "",
   hodApprover: "",
   issuanceDate: "",
@@ -58,6 +67,8 @@ interface FormInputProps {
   value: string;
   onChange: (value: string) => void;
 }
+
+const POLICY = getAccessPolicy(CURRENT_ACCESS_POLICY_VERSION);
 
 // ---- Main Page ----
 export default function KeyAccessRequisitionForm() {
@@ -98,6 +109,7 @@ export default function KeyAccessRequisitionForm() {
   const requiredFields: (keyof KeyAccessFormData)[] = [
     "employeeName",
     "staffNumber",
+    "employeeStatus",
     "department",
     "hodApprover",
     "issuanceDate",
@@ -127,8 +139,12 @@ export default function KeyAccessRequisitionForm() {
   };
 
   const handleSubmit = async () => {
+    // The server records the policy version agreed to (and refuses a
+    // submission without the agreement)
     const payload = {
       formData,
+      agreedToTerms,
+      termsVersion: CURRENT_ACCESS_POLICY_VERSION,
     };
 
     setSubmitting(true);
@@ -255,6 +271,12 @@ export default function KeyAccessRequisitionForm() {
                     onChange={(v) => updateField("staffNumber", v)}
                   />
                   <FormSelect
+                    label="Employee Status"
+                    options={[...ACCESS_EMPLOYEE_STATUSES]}
+                    value={formData.employeeStatus}
+                    onChange={(v) => updateField("employeeStatus", v)}
+                  />
+                  <FormSelect
                     label="Department"
                     options={DEPARTMENTS}
                     value={formData.department}
@@ -294,12 +316,12 @@ export default function KeyAccessRequisitionForm() {
                   {/* Locations Textarea */}
                   <div className="flex flex-col gap-2">
                     <label className="text-[13px] font-medium text-[#7c5a5a]">
-                      Locations to be Accessed{" "}
+                      {ACCESS_LOCATIONS_LABEL}{" "}
                       <span className="text-red-500">*</span>
                     </label>
                     <textarea
                       className="rounded-control h-24 resize-none border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 py-3 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
-                      placeholder="Specify the exact rooms, stores, or facilities you need access to..."
+                      placeholder="Specify the exact rooms, stores, or facilities, and the level of access needed..."
                       value={formData.locations}
                       required
                       onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
@@ -311,7 +333,7 @@ export default function KeyAccessRequisitionForm() {
                   {/* Requirements Textarea */}
                   <div className="flex flex-col gap-2">
                     <label className="text-[13px] font-medium text-[#7c5a5a]">
-                      Requirements / Justification{" "}
+                      {ACCESS_REQUIREMENTS_LABEL}{" "}
                       <span className="text-red-500">*</span>
                     </label>
                     <textarea
@@ -335,63 +357,15 @@ export default function KeyAccessRequisitionForm() {
 
                 <div className="small-scrollbar rounded-control mb-4 max-h-60 overflow-y-auto border border-[rgba(240,180,180,0.6)] bg-rose-50/30 p-4 text-[13px] leading-relaxed text-[#5c4a4a]">
                   <p className="mb-3 font-semibold text-[#1e1b1b]">
-                    By receiving these keys/access codes, you are bound by the
-                    following conditions:
+                    {POLICY.intro}
                   </p>
                   <ol className="ml-4 flex list-decimal flex-col gap-1.5 pb-3">
-                    <li>
-                      Safeguard the store and key(s) securely at all times.
-                    </li>
-                    <li>Use the key(s) strictly for official purposes only.</li>
-                    <li>
-                      Arm and disarm the premises during departure and entry
-                      respectively.
-                    </li>
-                    <li>
-                      Ensure all staff and visitors have exited the premises,
-                      all windows and access points are closed, and lights
-                      switched off before arming the system.
-                    </li>
-                    <li>
-                      Report any lost, damaged, or missing key(s) to HOD & HAL
-                      Security immediately.
-                    </li>
-                    <li>
-                      Do not attempt to copy, alter, duplicate, or reproduce any
-                      HAL facility key(s).
-                    </li>
-                    <li>
-                      Do not share your access code with any colleague,
-                      stranger, or unauthorized person.
-                    </li>
-                    <li>
-                      If unable to secure the premises, report immediately to
-                      the HOD & HAL Security Department.
-                    </li>
-                    <li>
-                      Produce or surrender the key(s) upon official request or
-                      before proceeding on leave.
-                    </li>
-                    <li>
-                      Report any absence or unfamiliar security guard within the
-                      facility before opening the premises.
-                    </li>
-                    <li>
-                      Open & close the premises only in the presence of familiar
-                      contracted security personnel.
-                    </li>
-                    <li>
-                      Report and respond appropriately to any emergencies
-                      brought to your attention.
-                    </li>
-                    <li>
-                      Change your access code whenever deemed necessary based on
-                      your judgment or security concerns.
-                    </li>
+                    {POLICY.conditions.map((condition) => (
+                      <li key={condition}>{condition}</li>
+                    ))}
                   </ol>
                   <p className="mt-2 font-semibold text-rose-700">
-                    Do not hand over the key(s) to strangers or unauthorized
-                    persons under any circumstances.
+                    {POLICY.warning}
                   </p>
                 </div>
 
@@ -410,13 +384,8 @@ export default function KeyAccessRequisitionForm() {
                     onChange={(e) => setAgreedToTerms(e.target.checked)}
                   />
                   <span className="text-[13px] leading-tight font-medium text-slate-700">
-                    I agree to comply with all HAL policies and procedures
-                    relating to the custody and use of facility/store key(s) and
-                    access codes. I further acknowledge that if the key(s) are
-                    lost, stolen, damaged, or not surrendered upon request, I
-                    may be surcharged for costs incurred, including replacement
-                    of locks and related security measures.
-                  </span>{" "}
+                    {POLICY.acknowledgement}
+                  </span>
                 </label>
               </div>
 

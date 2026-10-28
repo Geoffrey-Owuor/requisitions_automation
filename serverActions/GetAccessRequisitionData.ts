@@ -109,9 +109,9 @@ export const getAccessRequisitionData = async ({
 
   const baseQuery = `
     SELECT
-        request_id, request_created_at, submitter_email,
+        request_id, request_created_at, submitter_name, submitter_email,
         employee_name, employee_department, employee_staff_number,
-        issuance_date, access_locations, access_requirements,
+        employee_status, issuance_date, access_locations, access_requirements,
         hod_approver_name, hod_approver_status, hod_approver_comments,
         security_approver_name, security_approver_status, security_approver_comments,
         COUNT(*) OVER() AS total_count

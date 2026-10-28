@@ -66,7 +66,7 @@ export async function hodApprovalStage({
     CasualEmailSender({
       to: userEmail,
       requestId: uuid,
-      message: `Your casual requisition has been approved by ${approverName} and has been forwaded to HR for the next approval stage`,
+      message: `Your casual requisition has been approved by ${approverName} and has been forwarded to HR for the next approval stage`,
       title: `Update: Casual Requisition Approved By ${approverName}`,
       role: "user",
     });

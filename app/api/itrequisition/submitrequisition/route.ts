@@ -184,7 +184,7 @@ export async function POST(request: NextRequest) {
         to: email,
         requestId: requestId,
         message:
-          "Your IT requisition has been submitted successfully and forwaded to IT for review",
+          "Your IT requisition has been submitted successfully and forwarded to IT for review",
         title: "Update: IT Requisition Submitted Successfully",
         role: "user",
       });
@@ -219,7 +219,7 @@ export async function POST(request: NextRequest) {
         to: email,
         requestId: requestId,
         message:
-          "Your IT requisition has been submitted successfully and forwaded to the HOD for review",
+          "Your IT requisition has been submitted successfully and forwarded to the HOD for review",
         title: "Update: IT Requisition Submitted Successfully",
         role: "user",
       });

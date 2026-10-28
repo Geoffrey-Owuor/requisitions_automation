@@ -9,6 +9,10 @@ import {
   statusMatches,
 } from "@/lib/reports/sql";
 import type { ReportQueryParams } from "./types";
+import {
+  ACCESS_LOCATIONS_LABEL,
+  ACCESS_REQUIREMENTS_LABEL,
+} from "@/lib/accessRequisition";
 
 // Key & Access Requisitions: one row per requisition (HOD -> Security).
 // hod_approver_email is the assigned HOD, hod_approver_name and
@@ -34,9 +38,12 @@ SELECT
   r.employee_name,
   r.employee_department,
   r.employee_staff_number,
+  r.employee_status,
   ${excelDate("r.issuance_date")}                  AS issuance_date,
   r.access_locations,
   r.access_requirements,
+  r.terms_version,
+  ${excelDateTime("r.terms_accepted_at")}          AS terms_accepted_at,
 
   CASE
     WHEN ${SECURITY_STATUS} = 'approved' THEN 'Approved'
@@ -75,9 +82,12 @@ const COLUMNS: ReportColumn[] = [
   { key: "employee_name", header: "Employee Name" },
   { key: "employee_department", header: "Department" },
   { key: "employee_staff_number", header: "Staff Number" },
+  { key: "employee_status", header: "Employee Status" },
   { key: "issuance_date", header: "Issuance Date", kind: "date" },
-  { key: "access_locations", header: "Locations", kind: "longtext" },
-  { key: "access_requirements", header: "Requirements", kind: "longtext" },
+  { key: "access_locations", header: ACCESS_LOCATIONS_LABEL, kind: "longtext" },
+  { key: "access_requirements", header: ACCESS_REQUIREMENTS_LABEL, kind: "longtext" },
+  { key: "terms_version", header: "Policy Version", kind: "integer" },
+  { key: "terms_accepted_at", header: "Policy Agreed On", kind: "datetime" },
   { key: "overall_status", header: "Overall Status" },
   { key: "hod_status", header: "HOD Status" },
   { key: "assigned_hod_email", header: "Assigned HOD Email" },
