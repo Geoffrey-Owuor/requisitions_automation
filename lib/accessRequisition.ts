@@ -57,6 +57,14 @@ export const ACCESS_POLICY_VERSIONS: Record<number, AccessPolicy> = {
 
 export const CURRENT_ACCESS_POLICY_VERSION = 1;
 
+// The acknowledgement in the named employee's voice, for the PDF they sign
+// when collecting the keys (the submitter may have requested on their behalf)
+export const employeeAcknowledgement = (
+  policy: AccessPolicy,
+  employeeName: string,
+) =>
+  `I, ${employeeName}, have read and understood the conditions above. ${policy.acknowledgement}`;
+
 export const getAccessPolicy = (version: number): AccessPolicy =>
   ACCESS_POLICY_VERSIONS[version] ??
   ACCESS_POLICY_VERSIONS[CURRENT_ACCESS_POLICY_VERSION];

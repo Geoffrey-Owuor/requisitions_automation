@@ -10,7 +10,31 @@ import { useEffect, useState } from "react";
 import {
   ACCESS_LOCATIONS_LABEL,
   ACCESS_REQUIREMENTS_LABEL,
+  employeeAcknowledgement,
+  getAccessPolicy,
 } from "@/lib/accessRequisition";
+import AccessPolicyConditions from "./AccessPolicyConditions";
+
+// One signatory's lines, mirroring the PDF
+const SignatureBlock = ({ title, name }: { title: string; name?: string }) => (
+  <div className="flex flex-col gap-4">
+    <p className="text-[11px] font-semibold tracking-[0.4px] text-[#b0a0a0] uppercase">
+      {title}
+    </p>
+    {[
+      { label: "Name", value: name },
+      { label: "Signature" },
+      { label: "Date" },
+    ].map(({ label, value }) => (
+      <div key={label} className="flex items-end gap-3 text-[13px]">
+        <span className="w-18 shrink-0 text-[#7c5a5a]">{label}</span>
+        <span className="min-h-6 flex-1 border-b border-[#1e1b1b] font-medium text-[#1e1b1b]">
+          {value}
+        </span>
+      </div>
+    ))}
+  </div>
+);
 
 // Helper components for the web view
 const Field = ({ label, value }: { label: string; value: string | number }) => (
@@ -32,6 +56,7 @@ const SectionHeading = ({ title }: { title: string }) => (
 
 const AccessPdfModal = ({ pdfData }: { pdfData: AccessPdfValues }) => {
   const [mounted, setMounted] = useState(false);
+  const policy = getAccessPolicy(pdfData.termsversion);
 
   useEffect(() => {
     Promise.resolve().then(() => setMounted(true));
@@ -157,6 +182,29 @@ const AccessPdfModal = ({ pdfData }: { pdfData: AccessPdfValues }) => {
                   </p>
                 )}
               </div>
+            </div>
+          </div>
+
+          {/* Key Custody & Access Policy, as agreed at submission */}
+          <div className="mb-8 border-t border-[rgba(240,180,180,0.4)] pt-8">
+            <SectionHeading title="Key Custody & Access Policy" />
+            <AccessPolicyConditions policy={policy} />
+          </div>
+
+          {/* Acknowledgement and signatures */}
+          <div className="border-t border-[rgba(240,180,180,0.4)] pt-8">
+            <SectionHeading title="Employee Acknowledgement" />
+            <p className="text-[13px] leading-relaxed text-[#1e1b1b]">
+              {employeeAcknowledgement(policy, pdfData.employeename)}
+            </p>
+            <p className="mt-2 text-[12px] text-[#7c5a5a]">
+              Agreed to electronically by {pdfData.submittername} when
+              submitting this requisition on{" "}
+              {dateFormatter(pdfData.termsacceptedat)}.
+            </p>
+            <div className="mt-8 grid grid-cols-2 gap-10 max-sm:grid-cols-1">
+              <SignatureBlock title="Employee" name={pdfData.employeename} />
+              <SignatureBlock title="Security Manager" />
             </div>
           </div>
         </div>
