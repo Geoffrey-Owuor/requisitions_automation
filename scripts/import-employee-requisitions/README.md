@@ -11,10 +11,21 @@ The script is plain Node (24+) using the app's own `pg` and `exceljs`. It connec
 ```sh
 node --env-file=.env.local scripts/import-employee-requisitions/index.mjs template employee-requisitions-import.xlsx
 node --env-file=.env.local scripts/import-employee-requisitions/index.mjs validate employee-requisitions-import.xlsx
+node --env-file=.env.local scripts/import-employee-requisitions/index.mjs import employee-requisitions-import.xlsx --commit
 ```
 
 1. **`template [output.xlsx]`** builds the Excel template from the database, so its dropdowns list the real departments and job grades. It has an Instructions sheet (every column, the rules, and a worked example), the Requisitions sheet to fill in, and a Lists sheet.
 2. **`validate <file.xlsx>`** checks a filled-in file and writes nothing to the database. It prints the first problems, and when there are any, saves `<file>.errors.xlsx`: a copy with each problem cell filled (red: error, yellow: warning) with the reason as a note, an Issues column per row, and an Issues sheet listing everything. Fix the original (or the report itself, which validating again updates in place) until there are no errors.
+3. **`import <file.xlsx>`** validates again, then inserts every requisition and position in one transaction and rolls it back: a dry run that also proves the database accepts every row. With **`--commit`** it keeps them, all under one new `import_batch_id`, which it prints. Any error writes nothing, and no emails are sent.
+4. **`undo <batch-id>`** shows how many requisitions a batch holds; with **`--commit`** it deletes them (their positions cascade). It refuses to delete anything if a row in the batch isn't a plain import any more (not imported, or amended), so it can never remove live data. The same by hand: `DELETE FROM employee_requisitions WHERE import_batch_id = '<batch-id>'`.
+
+## Running the import for real
+
+1. Run migration `036_employee_requisition_import.sql`, and deploy the app version that knows about imported rows (the amendment block and labels) before importing.
+2. Build the template on the server (`template`), so its lists match production, and send it to whoever fills it in.
+3. `validate` the returned file until it has no errors, and review the warnings.
+4. `import` (dry run), then `import --commit`. Keep the printed batch id.
+5. Spot-check a few requisitions in the dashboard and the Employee report, then delete this folder in a later commit.
 
 ## The rules
 
@@ -30,6 +41,7 @@ node --env-file=.env.local scripts/import-employee-requisitions/index.mjs valida
 ## Files
 
 - `index.mjs`: the commands
+- `import.mjs`: the insert and the batch undo
 - `columns.mjs`: the template's columns, stages and accepted values
 - `cells.mjs`: reading Excel cells as text, dates and numbers
 - `validate.mjs`: the checks, producing the rows to store

@@ -2,6 +2,8 @@
 //
 //   node --env-file=<env file> scripts/import-employee-requisitions/index.mjs template [output.xlsx]
 //   node --env-file=<env file> scripts/import-employee-requisitions/index.mjs validate <file.xlsx>
+//   node --env-file=<env file> scripts/import-employee-requisitions/index.mjs import <file.xlsx> [--commit]
+//   node --env-file=<env file> scripts/import-employee-requisitions/index.mjs undo <batch-id> [--commit]
 
 import path from "node:path";
 import ExcelJS from "exceljs";
@@ -9,10 +11,19 @@ import { connect, loadLookups } from "./db.mjs";
 import { writeTemplate } from "./template.mjs";
 import { validateWorkbook } from "./validate.mjs";
 import { columnHeader, sortIssues, writeIssueReport } from "./report.mjs";
+import { importRequisitions, undoBatch } from "./import.mjs";
 
 const USAGE = `Usage:
   index.mjs template [output.xlsx]   Build the Excel template from the database
-  index.mjs validate <file.xlsx>     Check a filled-in template (writes nothing to the database)`;
+  index.mjs validate <file.xlsx>     Check a filled-in template (writes nothing to the database)
+  index.mjs import <file.xlsx>       Check, then insert everything and roll back (a dry run)
+  index.mjs import <file.xlsx> --commit
+                                     Check, then insert everything in one transaction
+  index.mjs undo <batch-id>          Show how many requisitions an import batch holds
+  index.mjs undo <batch-id> --commit Delete an import batch`;
+
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 // How many issues to print; the report file has them all
 const PRINTED_ISSUES = 25;
@@ -85,13 +96,51 @@ async function checkFile(client, file) {
   return result;
 }
 
-async function main() {
-  const [command, file] = process.argv.slice(2);
-  if (command !== "template" && command !== "validate") {
-    console.error(USAGE);
-    process.exit(1);
+async function importFile(client, file, commit) {
+  const result = await checkFile(client, file);
+  if (!result) {
+    process.exitCode = 1;
+    return;
   }
-  if (command === "validate" && !file) {
+  const { batchId, requisitions, positions } = await importRequisitions(
+    client,
+    result.requisitions,
+    { commit },
+  );
+  if (!commit) {
+    console.log(
+      `Dry run: inserted ${requisitions} requisitions and ${positions} positions, then rolled back. Run again with --commit to import.`,
+    );
+    return;
+  }
+  console.log(
+    `Imported ${requisitions} requisitions and ${positions} positions as batch ${batchId}`,
+  );
+  console.log(
+    `Keep the batch id. To undo: index.mjs undo ${batchId} --commit`,
+  );
+}
+
+async function undo(client, batchId, commit) {
+  if (!UUID_PATTERN.test(batchId)) {
+    console.error(`${batchId} isn't a batch id`);
+    process.exitCode = 1;
+    return;
+  }
+  const count = await undoBatch(client, batchId, { commit });
+  console.log(
+    commit
+      ? `Deleted ${count} requisitions from batch ${batchId}`
+      : `Batch ${batchId} has ${count} requisitions. Run again with --commit to delete them.`,
+  );
+}
+
+async function main() {
+  const args = process.argv.slice(2);
+  const commit = args.includes("--commit");
+  const [command, target] = args.filter((arg) => arg !== "--commit");
+  const needsTarget = ["validate", "import", "undo"].includes(command);
+  if ((command !== "template" && !needsTarget) || (needsTarget && !target)) {
     console.error(USAGE);
     process.exit(1);
   }
@@ -99,10 +148,14 @@ async function main() {
   const client = await connect();
   try {
     if (command === "template") {
-      await template(client, file);
-    } else {
-      const result = await checkFile(client, file);
+      await template(client, target);
+    } else if (command === "validate") {
+      const result = await checkFile(client, target);
       if (!result) process.exitCode = 1;
+    } else if (command === "import") {
+      await importFile(client, target, commit);
+    } else {
+      await undo(client, target, commit);
     }
   } finally {
     await client.end();
