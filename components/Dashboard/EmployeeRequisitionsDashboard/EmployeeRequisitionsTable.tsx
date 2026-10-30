@@ -63,12 +63,12 @@ export default function EmployeeRequisitionsTable({
                 {req.employee_department}
               </span>
               {req.imported && (
-                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
+                <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold whitespace-nowrap text-slate-600">
                   Imported
                 </span>
               )}
               {req.amendment_count > 0 && (
-                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
+                <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold whitespace-nowrap text-amber-700">
                   Amended ×{req.amendment_count}
                 </span>
               )}
