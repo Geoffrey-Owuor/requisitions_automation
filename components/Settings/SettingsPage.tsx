@@ -14,6 +14,11 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { SETTINGS_PAGE } from "@/lib/configAdmin";
+import RequisitionPagesWrapper from "@/components/Dashboard/RequisitionPagesWrapper";
+import {
+  ScrollingNav,
+  StickyNavBar,
+} from "@/components/Dashboard/StickyNavBar";
 import ApproversSettings from "./ApproversSettings";
 import AdvanceSettings from "./AdvanceSettings";
 import AuditLogSettings from "./AuditLogSettings";
@@ -114,54 +119,71 @@ export default function SettingsPage({ tab }: { tab?: string }) {
   const activeTab = TABS.find((entry) => entry.key === tab) ?? TABS[0];
 
   return (
-    <div className="space-y-5 px-2 pt-4 pb-6">
-      <div>
-        <h1 className="flex items-center gap-2 text-lg font-semibold text-[#1e1b1b]">
-          <SETTINGS_PAGE.Icon className="h-5 w-5 text-neutral-500" />
-          Settings
-        </h1>
-        <p className="mt-1 text-sm text-neutral-500">
-          Manage who can do what and the options the requisition forms use.
-          Every change is recorded with your name.
-        </p>
-      </div>
-
-      {/* Each group wraps as a unit, under its own label */}
-      <nav
-        aria-label="Settings sections"
-        className="flex flex-wrap items-end gap-x-5 gap-y-3"
-      >
-        {TAB_GROUPS.map((group) => (
-          <div key={group.label} className="space-y-1.5">
-            <p className="text-[10px] font-bold tracking-widest text-neutral-400 uppercase">
-              {group.label}
+    <RequisitionPagesWrapper
+      header={
+        <>
+          <div className="mx-auto w-full max-w-7xl px-2 pt-4 pb-3">
+            <h1 className="flex items-center gap-2 text-lg font-semibold text-[#1e1b1b]">
+              <SETTINGS_PAGE.Icon className="h-5 w-5 text-neutral-500" />
+              Settings
+            </h1>
+            <p className="mt-1 text-sm text-neutral-500">
+              Manage who can do what and the options the requisition forms use.
+              Every change is recorded with your name.
             </p>
-            <div className="flex flex-wrap gap-1.5">
-              {group.tabs.map(({ key, label, Icon }) => {
-                const isActive = key === activeTab.key;
-                return (
-                  <Link
-                    key={key}
-                    href={`${SETTINGS_PAGE.href}?tab=${key}`}
-                    scroll={false}
-                    aria-current={isActive ? "page" : undefined}
-                    className={`rounded-compact inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold transition-colors ${
-                      isActive
-                        ? "bg-slate-900 text-white"
-                        : "border border-neutral-200 bg-white text-neutral-700 hover:border-neutral-400"
-                    }`}
-                  >
-                    <Icon className="h-3.5 w-3.5" />
-                    {label}
-                  </Link>
-                );
-              })}
-            </div>
           </div>
-        ))}
-      </nav>
 
-      <activeTab.Panel />
-    </div>
+          {/* One row, each group's tabs after its label */}
+          <StickyNavBar>
+            <ScrollingNav
+              label="Settings sections"
+              activeKey={activeTab.key}
+              keepContentInView
+            >
+              {TAB_GROUPS.map((group, index) => (
+                <div
+                  key={group.label}
+                  role="group"
+                  aria-label={group.label}
+                  className={`flex shrink-0 items-center gap-1 ${
+                    index > 0 ? "ml-3 border-l border-neutral-200 pl-3" : ""
+                  }`}
+                >
+                  <span
+                    aria-hidden
+                    className="mr-1 text-[10px] font-bold tracking-widest whitespace-nowrap text-neutral-400 uppercase"
+                  >
+                    {group.label}
+                  </span>
+                  {group.tabs.map(({ key, label, Icon }) => {
+                    const isActive = key === activeTab.key;
+                    return (
+                      <Link
+                        key={key}
+                        href={`${SETTINGS_PAGE.href}?tab=${key}`}
+                        scroll={false}
+                        aria-current={isActive ? "page" : undefined}
+                        className={`rounded-compact inline-flex shrink-0 items-center gap-1.5 px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-colors ${
+                          isActive
+                            ? "bg-slate-900 text-white"
+                            : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
+                        }`}
+                      >
+                        <Icon className="h-3.5 w-3.5" />
+                        {label}
+                      </Link>
+                    );
+                  })}
+                </div>
+              ))}
+            </ScrollingNav>
+          </StickyNavBar>
+        </>
+      }
+    >
+      <div className="px-2 pt-5 pb-6">
+        <activeTab.Panel />
+      </div>
+    </RequisitionPagesWrapper>
   );
 }
