@@ -23,7 +23,6 @@ import {
   loadCasualConfig,
   HodApproversObject,
 } from "@/lib/loadAppDataV2";
-import { assets } from "@/public/assets";
 import {
   getActiveCasualCategories,
   getCasualLocationsForDepartment,
@@ -36,7 +35,7 @@ import SubmittingOverlay from "@/components/SubmittingOverlay";
 import AlertModal from "@/components/AlertModal";
 import { AlertInfo } from "@/components/TravelRequisitionPage";
 import CasualConfirmationModal from "./CasualConfirmationModal";
-import Image from "next/image";
+import { FormBanner } from "@/components/FormBanner";
 import { getCasualAmendmentContext } from "@/serverActions/GetCasualAmendmentContext";
 import CasualAmendmentHistory from "@/components/Approvers/CasualApprovers/CasualAmendmentHistory";
 import { useRouter } from "next/navigation";
@@ -456,7 +455,7 @@ export default function CasualRequisitionForm({
   if (amendRequestId && amendmentLoading) {
     return (
       <RequisitionFormSkeleton
-        image={assets.casual_form_image}
+        banner="casual"
         title="Amend Casual Requisition"
         subtitle="Update this requisition - the approval workflow will restart from HOD."
         sections={[3, 4]}
@@ -529,16 +528,7 @@ export default function CasualRequisitionForm({
 
       {step === 1 && (
         <div className="relative z-10 mx-auto max-w-225">
-          {/* Form Image - TODO: Update src to appropriate asset if needed */}
-          <div className="rounded-surface sm:rounded-surface mb-4 overflow-hidden">
-            <Image
-              src={assets.casual_form_image}
-              sizes="100vh"
-              className="rounded-control object-contain object-center"
-              priority
-              alt="Form Image"
-            />
-          </div>
+          <FormBanner type="casual" />
           {/* Header */}
           <header className="mb-8 flex items-end justify-between max-sm:flex-col max-sm:items-start max-sm:gap-5">
             <div>

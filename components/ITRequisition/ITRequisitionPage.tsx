@@ -10,8 +10,7 @@ import {
   Check,
   Lightbulb,
 } from "lucide-react";
-import Image from "next/image";
-import { assets } from "@/public/assets";
+import { FormBanner } from "@/components/FormBanner";
 import { useQuery } from "@tanstack/react-query";
 import {
   loadHodArray,
@@ -225,16 +224,7 @@ export default function ITRequisitionPage() {
 
       {step === 1 && (
         <div className="relative z-10 mx-auto max-w-225">
-          {/* Form Image */}
-          <div className="rounded-surface sm:rounded-surface mb-4 overflow-hidden">
-            <Image
-              src={assets.it_form_image}
-              sizes="100vh"
-              className="rounded-control object-contain object-center"
-              priority
-              alt="Form Image"
-            />
-          </div>
+          <FormBanner type="it" />
 
           {/* Header */}
           <header className="mb-8 flex items-end justify-between max-sm:flex-col max-sm:items-start max-sm:gap-5">

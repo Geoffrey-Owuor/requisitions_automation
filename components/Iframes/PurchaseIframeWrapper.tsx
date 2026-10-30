@@ -1,7 +1,7 @@
 "use client";
 import { Loader2 } from "lucide-react";
-import Image from "next/image";
 import { useState } from "react";
+import HotpointMark from "@/components/HotpointMark";
 
 const PurchaseIframeWrapper = ({ ssoUrl }: { ssoUrl: string }) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -10,17 +10,9 @@ const PurchaseIframeWrapper = ({ ssoUrl }: { ssoUrl: string }) => {
       {/* - LOADER OVERLAY - */}
       {isLoading && (
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center">
-          {/* The app icon, resized to 240px WebP (2x the 120px it shows at)
-              and preloaded from <head> so it appears with the first paint */}
-          <Image
-            src="/icons/apps/staff-product-purchase.webp"
-            alt=""
-            width={240}
-            height={240}
-            className="mb-12 h-30 w-30"
-            unoptimized
-            preload
-          />
+          {/* The app's icon is the Hotpoint mark, inlined so the loader
+              shows it on first paint without a request */}
+          <HotpointMark className="mb-12 h-30 w-30" />
           {/* Smaller Spinning Loader */}
           <Loader2 className="h-12 w-12 animate-spin text-gray-500 dark:text-gray-400" />
 

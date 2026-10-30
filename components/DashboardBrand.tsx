@@ -1,9 +1,10 @@
 "use client";
 
-import Image from "next/image";
+import Image, { getImageProps } from "next/image";
 import Link from "next/link";
-import { assets } from "@/public/assets";
+import HotpointMark from "@/components/HotpointMark";
 import { useState, useEffect, useId, useRef } from "react";
+import { preload } from "react-dom";
 import { usePathname } from "next/navigation";
 import { useUser } from "@/context/UserContext";
 import {
@@ -106,6 +107,22 @@ const MICROSOFT_APPS: LauncherApp[] = [
   },
 ].map((app) => ({ ...app, external: true }));
 
+// Starts loading the Microsoft icons once the pointer or focus reaches the
+// logo, so the menu doesn't open with empty tiles. Same props as the tiles'
+// <Image>, so the browser reuses these requests.
+const preloadMicrosoftIcons = () => {
+  for (const { iconSrc } of MICROSOFT_APPS) {
+    if (!iconSrc) continue;
+    const { props } = getImageProps({
+      src: iconSrc,
+      alt: "",
+      width: 28,
+      height: 28,
+    });
+    preload(props.src, { as: "image", imageSrcSet: props.srcSet });
+  }
+};
+
 const fromNavItem = (item: DashboardNavItem): LauncherApp => ({
   key: item.key,
   name: item.label,
@@ -204,17 +221,12 @@ const DashboardBrand = () => {
         aria-expanded={openMenu}
         aria-controls={openMenu ? panelId : undefined}
         onClick={() => setOpenMenu((prev) => !prev)}
+        onPointerEnter={preloadMicrosoftIcons}
+        onFocus={preloadMicrosoftIcons}
         className="group rounded-control relative flex cursor-pointer items-center p-2 outline-none hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white/80"
       >
         <span className="relative inline-flex h-6.5 w-6.5 shrink-0 items-center justify-center">
-          <Image
-            src={assets.hotpoint_black_logo}
-            alt=""
-            sizes="32px"
-            className="object-contain invert"
-            fill
-            preload
-          />
+          <HotpointMark fill="#fff" className="h-full w-full" />
           {/* Always-visible hint that the logo opens the app menu */}
           <span
             aria-hidden="true"
