@@ -85,6 +85,17 @@ export type AnalyticsFilters = {
   department: string;
 };
 
+// The filters as the dashboards' query string
+export const analyticsFiltersQuery = ({
+  from,
+  to,
+  department,
+}: AnalyticsFilters) => {
+  const params = new URLSearchParams({ from, to });
+  if (department) params.set("department", department);
+  return params.toString();
+};
+
 export const MAX_DEPARTMENT_LENGTH = 255;
 
 export function getAnalyticsFiltersError({

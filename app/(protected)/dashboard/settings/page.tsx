@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/session";
 import { getUserRoles } from "@/serverActions/GetUserRoles";
 import { canManageSettings } from "@/lib/configAdmin";
-import RequisitionPagesWrapper from "@/components/Dashboard/RequisitionPagesWrapper";
 import SettingsPage from "@/components/Settings/SettingsPage";
 
 export const metadata: Metadata = {
@@ -26,11 +25,7 @@ const page = async ({
 
   const { tab } = await searchParams;
 
-  return (
-    <RequisitionPagesWrapper>
-      <SettingsPage tab={typeof tab === "string" ? tab : undefined} />
-    </RequisitionPagesWrapper>
-  );
+  return <SettingsPage tab={typeof tab === "string" ? tab : undefined} />;
 };
 
 export default page;
