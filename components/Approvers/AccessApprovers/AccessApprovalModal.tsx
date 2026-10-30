@@ -1,9 +1,8 @@
 "use client";
 
-import Image from "next/image";
+import { FormBanner } from "@/components/FormBanner";
 import { useState } from "react";
 import {
-  assets,
   dateFormatter,
   initialsHelper,
   ACCESS_STAGE_LABELS,
@@ -184,16 +183,7 @@ const AccessApprovalModal = ({ data }: { data: AccessRequisitionData }) => {
 
       {step === 1 && (
         <div className="relative z-10 mx-auto max-w-225">
-          {/* Banner image */}
-          <div className="rounded-surface sm:rounded-surface mb-4 overflow-hidden">
-            <Image
-              src={assets.access_key_image}
-              sizes="100vh"
-              className="rounded-control object-contain object-center"
-              priority
-              alt="Access Request Form Image"
-            />
-          </div>
+          <FormBanner type="access" />
 
           {/* Page header */}
           <div className="mb-8">

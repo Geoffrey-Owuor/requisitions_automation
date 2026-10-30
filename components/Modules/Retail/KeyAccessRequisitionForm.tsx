@@ -10,8 +10,7 @@ import {
   MapPin,
   Check,
 } from "lucide-react";
-import Image from "next/image";
-import { assets } from "@/public/assets";
+import { FormBanner } from "@/components/FormBanner";
 import { useQuery } from "@tanstack/react-query";
 import { loadHodArray, loadBaseDepartments } from "@/lib/loadAppDataV2";
 import { ApiHandler } from "@/utils/ApiHandler";
@@ -219,16 +218,7 @@ export default function KeyAccessRequisitionForm() {
 
       {step === 1 && (
         <div className="relative z-10 mx-auto max-w-225">
-          {/* Form Image - TODO: Update src to appropriate asset if needed */}
-          <div className="rounded-surface sm:rounded-surface mb-4 overflow-hidden">
-            <Image
-              src={assets.access_key_image}
-              sizes="100vh"
-              className="rounded-control object-contain object-center"
-              priority
-              alt="Form Image"
-            />
-          </div>
+          <FormBanner type="access" />
 
           {/* Header */}
           <header className="mb-8 flex items-end justify-between max-sm:flex-col max-sm:items-start max-sm:gap-5">

@@ -12,6 +12,7 @@ import {
   type DashboardTableEntry,
 } from "@/lib/dashboardTables";
 import DashboardWatermark from "../Modules/DashboardWaterMark";
+import { preloadFormBanner } from "@/components/FormBanner";
 import TravelRequisitionsTable from "./TravelRequisitionsTable";
 import ITRequisitionsTable from "./ITRequisitionsDashboard/ITRequisitionsTable";
 import AccessRequisitionsTable from "./AccessRequisitionsDashboard/AccessRequisitionsTable";
@@ -72,6 +73,8 @@ export default function RequisitionTypeDashboard({
 }) {
   const { roles, memberships } = useUser();
   const { label, href, Icon } = getRequisitionType(type);
+  // "New" is the likeliest next click, so have its banner ready
+  preloadFormBanner(type);
 
   const tables = getVisibleTables({ roles, memberships }).filter(
     (entry) => entry.type === type,
