@@ -20,10 +20,15 @@ export type DashboardViewer = {
 
 export type DashboardTab = "mine" | "pending" | "history";
 
-export const DASHBOARD_TABS: { tab: DashboardTab; label: string }[] = [
-  { tab: "mine", label: "My Requisitions" },
-  { tab: "pending", label: "Pending Approval" },
-  { tab: "history", label: "History" },
+// shortLabel is shown on phones, where the full labels would wrap
+export const DASHBOARD_TABS: {
+  tab: DashboardTab;
+  label: string;
+  shortLabel: string;
+}[] = [
+  { tab: "mine", label: "My Requisitions", shortLabel: "Mine" },
+  { tab: "pending", label: "Pending Approval", shortLabel: "Pending" },
+  { tab: "history", label: "History", shortLabel: "History" },
 ];
 
 export type RequisitionTypeEntry = {

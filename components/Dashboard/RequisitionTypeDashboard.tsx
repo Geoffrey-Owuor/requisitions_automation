@@ -112,9 +112,9 @@ export default function RequisitionTypeDashboard({
           <div
             role="tablist"
             aria-label={`${label} requisition views`}
-            className="rounded-control flex w-fit gap-1 border border-neutral-300 bg-white/60 p-1"
+            className="rounded-control flex gap-1 border border-neutral-300 bg-white/60 p-1 sm:w-fit"
           >
-            {tabs.map(({ tab, label: tabLabel }) => {
+            {tabs.map(({ tab, label: tabLabel, shortLabel }) => {
               const isActive = tab === activeTab;
               return (
                 <Link
@@ -124,13 +124,14 @@ export default function RequisitionTypeDashboard({
                   scroll={false}
                   role="tab"
                   aria-selected={isActive}
-                  className={`rounded-compact inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors ${
+                  className={`rounded-compact inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors max-sm:flex-1 ${
                     isActive
                       ? "bg-slate-900 text-white"
                       : "text-neutral-600 hover:bg-neutral-200/70 hover:text-neutral-900"
                   }`}
                 >
-                  {tabLabel}
+                  <span className="sm:hidden">{shortLabel}</span>
+                  <span className="max-sm:hidden">{tabLabel}</span>
                   {tab === "pending" && pendingCount > 0 && (
                     <span className="rounded-full bg-red-600 px-1.5 text-[11px] leading-4.5 font-semibold text-white">
                       {pendingCount}
