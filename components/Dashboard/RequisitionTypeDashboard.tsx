@@ -1,16 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { Plus } from "lucide-react";
 import { useUser } from "@/context/UserContext";
 import { useDashboardSummary } from "@/hooks/useDashboardSummary";
 import type { DashboardRequisitionType } from "@/lib/dashboardApi";
 import {
   DASHBOARD_TABS,
-  REQUISITION_TYPES,
   getRequisitionType,
   getVisibleTables,
-  newRequisitionHref,
   type DashboardTab,
   type DashboardTableEntry,
 } from "@/lib/dashboardTables";
@@ -97,61 +94,27 @@ export default function RequisitionTypeDashboard({
     .reduce((sum, entry) => sum + (counts?.[entry.key] ?? 0), 0);
 
   return (
-    <div className="relative h-full p-2">
+    <div className="relative p-2">
       <div className="pointer-events-none fixed inset-y-0 left-1/2 z-0 flex -translate-x-1/2 items-center justify-center overflow-hidden lg:left-[calc(80px+(100vw-80px)/2)]">
         <DashboardWatermark />
       </div>
 
       <div className="relative z-10 space-y-4">
-        {/* Requisition type switcher — keeps the current tab where the
-            target type has it, otherwise the page falls back to "mine" */}
-        <nav
-          aria-label="Requisition types"
-          className="flex flex-wrap items-center gap-1.5"
-        >
-          {REQUISITION_TYPES.map((entry) => {
-            const isActive = entry.type === type;
-            return (
-              <Link
-                key={entry.type}
-                href={`${entry.href}?tab=${activeTab}`}
-                aria-current={isActive ? "page" : undefined}
-                className={`rounded-compact inline-flex items-center gap-1.5 border px-3 py-1.5 text-xs font-semibold transition-colors ${
-                  isActive
-                    ? "border-slate-900 bg-slate-900 text-white"
-                    : "border-neutral-300 bg-white/60 text-neutral-600 hover:border-neutral-400 hover:text-neutral-900"
-                }`}
-              >
-                <entry.Icon className="h-3.5 w-3.5" />
-                {entry.label}
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* Header */}
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="flex items-center gap-2 text-lg font-semibold text-[#1e1b1b]">
-            <Icon className="h-5 w-5 text-neutral-500" />
-            {label} Requisitions
-          </h1>
-          <Link
-            href={newRequisitionHref(type)}
-            className="rounded-control inline-flex items-center gap-2 bg-slate-900 px-3 py-2 text-sm text-white hover:bg-slate-800"
-          >
-            <Plus className="h-4 w-4" />
-            New {label} Requisition
-          </Link>
-        </div>
+        {/* Header — the type switcher and "New" action are in the sticky
+            RequisitionNavBar above */}
+        <h1 className="flex items-center gap-2 text-lg font-semibold text-[#1e1b1b]">
+          <Icon className="h-5 w-5 text-neutral-500" />
+          {label} Requisitions
+        </h1>
 
         {/* Tabs — hidden when the viewer only has their own submissions */}
         {tabs.length > 1 && (
           <div
             role="tablist"
             aria-label={`${label} requisition views`}
-            className="rounded-control flex w-fit gap-1 border border-neutral-300 bg-white/60 p-1"
+            className="rounded-control flex gap-1 border border-neutral-300 bg-white/60 p-1 sm:w-fit"
           >
-            {tabs.map(({ tab, label: tabLabel }) => {
+            {tabs.map(({ tab, label: tabLabel, shortLabel }) => {
               const isActive = tab === activeTab;
               return (
                 <Link
@@ -161,13 +124,14 @@ export default function RequisitionTypeDashboard({
                   scroll={false}
                   role="tab"
                   aria-selected={isActive}
-                  className={`rounded-compact inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors ${
+                  className={`rounded-compact inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors max-sm:flex-1 ${
                     isActive
                       ? "bg-slate-900 text-white"
                       : "text-neutral-600 hover:bg-neutral-200/70 hover:text-neutral-900"
                   }`}
                 >
-                  {tabLabel}
+                  <span className="sm:hidden">{shortLabel}</span>
+                  <span className="max-sm:hidden">{tabLabel}</span>
                   {tab === "pending" && pendingCount > 0 && (
                     <span className="rounded-full bg-red-600 px-1.5 text-[11px] leading-4.5 font-semibold text-white">
                       {pendingCount}

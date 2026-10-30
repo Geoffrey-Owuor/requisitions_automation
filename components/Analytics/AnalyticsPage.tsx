@@ -1,17 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Info } from "lucide-react";
 import { DatePicker } from "@/components/DatePicker";
 import { Select } from "@/components/Select";
 import {
-  ANALYTICS,
-  ANALYTICS_PAGE,
-  analyticsHref,
+  analyticsFiltersQuery as filtersQuery,
   defaultAnalyticsRange,
-  getAnalytics,
   getAnalyticsFiltersError,
   type AnalyticsFilters,
   type AnalyticsType,
@@ -51,24 +47,16 @@ const RANGE_PRESETS: RangePreset[] = [
   { label: "Last 12 months", range: defaultAnalyticsRange },
 ];
 
-const filtersQuery = ({ from, to, department }: AnalyticsFilters) => {
-  const params = new URLSearchParams({ from, to });
-  if (department) params.set("department", department);
-  return params.toString();
-};
-
 const fieldLabel =
   "text-[11px] font-bold tracking-widest text-gray-400 uppercase";
 
 export default function AnalyticsPage({
   type,
-  allowedTypes,
   filters,
   departments,
   today,
 }: {
   type: AnalyticsType;
-  allowedTypes: AnalyticsType[];
   // Already validated by the page
   filters: AnalyticsFilters;
   departments: string[];
@@ -77,7 +65,6 @@ export default function AnalyticsPage({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { label, Icon } = getAnalytics(type);
 
   // The date fields can hold a range the URL can't take yet (from after
   // to); only a usable range replaces the URL, which drives the dashboard
@@ -104,48 +91,6 @@ export default function AnalyticsPage({
 
   return (
     <div className="space-y-4 px-2 pt-4 pb-6">
-      {/* Dashboard switcher — keeps the filters */}
-      {allowedTypes.length > 1 && (
-        <nav
-          aria-label="Analytics dashboards"
-          className="flex flex-wrap items-center gap-1.5"
-        >
-          {ANALYTICS.filter((entry) => allowedTypes.includes(entry.type)).map(
-            (entry) => {
-              const isActive = entry.type === type;
-              return (
-                <Link
-                  key={entry.type}
-                  href={`${analyticsHref(entry.type)}?${filtersQuery(filters)}`}
-                  aria-current={isActive ? "page" : undefined}
-                  className={`rounded-compact inline-flex items-center gap-1.5 border px-3 py-1.5 text-xs font-semibold transition-colors ${
-                    isActive
-                      ? "border-slate-900 bg-slate-900 text-white"
-                      : "border-neutral-300 bg-white/60 text-neutral-600 hover:border-neutral-400 hover:text-neutral-900"
-                  }`}
-                >
-                  <entry.Icon className="h-3.5 w-3.5" />
-                  {entry.label}
-                </Link>
-              );
-            },
-          )}
-        </nav>
-      )}
-
-      {/* Header */}
-      <div>
-        <h1 className="flex items-center gap-2 text-lg font-semibold text-[#1e1b1b]">
-          <Icon className="h-5 w-5 text-neutral-500" />
-          {label} Requisition {ANALYTICS_PAGE.label}
-        </h1>
-        <p className="mt-1 text-sm text-neutral-500">
-          {filters.department
-            ? `Figures for ${filters.department}, for requisitions submitted in the chosen range.`
-            : "Company-wide figures for requisitions submitted in the chosen range."}
-        </p>
-      </div>
-
       {/* Filters */}
       <section
         aria-label="Analytics filters"

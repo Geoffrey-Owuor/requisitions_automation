@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import RequisitionPagesWrapper from "@/components/Dashboard/RequisitionPagesWrapper";
 import RequisitionTypeDashboard from "@/components/Dashboard/RequisitionTypeDashboard";
+import RequisitionNavBar from "@/components/Dashboard/RequisitionNavBar";
 
 export const metadata: Metadata = {
   title: "IT Requisitions",
@@ -12,13 +13,13 @@ const page = async ({
 }: {
   searchParams: Promise<{ tab?: string | string[] }>;
 }) => {
-  const { tab } = await searchParams;
+  const { tab: tabParam } = await searchParams;
+  const tab = typeof tabParam === "string" ? tabParam : undefined;
   return (
-    <RequisitionPagesWrapper>
-      <RequisitionTypeDashboard
-        type="it"
-        tab={typeof tab === "string" ? tab : undefined}
-      />
+    <RequisitionPagesWrapper
+      header={<RequisitionNavBar type="it" mode="tables" tab={tab} />}
+    >
+      <RequisitionTypeDashboard type="it" tab={tab} />
     </RequisitionPagesWrapper>
   );
 };

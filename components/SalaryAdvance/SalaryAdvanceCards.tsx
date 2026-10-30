@@ -214,7 +214,7 @@ export default function SalaryAdvanceCards() {
               <div className="flex items-center gap-1.5 text-gray-500">
                 <SendHorizontal size={14} strokeWidth={2} />
                 <span className="text-xs font-bold tracking-wide text-gray-600">
-                  Not Exported
+                  Unexported
                 </span>
               </div>
               <span className="text-xl font-bold text-gray-800">

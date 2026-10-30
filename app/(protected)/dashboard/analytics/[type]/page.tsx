@@ -12,6 +12,7 @@ import {
   isAnalyticsType,
 } from "@/lib/analytics/definitions";
 import RequisitionPagesWrapper from "@/components/Dashboard/RequisitionPagesWrapper";
+import AnalyticsHeader from "@/components/Analytics/AnalyticsHeader";
 import AnalyticsPage from "@/components/Analytics/AnalyticsPage";
 
 type Params = Promise<{ type: string }>;
@@ -74,10 +75,17 @@ const page = async ({
   const departments = await loadAllDepartmentNames();
 
   return (
-    <RequisitionPagesWrapper>
+    <RequisitionPagesWrapper
+      header={
+        <AnalyticsHeader
+          type={type}
+          allowedTypes={allowed.map((entry) => entry.type)}
+          filters={filters}
+        />
+      }
+    >
       <AnalyticsPage
         type={type}
-        allowedTypes={allowed.map((entry) => entry.type)}
         filters={filters}
         departments={departments}
         today={today}
