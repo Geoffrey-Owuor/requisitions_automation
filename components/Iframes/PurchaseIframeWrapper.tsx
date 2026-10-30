@@ -1,5 +1,6 @@
 "use client";
-import { Loader2, ShoppingBag } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import Image from "next/image";
 import { useState } from "react";
 
 const PurchaseIframeWrapper = ({ ssoUrl }: { ssoUrl: string }) => {
@@ -9,9 +10,16 @@ const PurchaseIframeWrapper = ({ ssoUrl }: { ssoUrl: string }) => {
       {/* - LOADER OVERLAY - */}
       {isLoading && (
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center">
-          <ShoppingBag
-            className="mb-12 h-30 w-30 text-gray-800 dark:text-gray-200"
-            strokeWidth={1.5}
+          {/* The app icon, resized to 240px WebP (2x the 120px it shows at)
+              and preloaded from <head> so it appears with the first paint */}
+          <Image
+            src="/icons/apps/staff-product-purchase.webp"
+            alt=""
+            width={240}
+            height={240}
+            className="mb-12 h-30 w-30"
+            unoptimized
+            preload
           />
           {/* Smaller Spinning Loader */}
           <Loader2 className="h-12 w-12 animate-spin text-gray-500 dark:text-gray-400" />
