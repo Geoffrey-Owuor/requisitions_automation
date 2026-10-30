@@ -21,8 +21,7 @@ import SubmittingOverlay from "../SubmittingOverlay";
 import { useAlertStore } from "@/store/useAlertStore";
 import { scrollPageToTop } from "@/utils/scrollPageToTop";
 import SalaryAdvanceConfirmationModal from "./SalaryAdvanceConfirmationModal";
-import Image from "next/image";
-import { assets } from "@/public/assets";
+import { FormBanner } from "@/components/FormBanner";
 import { DropdownOption } from "./CustomDropDown";
 import CustomDropdown from "./CustomDropDown";
 import { RequestVerificationCode } from "@/serverActions/PublicServerActions/RequestVerificationCode";
@@ -862,16 +861,7 @@ export default function SalaryAdvanceClient() {
       {/* STEP 2: Main Form */}
       {step === 2 && (
         <div className="relative z-10 mx-auto max-w-225">
-          {/* Form Image */}
-          <div className="rounded-surface sm:rounded-surface mb-4 overflow-hidden">
-            <Image
-              src={assets.advance_form_image}
-              sizes="100vh"
-              className="rounded-control object-contain object-center"
-              priority
-              alt="Form Image"
-            />
-          </div>
+          <FormBanner type="advance" />
           <header className="mb-6">
             <h1 className="m-0 text-2xl font-semibold tracking-[-0.5px] text-[#1e1b1b]">
               Salary Advance Request

@@ -16,7 +16,6 @@ import {
   Wallet,
 } from "lucide-react";
 import {
-  assets,
   dateFormatter,
   formatJobGrade,
   EMPLOYEE_STAGE_LABELS,
@@ -26,7 +25,7 @@ import { AlertInfo } from "@/components/TravelRequisitionPage";
 import { UpdateEmployeeStatus } from "@/serverActions/UpdateEmployeeStatus";
 import ApprovalAlert from "@/components/Approvers/TravelApprovers/ApprovalAlert";
 import { initialsHelper, EmployeeAttachmentType } from "@/public/assets";
-import Image from "next/image";
+import { FormBanner } from "@/components/FormBanner";
 import AttachmentTypeGroups from "./AttachmentTypeGroups";
 import EmployeeAmendmentHistory from "./EmployeeAmendmentHistory";
 import { EmployeeAmendmentValues } from "@/lib/employeeAmendment";
@@ -204,16 +203,7 @@ const EmployeeApprovalModal = ({
       )}
       {step === 1 && (
         <div className="relative z-10 mx-auto max-w-225">
-          {/* Form Image */}
-          <div className="rounded-surface sm:rounded-surface mb-4 overflow-hidden">
-            <Image
-              src={assets.employee_form_image}
-              sizes="100vh"
-              className="rounded-control object-contain object-center"
-              priority
-              alt="Form Image"
-            />
-          </div>
+          <FormBanner type="employee" />
           {/* Page header */}
           <div className="mb-8">
             <p className="mb-1 text-[11px] font-semibold tracking-[0.5px] text-rose-600 uppercase">

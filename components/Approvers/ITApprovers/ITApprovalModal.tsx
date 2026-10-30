@@ -1,8 +1,7 @@
 "use client";
 
-import Image from "next/image";
+import { FormBanner } from "@/components/FormBanner";
 import { useState } from "react";
-import { assets } from "@/public/assets";
 import {
   Building2,
   CalendarDays,
@@ -204,16 +203,7 @@ const ITApprovalModal = ({ data }: { data: ITRequisitionData }) => {
 
       {step === 1 && (
         <div className="relative z-10 mx-auto max-w-225">
-          {/* Banner image */}
-          <div className="rounded-surface sm:rounded-surface mb-4 overflow-hidden">
-            <Image
-              src={assets.it_form_image}
-              sizes="100vh"
-              className="rounded-control object-contain object-center"
-              priority
-              alt="Form Image"
-            />
-          </div>
+          <FormBanner type="it" />
 
           {/* Page header */}
           <div className="mb-8">

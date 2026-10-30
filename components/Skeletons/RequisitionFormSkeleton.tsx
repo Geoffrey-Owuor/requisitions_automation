@@ -1,17 +1,17 @@
-import Image, { StaticImageData } from "next/image";
+import { FormBanner, type FormBannerType } from "@/components/FormBanner";
 
 // Shown by the Travel/Casual/Employee amend forms while the requisition being
-// amended loads. The form image and heading don't depend on that data, so
+// amended loads. The form banner and heading don't depend on that data, so
 // they render for real; only the notice and the form card pulse. Mirrors the
 // forms' first step (image, header, amendment notice, form card) so nothing
 // jumps when the form replaces it.
 export function RequisitionFormSkeleton({
-  image,
+  banner,
   title,
   subtitle,
   sections = [5, 4],
 }: {
-  image: StaticImageData;
+  banner: FormBannerType;
   title: string;
   subtitle: string;
   // Field count per form section
@@ -19,15 +19,7 @@ export function RequisitionFormSkeleton({
 }) {
   return (
     <div className="relative z-10 mx-auto max-w-225" aria-busy="true">
-      <div className="rounded-surface sm:rounded-surface mb-4 overflow-hidden">
-        <Image
-          src={image}
-          sizes="100vh"
-          className="rounded-control object-contain object-center"
-          priority
-          alt="Form Image"
-        />
-      </div>
+      <FormBanner type={banner} />
       <header className="mb-8">
         <h1 className="m-0 text-2xl font-semibold tracking-[-0.5px] text-[#1e1b1b]">
           {title}

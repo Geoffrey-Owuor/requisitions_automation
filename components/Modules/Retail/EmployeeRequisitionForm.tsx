@@ -25,7 +25,6 @@ import {
 } from "@/lib/loadAppDataV2";
 import type { JobGrade } from "@/lib/loadRequisitionOptions";
 import {
-  assets,
   REPLACEMENT_OR_NEW_OPTIONS,
   EMPLOYEE_ATTACHMENT_TYPES,
   EMPLOYEE_ATTACHMENT_TYPE_LABELS,
@@ -46,7 +45,7 @@ import {
   hodNameLabel,
   excludeSubmitterFromHodArray,
 } from "./CasualRequisitionForm";
-import Image from "next/image";
+import { FormBanner } from "@/components/FormBanner";
 import { useRouter } from "next/navigation";
 import { useReportUnsavedChanges } from "@/components/Dashboard/UnsavedChangesGuard";
 import { scrollPageToTop } from "@/utils/scrollPageToTop";
@@ -445,7 +444,7 @@ export default function EmployeeRequisitionForm({
   if (amendRequestId && amendmentLoading) {
     return (
       <RequisitionFormSkeleton
-        image={assets.employee_form_image}
+        banner="employee"
         title="Amend Employee Requisition"
         subtitle="Update this requisition - the approval workflow will restart from HOD."
         sections={[2, 5]}
@@ -516,15 +515,7 @@ export default function EmployeeRequisitionForm({
 
       {step === 1 && (
         <div className="relative z-10 mx-auto max-w-225">
-          <div className="rounded-surface sm:rounded-surface mb-4 overflow-hidden">
-            <Image
-              src={assets.employee_form_image}
-              sizes="100vh"
-              className="rounded-control object-contain object-center"
-              priority
-              alt="Form Image"
-            />
-          </div>
+          <FormBanner type="employee" />
           {/* Header */}
           <header className="mb-8 flex items-end justify-between max-sm:flex-col max-sm:items-start max-sm:gap-5">
             <div>
@@ -546,9 +537,8 @@ export default function EmployeeRequisitionForm({
               <Info className="mt-0.5 h-4 w-4 shrink-0" />
               <p>
                 Amendments are only possible until this requisition is fully
-                approved.
-                Submitting this amendment resets every approval stage, so it
-                will need to be re-approved from the HOD stage onward.
+                approved. Submitting this amendment resets every approval stage,
+                so it will need to be re-approved from the HOD stage onward.
                 Attachments you don&apos;t replace are kept as they are;
                 replaced ones remain viewable in the amendment history.
               </p>

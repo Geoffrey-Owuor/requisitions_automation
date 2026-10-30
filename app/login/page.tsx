@@ -8,8 +8,7 @@ import Brand from "@/components/Brand";
 import Footer from "@/components/Footer";
 import { ArrowLeft, FileText, Lock, ShieldCheck } from "lucide-react";
 import HardRedirect from "@/components/HardRedirect";
-import Image from "next/image";
-import { assets } from "@/public/assets";
+import HotpointMark from "@/components/HotpointMark";
 
 export const metadata: Metadata = {
   title: "Login",
@@ -87,16 +86,7 @@ export default async function LoginPage({ searchParams }: Props) {
                 <div className="mb-6 flex justify-center">
                   <div className="rounded-control relative flex h-16 w-16 items-center justify-center border border-rose-100 bg-linear-to-br from-white to-rose-50 shadow-[inset_0_1.5px_0_rgba(255,255,255,1),0_10px_24px_-10px_rgba(225,29,72,0.45)]">
                     <div className="rounded-control absolute inset-0 ring-8 ring-rose-50/60" />
-                    <div className="relative h-7 w-7">
-                      <Image
-                        src={assets.hotpoint_logo}
-                        alt="Hotpoint Apps Hub"
-                        sizes="32px"
-                        className="object-contain"
-                        fill
-                        priority
-                      />
-                    </div>
+                    <HotpointMark className="relative h-7 w-7" />
                   </div>
                 </div>
 
