@@ -1,9 +1,3 @@
-import hotpoint_background from "./hotpoint_logo.png";
-
-export const assets = {
-  hotpoint_background,
-};
-
 // Date formatter
 export function dateFormatter(dateString: string) {
   if (!dateString) return "—";
