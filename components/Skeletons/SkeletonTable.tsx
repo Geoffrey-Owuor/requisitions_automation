@@ -4,7 +4,7 @@ export const SkeletonTable = () => {
       <div className="animate-pulse space-y-4">
         {/* Table Title Placeholder */}
         <div className="rounded-compact mb-4 h-6 w-64 bg-neutral-200" />
-        <div className="rounded-control mb-6 h-10 w-100 bg-neutral-200" />
+        <div className="rounded-control mb-6 h-10 w-full max-w-100 bg-neutral-200" />
 
         {/* Table Container */}
         <div className="rounded-surface h-full w-full border border-gray-200 bg-white px-4 py-2">
