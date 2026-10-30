@@ -15,8 +15,7 @@ import {
   History,
 } from "lucide-react";
 import { RequisitionFormSkeleton } from "@/components/Skeletons/RequisitionFormSkeleton";
-import Image from "next/image";
-import { assets } from "@/public/assets";
+import { FormBanner } from "@/components/FormBanner";
 import {
   TRAVEL_CATEGORIES,
   TRAVEL_MODES,
@@ -365,7 +364,7 @@ export default function TravelRequisitionPage({
   if (amendRequestId && amendmentLoading) {
     return (
       <RequisitionFormSkeleton
-        image={assets.form_image}
+        banner="travel"
         title="Amend Travel Requisition"
         subtitle="Update this requisition - the approval workflow will restart from HOD."
         sections={[5, 4, 3]}
@@ -436,16 +435,7 @@ export default function TravelRequisitionPage({
       )}
       {step === 1 && (
         <div className="relative z-10 mx-auto max-w-225">
-          {/* Form Image */}
-          <div className="rounded-surface sm:rounded-surface mb-4 overflow-hidden">
-            <Image
-              src={assets.form_image}
-              sizes="100vh"
-              className="rounded-control object-contain object-center" // or "object-cover" depending on your needs
-              priority
-              alt="Form Image"
-            />
-          </div>
+          <FormBanner type="travel" />
           {/* Header */}
           <header className="mb-8 flex items-end justify-between max-sm:flex-col max-sm:items-start max-sm:gap-5">
             <div>

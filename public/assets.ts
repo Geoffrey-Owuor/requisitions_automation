@@ -1,19 +1,7 @@
-import form_image from "./form_image.png";
 import hotpoint_background from "./hotpoint_logo.png";
-import it_form_image from "./it_form_image.png";
-import access_key_image from "./access_key_image.png";
-import advance_form_image from "./advance_form_image.png";
-import casual_form_image from "./casual_form_image.png";
-import employee_form_image from "./employee_form_image.png";
 
 export const assets = {
-  access_key_image,
-  advance_form_image,
-  form_image,
   hotpoint_background,
-  it_form_image,
-  casual_form_image,
-  employee_form_image,
 };
 
 // Date formatter

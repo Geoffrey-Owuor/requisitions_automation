@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
+import { FormBanner } from "@/components/FormBanner";
 import { useState } from "react";
-import { assets, TRAVEL_STAGE_LABELS } from "@/public/assets";
+import { TRAVEL_STAGE_LABELS } from "@/public/assets";
 import {
   Building2,
   MapPin,
@@ -231,16 +231,7 @@ const TravelApprovalModal = ({
       )}
       {step === 1 && (
         <div className="relative z-10 mx-auto max-w-225">
-          {/* Banner image */}
-          <div className="rounded-surface sm:rounded-surface mb-4 overflow-hidden">
-            <Image
-              src={assets.form_image}
-              sizes="100vh"
-              className="rounded-control object-contain object-center" // or "object-cover" depending on your needs
-              priority // Use this if the image is above the fold
-              alt="Form Image"
-            />
-          </div>
+          <FormBanner type="travel" />
 
           {/* Page header */}
           <div className="mb-8">

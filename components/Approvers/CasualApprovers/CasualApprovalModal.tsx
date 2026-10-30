@@ -14,13 +14,13 @@ import {
   X,
   MessageSquareText,
 } from "lucide-react";
-import { assets, dateFormatter, CASUAL_STAGE_LABELS } from "@/public/assets";
+import { dateFormatter, CASUAL_STAGE_LABELS } from "@/public/assets";
 import SubmittingOverlay from "@/components/SubmittingOverlay";
 import { AlertInfo } from "@/components/TravelRequisitionPage";
 import { UpdateCasualStatus } from "@/serverActions/UpdateCasualStatus";
 import ApprovalAlert from "@/components/Approvers/TravelApprovers/ApprovalAlert";
 import { initialsHelper } from "@/public/assets";
-import Image from "next/image";
+import { FormBanner } from "@/components/FormBanner";
 import PreviousApprovalsSection, {
   PreviousApproval,
 } from "@/components/Approvers/PreviousApprovalsSection";
@@ -192,16 +192,7 @@ const CasualApprovalModal = ({
       )}
       {step === 1 && (
         <div className="relative z-10 mx-auto max-w-225">
-          {/* Form Image - TODO: Update src to appropriate asset if needed */}
-          <div className="rounded-surface sm:rounded-surface mb-4 overflow-hidden">
-            <Image
-              src={assets.casual_form_image}
-              sizes="100vh"
-              className="rounded-control object-contain object-center"
-              priority
-              alt="Form Image"
-            />
-          </div>
+          <FormBanner type="casual" />
           {/* Page header */}
           <div className="mb-8">
             <p className="mb-1 text-[11px] font-semibold tracking-[0.5px] text-rose-600 uppercase">
