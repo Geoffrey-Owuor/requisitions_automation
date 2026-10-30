@@ -1,5 +1,4 @@
-import Image from "next/image";
-import { assets } from "@/public/assets";
+import HotpointMark from "@/components/HotpointMark";
 
 const DashboardWatermark = () => {
   return (
@@ -9,17 +8,7 @@ const DashboardWatermark = () => {
         - Enlarged to h-40/w-40 (or larger on sm screens)
         - opacity-5 and grayscale so the logo stays a faint backdrop behind content
       */}
-      <div className="relative h-40 w-40 shrink-0 opacity-5 grayscale sm:h-56 sm:w-56">
-        <Image
-          src={assets.hotpoint_logo}
-          alt="Apps Hub Watermark"
-          sizes="(max-width: 768px) 160px, 224px"
-          loading="eager"
-          className="object-contain"
-          fill
-          priority
-        />
-      </div>
+      <HotpointMark className="h-40 w-40 shrink-0 opacity-5 grayscale sm:h-56 sm:w-56" />
 
       {/* 
         Text Container: 
