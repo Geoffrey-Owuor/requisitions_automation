@@ -265,8 +265,11 @@ html {
    in can still override them. The panel and scroll body stay opaque, with no
    backdrop-filter (see the 4K render notes). */
 @layer components {
+  /* margin is !important because a dialog stays a DOM child of wherever it
+     is rendered: a parent's space-y or space-x utility (which outranks this
+     layer) would otherwise set its block margins and knock it off centre */
   .modal {
-    margin: 0;
+    margin: 0 !important;
     padding: 0;
     border: 0;
     max-width: none;
@@ -414,7 +417,7 @@ html {
 
   @media (width >= 40rem) {
     .modal-sheet {
-      margin: auto;
+      margin: auto !important;
       width: calc(100% - 2rem);
       height: fit-content;
       max-height: min(88dvh, 60rem);
@@ -441,7 +444,7 @@ html {
 
     .modal-alert {
       inset: 0;
-      margin: auto;
+      margin: auto !important;
       width: calc(100% - 2.5rem);
       max-width: 24rem;
       height: fit-content;
