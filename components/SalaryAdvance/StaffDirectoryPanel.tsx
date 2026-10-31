@@ -143,7 +143,7 @@ export default function StaffDirectoryPanel() {
         </div>
       ) : (
         <div className="rounded-surface overflow-x-auto border border-neutral-200 bg-white">
-          <table className="w-full min-w-[52rem] text-sm">
+          <table className="w-full min-w-208 text-sm">
             <thead>
               <tr className="border-b border-neutral-100 text-left text-[11px] font-semibold tracking-wide text-neutral-500 uppercase">
                 <th className="px-4 py-3">Staff no.</th>
@@ -401,18 +401,6 @@ function StaffRecordModal({
             onChange={set("name")}
           />
         </Field>
-        <div className="sm:col-span-2">
-          <Field label="Email" id="staff-email">
-            <input
-              id="staff-email"
-              type="email"
-              className={inputClass}
-              value={form.email}
-              maxLength={255}
-              onChange={set("email")}
-            />
-          </Field>
-        </div>
         <Field label="Department" id="staff-department">
           {/* Active departments only; an edit keeps showing a record's
               current department even if it isn't one of them */}
@@ -447,6 +435,19 @@ function StaffRecordModal({
             ))}
           </datalist>
         </Field>
+        <div className="sm:col-span-2">
+          <Field label="Email" id="staff-email">
+            <input
+              id="staff-email"
+              type="email"
+              className={inputClass}
+              value={form.email}
+              maxLength={255}
+              onChange={set("email")}
+            />
+          </Field>
+        </div>
+
         <p className="rounded-control flex items-start gap-2 border border-sky-200 bg-sky-50 p-3 text-xs text-sky-800 sm:col-span-2">
           <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
           Please double-check these details before saving. Other company apps
