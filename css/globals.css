@@ -178,33 +178,6 @@ html {
   }
 }
 
-/* Rounded scrollers: Chromium paints a scroller's scrollbar over its own
-   border-radius instead of clipping it (an ancestor's rounded clip does clip
-   it), so a flush thumb runs square into the corners. These inset the track
-   by a radius token at the rounded ends, so the thumb stops where the
-   straight edge does: pair them with the scroller's rounded-* class, e.g.
-   rounded-control scrollbar-inset-control, or rounded-t-dashboard
-   scrollbar-inset-t-dashboard. Only custom (webkit-styled) scrollbars honour
-   track margins; touch and Firefox scrollbars are unaffected. */
-@utility scrollbar-inset-* {
-  &::-webkit-scrollbar-track:vertical {
-    margin-block: --value(--radius-*);
-  }
-  &::-webkit-scrollbar-track:horizontal {
-    margin-inline: --value(--radius-*);
-  }
-}
-@utility scrollbar-inset-t-* {
-  &::-webkit-scrollbar-track:vertical {
-    margin-top: --value(--radius-*);
-  }
-}
-@utility scrollbar-inset-b-* {
-  &::-webkit-scrollbar-track:vertical {
-    margin-bottom: --value(--radius-*);
-  }
-}
-
 /* Dashboard Alert Styles */
 
 @keyframes slideInTopCenter {
