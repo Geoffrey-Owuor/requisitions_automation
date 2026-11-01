@@ -175,7 +175,7 @@ function ChangeRow({ entry }: { entry: ConfigChangeEntry }) {
                 <p className="text-[11px] font-semibold text-neutral-500">
                   {label}
                 </p>
-                <pre className="rounded-control mt-1 max-h-60 overflow-auto bg-neutral-50 p-2 text-[11px] text-neutral-700">
+                <pre className="rounded-control scrollbar-inset-control mt-1 max-h-60 overflow-auto bg-neutral-50 p-2 text-[11px] text-neutral-700">
                   {value === null ? "-" : JSON.stringify(value, null, 2)}
                 </pre>
               </div>

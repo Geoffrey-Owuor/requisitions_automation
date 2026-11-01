@@ -345,7 +345,7 @@ export default function KeyAccessRequisitionForm() {
                   <ShieldAlert size={16} /> Key Custody & Access Policy
                 </h2>
 
-                <div className="small-scrollbar rounded-control mb-4 max-h-60 overflow-y-auto border border-[rgba(240,180,180,0.6)] bg-rose-50/30 p-4 text-[13px] leading-relaxed text-[#5c4a4a]">
+                <div className="small-scrollbar rounded-control scrollbar-inset-control mb-4 max-h-60 overflow-y-auto border border-[rgba(240,180,180,0.6)] bg-rose-50/30 p-4 text-[13px] leading-relaxed text-[#5c4a4a]">
                   <p className="mb-3 font-semibold text-[#1e1b1b]">
                     {POLICY.intro}
                   </p>
