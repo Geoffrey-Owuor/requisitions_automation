@@ -3,7 +3,8 @@
 import { useId, useState } from "react";
 import { Mail, TriangleAlert, Send } from "lucide-react";
 import { Modal } from "@/components/Modal";
-import CustomDropdown, { DropdownOption } from "./CustomDropDown";
+import CustomDropdown from "./CustomDropDown";
+import { SelectOption } from "@/components/Select";
 import { useAlertStore } from "@/store/useAlertStore";
 import { SubmitEmailChangeRequest } from "@/serverActions/PublicServerActions/SubmitEmailChangeRequest";
 import {
@@ -18,7 +19,7 @@ interface EmailChangeRequestModalProps {
   defaults?: { staffNumber?: string; staffName?: string; department?: string };
 }
 
-const REASON_OPTIONS: DropdownOption[] = EMAIL_CHANGE_REASONS.map((reason) => ({
+const REASON_OPTIONS: SelectOption[] = EMAIL_CHANGE_REASONS.map((reason) => ({
   label: reason,
   value: reason,
 }));
