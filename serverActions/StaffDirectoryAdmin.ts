@@ -18,6 +18,12 @@ import {
   runHrAdvanceChange,
 } from "@/lib/salaryAdvanceAccess";
 import { resolveDepartment } from "@/lib/departments";
+import {
+  cleanStaffText,
+  findStaffClash,
+  lockStaffDirectory,
+  STAFF_FIELD_LIMITS,
+} from "@/lib/staffDirectory";
 
 // The salary advance HR dashboard's Staff directory: company_staff_data,
 // which identifies staff for the advance form's email verification and the
@@ -111,17 +117,6 @@ async function checkDepartment(
   }
 }
 
-function cleanText(value: unknown, label: string, max: number): string {
-  const text = typeof value === "string" ? value.trim() : "";
-  if (!text) throw new ConfigInputError(`Enter the ${label}`);
-  if (text.length > max) {
-    throw new ConfigInputError(
-      `The ${label} cannot be longer than ${max} characters`,
-    );
-  }
-  return text;
-}
-
 // Adds a staff record (no `id`) or updates one
 export async function saveStaffRecord(input: {
   id?: unknown;
@@ -137,11 +132,23 @@ export async function saveStaffRecord(input: {
       throw new ConfigInputError("Choose a staff record");
     }
     const record = {
-      staff_number: cleanText(input.staffNumber, "staff number", 150),
-      staff_name: cleanText(input.name, "name", 255),
+      staff_number: cleanStaffText(
+        input.staffNumber,
+        "staff number",
+        STAFF_FIELD_LIMITS.staffNumber,
+      ),
+      staff_name: cleanStaffText(input.name, "name", STAFF_FIELD_LIMITS.name),
       staff_email: cleanConfigEmail(input.email),
-      staff_department: cleanText(input.department, "department", 255),
-      staff_location: cleanText(input.location, "location", 255),
+      staff_department: cleanStaffText(
+        input.department,
+        "department",
+        STAFF_FIELD_LIMITS.department,
+      ),
+      staff_location: cleanStaffText(
+        input.location,
+        "location",
+        STAFF_FIELD_LIMITS.location,
+      ),
     };
 
     const values = [
@@ -152,28 +159,14 @@ export async function saveStaffRecord(input: {
       record.staff_location,
     ];
 
-    // Staff are matched by number (email change requests) and by email
-    // (verification codes), so both must stay unique
-    await client.query(
-      `LOCK TABLE company_staff_data IN SHARE ROW EXCLUSIVE MODE`,
-    );
-    const clash = await client.query<{
-      staff_number: string;
-      email_clash: boolean;
-    }>(
-      `SELECT staff_number, LOWER(staff_email) = $2 AS email_clash
-       FROM company_staff_data
-       WHERE (staff_number = $1 OR LOWER(staff_email) = $2)
-       AND ($3::int IS NULL OR id <> $3) LIMIT 1`,
-      [record.staff_number, record.staff_email, isNew ? null : input.id],
-    );
-    if (clash.rows.length > 0) {
-      throw new ConfigInputError(
-        clash.rows[0].email_clash
-          ? `${record.staff_email} is already the email of staff number ${clash.rows[0].staff_number}`
-          : `Staff number ${record.staff_number} already exists`,
-      );
-    }
+    // Staff number and email stay unique (lib/staffDirectory.ts)
+    await lockStaffDirectory(client);
+    const clash = await findStaffClash(client, {
+      staffNumber: record.staff_number,
+      email: record.staff_email,
+      excludeId: isNew ? null : (input.id as number),
+    });
+    if (clash) throw new ConfigInputError(clash);
 
     if (isNew) {
       await checkDepartment(client, record.staff_department, null);
@@ -307,7 +300,11 @@ export async function deactivateStaffRecord(id: unknown, reason: unknown) {
         action: "update",
         summary,
         before: { staff_number: staff.staff_number, active: true },
-        after: { staff_number: staff.staff_number, active: false, reason: text },
+        after: {
+          staff_number: staff.staff_number,
+          active: false,
+          reason: text,
+        },
       });
       return summary;
     },
