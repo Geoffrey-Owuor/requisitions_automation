@@ -91,11 +91,11 @@ html {
 
 @supports not selector(::-webkit-scrollbar) {
   .app-scrollbars {
-    scrollbar-color: #d4d4d4 transparent;
+    scrollbar-color: #a3a3a3 transparent;
   }
   .small-scrollbar {
     scrollbar-width: thin;
-    scrollbar-color: #d4d4d4 transparent;
+    scrollbar-color: #a3a3a3 transparent;
   }
 }
 
@@ -121,7 +121,7 @@ html {
     .app-scrollbars::-webkit-scrollbar-thumb,
     .app-scrollbars *::-webkit-scrollbar-thumb,
     .small-scrollbar::-webkit-scrollbar-thumb {
-      background-color: #d4d4d4;
+      background-color: #a3a3a3;
       background-clip: padding-box;
       border: 0 solid transparent;
       border-radius: 999px;
@@ -140,11 +140,13 @@ html {
     }
     .app-scrollbars::-webkit-scrollbar-thumb:hover,
     .app-scrollbars *::-webkit-scrollbar-thumb:hover,
-    .small-scrollbar::-webkit-scrollbar-thumb:hover,
+    .small-scrollbar::-webkit-scrollbar-thumb:hover {
+      background-color: #737373;
+    }
     .app-scrollbars::-webkit-scrollbar-thumb:active,
     .app-scrollbars *::-webkit-scrollbar-thumb:active,
     .small-scrollbar::-webkit-scrollbar-thumb:active {
-      background-color: #737373;
+      background-color: #525252;
     }
 
     .app-scrollbars::-webkit-scrollbar-track,
