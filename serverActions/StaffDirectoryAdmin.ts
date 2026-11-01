@@ -300,7 +300,11 @@ export async function deactivateStaffRecord(id: unknown, reason: unknown) {
         action: "update",
         summary,
         before: { staff_number: staff.staff_number, active: true },
-        after: { staff_number: staff.staff_number, active: false, reason: text },
+        after: {
+          staff_number: staff.staff_number,
+          active: false,
+          reason: text,
+        },
       });
       return summary;
     },
