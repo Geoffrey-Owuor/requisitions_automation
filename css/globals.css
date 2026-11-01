@@ -127,16 +127,28 @@ html {
       border-radius: 999px;
     }
     /* Inset from the content side only, so the thumb sits flush against the
-       scroller's edge, as in Google Drive */
+       scroller's edge, as in Google Drive. The painted (padding-box) corners
+       are the outer radii minus the border, so a one-sided border would make
+       uneven, pinched ends; the inset side's radii are 2px larger along the
+       border so the visible thumb ends in a true semicircle (radius 4px, 2px
+       thin). */
     .app-scrollbars::-webkit-scrollbar-thumb:vertical,
-    .app-scrollbars *::-webkit-scrollbar-thumb:vertical,
-    .small-scrollbar::-webkit-scrollbar-thumb:vertical {
+    .app-scrollbars *::-webkit-scrollbar-thumb:vertical {
       border-left-width: 2px;
+      border-radius: 6px 4px 4px 6px / 4px;
     }
     .app-scrollbars::-webkit-scrollbar-thumb:horizontal,
-    .app-scrollbars *::-webkit-scrollbar-thumb:horizontal,
+    .app-scrollbars *::-webkit-scrollbar-thumb:horizontal {
+      border-top-width: 2px;
+      border-radius: 4px / 6px 6px 4px 4px;
+    }
+    .small-scrollbar::-webkit-scrollbar-thumb:vertical {
+      border-left-width: 2px;
+      border-radius: 4px 2px 2px 4px / 2px;
+    }
     .small-scrollbar::-webkit-scrollbar-thumb:horizontal {
       border-top-width: 2px;
+      border-radius: 2px / 4px 4px 2px 2px;
     }
     .app-scrollbars::-webkit-scrollbar-thumb:hover,
     .app-scrollbars *::-webkit-scrollbar-thumb:hover,
