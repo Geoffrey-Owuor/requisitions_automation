@@ -53,9 +53,9 @@
   --breakpoint-custom: 1200px;
 
   /* Desktop dashboard frame: the sidebar column, the gap around the page
-     area, and the page area's corner radius. The sidebar, DashboardWrapper
-     (page area and corner overlays) and the requisition form modal all size
-     themselves from these, so they can't drift apart. */
+     area, and the page area's corner radius. The sidebar and DashboardWrapper
+     (page area and corner overlays) size themselves from these, so they
+     can't drift apart. */
   --spacing-dashboard-sidebar: 5rem;
   --spacing-dashboard-gap: 0.5rem;
   --radius-dashboard: 1rem;
