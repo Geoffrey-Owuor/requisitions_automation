@@ -147,7 +147,7 @@ export function Modal({
           drops the clip altogether. Without a footer the body is the last
           row from sm up (phones are full screen, unrounded). */}
       <div
-        className={`modal-sheet-body border-t border-neutral-100 ${footer ? "" : "sm:rounded-b-surface sm:scrollbar-inset-b-surface"} ${overflowVisible ? "sm:overflow-visible" : ""} ${bodyClassName}`}
+        className={`modal-sheet-body border-t border-neutral-100 ${footer ? "" : "sm:rounded-b-surface"} ${overflowVisible ? "sm:overflow-visible" : ""} ${bodyClassName}`}
       >
         {children}
       </div>
@@ -191,9 +191,7 @@ export function AlertDialog({
       aria-describedby={describedBy}
       onCancel={cancelHandler(onClose)}
       onClick={backdropClickHandler(onClose)}
-      // The dialog is its own scroller: inset its scrollbar from the rounded
-      // corners (the top two on phones, all four from sm up)
-      className="modal modal-alert app-scrollbars scrollbar-inset-t-surface sm:scrollbar-inset-surface"
+      className="modal modal-alert app-scrollbars"
     >
       <div className={className}>{children}</div>
     </dialog>
