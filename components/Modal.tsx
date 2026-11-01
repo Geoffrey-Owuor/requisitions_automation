@@ -141,8 +141,13 @@ export function Modal({
         </button>
       </div>
 
+      {/* The body and footer round their own bottom corners rather than
+          relying on the dialog's clip: Chrome can paint an opaque scroller's
+          background outside a parent's rounded clip, and overflowVisible
+          drops the clip altogether. Without a footer the body is the last
+          row from sm up (phones are full screen, unrounded). */}
       <div
-        className={`modal-sheet-body border-t border-neutral-100 ${overflowVisible ? "sm:overflow-visible" : ""} ${bodyClassName}`}
+        className={`modal-sheet-body border-t border-neutral-100 ${footer ? "" : "sm:rounded-b-surface"} ${overflowVisible ? "sm:overflow-visible" : ""} ${bodyClassName}`}
       >
         {children}
       </div>
