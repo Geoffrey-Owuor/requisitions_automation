@@ -90,7 +90,7 @@ const MobileHeader = () => {
 
         <nav
           aria-label="Main"
-          className="layout-scrollbar flex min-h-0 flex-1 flex-col gap-5 overscroll-contain p-4"
+          className="layout-scrollbar app-scrollbars flex min-h-0 flex-1 flex-col gap-5 overscroll-contain p-4"
         >
           <DrawerLink
             item={HOME_NAV_ITEM}

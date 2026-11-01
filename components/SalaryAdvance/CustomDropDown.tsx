@@ -62,7 +62,7 @@ export default function CustomDropdown({
           />
           {/* Dropdown Menu */}
           <div
-            className={`absolute right-0 ${openUpwards ? "bottom-[calc(100%-22px)]" : "top-[calc(100%+4px)]"} rounded-control left-0 z-50 max-h-60 scrollbar-thin overflow-y-auto border border-slate-200 bg-white p-1 shadow-lg`}
+            className={`absolute right-0 ${openUpwards ? "bottom-[calc(100%-22px)]" : "top-[calc(100%+4px)]"} rounded-control left-0 z-50 small-scrollbar max-h-60 overflow-y-auto border border-slate-200 bg-white p-1 shadow-lg`}
           >
             {options.map((opt) => (
               <div
