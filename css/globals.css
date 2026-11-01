@@ -108,13 +108,13 @@ html {
 
     .app-scrollbars::-webkit-scrollbar,
     .app-scrollbars *::-webkit-scrollbar {
-      width: 10px;
-      height: 10px;
+      width: 12px;
+      height: 12px;
       background: transparent;
     }
     .small-scrollbar::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
+      width: 8px;
+      height: 8px;
       background: transparent;
     }
 
