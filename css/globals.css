@@ -71,9 +71,9 @@ html {
      StickyNavBar look it up). On its own it keeps the browser's native
      scrollbar, arrows included: the public pages.
    - .app-scrollbars styles itself and every scroller inside it the Google
-     Drive way: no arrow buttons and a pill thumb inset in a transparent
-     track, so the scroller's rounded corners (or the dashboard frame's
-     corner overlays) shape the thumb's ends. On the dashboard page area, the
+     Drive way: no arrow buttons and a pill thumb flush against the
+     scroller's edge in a transparent track, so the scroller's rounded
+     corners (or the dashboard frame's corner overlays) shape its ends. On the dashboard page area, the
      mobile drawer and every Modal dialog.
    - .small-scrollbar is the thin variant for small scrollers (dropdowns,
      menus, the Key & Access terms box), inside the scope or not.
@@ -108,13 +108,13 @@ html {
 
     .app-scrollbars::-webkit-scrollbar,
     .app-scrollbars *::-webkit-scrollbar {
-      width: 12px;
-      height: 12px;
+      width: 10px;
+      height: 10px;
       background: transparent;
     }
     .small-scrollbar::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
+      width: 6px;
+      height: 6px;
       background: transparent;
     }
 
@@ -123,8 +123,20 @@ html {
     .small-scrollbar::-webkit-scrollbar-thumb {
       background-color: #d4d4d4;
       background-clip: padding-box;
-      border: 2px solid transparent;
+      border: 0 solid transparent;
       border-radius: 999px;
+    }
+    /* Inset from the content side only, so the thumb sits flush against the
+       scroller's edge, as in Google Drive */
+    .app-scrollbars::-webkit-scrollbar-thumb:vertical,
+    .app-scrollbars *::-webkit-scrollbar-thumb:vertical,
+    .small-scrollbar::-webkit-scrollbar-thumb:vertical {
+      border-left-width: 2px;
+    }
+    .app-scrollbars::-webkit-scrollbar-thumb:horizontal,
+    .app-scrollbars *::-webkit-scrollbar-thumb:horizontal,
+    .small-scrollbar::-webkit-scrollbar-thumb:horizontal {
+      border-top-width: 2px;
     }
     .app-scrollbars::-webkit-scrollbar-thumb:hover,
     .app-scrollbars *::-webkit-scrollbar-thumb:hover,
