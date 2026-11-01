@@ -53,9 +53,9 @@
   --breakpoint-custom: 1200px;
 
   /* Desktop dashboard frame: the sidebar column, the gap around the page
-     area, and the page area's corner radius. The sidebar, DashboardWrapper
-     (page area and corner overlays) and the requisition form modal all size
-     themselves from these, so they can't drift apart. */
+     area, and the page area's corner radius. The sidebar and DashboardWrapper
+     (the page area's inset and rounding) size themselves from these, so they
+     can't drift apart. */
   --spacing-dashboard-sidebar: 5rem;
   --spacing-dashboard-gap: 0.5rem;
   --radius-dashboard: 1rem;
@@ -73,8 +73,8 @@ html {
    - .app-scrollbars styles itself and every scroller inside it the Google
      Drive way: no arrow buttons and a pill thumb flush against the
      scroller's edge in a transparent track, so the scroller's rounded
-     corners (or the dashboard frame's corner overlays) shape its ends. On the dashboard page area, the
-     mobile drawer and every Modal dialog.
+     corners shape its ends. On the dashboard page area, the mobile drawer
+     and every Modal dialog.
    - .small-scrollbar is the thin variant for small scrollers (dropdowns,
      menus, the Key & Access terms box), inside the scope or not.
    Chromium 121+ ignores the ::-webkit-scrollbar pseudo-elements on any
