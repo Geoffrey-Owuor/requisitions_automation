@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  FileSpreadsheet,
   Info,
   Pencil,
   Plus,
@@ -32,8 +33,10 @@ import {
   StatusBadge,
   useSettingsRunner,
 } from "@/components/Settings/SettingsPrimitives";
+import StaffImportModal from "@/components/SalaryAdvance/StaffImportModal";
 
 const DIRECTORY_KEY = ["StaffDirectory"];
+const IMPORT_INVALIDATES = [DIRECTORY_KEY, ["StaffDirectoryOptions"]];
 
 const inputClass =
   "rounded-control h-10 w-full border border-neutral-200 bg-white px-3 text-sm text-neutral-900 outline-none focus:border-slate-900";
@@ -44,6 +47,7 @@ type Editing = StaffRecord | "new" | null;
 export default function StaffDirectoryPanel() {
   const [editing, setEditing] = useState<Editing>(null);
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
+  const [importing, setImporting] = useState(false);
   const { busy, run } = useSettingsRunner(DIRECTORY_KEY, []);
 
   const {
@@ -119,6 +123,14 @@ export default function StaffDirectoryPanel() {
         >
           <Plus className="h-4 w-4" />
           Add staff
+        </button>
+        <button
+          type="button"
+          onClick={() => setImporting(true)}
+          className="rounded-control inline-flex items-center gap-2 border border-neutral-300 bg-white px-3 py-2.5 text-sm font-medium text-neutral-800 hover:border-neutral-400"
+        >
+          <FileSpreadsheet className="h-4 w-4" />
+          Import from Excel
         </button>
       </div>
 
@@ -260,6 +272,11 @@ export default function StaffDirectoryPanel() {
       )}
 
       <StaffRecordModal editing={editing} onClose={() => setEditing(null)} />
+      <StaffImportModal
+        open={importing}
+        onClose={() => setImporting(false)}
+        invalidateKeys={IMPORT_INVALIDATES}
+      />
       <ConfirmDialog
         confirmation={confirmation}
         busy={busy}

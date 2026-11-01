@@ -29,7 +29,9 @@ export const STAFF_FIELD_LIMITS = {
 // Blocks other writers (but not readers) until the transaction ends, so a
 // uniqueness check stays true until the insert or update
 export async function lockStaffDirectory(client: PoolClient) {
-  await client.query(`LOCK TABLE company_staff_data IN SHARE ROW EXCLUSIVE MODE`);
+  await client.query(
+    `LOCK TABLE company_staff_data IN SHARE ROW EXCLUSIVE MODE`,
+  );
 }
 
 // The ConfigInputError message for a record whose staff number or email
