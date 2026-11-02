@@ -22,7 +22,7 @@ import { useAlertStore } from "@/store/useAlertStore";
 import { scrollPageToTop } from "@/utils/scrollPageToTop";
 import SalaryAdvanceConfirmationModal from "./SalaryAdvanceConfirmationModal";
 import { FormBanner } from "@/components/FormBanner";
-import { DropdownOption } from "./CustomDropDown";
+import { SelectOption } from "@/components/Select";
 import CustomDropdown from "./CustomDropDown";
 import { RequestVerificationCode } from "@/serverActions/PublicServerActions/RequestVerificationCode";
 import { VerifyAdvanceCode } from "@/serverActions/PublicServerActions/VerifyAdvanceCode";
@@ -64,13 +64,13 @@ const InitialFormState: SalaryAdvanceFormData = {
 };
 
 // Define these arrays
-const INSTALLMENT_OPTIONS: DropdownOption[] = [
+const INSTALLMENT_OPTIONS: SelectOption[] = [
   { label: "One", value: "1" },
   { label: "Two", value: "2" },
   { label: "Three", value: "3" },
 ];
 
-const REQUEST_TYPE_OPTIONS: DropdownOption[] = [
+const REQUEST_TYPE_OPTIONS: SelectOption[] = [
   { label: "One-off", value: "oneoff" },
   { label: "Continuous", value: "continuous" },
 ];

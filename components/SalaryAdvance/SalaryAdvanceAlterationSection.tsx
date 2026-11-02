@@ -124,7 +124,6 @@ function CandidateGroup({
                 }))}
                 value={selectedInstallments}
                 onChange={setSelectedInstallments}
-                openUpwards={true}
               />
             </div>
 

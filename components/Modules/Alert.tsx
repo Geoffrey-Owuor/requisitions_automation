@@ -1,48 +1,25 @@
 "use client";
 
 import { X, BadgeCheck, AlertOctagon } from "lucide-react";
-import { useEffect, useCallback, useRef, useState } from "react";
-import { useAlertStore } from "@/store/useAlertStore";
+import { useEffect, useCallback, useState } from "react";
+import { AlertItem, useAlertStore } from "@/store/useAlertStore";
 
-const Alert = () => {
-  // Alert store states
-  const hideAlert = useAlertStore((state) => state.hideAlert);
-  const showAlert = useAlertStore((state) => state.showAlert);
-  const alertType = useAlertStore((state) => state.alertType);
-  const alertMessage = useAlertStore((state) => state.alertMessage);
+const Alert = ({ alert }: { alert: AlertItem }) => {
+  const dismissAlert = useAlertStore((state) => state.dismissAlert);
+  const { id, type: alertType, message: alertMessage, count } = alert;
 
   const [isClosing, setIsClosing] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  // Shown as a manual popover so it sits in the top layer, above any open
-  // <dialog> modal (which a plain z-index can't beat). Re-raised for every
-  // new alert, since the top layer stacks in the order things were shown.
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!showAlert || !el) return;
-    if (el.matches(":popover-open")) el.hidePopover();
-    el.showPopover();
-  }, [showAlert, alertType, alertMessage]);
 
   const handleClose = useCallback(() => {
     setIsClosing(true);
-    setTimeout(() => {
-      hideAlert();
-      setIsClosing(false); // reset isClosing after it animates out
-    }, 200); // Match this with your CSS animation duration
-  }, [hideAlert]);
+    setTimeout(() => dismissAlert(id), 200); // Match this with your CSS animation duration
+  }, [dismissAlert, id]);
 
   // Auto close after 6 seconds
   useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (showAlert) {
-      timer = setTimeout(handleClose, 6000);
-    }
+    const timer = setTimeout(handleClose, 6000);
     return () => clearTimeout(timer);
-  }, [showAlert, handleClose]);
-
-  // Don't render anything if there's no alert and we aren't currently animating out
-  if (!showAlert && !isClosing) return null;
+  }, [handleClose]);
 
   const isSuccess = alertType === "success";
   const IconComponent = isSuccess ? BadgeCheck : AlertOctagon;
@@ -56,11 +33,9 @@ const Alert = () => {
   };
 
   return (
-    // Container: Floating bottom right with responsive widths
+    // Positioned by AlertLayer, which also keeps it above any open modal
     <div
-      ref={containerRef}
-      popover="manual"
-      className={`fixed inset-auto right-4 bottom-4 left-4 z-9999 m-0 w-auto overflow-visible border-0 bg-transparent p-0 transition-all duration-200 sm:right-6 sm:bottom-6 sm:left-auto sm:w-auto sm:max-w-md sm:min-w-[320px] ${
+      className={`pointer-events-auto transition-all duration-200 ${
         isClosing
           ? "animate-slideDown opacity-0"
           : "animate-slideUp opacity-100"
@@ -83,9 +58,19 @@ const Alert = () => {
         {/* Content Area */}
         <div className="flex flex-1 flex-col pt-0.5">
           {/* Title: White in light mode (on black), Black in dark mode (on white) */}
-          <h3 className="text-sm font-bold tracking-tight text-white">
-            {theme.title}
-          </h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-bold tracking-tight text-white">
+              {theme.title}
+            </h3>
+            {count > 1 && (
+              <span
+                aria-label={`Shown ${count} times`}
+                className="rounded-full bg-white/15 px-1.5 py-px text-[11px] leading-4 font-semibold text-white tabular-nums"
+              >
+                x{count}
+              </span>
+            )}
+          </div>
           {/* Message: Dimmed for contrast hierarchy */}
           <p
             className="mt-0.5 line-clamp-4 text-[13px] wrap-break-word text-neutral-200"
@@ -108,4 +93,11 @@ const Alert = () => {
   );
 };
 
-export default Alert;
+// Every alert on screen, each with its own timer, the newest nearest the corner
+const Alerts = () => {
+  const alerts = useAlertStore((state) => state.alerts);
+
+  return alerts.map((alert) => <Alert key={alert.id} alert={alert} />);
+};
+
+export default Alerts;

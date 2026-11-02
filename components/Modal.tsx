@@ -2,6 +2,7 @@
 
 import { ReactNode, useEffect, useId, useRef, useState } from "react";
 import { X } from "lucide-react";
+import { trackOpenModal } from "@/lib/modalStack";
 
 // Shared modal shells on the native <dialog> element (styles: "Modals" in
 // css/globals.css). showModal() puts the dialog in the top layer, so no
@@ -32,6 +33,7 @@ function useModalDialog(open: boolean, focusDialog: boolean) {
     } else if (!open && dialog.open) {
       dialog.close();
     }
+    if (open) return trackOpenModal(dialog);
   }, [open, focusDialog]);
 
   return ref;
@@ -103,7 +105,7 @@ export function Modal({
       aria-labelledby={titleId}
       onCancel={cancelHandler(onClose)}
       onClick={backdropClickHandler(onClose)}
-      className={`modal modal-sheet ${widthClassName} ${overflowVisible ? "sm:overflow-visible" : ""}`}
+      className={`modal modal-sheet app-scrollbars ${widthClassName} ${overflowVisible ? "sm:overflow-visible" : ""}`}
     >
       <div className="modal-sheet-head flex min-w-0 items-center gap-3 py-4 pl-5 sm:pl-8">
         {icon && (
@@ -186,7 +188,7 @@ export function AlertDialog({
       aria-describedby={describedBy}
       onCancel={cancelHandler(onClose)}
       onClick={backdropClickHandler(onClose)}
-      className="modal modal-alert"
+      className="modal modal-alert app-scrollbars"
     >
       <div className={className}>{children}</div>
     </dialog>
