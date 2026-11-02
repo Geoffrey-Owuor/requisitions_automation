@@ -12,6 +12,9 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_APP_VERSION: process.env.GITHUB_SHA ?? "",
   },
+  // Makes a navigation in a tab left open across a deploy a full page load, since
+  // the release swap removes the JS chunks and server actions the tab knows about
+  deploymentId: process.env.GITHUB_SHA,
   allowedDevOrigins: ["192.0.2.34", "192.0.2.12"],
   experimental: {
     turbopackFileSystemCacheForBuild: true,
