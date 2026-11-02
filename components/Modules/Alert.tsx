@@ -6,7 +6,7 @@ import { AlertItem, useAlertStore } from "@/store/useAlertStore";
 
 const Alert = ({ alert }: { alert: AlertItem }) => {
   const dismissAlert = useAlertStore((state) => state.dismissAlert);
-  const { id, type: alertType, message: alertMessage } = alert;
+  const { id, type: alertType, message: alertMessage, count } = alert;
 
   const [isClosing, setIsClosing] = useState(false);
 
@@ -58,9 +58,19 @@ const Alert = ({ alert }: { alert: AlertItem }) => {
         {/* Content Area */}
         <div className="flex flex-1 flex-col pt-0.5">
           {/* Title: White in light mode (on black), Black in dark mode (on white) */}
-          <h3 className="text-sm font-bold tracking-tight text-white">
-            {theme.title}
-          </h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-bold tracking-tight text-white">
+              {theme.title}
+            </h3>
+            {count > 1 && (
+              <span
+                aria-label={`Shown ${count} times`}
+                className="rounded-full bg-white/15 px-1.5 py-px text-[11px] leading-4 font-semibold text-white tabular-nums"
+              >
+                x{count}
+              </span>
+            )}
+          </div>
           {/* Message: Dimmed for contrast hierarchy */}
           <p
             className="mt-0.5 line-clamp-4 text-[13px] wrap-break-word text-neutral-200"
