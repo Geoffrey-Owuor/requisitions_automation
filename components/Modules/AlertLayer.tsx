@@ -3,6 +3,8 @@
 import { useLayoutEffect, useRef, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import Alerts from "@/components/Modules/Alert";
+import UpdateAlert from "@/components/Modules/UpdateAlert";
+import { useUpdateAvailable } from "@/components/Modules/useUpdateAvailable";
 import { useTopModal } from "@/lib/modalStack";
 
 const subscribeToNothing = () => () => {};
@@ -19,6 +21,8 @@ const subscribeToNothing = () => () => {};
 // moves to the top of the screen while one is open.
 const AlertLayer = () => {
   const topModal = useTopModal();
+  // Above the portal, whose children remount each time a modal opens or closes
+  const update = useUpdateAvailable();
   const isClient = useSyncExternalStore(
     subscribeToNothing,
     () => true,
@@ -44,6 +48,7 @@ const AlertLayer = () => {
       }`}
     >
       <Alerts />
+      {update.available && <UpdateAlert onLater={update.dismiss} />}
     </div>,
     topModal ?? document.body,
   );
