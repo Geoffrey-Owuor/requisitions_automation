@@ -8,10 +8,15 @@ export interface AlertItem {
   message: string;
   // How many times it has fired while on screen, shown as a pill from 2 up
   count: number;
+  firedAt: number;
 }
 
 // The most shown at once, so a burst can't fill the screen. The oldest goes first.
 const MAX_ALERTS = 4;
+
+// A repeat this soon is one event firing twice (React runs effects twice in
+// development), not something the user did again, so it doesn't add to the count
+const SAME_EVENT_WINDOW_MS = 300;
 
 let nextAlertId = 0;
 
@@ -34,6 +39,9 @@ export const useAlertStore = create<AlertState>()((set) => ({
       const isSameAlert = (alert: AlertItem) =>
         alert.type === type && alert.message === message;
       const repeated = state.alerts.find(isSameAlert);
+      const firedAt = Date.now();
+      const isSameEvent =
+        repeated && firedAt - repeated.firedAt < SAME_EVENT_WINDOW_MS;
 
       return {
         alerts: [
@@ -42,7 +50,8 @@ export const useAlertStore = create<AlertState>()((set) => ({
             id: nextAlertId++,
             type,
             message,
-            count: (repeated?.count ?? 0) + 1,
+            count: (repeated?.count ?? 0) + (isSameEvent ? 0 : 1),
+            firedAt,
           },
         ].slice(-MAX_ALERTS),
       };
