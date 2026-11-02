@@ -78,7 +78,7 @@ export function ScrollingNav({
       ref={navRef}
       aria-label={label}
       onClick={keepContentInView ? scrollToContent : undefined}
-      className={`relative flex min-w-0 flex-1 [scrollbar-width:none] items-center overflow-x-auto [mask-image:linear-gradient(to_right,black_calc(100%_-_1.5rem),transparent)] pr-6 ${className}`}
+      className={`relative flex min-w-0 flex-1 scrollbar-none items-center overflow-x-auto [mask-image:linear-gradient(to_right,black_calc(100%_-_1.5rem),transparent)] pr-6 ${className}`}
     >
       {children}
     </nav>

@@ -28,7 +28,7 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
 
         <div
           id="dashboard-wrapper"
-          className="layout-scrollbar custom:top-dashboard-gap custom:right-dashboard-gap custom:bottom-dashboard-gap custom:left-dashboard-sidebar fixed top-16 right-0 bottom-0 left-0 bg-white"
+          className="layout-scrollbar app-scrollbars custom:top-dashboard-gap custom:right-dashboard-gap custom:bottom-dashboard-gap custom:left-dashboard-sidebar fixed top-16 right-0 bottom-0 left-0 bg-white"
         >
           <div className="flex h-full w-full flex-col">{children}</div>
         </div>

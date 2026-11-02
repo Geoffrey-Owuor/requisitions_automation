@@ -53,9 +53,9 @@
   --breakpoint-custom: 1200px;
 
   /* Desktop dashboard frame: the sidebar column, the gap around the page
-     area, and the page area's corner radius. The sidebar, DashboardWrapper
-     (page area and corner overlays) and the requisition form modal all size
-     themselves from these, so they can't drift apart. */
+     area, and the page area's corner radius. The sidebar and DashboardWrapper
+     (page area and corner overlays) size themselves from these, so they
+     can't drift apart. */
   --spacing-dashboard-sidebar: 5rem;
   --spacing-dashboard-gap: 0.5rem;
   --radius-dashboard: 1rem;
@@ -66,52 +66,116 @@ html {
   font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
-/* Default pages scrollbar navigations */
+/* Scrollbars
+   - .layout-scrollbar marks a page's scroll container (scrollPageToTop and
+     StickyNavBar look it up). On its own it keeps the browser's native
+     scrollbar, arrows included: the public pages.
+   - .app-scrollbars styles itself and every scroller inside it the Google
+     Drive way: no arrow buttons and a pill thumb flush against the
+     scroller's edge in a transparent track, so the scroller's rounded
+     corners (or the dashboard frame's corner overlays) shape its ends. On the dashboard page area, the
+     mobile drawer and every Modal dialog.
+   - .small-scrollbar is the thin variant for small scrollers (dropdowns,
+     menus, the Key & Access terms box), inside the scope or not.
+   Chromium 121+ ignores the ::-webkit-scrollbar pseudo-elements on any
+   element with scrollbar-color or scrollbar-width set, and scrollbar-color is
+   inherited. So the standard properties are for Firefox only, the scoped
+   elements reset the colour to auto, and Tailwind's scrollbar-thin /
+   scrollbar-thumb-* / scrollbar-track-* utilities must not be used inside
+   the scope (scrollbar-none, for a hidden bar, is fine). Touch screens keep
+   their native auto-hiding overlay scrollbars. */
 .layout-scrollbar {
   scrollbar-color: #737373 transparent;
   overflow-y: auto;
 }
 
-.client-scrollbar {
-  scrollbar-color: #ffffff transparent;
-  overflow-y: auto;
-}
-
-/* Sidebar scrollbar navigation styles */
-.sidebar-nav {
-  overflow-y: auto;
-}
-
-.sidebar-nav::-webkit-scrollbar {
-  width: 3px;
-}
-
-.sidebar-nav::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.sidebar-nav::-webkit-scrollbar-thumb {
-  background-color: #fca5a5; /* red */
-  border-radius: 999px;
-}
-
-/* Firefox: standard scrollbar properties. Scoped to browsers without
-   ::-webkit-scrollbar support, since Chromium 121+ ignores the webkit
-   pseudo-elements above whenever scrollbar-width/scrollbar-color are set. */
 @supports not selector(::-webkit-scrollbar) {
-  .sidebar-nav {
+  .app-scrollbars {
+    scrollbar-color: #a3a3a3 transparent;
+  }
+  .small-scrollbar {
     scrollbar-width: thin;
-    scrollbar-color: #fca5a5 transparent; /* thumb track */
+    scrollbar-color: #a3a3a3 transparent;
   }
 }
-/* Normal scrollbar */
-.normal-scrollbar {
-  scrollbar-color: #a3a3a3 transparent;
-}
-/* Small scrollbar */
-.small-scrollbar {
-  scrollbar-color: #a3a3a3 transparent;
-  scrollbar-width: thin;
+
+@supports selector(::-webkit-scrollbar) {
+  @media (hover: hover) and (pointer: fine) {
+    .app-scrollbars,
+    .small-scrollbar {
+      scrollbar-color: auto;
+    }
+
+    .app-scrollbars::-webkit-scrollbar,
+    .app-scrollbars *::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+      background: transparent;
+    }
+    .small-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+      background: transparent;
+    }
+
+    .app-scrollbars::-webkit-scrollbar-thumb,
+    .app-scrollbars *::-webkit-scrollbar-thumb,
+    .small-scrollbar::-webkit-scrollbar-thumb {
+      background-color: #a3a3a3;
+      background-clip: padding-box;
+      border: 0 solid transparent;
+      border-radius: 999px;
+    }
+    /* Inset from the content side only, so the thumb sits flush against the
+       scroller's edge, as in Google Drive. The painted (padding-box) corners
+       are the outer radii minus the border, so a one-sided border would make
+       uneven, pinched ends; the inset side's radii are 2px larger along the
+       border so the visible thumb ends in a true semicircle (radius 4px, 2px
+       thin). */
+    .app-scrollbars::-webkit-scrollbar-thumb:vertical,
+    .app-scrollbars *::-webkit-scrollbar-thumb:vertical {
+      border-left-width: 2px;
+      border-radius: 6px 4px 4px 6px / 4px;
+    }
+    .app-scrollbars::-webkit-scrollbar-thumb:horizontal,
+    .app-scrollbars *::-webkit-scrollbar-thumb:horizontal {
+      border-top-width: 2px;
+      border-radius: 4px / 6px 6px 4px 4px;
+    }
+    .small-scrollbar::-webkit-scrollbar-thumb:vertical {
+      border-left-width: 2px;
+      border-radius: 4px 2px 2px 4px / 2px;
+    }
+    .small-scrollbar::-webkit-scrollbar-thumb:horizontal {
+      border-top-width: 2px;
+      border-radius: 2px / 4px 4px 2px 2px;
+    }
+    .app-scrollbars::-webkit-scrollbar-thumb:hover,
+    .app-scrollbars *::-webkit-scrollbar-thumb:hover,
+    .small-scrollbar::-webkit-scrollbar-thumb:hover {
+      background-color: #737373;
+    }
+    .app-scrollbars::-webkit-scrollbar-thumb:active,
+    .app-scrollbars *::-webkit-scrollbar-thumb:active,
+    .small-scrollbar::-webkit-scrollbar-thumb:active {
+      background-color: #525252;
+    }
+
+    .app-scrollbars::-webkit-scrollbar-track,
+    .app-scrollbars *::-webkit-scrollbar-track,
+    .small-scrollbar::-webkit-scrollbar-track,
+    .app-scrollbars::-webkit-scrollbar-corner,
+    .app-scrollbars *::-webkit-scrollbar-corner,
+    .small-scrollbar::-webkit-scrollbar-corner {
+      background: transparent;
+    }
+
+    .app-scrollbars::-webkit-scrollbar-button,
+    .app-scrollbars *::-webkit-scrollbar-button,
+    .small-scrollbar::-webkit-scrollbar-button {
+      display: none;
+    }
+  }
 }
 
 /* Dashboard Alert Styles */
@@ -364,7 +428,6 @@ html {
     grid-area: body;
     overflow-y: auto;
     overscroll-behavior: contain;
-    scrollbar-color: #737373 transparent;
     background: #fff;
   }
 
