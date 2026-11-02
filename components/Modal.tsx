@@ -2,6 +2,7 @@
 
 import { ReactNode, useEffect, useId, useRef, useState } from "react";
 import { X } from "lucide-react";
+import { trackOpenModal } from "@/lib/modalStack";
 
 // Shared modal shells on the native <dialog> element (styles: "Modals" in
 // css/globals.css). showModal() puts the dialog in the top layer, so no
@@ -32,6 +33,7 @@ function useModalDialog(open: boolean, focusDialog: boolean) {
     } else if (!open && dialog.open) {
       dialog.close();
     }
+    if (open) return trackOpenModal(dialog);
   }, [open, focusDialog]);
 
   return ref;
