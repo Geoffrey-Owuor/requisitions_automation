@@ -15,6 +15,7 @@ import {
   getDashboardNavGroups,
   isNavItemActive,
 } from "@/lib/dashboardNav";
+import { trackOpenModal } from "@/lib/modalStack";
 
 const MobileHeader = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -45,6 +46,7 @@ const MobileHeader = () => {
     } else if (!sidebarOpen && dialog.open) {
       dialog.close();
     }
+    if (sidebarOpen) return trackOpenModal(dialog);
   }, [sidebarOpen]);
 
   // The drawer only exists below the custom breakpoint: close it if the
