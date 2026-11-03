@@ -46,6 +46,33 @@ export type SelectTone = "slate" | "rose";
 
 const SEARCH_THRESHOLD = 8;
 const LIST_MAX_HEIGHT = 288;
+// Keep in step with the list's min-w-48 and w-36 classes
+const FIELD_LIST_MIN_WIDTH = 192;
+const INLINE_LIST_WIDTH = 144;
+const LIST_EDGE_MARGIN = 8;
+
+type ListAlign = "start" | "end" | "center";
+
+const LIST_ALIGN: Record<ListAlign, string> = {
+  start: "left-0",
+  end: "right-0",
+  center: "left-1/2 -translate-x-1/2",
+};
+
+// The horizontal space a list can use before it widens the page's scroll area
+// or gets cut off: the viewport, narrowed by every ancestor that clips or
+// scrolls (the dashboard's page area, a modal)
+function getHorizontalBounds(element: HTMLElement) {
+  let left = 0;
+  let right = document.documentElement.clientWidth;
+  for (let el = element.parentElement; el; el = el.parentElement) {
+    if (getComputedStyle(el).overflowX === "visible") continue;
+    const rect = el.getBoundingClientRect();
+    left = Math.max(left, rect.left + el.clientLeft);
+    right = Math.min(right, rect.left + el.clientLeft + el.clientWidth);
+  }
+  return { left: left + LIST_EDGE_MARGIN, right: right - LIST_EDGE_MARGIN };
+}
 
 const TONES: Record<
   SelectTone,
@@ -112,6 +139,7 @@ export function Select({
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(-1);
   const [placement, setPlacement] = useState<"top" | "bottom">("bottom");
+  const [align, setAlign] = useState<ListAlign>(inline ? "center" : "start");
 
   const selected = options.find((option) => option.value === value);
   const shownLabel = selected?.label ?? (value ? unlistedLabel : undefined);
@@ -124,12 +152,26 @@ export function Select({
 
   const openList = (index?: number) => {
     if (disabled) return;
-    const rect = triggerRef.current?.getBoundingClientRect();
-    if (rect) {
+    const trigger = triggerRef.current;
+    if (trigger) {
+      const rect = trigger.getBoundingClientRect();
       const below = window.innerHeight - rect.bottom;
       setPlacement(
         below < LIST_MAX_HEIGHT + 64 && rect.top > below ? "top" : "bottom",
       );
+
+      // The list can be wider than its trigger, so it may need to open from
+      // the trigger's other edge to stay on the page
+      const bounds = getHorizontalBounds(trigger);
+      const width = inline
+        ? INLINE_LIST_WIDTH
+        : Math.max(rect.width, FIELD_LIST_MIN_WIDTH);
+      const center = rect.left + rect.width / 2;
+      const centerFits =
+        center - width / 2 >= bounds.left && center + width / 2 <= bounds.right;
+      if (inline && centerFits) setAlign("center");
+      else if (rect.left + width <= bounds.right) setAlign("start");
+      else setAlign(rect.right - width >= bounds.left ? "end" : "start");
     }
     setQuery("");
     setActiveIndex(
@@ -297,10 +339,8 @@ export function Select({
 
       {open && (
         <div
-          className={`rounded-control absolute z-60 overflow-hidden border border-neutral-200 bg-white shadow-lg ${
-            inline
-              ? "left-1/2 w-36 -translate-x-1/2"
-              : "right-0 left-0 min-w-48"
+          className={`rounded-control absolute z-60 overflow-hidden border border-neutral-200 bg-white shadow-lg ${LIST_ALIGN[align]} ${
+            inline ? "w-36" : "w-full min-w-48"
           } ${placement === "top" ? "bottom-full mb-1.5" : "top-full mt-1.5"}`}
         >
           {searchable && (
