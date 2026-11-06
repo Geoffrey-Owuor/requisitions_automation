@@ -482,7 +482,7 @@ const AppMenu = ({
         <div
           id={`${id}-results`}
           onKeyDown={handleGridKeyDown}
-          className="small-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 pt-3"
+          className="small-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 pt-3 [--scrollbar-inset:var(--radius-surface)]"
         >
           {resultCount === 0 && (
             <p className="py-8 text-center text-[12px] font-medium text-gray-500">
