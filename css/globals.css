@@ -72,9 +72,10 @@ html {
      scrollbar, arrows included: the public pages.
    - .app-scrollbars styles itself and every scroller inside it the Google
      Drive way: no arrow buttons and a pill thumb flush against the
-     scroller's edge in a transparent track, so the scroller's rounded
-     corners (or the dashboard frame's corner overlays) shape its ends. On the dashboard page area, the
-     mobile drawer and every Modal dialog.
+     scroller's edge in a transparent track. On the dashboard page area, the
+     mobile drawer and every Modal dialog. The dashboard frame's corner
+     overlays shape the page area's bar ends; other rounded scrollers get a
+     track inset (below).
    - .small-scrollbar is the thin variant for small scrollers (dropdowns,
      menus, the Key & Access terms box), inside the scope or not.
    Chromium 121+ ignores the ::-webkit-scrollbar pseudo-elements on any
@@ -87,6 +88,37 @@ html {
 .layout-scrollbar {
   scrollbar-color: #737373 transparent;
   overflow-y: auto;
+}
+
+/* Track inset at both ends of the scroll axis, so the thumb stops short of
+   rounded corners: Chromium clips a rounded scroller's bar to its radius, and
+   a square scroller inside a rounded box that clips it (dropdowns, modals)
+   runs into the box's curve. The scrollbar pseudo-elements read it by
+   inheriting from their scroller, so it must inherit; every element resets it
+   instead, so a rounded box doesn't inset the scrollers nested in it. (An
+   @property with inherits: false would leave the pseudo-elements at 0.) The
+   reset is in the base layer so utilities and the Modal rules override it.
+   Scrollers rounded with the classes below get it automatically; one inside
+   a clipping rounded box sets it to the box's radius, e.g.
+   [--scrollbar-inset:var(--radius-control)]. The dashboard page area has
+   none on purpose: its bar runs under the frame's corner overlays. */
+@layer base {
+  * {
+    --scrollbar-inset: 0px;
+  }
+}
+
+.small-scrollbar.rounded-compact,
+.app-scrollbars .rounded-compact {
+  --scrollbar-inset: var(--radius-compact);
+}
+.small-scrollbar.rounded-control,
+.app-scrollbars .rounded-control {
+  --scrollbar-inset: var(--radius-control);
+}
+.small-scrollbar.rounded-surface,
+.app-scrollbars .rounded-surface {
+  --scrollbar-inset: var(--radius-surface);
 }
 
 @supports not selector(::-webkit-scrollbar) {
@@ -168,6 +200,17 @@ html {
     .app-scrollbars *::-webkit-scrollbar-corner,
     .small-scrollbar::-webkit-scrollbar-corner {
       background: transparent;
+    }
+
+    .app-scrollbars::-webkit-scrollbar-track:vertical,
+    .app-scrollbars *::-webkit-scrollbar-track:vertical,
+    .small-scrollbar::-webkit-scrollbar-track:vertical {
+      margin-block: var(--scrollbar-inset);
+    }
+    .app-scrollbars::-webkit-scrollbar-track:horizontal,
+    .app-scrollbars *::-webkit-scrollbar-track:horizontal,
+    .small-scrollbar::-webkit-scrollbar-track:horizontal {
+      margin-inline: var(--scrollbar-inset);
     }
 
     .app-scrollbars::-webkit-scrollbar-button,
@@ -442,6 +485,8 @@ html {
     border-radius: var(--radius-surface) var(--radius-surface) 0 0;
     padding-bottom: env(safe-area-inset-bottom);
     transform: translateY(100%);
+    /* Keeps the thumb off the rounded corners */
+    --scrollbar-inset: var(--radius-surface);
   }
 
   .modal-alert[open] {
@@ -503,6 +548,11 @@ html {
 
     .modal-sheet-actions {
       padding-bottom: 0;
+    }
+
+    /* The body can end at the card's rounded bottom corners (no footer) */
+    .modal-sheet-body {
+      --scrollbar-inset: var(--radius-surface);
     }
 
     .modal-alert {
