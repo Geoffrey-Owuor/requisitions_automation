@@ -10,19 +10,10 @@
 // The record's email is never returned: a caller looking up by staff number
 // must not learn the personal email on file.
 import { NextRequest, NextResponse } from "next/server";
-import { timingSafeEqual } from "crypto";
 import { query } from "@/lib/db";
+import { hasValidStaffApiKey } from "@/lib/staffApiKey";
 
 const noStore = { "Cache-Control": "no-store" };
-
-function hasValidKey(request: NextRequest) {
-  const expected = process.env.STAFF_LOOKUP_API_KEY;
-  const provided = request.headers.get("x-staff-lookup-key");
-  if (!expected || !provided) return false;
-  const a = Buffer.from(provided);
-  const b = Buffer.from(expected);
-  return a.length === b.length && timingSafeEqual(a, b);
-}
 
 const clean = (value: unknown, max: number) =>
   typeof value === "string" && value.trim() && value.trim().length <= max
@@ -33,7 +24,7 @@ export async function POST(request: NextRequest) {
   if (!process.env.STAFF_LOOKUP_API_KEY) {
     console.error("STAFF_LOOKUP_API_KEY is not set - refusing staff lookups");
   }
-  if (!hasValidKey(request)) {
+  if (!hasValidStaffApiKey(request)) {
     return NextResponse.json(
       { message: "Forbidden" },
       { status: 403, headers: noStore },
