@@ -22,7 +22,7 @@ import {
   submissionStage,
   EmployeeFirstPendingStage,
 } from "@/utils/EmployeeApprovalStages/submissionStage";
-import { formatSalaryRange, EmployeeAttachmentType } from "@/public/assets";
+import { EmployeeAttachmentType } from "@/public/assets";
 
 export async function POST(request: NextRequest) {
   // Check if we have a valid session
@@ -199,11 +199,11 @@ export async function POST(request: NextRequest) {
         ],
       );
 
-      const positionColumns = 11;
+      const positionColumns = 10;
       const positionValuesClause = positions
         .map(
           (_, index) =>
-            `($${index * positionColumns + 1}, $${index * positionColumns + 2}, $${index * positionColumns + 3}, $${index * positionColumns + 4}, $${index * positionColumns + 5}, $${index * positionColumns + 6}, $${index * positionColumns + 7}, $${index * positionColumns + 8}, $${index * positionColumns + 9}, $${index * positionColumns + 10}, $${index * positionColumns + 11})`,
+            `($${index * positionColumns + 1}, $${index * positionColumns + 2}, $${index * positionColumns + 3}, $${index * positionColumns + 4}, $${index * positionColumns + 5}, $${index * positionColumns + 6}, $${index * positionColumns + 7}, $${index * positionColumns + 8}, $${index * positionColumns + 9}, $${index * positionColumns + 10})`,
         )
         .join(", ");
 
@@ -217,7 +217,6 @@ export async function POST(request: NextRequest) {
         position.dateFilled,
         position.replacementOrNew,
         position.jobGrade,
-        formatSalaryRange(Number(position.salaryMin), Number(position.salaryMax)),
         gradeRank(position.jobGrade),
       ]);
 
@@ -226,7 +225,7 @@ export async function POST(request: NextRequest) {
         INSERT INTO employee_requisition_positions
         (position_id, request_id, position_title, number_required,
         position_justification, position_reporting_to, date_position_filled,
-        position_replacement_or_new, position_job_grade, position_salary_range,
+        position_replacement_or_new, position_job_grade,
         position_job_grade_rank)
         VALUES ${positionValuesClause}
         `,

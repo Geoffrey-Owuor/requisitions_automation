@@ -165,14 +165,6 @@ export default function EmployeeConfirmationModal({
                       : "—"}
                   </span>
                 </div>
-                <div className="flex flex-col gap-2">
-                  <span className="text-[#7c5a5a]">Salary Range (KES)</span>
-                  <span className="font-medium text-[#1e1b1b]">
-                    {position.salaryMin && position.salaryMax
-                      ? `${position.salaryMin.toLocaleString()} – ${position.salaryMax.toLocaleString()}`
-                      : "—"}
-                  </span>
-                </div>
               </div>
 
               <div className="mb-3">

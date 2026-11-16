@@ -1,10 +1,7 @@
 import "server-only";
 import { query } from "@/lib/db";
 import type { ReportColumn, ReportSheet } from "@/lib/reports/workbook";
-import {
-  EMPLOYEE_ATTACHMENT_TYPE_LABELS,
-  parseSalaryRange,
-} from "@/public/assets";
+import { EMPLOYEE_ATTACHMENT_TYPE_LABELS } from "@/public/assets";
 import {
   createdInRange,
   excelDate,
@@ -130,8 +127,6 @@ position_changes AS (
                      THEN ', ' || ap.previous_replacement_or_new || ' -> ' || ap.new_replacement_or_new ELSE '' END
              || CASE WHEN ap.previous_job_grade IS DISTINCT FROM ap.new_job_grade
                      THEN ', grade ' || ap.previous_job_grade || ' -> ' || ap.new_job_grade ELSE '' END
-             || CASE WHEN ap.previous_salary_range IS DISTINCT FROM ap.new_salary_range
-                     THEN ', salary ' || ap.previous_salary_range || ' -> ' || ap.new_salary_range ELSE '' END
              || CASE WHEN ap.previous_reporting_to IS DISTINCT FROM ap.new_reporting_to
                      THEN ', reporting to ' || ap.previous_reporting_to || ' -> ' || ap.new_reporting_to ELSE '' END
              || CASE WHEN ap.previous_date_filled IS DISTINCT FROM ap.new_date_filled
@@ -164,7 +159,6 @@ SELECT
   p.number_required,
   p.position_replacement_or_new,
   p.position_job_grade,
-  p.position_salary_range,
   p.position_reporting_to,
   ${excelDate("p.date_position_filled")}             AS date_position_filled,
   p.position_justification,
@@ -248,9 +242,6 @@ const COLUMNS: ReportColumn[] = [
   { key: "number_required", header: "No. Required", kind: "integer" },
   { key: "position_replacement_or_new", header: "Replacement / New" },
   { key: "position_job_grade", header: "Job Grade" },
-  { key: "position_salary_range", header: "Salary Range (KES)" },
-  { key: "salary_min", header: "Salary Min (KES)", kind: "money" },
-  { key: "salary_max", header: "Salary Max (KES)", kind: "money" },
   { key: "position_reporting_to", header: "Reporting To" },
   { key: "date_position_filled", header: "Fill By", kind: "date" },
   { key: "position_justification", header: "Justification", kind: "longtext" },
@@ -297,11 +288,5 @@ export async function buildEmployeeReport({
   status,
 }: ReportQueryParams): Promise<ReportSheet[]> {
   const rows = await query(SQL, [from, to, status]);
-  // Salary ranges are stored as "<min> - <max>" (or "<min> to <max>" on
-  // some early rows); split them so the bounds are numbers in Excel
-  const withSalary = rows.map((row) => {
-    const range = parseSalaryRange(String(row.position_salary_range ?? ""));
-    return { ...row, salary_min: range?.min, salary_max: range?.max };
-  });
-  return [{ name: "Employee Requisitions", columns: COLUMNS, rows: withSalary }];
+  return [{ name: "Employee Requisitions", columns: COLUMNS, rows }];
 }
