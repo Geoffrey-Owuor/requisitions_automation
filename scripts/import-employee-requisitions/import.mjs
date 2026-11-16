@@ -46,11 +46,11 @@ const INSERT_REQUISITION = `
 const INSERT_POSITION = `
   INSERT INTO employee_requisition_positions (
     request_id, position_title, number_required, position_replacement_or_new,
-    position_job_grade, position_job_grade_rank, position_salary_range,
+    position_job_grade, position_job_grade_rank,
     position_justification, position_reporting_to, date_position_filled,
     position_created_at
-  ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::date,
-    ${nairobi("$11")} + ($12::float8 * INTERVAL '1 millisecond'))`;
+  ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::date,
+    ${nairobi("$10")} + ($11::float8 * INTERVAL '1 millisecond'))`;
 
 function headerValues(requisition, batchId) {
   const stageValues = STAGE_KEYS.flatMap((key) => {
@@ -99,9 +99,9 @@ export async function importRequisitions(client, requisitions, { commit }) {
           position.title,
           position.numberRequired,
           position.replacementOrNew,
-          position.jobGrade,
-          position.jobGradeRank,
-          position.salaryRange,
+          // Both null for a position without a job grade
+          position.jobGrade ?? null,
+          position.jobGradeRank ?? null,
           position.justification,
           position.reportingTo,
           position.targetFillDate,

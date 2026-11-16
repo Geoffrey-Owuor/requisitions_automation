@@ -115,26 +115,10 @@ const positionColumns = [
   {
     key: "jobGrade",
     header: "Job Grade",
-    required: true,
     width: 18,
-    accepts: "A job grade from the Lists sheet",
-    notes: "Inactive grades are allowed. The grade's current rank is stored.",
-  },
-  {
-    key: "salaryMin",
-    header: "Salary Min (KES)",
-    required: true,
-    kind: "money",
-    width: 14,
-    accepts: "A number above 0",
-  },
-  {
-    key: "salaryMax",
-    header: "Salary Max (KES)",
-    required: true,
-    kind: "money",
-    width: 14,
-    accepts: "A number, at least Salary Min",
+    accepts: "A job grade from the Lists sheet, or blank",
+    notes:
+      "Optional. Inactive grades are allowed. The grade's current rank is stored.",
   },
   {
     key: "justification",
