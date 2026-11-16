@@ -4,6 +4,7 @@ import { ChangedValuePill } from "@/components/Approvers/CasualApprovers/CasualA
 import {
   dateFormatter,
   EMPLOYEE_ATTACHMENT_TYPE_LABELS,
+  NO_JOB_GRADE_LABEL,
 } from "@/public/assets";
 import {
   EmployeeAmendmentAttachmentChange,
@@ -162,8 +163,8 @@ function PositionChange({
           />
           <FieldDiff
             label="Job Grade"
-            previous={position.previousJobGrade}
-            next={position.newJobGrade}
+            previous={position.previousJobGrade ?? NO_JOB_GRADE_LABEL}
+            next={position.newJobGrade ?? NO_JOB_GRADE_LABEL}
           />
           <FieldDiff
             label="Reporting To"
@@ -183,7 +184,8 @@ function PositionChange({
         </div>
       ) : (
         <p className="text-[12px] text-[#7c5a5a]">
-          {values.numberRequired} required &middot; {values.jobGrade}
+          {values.numberRequired} required
+          {values.jobGrade && <> &middot; {values.jobGrade}</>}
           {values.dateFilled && (
             <> &middot; by {dateFormatter(values.dateFilled)}</>
           )}

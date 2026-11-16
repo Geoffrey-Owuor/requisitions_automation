@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
       .map((grade) => grade.name);
     // Each position stores its grade's rank at submission, so re-ranking
     // grades later never renumbers it
-    const gradeRank = (name: string) =>
+    const gradeRank = (name: string | null) =>
       jobGrades.find((grade) => grade.name === name)?.rank ?? null;
 
     // Validate every position and collect its files - never trust client state
@@ -216,8 +216,9 @@ export async function POST(request: NextRequest) {
         position.reportingTo,
         position.dateFilled,
         position.replacementOrNew,
-        position.jobGrade,
-        gradeRank(position.jobGrade),
+        // The job grade is optional: stored as NULL when not given
+        position.jobGrade || null,
+        gradeRank(position.jobGrade || null),
       ]);
 
       await client.query(

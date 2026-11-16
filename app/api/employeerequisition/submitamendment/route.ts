@@ -55,7 +55,7 @@ interface ExistingPositionRow {
   position_title: string;
   number_required: number;
   position_replacement_or_new: string;
-  position_job_grade: string;
+  position_job_grade: string | null;
   position_justification: string;
   position_reporting_to: string;
   date_filled: string;
@@ -73,7 +73,8 @@ interface PositionValues {
   title: string;
   numberRequired: number;
   replacementOrNew: string;
-  jobGrade: string;
+  // Null when the position has no job grade (it's optional)
+  jobGrade: string | null;
   justification: string;
   reportingTo: string;
   dateFilled: string;
@@ -109,7 +110,7 @@ const inputToValues = (position: PositionInput): PositionValues => ({
   title: position.title,
   numberRequired: Number(position.numberRequired),
   replacementOrNew: position.replacementOrNew,
-  jobGrade: position.jobGrade,
+  jobGrade: position.jobGrade || null,
   justification: position.justification,
   reportingTo: position.reportingTo,
   dateFilled: position.dateFilled,
@@ -188,13 +189,13 @@ export async function POST(request: NextRequest) {
       .filter((grade) => grade.isActive)
       .map((grade) => grade.name);
     // A position stores its grade's rank as of this amendment
-    const gradeRank = (name: string) =>
+    const gradeRank = (name: string | null) =>
       jobGrades.find((grade) => grade.name === name)?.rank ?? null;
     // An existing position may keep its grade even once it's inactive.
     // Read before the ownership check, but only used to widen validation.
     const currentGrades = new Map(
       (
-        await query<{ position_id: string; position_job_grade: string }>(
+        await query<{ position_id: string; position_job_grade: string | null }>(
           `SELECT position_id, position_job_grade FROM employee_requisition_positions
            WHERE request_id = $1`,
           [requestId],

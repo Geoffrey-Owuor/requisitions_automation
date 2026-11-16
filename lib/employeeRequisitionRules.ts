@@ -21,7 +21,8 @@ export type PositionInput = {
   title: string;
   numberRequired: number;
   replacementOrNew: string;
-  jobGrade: string;
+  // Optional: empty (or missing) when the position has no grade
+  jobGrade?: string | null;
   justification: string;
   reportingTo: string;
   dateFilled: string;
@@ -39,7 +40,7 @@ export function todayIsoDate() {
 // The target fill date must not be in the past - on an amendment this
 // applies to unchanged positions too, so approvers never see a stale target.
 // `allowedGrades` are the active job grades, plus - for a position an
-// amendment keeps - the grade it already has.
+// amendment keeps - the grade it already has. The grade itself is optional.
 export function getPositionError(
   position: PositionInput,
   index: number,
@@ -78,7 +79,10 @@ export function getPositionError(
     return `Position ${index + 1} has an invalid Replacement/New selection`;
   }
 
-  if (!allowedGrades.includes(position.jobGrade)) {
+  if (
+    !isEmpty(position.jobGrade) &&
+    !allowedGrades.includes(position.jobGrade as string)
+  ) {
     return `Position ${index + 1} has an invalid Job Grade selection`;
   }
 

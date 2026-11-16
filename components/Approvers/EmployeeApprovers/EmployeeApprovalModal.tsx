@@ -49,7 +49,7 @@ export interface EmployeeApprovalPosition {
   positionTitle: string;
   numberRequired: number;
   replacementOrNew: string;
-  jobGrade: string;
+  jobGrade: string | null;
   jobGradeRank: number | null;
   justification: string;
   reportingTo: string;

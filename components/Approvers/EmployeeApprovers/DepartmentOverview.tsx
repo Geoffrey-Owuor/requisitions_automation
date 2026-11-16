@@ -95,7 +95,9 @@ function OverviewBody({
             <BarList
               color={SERIES.approved}
               items={overview.byGrade.map((row) => ({
-                label: formatJobGrade(row.grade, row.rank),
+                label: row.grade
+                  ? formatJobGrade(row.grade, row.rank)
+                  : "No grade",
                 value: row.headcount,
               }))}
             />
@@ -133,7 +135,9 @@ function OverviewBody({
                   </span>
                   <span className="text-[#7c5a5a]">
                     {" · "}
-                    {formatJobGrade(position.grade, position.rank)} ·{" "}
+                    {position.grade && (
+                      <>{formatJobGrade(position.grade, position.rank)} · </>
+                    )}
                     {position.replacementOrNew}
                   </span>
                 </span>

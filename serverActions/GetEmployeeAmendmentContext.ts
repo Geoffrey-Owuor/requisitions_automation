@@ -74,7 +74,7 @@ export async function getEmployeeAmendmentContext(
       position_title: string;
       number_required: number;
       position_replacement_or_new: string;
-      position_job_grade: string;
+      position_job_grade: string | null;
       position_justification: string;
       position_reporting_to: string;
       date_filled: string;
@@ -111,7 +111,7 @@ export async function getEmployeeAmendmentContext(
         title: position.position_title,
         numberRequired: position.number_required,
         replacementOrNew: position.position_replacement_or_new,
-        jobGrade: position.position_job_grade,
+        jobGrade: position.position_job_grade ?? "",
         justification: position.position_justification,
         reportingTo: position.position_reporting_to,
         dateFilled: position.date_filled,

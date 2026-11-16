@@ -236,7 +236,6 @@ export default function EmployeeRequisitionForm({
         position.dateFilled < today ||
         Number(position.numberRequired) < 1 ||
         isEmpty(position.replacementOrNew) ||
-        isEmpty(position.jobGrade) ||
         EMPLOYEE_ATTACHMENT_TYPES.some((type) => {
           const file = position.files[type];
           // No new file is fine when the position keeps an existing one
@@ -660,8 +659,8 @@ export default function EmployeeRequisitionForm({
                 </button>
                 <p className="mt-3 text-center text-xs text-[#7c5a5a]">
                   {isAmendment
-                    ? "All fields are required to proceed, and target fill dates must be today or later. A new position needs a Job Description, KPIs, and Org Chart document (Word, Excel, or PDF, max 2MB each)."
-                    : "All fields are required to proceed. Each position needs a Job Description, KPIs, and Org Chart document (Word, Excel, or PDF, max 2MB each)."}
+                    ? "Every field except Job Grade is required to proceed, and target fill dates must be today or later. A new position needs a Job Description, KPIs, and Org Chart document (Word, Excel, or PDF, max 2MB each)."
+                    : "Every field except Job Grade is required to proceed. Each position needs a Job Description, KPIs, and Org Chart document (Word, Excel, or PDF, max 2MB each)."}
                 </p>
               </div>
             </form>
@@ -791,6 +790,7 @@ function PositionFieldset({
         />
         <FormSelect
           label="Job Grade"
+          optional
           options={jobGrades
             .filter((grade) => grade.isActive)
             .map((grade) => grade.name)}

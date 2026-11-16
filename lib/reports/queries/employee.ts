@@ -126,7 +126,7 @@ position_changes AS (
              || CASE WHEN ap.previous_replacement_or_new IS DISTINCT FROM ap.new_replacement_or_new
                      THEN ', ' || ap.previous_replacement_or_new || ' -> ' || ap.new_replacement_or_new ELSE '' END
              || CASE WHEN ap.previous_job_grade IS DISTINCT FROM ap.new_job_grade
-                     THEN ', grade ' || ap.previous_job_grade || ' -> ' || ap.new_job_grade ELSE '' END
+                     THEN ', grade ' || COALESCE(ap.previous_job_grade, 'none') || ' -> ' || COALESCE(ap.new_job_grade, 'none') ELSE '' END
              || CASE WHEN ap.previous_reporting_to IS DISTINCT FROM ap.new_reporting_to
                      THEN ', reporting to ' || ap.previous_reporting_to || ' -> ' || ap.new_reporting_to ELSE '' END
              || CASE WHEN ap.previous_date_filled IS DISTINCT FROM ap.new_date_filled

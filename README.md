@@ -35,7 +35,7 @@ An internal web application for Hotpoint Appliances Ltd that automates requisiti
 ### Employee Requisition
 
 - Request one or more open positions to be filled, each with its own headcount, justification, reporting line, and target fill date
-- Each position also records whether it's a Replacement or a New position, its Job Grade (Assistant Officer through Director), and a Salary Range in KES (minimum cannot be 0, maximum cannot be less than the minimum)
+- Each position also records whether it's a Replacement or a New position, and, optionally, its Job Grade (Assistant Officer through Director)
 - Requires a Job Description, KPIs, and Org Chart document per position — each is its own required upload (Word, Excel, or PDF), up to 2MB per file
 - Approval workflow: HOD Approval → Retail Director Approval (retail departments only, and skipped if the HOD is themself a Retail Director) → CEO Approval → HR Approval. Retail Director, CEO, and HR stages are array-based — any group member can act, first click wins
 
