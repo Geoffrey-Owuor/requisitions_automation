@@ -22,8 +22,6 @@ import {
   submissionStage,
 } from "@/utils/EmployeeApprovalStages/submissionStage";
 import {
-  formatSalaryRange,
-  parseSalaryRange,
   EmployeeAttachmentType,
   MAX_AMENDMENT_REASON_LENGTH,
 } from "@/public/assets";
@@ -57,8 +55,7 @@ interface ExistingPositionRow {
   position_title: string;
   number_required: number;
   position_replacement_or_new: string;
-  position_job_grade: string;
-  position_salary_range: string;
+  position_job_grade: string | null;
   position_justification: string;
   position_reporting_to: string;
   date_filled: string;
@@ -76,8 +73,8 @@ interface PositionValues {
   title: string;
   numberRequired: number;
   replacementOrNew: string;
-  jobGrade: string;
-  salaryRange: string;
+  // Null when the position has no job grade (it's optional)
+  jobGrade: string | null;
   justification: string;
   reportingTo: string;
   dateFilled: string;
@@ -99,19 +96,11 @@ interface PositionDiff {
   attachmentChanges: AttachmentChange[];
 }
 
-// The stored salary range is normalised to formatSalaryRange's form so a
-// legacy "<min> to <max>" row doesn't register as changed when it wasn't
-const normaliseSalaryRange = (value: string) => {
-  const parsed = parseSalaryRange(value);
-  return parsed ? formatSalaryRange(parsed.min, parsed.max) : value;
-};
-
 const rowToValues = (row: ExistingPositionRow): PositionValues => ({
   title: row.position_title,
   numberRequired: row.number_required,
   replacementOrNew: row.position_replacement_or_new,
   jobGrade: row.position_job_grade,
-  salaryRange: normaliseSalaryRange(row.position_salary_range),
   justification: row.position_justification,
   reportingTo: row.position_reporting_to,
   dateFilled: row.date_filled,
@@ -121,11 +110,7 @@ const inputToValues = (position: PositionInput): PositionValues => ({
   title: position.title,
   numberRequired: Number(position.numberRequired),
   replacementOrNew: position.replacementOrNew,
-  jobGrade: position.jobGrade,
-  salaryRange: formatSalaryRange(
-    Number(position.salaryMin),
-    Number(position.salaryMax),
-  ),
+  jobGrade: position.jobGrade || null,
   justification: position.justification,
   reportingTo: position.reportingTo,
   dateFilled: position.dateFilled,
@@ -204,13 +189,13 @@ export async function POST(request: NextRequest) {
       .filter((grade) => grade.isActive)
       .map((grade) => grade.name);
     // A position stores its grade's rank as of this amendment
-    const gradeRank = (name: string) =>
+    const gradeRank = (name: string | null) =>
       jobGrades.find((grade) => grade.name === name)?.rank ?? null;
     // An existing position may keep its grade even once it's inactive.
     // Read before the ownership check, but only used to widen validation.
     const currentGrades = new Map(
       (
-        await query<{ position_id: string; position_job_grade: string }>(
+        await query<{ position_id: string; position_job_grade: string | null }>(
           `SELECT position_id, position_job_grade FROM employee_requisition_positions
            WHERE request_id = $1`,
           [requestId],
@@ -424,7 +409,7 @@ export async function POST(request: NextRequest) {
     const { rows: existingPositions } =
       await client.query<ExistingPositionRow>(
         `SELECT position_id, position_title, number_required,
-         position_replacement_or_new, position_job_grade, position_salary_range,
+         position_replacement_or_new, position_job_grade,
          position_justification, position_reporting_to,
          TO_CHAR(date_position_filled, 'YYYY-MM-DD') AS date_filled
          FROM employee_requisition_positions WHERE request_id = $1 FOR UPDATE`,
@@ -610,11 +595,11 @@ export async function POST(request: NextRequest) {
          (amendment_id, position_id, position_title, change_type,
           previous_title, new_title, previous_number_required, new_number_required,
           previous_replacement_or_new, new_replacement_or_new,
-          previous_job_grade, new_job_grade, previous_salary_range, new_salary_range,
+          previous_job_grade, new_job_grade,
           previous_justification, new_justification,
           previous_reporting_to, new_reporting_to,
           previous_date_filled, new_date_filled)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
          RETURNING amendment_position_id`,
         [
           amendmentId,
@@ -629,8 +614,6 @@ export async function POST(request: NextRequest) {
           diff.next?.replacementOrNew ?? null,
           diff.previous?.jobGrade ?? null,
           diff.next?.jobGrade ?? null,
-          diff.previous?.salaryRange ?? null,
-          diff.next?.salaryRange ?? null,
           diff.previous?.justification ?? null,
           diff.next?.justification ?? null,
           diff.previous?.reportingTo ?? null,
@@ -752,7 +735,6 @@ export async function POST(request: NextRequest) {
         next.dateFilled,
         next.replacementOrNew,
         next.jobGrade,
-        next.salaryRange,
       ];
 
       if (diff.changeType === "added") {
@@ -760,9 +742,9 @@ export async function POST(request: NextRequest) {
           `INSERT INTO employee_requisition_positions
            (position_id, request_id, position_title, number_required,
             position_justification, position_reporting_to, date_position_filled,
-            position_replacement_or_new, position_job_grade, position_salary_range,
-           position_job_grade_rank)
-           VALUES ($1, $10, $2, $3, $4, $5, $6, $7, $8, $9, $11)`,
+            position_replacement_or_new, position_job_grade,
+            position_job_grade_rank)
+           VALUES ($1, $9, $2, $3, $4, $5, $6, $7, $8, $10)`,
           [...values, requestId, gradeRank(next.jobGrade)],
         );
 
@@ -773,8 +755,7 @@ export async function POST(request: NextRequest) {
            SET position_title = $2, number_required = $3,
            position_justification = $4, position_reporting_to = $5,
            date_position_filled = $6, position_replacement_or_new = $7,
-           position_job_grade = $8, position_salary_range = $9,
-           position_job_grade_rank = $10
+           position_job_grade = $8, position_job_grade_rank = $9
            WHERE position_id = $1`,
           [...values, gradeRank(next.jobGrade)],
         );

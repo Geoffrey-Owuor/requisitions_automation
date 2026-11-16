@@ -79,7 +79,6 @@ const PositionCard = ({
         label="Job Grade"
         value={formatJobGrade(position.jobgrade, position.jobgraderank)}
       />
-      <Field label="Salary Range (KES)" value={position.salaryrange} />
     </div>
 
     <div className="mb-4">

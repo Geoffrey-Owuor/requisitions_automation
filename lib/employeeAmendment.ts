@@ -28,8 +28,6 @@ export interface EmployeeAmendmentPositionValues {
   newReplacementOrNew: string | null;
   previousJobGrade: string | null;
   newJobGrade: string | null;
-  previousSalaryRange: string | null;
-  newSalaryRange: string | null;
   previousJustification: string | null;
   newJustification: string | null;
   previousReportingTo: string | null;
@@ -96,8 +94,6 @@ export const employeeAmendmentsQuery = `
           'newReplacementOrNew', p.new_replacement_or_new,
           'previousJobGrade', p.previous_job_grade,
           'newJobGrade', p.new_job_grade,
-          'previousSalaryRange', p.previous_salary_range,
-          'newSalaryRange', p.new_salary_range,
           'previousJustification', p.previous_justification,
           'newJustification', p.new_justification,
           'previousReportingTo', p.previous_reporting_to,

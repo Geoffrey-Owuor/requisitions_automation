@@ -58,23 +58,13 @@ const REQUISITIONS = `
       AND ($4::uuid IS NULL OR e.request_id <> $4::uuid)
   )`;
 
-// Salary ranges are stored as text, "<min> - <max>" (or "<min> to <max>"
-// on some early rows) — the SQL twin of parseSalaryRange in public/assets.ts
-const SALARY_PATTERN = `'^\\s*\\d+(\\.\\d+)?\\s*(-|to)\\s*\\d+(\\.\\d+)?\\s*$'`;
-
 const POSITIONS = `
   pos AS (
     SELECT
       p.*,
       req.outcome,
       req.employee_department,
-      req.decided_at,
-      CASE WHEN p.position_salary_range ~ ${SALARY_PATTERN}
-           THEN SUBSTRING(p.position_salary_range FROM '^\\s*(\\d+(?:\\.\\d+)?)')::numeric
-      END AS salary_min,
-      CASE WHEN p.position_salary_range ~ ${SALARY_PATTERN}
-           THEN SUBSTRING(p.position_salary_range FROM '(\\d+(?:\\.\\d+)?)\\s*$')::numeric
-      END AS salary_max
+      req.decided_at
     FROM employee_requisition_positions p
     JOIN req ON req.request_id = p.request_id
   )`;
@@ -95,13 +85,7 @@ const TOTALS_SQL = `${WITH}
     COALESCE(SUM(number_required) FILTER (WHERE outcome = 'approved'), 0)::int
       AS approved_headcount,
     COALESCE(SUM(number_required) FILTER (WHERE outcome = 'pending'), 0)::int
-      AS pending_headcount,
-    COALESCE(SUM(number_required * salary_min) FILTER (WHERE outcome = 'approved'), 0)::float8
-      AS approved_salary_min,
-    COALESCE(SUM(number_required * salary_max) FILTER (WHERE outcome = 'approved'), 0)::float8
-      AS approved_salary_max,
-    COUNT(*) FILTER (WHERE outcome = 'approved' AND salary_min IS NULL)::int
-      AS unpriced_approved_positions
+      AS pending_headcount
   FROM pos`;
 
 const MONTHLY_SQL = `${WITH}, ${MONTHS},
@@ -144,7 +128,8 @@ const BY_GRADE_SQL = `${WITH}
          SUM(number_required)::int AS headcount
   FROM pos WHERE outcome = 'approved'
   GROUP BY position_job_grade
-  ORDER BY MIN(position_job_grade_rank) NULLS LAST, position_job_grade`;
+  ORDER BY (position_job_grade IS NULL), MIN(position_job_grade_rank) NULLS LAST,
+           position_job_grade`;
 
 const BY_STAGE_SQL = `${WITH},
   req_headcount AS (
@@ -166,7 +151,6 @@ const RECENT_APPROVED_SQL = `${WITH}
     position_job_grade_rank AS rank,
     number_required AS headcount,
     position_replacement_or_new,
-    position_salary_range,
     TO_CHAR(${nairobi("decided_at")}, 'YYYY-MM-DD') AS approved_on
   FROM pos
   WHERE outcome = 'approved'
@@ -206,9 +190,6 @@ export async function loadEmployeeAnalytics(
       headcount_requested: number;
       approved_headcount: number;
       pending_headcount: number;
-      approved_salary_min: number;
-      approved_salary_max: number;
-      unpriced_approved_positions: number;
     }>(TOTALS_SQL, params),
     query<{
       month: string;
@@ -221,7 +202,7 @@ export async function loadEmployeeAnalytics(
       pending_headcount: number;
     }>(BY_DEPARTMENT_SQL, params),
     query<{ kind: string; headcount: number }>(REPLACEMENT_OR_NEW_SQL, params),
-    query<{ grade: string; rank: number | null; headcount: number }>(
+    query<{ grade: string | null; rank: number | null; headcount: number }>(
       BY_GRADE_SQL,
       params,
     ),
@@ -235,11 +216,10 @@ export async function loadEmployeeAnalytics(
       position_id: string;
       position_title: string;
       department: string;
-      grade: string;
+      grade: string | null;
       rank: number | null;
       headcount: number;
       position_replacement_or_new: string;
-      position_salary_range: string;
       approved_on: string;
     }>(RECENT_APPROVED_SQL, params),
   ]);
@@ -260,9 +240,6 @@ export async function loadEmployeeAnalytics(
       pendingHeadcount: totals.pending_headcount,
       declinedRequisitions: totals.declined_requisitions,
       avgDaysToDecision: totals.avg_days_to_decision,
-      approvedSalaryMin: totals.approved_salary_min,
-      approvedSalaryMax: totals.approved_salary_max,
-      unpricedApprovedPositions: totals.unpriced_approved_positions,
     },
     monthly: monthly.map((row) => ({
       month: row.month,
@@ -295,7 +272,6 @@ export async function loadEmployeeAnalytics(
       rank: row.rank,
       headcount: row.headcount,
       replacementOrNew: row.position_replacement_or_new,
-      salaryRange: row.position_salary_range,
       approvedOn: row.approved_on,
     })),
   };

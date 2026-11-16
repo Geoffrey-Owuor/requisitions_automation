@@ -5,6 +5,7 @@ import { EmployeeFormData } from "./EmployeeRequisitionForm";
 import {
   dateFormatter,
   formatJobGrade,
+  NO_JOB_GRADE_LABEL,
   EMPLOYEE_ATTACHMENT_TYPES,
   EMPLOYEE_ATTACHMENT_TYPE_LABELS,
 } from "@/public/assets";
@@ -162,15 +163,7 @@ export default function EmployeeConfirmationModal({
                             (grade) => grade.name === position.jobGrade,
                           )?.rank ?? null,
                         )
-                      : "—"}
-                  </span>
-                </div>
-                <div className="flex flex-col gap-2">
-                  <span className="text-[#7c5a5a]">Salary Range (KES)</span>
-                  <span className="font-medium text-[#1e1b1b]">
-                    {position.salaryMin && position.salaryMax
-                      ? `${position.salaryMin.toLocaleString()} – ${position.salaryMax.toLocaleString()}`
-                      : "—"}
+                      : NO_JOB_GRADE_LABEL}
                   </span>
                 </div>
               </div>

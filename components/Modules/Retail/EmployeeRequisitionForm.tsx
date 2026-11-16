@@ -77,8 +77,6 @@ export interface EmployeePositionFormData {
   numberRequired: number;
   replacementOrNew: string;
   jobGrade: string;
-  salaryMin: number;
-  salaryMax: number;
   justification: string;
   reportingTo: string;
   dateFilled: string;
@@ -101,8 +99,6 @@ function EmptyPosition(): EmployeePositionFormData {
     numberRequired: 1,
     replacementOrNew: "",
     jobGrade: "",
-    salaryMin: 0,
-    salaryMax: 0,
     justification: "",
     reportingTo: "",
     dateFilled: "",
@@ -240,9 +236,6 @@ export default function EmployeeRequisitionForm({
         position.dateFilled < today ||
         Number(position.numberRequired) < 1 ||
         isEmpty(position.replacementOrNew) ||
-        isEmpty(position.jobGrade) ||
-        Number(position.salaryMin) <= 0 ||
-        Number(position.salaryMax) < Number(position.salaryMin) ||
         EMPLOYEE_ATTACHMENT_TYPES.some((type) => {
           const file = position.files[type];
           // No new file is fine when the position keeps an existing one
@@ -374,8 +367,6 @@ export default function EmployeeRequisitionForm({
           numberRequired: Number(p.numberRequired),
           replacementOrNew: p.replacementOrNew,
           jobGrade: p.jobGrade,
-          salaryMin: Number(p.salaryMin),
-          salaryMax: Number(p.salaryMax),
           justification: p.justification,
           reportingTo: p.reportingTo,
           dateFilled: p.dateFilled,
@@ -668,8 +659,8 @@ export default function EmployeeRequisitionForm({
                 </button>
                 <p className="mt-3 text-center text-xs text-[#7c5a5a]">
                   {isAmendment
-                    ? "All fields are required to proceed, and target fill dates must be today or later. A new position needs a Job Description, KPIs, and Org Chart document (Word, Excel, or PDF, max 2MB each)."
-                    : "All fields are required to proceed. Each position needs a Job Description, KPIs, and Org Chart document (Word, Excel, or PDF, max 2MB each)."}
+                    ? "Every field except Job Grade is required to proceed, and target fill dates must be today or later. A new position needs a Job Description, KPIs, and Org Chart document (Word, Excel, or PDF, max 2MB each)."
+                    : "Every field except Job Grade is required to proceed. Each position needs a Job Description, KPIs, and Org Chart document (Word, Excel, or PDF, max 2MB each)."}
                 </p>
               </div>
             </form>
@@ -799,6 +790,7 @@ function PositionFieldset({
         />
         <FormSelect
           label="Job Grade"
+          optional
           options={jobGrades
             .filter((grade) => grade.isActive)
             .map((grade) => grade.name)}
@@ -810,41 +802,6 @@ function PositionFieldset({
             return rank ? `${rank}. ${name}` : name;
           }}
         />
-        <span className="col-span-2 text-[13px] font-semibold text-rose-600">
-          Salary Range (KES)
-        </span>
-
-        <div className="flex flex-col gap-2">
-          <label className="text-[13px] font-medium text-[#7c5a5a]">
-            Minimum Salary<span className="text-red-500">*</span>
-          </label>
-          <input
-            type="number"
-            min={1}
-            className="rounded-control h-10 border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
-            value={position.salaryMin || ""}
-            onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              onChange("salaryMin", Number(e.target.value))
-            }
-            required
-          />
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <label className="text-[13px] font-medium text-[#7c5a5a]">
-            Maximum Salary<span className="text-red-500">*</span>
-          </label>
-          <input
-            type="number"
-            min={1}
-            className="rounded-control h-10 border border-[rgba(240,180,180,0.6)] bg-white/80 px-3.5 text-sm transition-all duration-200 outline-none focus:border-rose-600 focus:shadow-[0_0_0_3px_rgba(225,29,72,0.1)]"
-            value={position.salaryMax || ""}
-            onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              onChange("salaryMax", Number(e.target.value))
-            }
-            required
-          />
-        </div>
       </div>
 
       <div className="mt-5 flex flex-col gap-2">

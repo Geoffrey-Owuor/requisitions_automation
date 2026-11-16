@@ -17,12 +17,6 @@ export type EmployeeAnalytics = {
     // Calendar days from submission to the final decision (approval or
     // decline), averaged over decided requisitions; null when none are
     avgDaysToDecision: number | null;
-    // Monthly salary range (KES) of the approved headcount: each position's
-    // range times its headcount
-    approvedSalaryMin: number;
-    approvedSalaryMax: number;
-    // Approved positions whose stored range couldn't be read
-    unpricedApprovedPositions: number;
   };
   // One entry per calendar month of the range (YYYY-MM), by submission month
   monthly: {
@@ -37,8 +31,9 @@ export type EmployeeAnalytics = {
   }[];
   // Approved headcount
   replacementOrNew: { kind: string; headcount: number }[];
-  // Approved headcount, highest grade (by rank at submission) last
-  byGrade: { grade: string; rank: number | null; headcount: number }[];
+  // Approved headcount, highest grade (by rank at submission) last, then
+  // positions without a grade (grade null)
+  byGrade: { grade: string | null; rank: number | null; headcount: number }[];
   // Pending requisitions by the stage they wait on, in approval order
   pipeline: { stage: EmployeeStage; requisitions: number; headcount: number }[];
   // Declined requisitions by the stage that declined them
@@ -47,11 +42,10 @@ export type EmployeeAnalytics = {
     positionId: string;
     positionTitle: string;
     department: string;
-    grade: string;
+    grade: string | null;
     rank: number | null;
     headcount: number;
     replacementOrNew: string;
-    salaryRange: string;
     // Nairobi calendar date of the final approval (YYYY-MM-DD)
     approvedOn: string;
   }[];
