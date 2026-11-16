@@ -7,16 +7,11 @@ import {
   Hourglass,
   Timer,
   UsersRound,
-  Wallet,
 } from "lucide-react";
 import { analyticsQueryKey, fetchAnalytics } from "@/lib/analytics/api";
 import type { AnalyticsFilters } from "@/lib/analytics/definitions";
 import { EMPLOYEE_STAGE_SHORT_LABELS } from "@/lib/employeeApprovalOrder";
-import {
-  dateFormatter,
-  formatJobGrade,
-  parseSalaryRange,
-} from "@/public/assets";
+import { dateFormatter, formatJobGrade } from "@/public/assets";
 import AnalyticsSkeleton from "@/components/Skeletons/AnalyticsSkeleton";
 import { DetailsLoadError } from "@/components/Dashboard/DetailsLoadError";
 import {
@@ -24,9 +19,7 @@ import {
   ChartCard,
   SERIES,
   StatTile,
-  formatCompact,
   formatCount,
-  formatKes,
   formatMonth,
   percent,
 } from "./AnalyticsPrimitives";
@@ -63,7 +56,7 @@ export default function EmployeeAnalytics({
       className={`space-y-4 transition-opacity ${isPlaceholderData ? "opacity-60" : ""}`}
     >
       {/* Headline figures */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <StatTile
           Icon={UsersRound}
           label="Headcount requested"
@@ -97,20 +90,6 @@ export default function EmployeeAnalytics({
               : totals.avgDaysToDecision.toFixed(1)
           }
           detail="From submission to final approval or decline"
-        />
-        <StatTile
-          Icon={Wallet}
-          label="Approved monthly salaries"
-          value={
-            totals.approvedHeadcount === 0
-              ? "—"
-              : `${formatKes(totals.approvedSalaryMin)} – ${formatCompact(totals.approvedSalaryMax)}`
-          }
-          detail={
-            totals.unpricedApprovedPositions > 0
-              ? `${totals.unpricedApprovedPositions} approved position(s) without a readable range`
-              : "Salary range times headcount, approved positions"
-          }
         />
       </div>
 
@@ -296,7 +275,6 @@ function RecentApproved({
     rank: number | null;
     headcount: number;
     replacementOrNew: string;
-    salaryRange: string;
     approvedOn: string;
   }[];
 }) {
@@ -332,9 +310,6 @@ function RecentApproved({
                 <th scope="col" className="py-2 pr-3 text-right font-medium">
                   Headcount
                 </th>
-                <th scope="col" className="py-2 pr-3 font-medium">
-                  Salary range (KES)
-                </th>
                 <th scope="col" className="py-2 font-medium">
                   Approved
                 </th>
@@ -358,9 +333,6 @@ function RecentApproved({
                   <td className="py-2 pr-3 text-right tabular-nums">
                     {formatCount(position.headcount)}
                   </td>
-                  <td className="py-2 pr-3 tabular-nums">
-                    {formatSalary(position.salaryRange)}
-                  </td>
                   <td className="py-2 whitespace-nowrap">
                     {dateFormatter(position.approvedOn)}
                   </td>
@@ -372,12 +344,4 @@ function RecentApproved({
       )}
     </section>
   );
-}
-
-// "50000 - 100000" -> "50,000 – 100,000"; anything unreadable as stored
-function formatSalary(value: string) {
-  const range = parseSalaryRange(value);
-  return range
-    ? `${formatCount(range.min)} – ${formatCount(range.max)}`
-    : value;
 }

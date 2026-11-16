@@ -166,11 +166,6 @@ function PositionChange({
             next={position.newJobGrade}
           />
           <FieldDiff
-            label="Salary Range (KES)"
-            previous={position.previousSalaryRange}
-            next={position.newSalaryRange}
-          />
-          <FieldDiff
             label="Reporting To"
             previous={position.previousReportingTo}
             next={position.newReportingTo}

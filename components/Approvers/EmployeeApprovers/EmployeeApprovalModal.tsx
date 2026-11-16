@@ -13,7 +13,6 @@ import {
   UserRound,
   Repeat,
   Layers,
-  Wallet,
 } from "lucide-react";
 import {
   dateFormatter,
@@ -52,7 +51,6 @@ export interface EmployeeApprovalPosition {
   replacementOrNew: string;
   jobGrade: string;
   jobGradeRank: number | null;
-  salaryRange: string;
   justification: string;
   reportingTo: string;
   dateFilled: string;
@@ -342,11 +340,6 @@ const EmployeeApprovalModal = ({
                           position.jobGrade,
                           position.jobGradeRank,
                         )}
-                      />
-                      <DetailRow
-                        icon={Wallet}
-                        label="Salary Range (KES)"
-                        value={position.salaryRange}
                       />
                     </div>
 

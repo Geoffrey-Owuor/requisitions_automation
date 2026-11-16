@@ -7,9 +7,7 @@ import { dateFormatter, formatJobGrade } from "@/public/assets";
 import {
   BarList,
   SERIES,
-  formatCompact,
   formatCount,
-  formatKes,
   percent,
 } from "@/components/Analytics/AnalyticsPrimitives";
 
@@ -23,13 +21,17 @@ function Stat({
   label,
   value,
   detail,
+  className = "",
 }: {
   label: string;
   value: string;
   detail: string;
+  className?: string;
 }) {
   return (
-    <div className="rounded-control border border-[rgba(240,180,180,0.4)] bg-white px-3 py-2.5">
+    <div
+      className={`rounded-control border border-[rgba(240,180,180,0.4)] bg-white px-3 py-2.5 ${className}`}
+    >
       <p className="text-[11px] text-[#7c5a5a]">{label}</p>
       <p className="mt-0.5 text-lg font-semibold text-[#1e1b1b]">{value}</p>
       <p className="text-[11px] text-[#a18080]">{detail}</p>
@@ -61,20 +63,12 @@ function OverviewBody({
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
         <Stat
+          className="max-sm:col-span-2"
           label="Headcount approved"
           value={formatCount(totals.approvedHeadcount)}
           detail={plural(totals.approvedRequisitions, "requisition")}
-        />
-        <Stat
-          label="Approved monthly salaries"
-          value={
-            totals.approvedHeadcount === 0
-              ? "—"
-              : `${formatKes(totals.approvedSalaryMin)} – ${formatCompact(totals.approvedSalaryMax)}`
-          }
-          detail="Range times headcount"
         />
         <Stat
           label="Awaiting approval"
@@ -229,11 +223,11 @@ export function DepartmentOverviewSkeleton({
   return (
     <OverviewFrame department={department} from={null} loading>
       <div aria-hidden className="animate-pulse space-y-4">
-        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
-          {Array.from({ length: 4 }, (_, i) => (
+        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+          {Array.from({ length: 3 }, (_, i) => (
             <div
               key={i}
-              className="rounded-control space-y-1.5 border border-[rgba(240,180,180,0.4)] bg-white px-3 py-2.5"
+              className="rounded-control space-y-1.5 first:max-sm:col-span-2 border border-[rgba(240,180,180,0.4)] bg-white px-3 py-2.5"
             >
               <div className="h-3 w-20 rounded-md bg-neutral-100" />
               <div className="h-5 w-12 rounded-md bg-neutral-200" />

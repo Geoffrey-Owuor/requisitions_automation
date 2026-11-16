@@ -17,12 +17,6 @@ export type EmployeeAnalytics = {
     // Calendar days from submission to the final decision (approval or
     // decline), averaged over decided requisitions; null when none are
     avgDaysToDecision: number | null;
-    // Monthly salary range (KES) of the approved headcount: each position's
-    // range times its headcount
-    approvedSalaryMin: number;
-    approvedSalaryMax: number;
-    // Approved positions whose stored range couldn't be read
-    unpricedApprovedPositions: number;
   };
   // One entry per calendar month of the range (YYYY-MM), by submission month
   monthly: {
@@ -51,7 +45,6 @@ export type EmployeeAnalytics = {
     rank: number | null;
     headcount: number;
     replacementOrNew: string;
-    salaryRange: string;
     // Nairobi calendar date of the final approval (YYYY-MM-DD)
     approvedOn: string;
   }[];

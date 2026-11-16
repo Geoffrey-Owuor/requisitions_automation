@@ -22,8 +22,6 @@ export type PositionInput = {
   numberRequired: number;
   replacementOrNew: string;
   jobGrade: string;
-  salaryMin: number;
-  salaryMax: number;
   justification: string;
   reportingTo: string;
   dateFilled: string;
@@ -82,20 +80,6 @@ export function getPositionError(
 
   if (!allowedGrades.includes(position.jobGrade)) {
     return `Position ${index + 1} has an invalid Job Grade selection`;
-  }
-
-  if (
-    !Number.isFinite(Number(position.salaryMin)) ||
-    Number(position.salaryMin) <= 0
-  ) {
-    return `Position ${index + 1}'s minimum salary must be greater than 0`;
-  }
-
-  if (
-    !Number.isFinite(Number(position.salaryMax)) ||
-    Number(position.salaryMax) < Number(position.salaryMin)
-  ) {
-    return `Position ${index + 1}'s maximum salary cannot be less than the minimum salary`;
   }
 
   return null;

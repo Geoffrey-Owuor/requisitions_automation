@@ -184,20 +184,6 @@ export function formatJobGrade(grade: string, rank: number | null): string {
   return rank ? `${grade} (Grade ${rank})` : grade;
 }
 
-export function formatSalaryRange(min: number, max: number): string {
-  return `${min} - ${max}`;
-}
-
-// Inverse of formatSalaryRange. Also reads the older "<min> to <max>" form
-// some early rows were stored in. Returns null for anything unparseable.
-export function parseSalaryRange(
-  value: string,
-): { min: number; max: number } | null {
-  const match = /^\s*(\d+(?:\.\d+)?)\s*(?:-|to)\s*(\d+(?:\.\d+)?)\s*$/.exec(
-    value,
-  );
-  return match ? { min: Number(match[1]), max: Number(match[2]) } : null;
-}
 
 // Employee Requisition position attachments: exactly one file per type is
 // required. Slugs sort alphabetically into the desired display order

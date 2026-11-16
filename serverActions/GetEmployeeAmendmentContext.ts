@@ -7,7 +7,6 @@ import { isUuid } from "@/lib/uuid";
 import { sameEmail } from "@/lib/hodAssignment";
 import {
   EmployeeAttachmentType,
-  parseSalaryRange,
 } from "@/public/assets";
 import {
   employeeAmendmentsQuery,
@@ -76,13 +75,12 @@ export async function getEmployeeAmendmentContext(
       number_required: number;
       position_replacement_or_new: string;
       position_job_grade: string;
-      position_salary_range: string;
       position_justification: string;
       position_reporting_to: string;
       date_filled: string;
     }>(
       `SELECT position_id, position_title, number_required,
-       position_replacement_or_new, position_job_grade, position_salary_range,
+       position_replacement_or_new, position_job_grade,
        position_justification, position_reporting_to,
        TO_CHAR(date_position_filled, 'YYYY-MM-DD') AS date_filled
        FROM employee_requisition_positions WHERE request_id = $1
@@ -107,9 +105,6 @@ export async function getEmployeeAmendmentContext(
     // The form holds the assigned HOD's email (see hodNameLabel)
     hodApprover: header.employee_hod_email,
     positions: positions.map((position) => {
-      // An unparseable legacy salary range is left blank to be re-entered
-      const salary = parseSalaryRange(position.position_salary_range);
-
       return {
         clientId: randomUUID(),
         positionId: position.position_id,
@@ -117,8 +112,6 @@ export async function getEmployeeAmendmentContext(
         numberRequired: position.number_required,
         replacementOrNew: position.position_replacement_or_new,
         jobGrade: position.position_job_grade,
-        salaryMin: salary?.min ?? 0,
-        salaryMax: salary?.max ?? 0,
         justification: position.position_justification,
         reportingTo: position.position_reporting_to,
         dateFilled: position.date_filled,

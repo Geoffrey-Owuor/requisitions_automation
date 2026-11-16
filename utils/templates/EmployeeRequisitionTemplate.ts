@@ -166,7 +166,6 @@ function positionCard(position: EmployeePositionValues, reviewLink?: string) {
         ${modernRow("Date Position Should Be Filled", formattedDate)}
         ${modernRow("Replacement/New", position.replacementornew)}
         ${modernRow("Job Grade", formatJobGrade(position.jobgrade, position.jobgraderank))}
-        ${modernRow("Salary Range (KES)", position.salaryrange)}
         ${modernRow("Justification", position.justification)}
       </table>
       <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #f7f0f0;">
