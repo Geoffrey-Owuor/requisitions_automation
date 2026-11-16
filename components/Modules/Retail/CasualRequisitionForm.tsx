@@ -134,6 +134,8 @@ interface FormSelectProps {
   loading?: boolean;
   onChange: (value: string) => void;
   optionLabel?: (option: string) => string;
+  // Not required: the label says so and the list offers an empty choice
+  optional?: boolean;
 }
 
 // ---- Main Page ----
@@ -891,6 +893,9 @@ function SectionFieldset({
   );
 }
 
+// What an optional FormSelect shows, and offers, for no choice
+const OPTIONAL_EMPTY_LABEL = "Not specified";
+
 // The requisition forms' dropdown: the shared Select in the forms' rose tone,
 // under a visible label
 export function FormSelect({
@@ -900,12 +905,18 @@ export function FormSelect({
   onChange,
   loading,
   optionLabel,
+  optional = false,
 }: FormSelectProps) {
   const id = useId();
   return (
     <div className="flex flex-col gap-2">
       <label htmlFor={id} className="text-[13px] font-medium text-[#7c5a5a]">
-        {label} <span className="text-red-500">*</span>
+        {label}{" "}
+        {optional ? (
+          <span className="font-normal text-[#a18080]">(optional)</span>
+        ) : (
+          <span className="text-red-500">*</span>
+        )}
       </label>
       <Select
         id={id}
@@ -914,10 +925,13 @@ export function FormSelect({
         onChange={onChange}
         busy={loading}
         unlistedLabel={optionLabel ? optionLabel(value) : value}
-        options={options.map((option) => ({
-          value: option,
-          label: optionLabel ? optionLabel(option) : option,
-        }))}
+        options={[
+          ...(optional ? [{ value: "", label: OPTIONAL_EMPTY_LABEL }] : []),
+          ...options.map((option) => ({
+            value: option,
+            label: optionLabel ? optionLabel(option) : option,
+          })),
+        ]}
       />
     </div>
   );

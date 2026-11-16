@@ -177,27 +177,21 @@ export function isCasualAmendableHrStatus(hrStatus: string): boolean {
 export const REPLACEMENT_OR_NEW_OPTIONS = ["Replacement", "New"] as const;
 export type ReplacementOrNew = (typeof REPLACEMENT_OR_NEW_OPTIONS)[number];
 
+// What displays show for a position submitted without a job grade
+export const NO_JOB_GRADE_LABEL = "Not specified";
+
 // "Officer (Grade 2)". Job grades live in job_grades (migration 027); a
 // position stores its grade's rank at submission (position_job_grade_rank),
-// null for a grade that had none - shown without a number then.
-export function formatJobGrade(grade: string, rank: number | null): string {
+// null for a grade that had none - shown without a number then. The grade
+// is optional, so a position may have none.
+export function formatJobGrade(
+  grade: string | null,
+  rank: number | null,
+): string {
+  if (!grade) return NO_JOB_GRADE_LABEL;
   return rank ? `${grade} (Grade ${rank})` : grade;
 }
 
-export function formatSalaryRange(min: number, max: number): string {
-  return `${min} - ${max}`;
-}
-
-// Inverse of formatSalaryRange. Also reads the older "<min> to <max>" form
-// some early rows were stored in. Returns null for anything unparseable.
-export function parseSalaryRange(
-  value: string,
-): { min: number; max: number } | null {
-  const match = /^\s*(\d+(?:\.\d+)?)\s*(?:-|to)\s*(\d+(?:\.\d+)?)\s*$/.exec(
-    value,
-  );
-  return match ? { min: Number(match[1]), max: Number(match[2]) } : null;
-}
 
 // Employee Requisition position attachments: exactly one file per type is
 // required. Slugs sort alphabetically into the desired display order

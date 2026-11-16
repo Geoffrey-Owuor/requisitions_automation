@@ -222,7 +222,9 @@ export const EmployeeDetailsModal = ({
                   </span>
                   <span className="text-[11px] text-neutral-500">
                     {position.replacementornew} &middot;{" "}
-                    {formatJobGrade(position.jobgrade, position.jobgraderank)}
+                    {position.jobgrade
+                      ? formatJobGrade(position.jobgrade, position.jobgraderank)
+                      : "Job grade not specified"}
                   </span>
                 </div>
                 <div className="mt-2 flex flex-wrap gap-4 text-[12px] text-neutral-500">

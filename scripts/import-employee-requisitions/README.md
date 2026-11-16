@@ -32,7 +32,7 @@ node --env-file=.env.local scripts/import-employee-requisitions/index.mjs import
 - One row per position; rows with the same Legacy Ref are one requisition. A requisition's columns (pink and blue headers) come from its first row; later rows leave them blank or repeat them exactly.
 - Legacy Refs are unique, also against earlier imports (case-insensitively).
 - Dates are real Excel dates or `YYYY-MM-DD` text, never ambiguous text like `03/04/2023`. Submission and approval dates may have a time, aren't in the future, and approval dates don't go backwards.
-- Department and Job Grade must exist (inactive ones allowed); the grade's current rank is stored, like a live submission.
+- Department must exist (inactive ones allowed). Job Grade is optional; a grade that is given must exist (inactive ones allowed), and its current rank is stored, like a live submission.
 - Approvals follow the row's Approval Order (`HR before CEO` sets `hr_before_director`). Every stage is decided up to the final approval or the first decline, so pending requisitions are refused: no one would be notified about them. Stages after a decline are blank and stored `pending` (Retail Director `N/A` when the department doesn't use one), the way a live decline leaves them.
 - A decided stage needs a name, email and date; an undecided one has none.
 - Retail Director `N/A` is compared with today's department flag, only as a warning.

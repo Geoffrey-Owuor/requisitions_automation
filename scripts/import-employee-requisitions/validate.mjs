@@ -25,9 +25,6 @@ function isBefore(a, b) {
     : a < b;
 }
 
-// formatSalaryRange in public/assets.ts
-const formatSalaryRange = (min, max) => `${min} - ${max}`;
-
 // Reads and checks the Requisitions sheet of a filled-in template, writing
 // nothing. Returns:
 // - fatal: a message when the sheet can't be read at all
@@ -430,24 +427,12 @@ function readPosition(row, read, grades, error) {
     error(row.rowNumber, "numberRequired", "Must be a whole number, 1 or more");
   }
 
-  const gradeName = read.text("jobGrade", { required: true });
+  // Optional: a blank cell is a position without a grade
+  const gradeName = read.text("jobGrade");
   const grade =
     gradeName === undefined ? undefined : grades.get(gradeName.toLowerCase());
   if (gradeName !== undefined && !grade) {
     error(row.rowNumber, "jobGrade", "Isn't a job grade in the Apps Hub");
-  }
-
-  const salaryMin = read.number("salaryMin");
-  const salaryMax = read.number("salaryMax");
-  if (salaryMin !== undefined && salaryMin <= 0) {
-    error(row.rowNumber, "salaryMin", "Must be greater than 0");
-  }
-  if (
-    salaryMin !== undefined &&
-    salaryMax !== undefined &&
-    salaryMax < salaryMin
-  ) {
-    error(row.rowNumber, "salaryMax", "Can't be less than Salary Min");
   }
 
   return {
@@ -459,10 +444,6 @@ function readPosition(row, read, grades, error) {
     }),
     jobGrade: grade?.name,
     jobGradeRank: grade?.rank,
-    salaryRange:
-      salaryMin !== undefined && salaryMax !== undefined
-        ? formatSalaryRange(salaryMin, salaryMax)
-        : undefined,
     justification: read.text("justification", { required: true }),
     reportingTo: read.text("reportingTo", { required: true, max: 100 }),
     targetFillDate: read.date("targetFillDate", { required: true }),
