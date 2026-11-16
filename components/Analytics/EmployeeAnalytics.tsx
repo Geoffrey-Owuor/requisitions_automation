@@ -174,7 +174,7 @@ export default function EmployeeAnalytics({
           table={{
             columns: ["Job grade", "Headcount"],
             rows: data.byGrade.map((row) => [
-              formatJobGrade(row.grade, row.rank),
+              gradeBarLabel(row.grade, row.rank),
               row.headcount,
             ]),
           }}
@@ -182,7 +182,7 @@ export default function EmployeeAnalytics({
           <BarList
             color={SERIES.approved}
             items={data.byGrade.map((row) => ({
-              label: formatJobGrade(row.grade, row.rank),
+              label: gradeBarLabel(row.grade, row.rank),
               value: row.headcount,
             }))}
           />
@@ -264,6 +264,10 @@ export default function EmployeeAnalytics({
   );
 }
 
+// The grade chart's bar for positions submitted without a job grade
+const gradeBarLabel = (grade: string | null, rank: number | null) =>
+  grade ? formatJobGrade(grade, rank) : "No grade";
+
 function RecentApproved({
   positions,
 }: {
@@ -271,7 +275,7 @@ function RecentApproved({
     positionId: string;
     positionTitle: string;
     department: string;
-    grade: string;
+    grade: string | null;
     rank: number | null;
     headcount: number;
     replacementOrNew: string;

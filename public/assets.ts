@@ -177,10 +177,18 @@ export function isCasualAmendableHrStatus(hrStatus: string): boolean {
 export const REPLACEMENT_OR_NEW_OPTIONS = ["Replacement", "New"] as const;
 export type ReplacementOrNew = (typeof REPLACEMENT_OR_NEW_OPTIONS)[number];
 
+// What displays show for a position submitted without a job grade
+export const NO_JOB_GRADE_LABEL = "Not specified";
+
 // "Officer (Grade 2)". Job grades live in job_grades (migration 027); a
 // position stores its grade's rank at submission (position_job_grade_rank),
-// null for a grade that had none - shown without a number then.
-export function formatJobGrade(grade: string, rank: number | null): string {
+// null for a grade that had none - shown without a number then. The grade
+// is optional, so a position may have none.
+export function formatJobGrade(
+  grade: string | null,
+  rank: number | null,
+): string {
+  if (!grade) return NO_JOB_GRADE_LABEL;
   return rank ? `${grade} (Grade ${rank})` : grade;
 }
 

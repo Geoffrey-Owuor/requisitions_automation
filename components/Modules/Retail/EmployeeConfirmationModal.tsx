@@ -5,6 +5,7 @@ import { EmployeeFormData } from "./EmployeeRequisitionForm";
 import {
   dateFormatter,
   formatJobGrade,
+  NO_JOB_GRADE_LABEL,
   EMPLOYEE_ATTACHMENT_TYPES,
   EMPLOYEE_ATTACHMENT_TYPE_LABELS,
 } from "@/public/assets";
@@ -162,7 +163,7 @@ export default function EmployeeConfirmationModal({
                             (grade) => grade.name === position.jobGrade,
                           )?.rank ?? null,
                         )
-                      : "—"}
+                      : NO_JOB_GRADE_LABEL}
                   </span>
                 </div>
               </div>

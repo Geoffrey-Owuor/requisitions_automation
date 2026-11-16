@@ -20,7 +20,7 @@ export interface EmployeePositionValues {
   positiontitle: string;
   numberrequired: number;
   replacementornew: string;
-  jobgrade: string;
+  jobgrade: string | null;
   jobgraderank: number | null;
   justification: string;
   reportingto: string;

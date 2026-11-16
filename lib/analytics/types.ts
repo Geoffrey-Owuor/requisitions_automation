@@ -31,8 +31,9 @@ export type EmployeeAnalytics = {
   }[];
   // Approved headcount
   replacementOrNew: { kind: string; headcount: number }[];
-  // Approved headcount, highest grade (by rank at submission) last
-  byGrade: { grade: string; rank: number | null; headcount: number }[];
+  // Approved headcount, highest grade (by rank at submission) last, then
+  // positions without a grade (grade null)
+  byGrade: { grade: string | null; rank: number | null; headcount: number }[];
   // Pending requisitions by the stage they wait on, in approval order
   pipeline: { stage: EmployeeStage; requisitions: number; headcount: number }[];
   // Declined requisitions by the stage that declined them
@@ -41,7 +42,7 @@ export type EmployeeAnalytics = {
     positionId: string;
     positionTitle: string;
     department: string;
-    grade: string;
+    grade: string | null;
     rank: number | null;
     headcount: number;
     replacementOrNew: string;

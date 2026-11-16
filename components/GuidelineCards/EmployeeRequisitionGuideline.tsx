@@ -41,7 +41,7 @@ export default function EmployeeRequisitionGuideline() {
             items={[
               "Requesting department and the reporting HOD approver.",
               "One or more positions, each with its own title, number required, and target fill date.",
-              "Whether each position is a Replacement or New, and its Job Grade.",
+              "Whether each position is a Replacement or New, and, optionally, its Job Grade.",
               "Business justification and reporting line for each position.",
             ]}
           />

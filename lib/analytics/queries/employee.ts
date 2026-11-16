@@ -128,7 +128,8 @@ const BY_GRADE_SQL = `${WITH}
          SUM(number_required)::int AS headcount
   FROM pos WHERE outcome = 'approved'
   GROUP BY position_job_grade
-  ORDER BY MIN(position_job_grade_rank) NULLS LAST, position_job_grade`;
+  ORDER BY (position_job_grade IS NULL), MIN(position_job_grade_rank) NULLS LAST,
+           position_job_grade`;
 
 const BY_STAGE_SQL = `${WITH},
   req_headcount AS (
@@ -201,7 +202,7 @@ export async function loadEmployeeAnalytics(
       pending_headcount: number;
     }>(BY_DEPARTMENT_SQL, params),
     query<{ kind: string; headcount: number }>(REPLACEMENT_OR_NEW_SQL, params),
-    query<{ grade: string; rank: number | null; headcount: number }>(
+    query<{ grade: string | null; rank: number | null; headcount: number }>(
       BY_GRADE_SQL,
       params,
     ),
@@ -215,7 +216,7 @@ export async function loadEmployeeAnalytics(
       position_id: string;
       position_title: string;
       department: string;
-      grade: string;
+      grade: string | null;
       rank: number | null;
       headcount: number;
       position_replacement_or_new: string;
