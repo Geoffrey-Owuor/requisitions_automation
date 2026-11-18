@@ -5,6 +5,7 @@ import type {
   AnalyticsType,
 } from "@/lib/analytics/definitions";
 import type {
+  AdvanceAnalytics,
   CasualAnalytics,
   CasualBudget,
   EmployeeAnalytics,
@@ -17,6 +18,7 @@ export type AnalyticsData = {
   casual: CasualAnalytics;
   employee: EmployeeAnalytics;
   it: ItAnalytics;
+  advance: AdvanceAnalytics;
 };
 
 export const analyticsQueryKey = (

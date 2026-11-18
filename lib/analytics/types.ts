@@ -235,3 +235,52 @@ export type ItAnalytics = {
   pipeline: { stage: ItStage; requests: number }[];
   declines: { stage: ItStage; requests: number }[];
 };
+
+// Salary advances. A one-off request's amount is the advance itself, repaid
+// over its installments; a continuous request's amount is a standing monthly
+// deduction with no end date, so the two are never added together. HR's
+// review is the only stage: "approved"/"declined" are its decision, and
+// "pending" is everything HR hasn't reviewed yet.
+export type AdvanceAnalytics = {
+  totals: {
+    requests: number;
+    // Distinct staff numbers, and those with more than one request
+    staff: number;
+    repeatStaff: number;
+    oneoffRequests: number;
+    oneoffAmount: number;
+    continuousRequests: number;
+    continuousAmount: number;
+    approvedRequests: number;
+    approvedOneoffAmount: number;
+    approvedContinuousRequests: number;
+    // Standing monthly deductions of approved continuous requests
+    approvedContinuousAmount: number;
+    pendingRequests: number;
+    pendingOneoffAmount: number;
+    declinedRequests: number;
+    // Average approved one-off advance; null when none are approved
+    avgApprovedOneoff: number | null;
+    // Calendar days from submission to HR's decision, over decided requests
+    // that recorded when (hr_reviewed_at); null when none did
+    avgDaysToReview: number | null;
+  };
+  // One entry per calendar month of the range (YYYY-MM), by submission month
+  monthly: { month: string; requested: number; approved: number }[];
+  // One-off amounts by the month repayment starts (YYYY-MM), approved and
+  // awaiting HR, for requests submitted in the range
+  byRepaymentMonth: {
+    month: string;
+    approvedAmount: number;
+    pendingAmount: number;
+  }[];
+  byDepartment: { department: string; approved: number; pending: number }[];
+  // Approved and pending requests
+  byLocation: { location: string; requests: number }[];
+  // Approved one-off requests by installments chosen, fewest first
+  byInstallments: { installments: number; requests: number }[];
+  // Approved one-off requests by amount band, smallest first
+  byAmountBand: { band: string; requests: number; amount: number }[];
+  // Self-service alterations recorded on requests in the range
+  alterations: { kind: "switch_to_oneoff" | "reduce_installments"; requests: number }[];
+};

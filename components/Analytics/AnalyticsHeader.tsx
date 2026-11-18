@@ -1,7 +1,6 @@
 import Link from "next/link";
 import {
   ANALYTICS,
-  ANALYTICS_PAGE,
   analyticsFiltersQuery,
   analyticsHref,
   getAnalytics,
@@ -25,19 +24,19 @@ export default function AnalyticsHeader({
   allowedTypes: AnalyticsType[];
   filters: AnalyticsFilters;
 }) {
-  const { label, Icon } = getAnalytics(type);
+  const { heading, noun, Icon } = getAnalytics(type);
 
   return (
     <>
       <div className="mx-auto w-full max-w-7xl px-2 pt-4 pb-3">
         <h1 className="flex items-center gap-2 text-lg font-semibold text-[#1e1b1b]">
           <Icon className="h-5 w-5 text-neutral-500" />
-          {label} Requisition {ANALYTICS_PAGE.label}
+          {heading}
         </h1>
         <p className="mt-1 text-sm text-neutral-500">
           {filters.department
-            ? `Figures for ${filters.department}, for requisitions submitted in the chosen range.`
-            : "Company-wide figures for requisitions submitted in the chosen range."}
+            ? `Figures for ${filters.department}, for ${noun} submitted in the chosen range.`
+            : `Company-wide figures for ${noun} submitted in the chosen range.`}
         </p>
       </div>
 
