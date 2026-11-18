@@ -39,6 +39,15 @@ export function useServerPagination<T, TParams>({
   const [itemsPerPage, setItemsPerPageState] = useState(initialPageSize);
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // New filter params start again from the first page (the analytics
+  // Records view changes them; dashboard tables never do)
+  const paramsKey = JSON.stringify(params);
+  const [shownParamsKey, setShownParamsKey] = useState(paramsKey);
+  if (shownParamsKey !== paramsKey) {
+    setShownParamsKey(paramsKey);
+    setCurrentPage(1);
+  }
+
   // Debounce typed search input, but apply clearing immediately so the
   // "clear search" affordance feels instant rather than lagging. Driven from
   // the setter (an event-handler call site) rather than an effect watching
@@ -67,7 +76,10 @@ export function useServerPagination<T, TParams>({
   }, []);
 
   const query = useQuery({
-    queryKey: [...queryKey, { currentPage, itemsPerPage, debouncedSearchTerm, params }],
+    queryKey: [
+      ...queryKey,
+      { currentPage, itemsPerPage, debouncedSearchTerm, params },
+    ],
     queryFn: () =>
       queryFn({
         params,

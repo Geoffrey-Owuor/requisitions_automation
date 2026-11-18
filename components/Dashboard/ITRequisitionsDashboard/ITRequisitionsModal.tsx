@@ -27,7 +27,7 @@ import Link from "next/link";
 
 interface ITRequisitionModalProps {
   isOpen: boolean;
-  dataFlag: "userData" | "hodPending" | "itPending" | "itAll" | "history";
+  dataFlag: "userData" | "hodPending" | "itPending" | "history";
   data: QueryResultRow | null;
   onClose: () => void;
 }
@@ -108,7 +108,6 @@ export function ITRequisitionModal({
     itPending: "it",
     userData: "user", // We have to make sure this is never used as it it not yet available in our data
     history: "user", // Read-only — approvals happen from the pending tables
-    itAll: "it",
   };
 
   const stage = STAGE_LEVELS[dataFlag];

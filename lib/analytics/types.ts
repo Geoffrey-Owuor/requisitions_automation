@@ -282,5 +282,8 @@ export type AdvanceAnalytics = {
   // Approved one-off requests by amount band, smallest first
   byAmountBand: { band: string; requests: number; amount: number }[];
   // Self-service alterations recorded on requests in the range
-  alterations: { kind: "switch_to_oneoff" | "reduce_installments"; requests: number }[];
+  alterations: {
+    kind: "switch_to_oneoff" | "reduce_installments";
+    requests: number;
+  }[];
 };

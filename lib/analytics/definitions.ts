@@ -24,12 +24,7 @@ export const ANALYTICS_PAGE = {
 };
 
 // Listed in the nav's order
-export type AnalyticsType =
-  | "travel"
-  | "casual"
-  | "employee"
-  | "it"
-  | "advance";
+export type AnalyticsType = "travel" | "casual" | "employee" | "it" | "advance";
 
 export type AnalyticsDefinition = {
   type: AnalyticsType;
