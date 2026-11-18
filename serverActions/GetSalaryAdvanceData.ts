@@ -1,7 +1,11 @@
 "use server";
 import { query } from "@/lib/db";
 import { getHrAdvanceSession } from "@/lib/salaryAdvanceAccess";
-import { alterationsJsonLateral } from "@/lib/salaryAdvanceRules";
+import {
+  ADVANCE_SEARCHABLE_COLUMNS,
+  ADVANCE_TABLE_COLUMNS,
+  ADVANCE_TABLE_FROM,
+} from "@/lib/salaryAdvanceTable";
 import {
   PaginatedResult,
   emptyPaginatedResult,
@@ -54,24 +58,15 @@ export interface GetSalaryAdvanceDataProps {
   alteredFilter?: AlteredFilter;
 }
 
-// Columns matched against when a search term is supplied — mirrors what's
-// visible in the table UI (employee, department, type, status).
-const SEARCHABLE_COLUMNS = [
-  "sa.staff_name",
-  "sa.staff_number",
-  "sa.staff_department",
-  "sa.request_type",
-  "sa.approval_status",
-  "sa.staff_phone_number",
-];
-
 export async function GetSalaryAdvanceData({
   page = 1,
   pageSize = 6,
   searchTerm,
   exportedFilter = "all",
   alteredFilter = "all",
-}: GetSalaryAdvanceDataProps = {}): Promise<PaginatedResult<SalaryAdvanceData>> {
+}: GetSalaryAdvanceDataProps = {}): Promise<
+  PaginatedResult<SalaryAdvanceData>
+> {
   const user = await getHrAdvanceSession();
   if (!user) return emptyPaginatedResult(page, pageSize);
 
@@ -79,7 +74,7 @@ export async function GetSalaryAdvanceData({
   const conditions: string[] = [];
 
   if (searchTerm?.trim()) {
-    const searchClause = SEARCHABLE_COLUMNS.map(
+    const searchClause = ADVANCE_SEARCHABLE_COLUMNS.map(
       (col) => `${col}::text ILIKE $${baseParams.length + 1}`,
     ).join(" OR ");
     baseParams.push(`%${searchTerm.trim()}%`);
@@ -88,8 +83,10 @@ export async function GetSalaryAdvanceData({
 
   if (exportedFilter === "exported") conditions.push("sa.exported = true");
   if (exportedFilter === "not_exported") conditions.push("sa.exported = false");
-  if (alteredFilter === "altered") conditions.push("alt.alterations IS NOT NULL");
-  if (alteredFilter === "not_altered") conditions.push("alt.alterations IS NULL");
+  if (alteredFilter === "altered")
+    conditions.push("alt.alterations IS NOT NULL");
+  if (alteredFilter === "not_altered")
+    conditions.push("alt.alterations IS NULL");
 
   const whereClause = conditions.length
     ? `WHERE ${conditions.join(" AND ")}`
@@ -98,15 +95,9 @@ export async function GetSalaryAdvanceData({
   const { limit, offset } = toSafeOffsetLimit({ page, pageSize });
 
   const baseQuery = `
-    SELECT
-    sa.request_id, sa.request_created_at, sa.staff_number, sa.staff_name, sa.staff_email, sa.staff_department,
-    sa.staff_location, sa.staff_phone_number, sa.request_amount, sa.no_of_installments, sa.repayment_start_date,
-    sa.request_type, sa.approval_status, sa.approver_comments, sa.exported,
-    (alt.alterations IS NOT NULL) AS altered,
-    COALESCE(alt.alterations, '[]'::json) AS alterations,
+    SELECT ${ADVANCE_TABLE_COLUMNS},
     COUNT(*) OVER() AS total_count
-    FROM salary_advances sa
-    ${alterationsJsonLateral("sa")}
+    FROM ${ADVANCE_TABLE_FROM}
     ${whereClause}
     ORDER BY sa.request_created_at DESC
     LIMIT $${baseParams.length + 1} OFFSET $${baseParams.length + 2}

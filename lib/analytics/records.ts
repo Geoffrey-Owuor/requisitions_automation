@@ -123,6 +123,36 @@ export const ANALYTICS_RECORD_FILTERS: Partial<
       ],
     },
   ],
+  advance: [
+    recordStatusFilter([{ key: "hr", label: "HR" }], "Approved by HR"),
+    {
+      key: "type",
+      label: "Repayment",
+      allLabel: "One-off and continuous",
+      options: [
+        { value: "oneoff", label: "One-off" },
+        { value: "continuous", label: "Continuous" },
+      ],
+    },
+    {
+      key: "exported",
+      label: "Export",
+      allLabel: "Exported or not",
+      options: [
+        { value: "yes", label: "In an HR/Finance export" },
+        { value: "no", label: "Not exported yet" },
+      ],
+    },
+    {
+      key: "altered",
+      label: "Alterations",
+      allLabel: "Altered or not",
+      options: [
+        { value: "yes", label: "Altered after export" },
+        { value: "no", label: "Never altered" },
+      ],
+    },
+  ],
   it: [
     {
       key: "status",
