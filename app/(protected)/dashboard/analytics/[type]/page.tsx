@@ -3,6 +3,12 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/session";
 import { getUserRoles } from "@/serverActions/GetUserRoles";
 import { loadAllDepartmentNames } from "@/lib/departments";
+import { loadAdvanceDepartmentNames } from "@/lib/analytics/queries/advance";
+import {
+  hasAnalyticsRecords,
+  parseRecordFilters,
+  type AnalyticsView,
+} from "@/lib/analytics/records";
 import {
   ANALYTICS_PAGE,
   defaultAnalyticsRange,
@@ -71,8 +77,22 @@ const page = async ({
   const filters = getAnalyticsFiltersError(requested)
     ? { ...defaultAnalyticsRange(today), department: "" }
     : requested;
+  // The Records view, and its own filters, for dashboards that have one
+  const view: AnalyticsView =
+    single(query.view) === "records" && hasAnalyticsRecords(type)
+      ? "records"
+      : "charts";
+  const recordFilters =
+    view === "records"
+      ? parseRecordFilters(type, (key) => single(query[key]))
+      : {};
 
-  const departments = await loadAllDepartmentNames();
+  // Salary advances carry the department from the HR import, which needn't
+  // match base_departments, so that filter offers the names on requests
+  const departments =
+    type === "advance"
+      ? await loadAdvanceDepartmentNames()
+      : await loadAllDepartmentNames();
 
   return (
     <RequisitionPagesWrapper
@@ -81,12 +101,16 @@ const page = async ({
           type={type}
           allowedTypes={allowed.map((entry) => entry.type)}
           filters={filters}
+          view={view}
+          recordFilters={recordFilters}
         />
       }
     >
       <AnalyticsPage
         type={type}
         filters={filters}
+        view={view}
+        recordFilters={recordFilters}
         departments={departments}
         today={today}
       />

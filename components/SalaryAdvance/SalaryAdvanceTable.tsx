@@ -25,6 +25,20 @@ import { SalaryAdvanceExportModal } from "./SalaryAdvanceExportModal";
 import { Checkbox } from "./Checkbox";
 import { useServerPagination } from "@/hooks/useServerPagination";
 
+// A request's columns and cells after the selection checkbox, shared with
+// the analytics Records view (components/Analytics/records/)
+export const ADVANCE_COLUMNS = [
+  { key: "employee", label: "Employee" },
+  { key: "department", label: "Department" },
+  { key: "amount", label: "Amount" },
+  { key: "installments", label: "Installments" },
+  { key: "type", label: "Type" },
+  { key: "exported", label: "Exported" },
+  { key: "altered", label: "Altered" },
+  { key: "date", label: "Date Submitted" },
+  { key: "status", label: "Status" },
+];
+
 const EXPORTED_FILTER_OPTIONS: { value: ExportedFilter; label: string }[] = [
   { value: "all", label: "All" },
   { value: "not_exported", label: "Not exported" },
@@ -263,17 +277,7 @@ export default function SalaryAdvanceTable() {
                       onChange={togglePageSelection}
                     />
                   </th>
-                  {[
-                    "Employee",
-                    "Department",
-                    "Amount",
-                    "Installments",
-                    "Type",
-                    "Exported",
-                    "Altered",
-                    "Date Submitted",
-                    "Status",
-                  ].map((col) => (
+                  {ADVANCE_COLUMNS.map(({ label: col }) => (
                     <th
                       key={col}
                       className="px-6 py-4 text-[11px] font-bold tracking-widest text-neutral-500 uppercase"
@@ -319,92 +323,7 @@ export default function SalaryAdvanceTable() {
                           )}
                         </td>
 
-                        {/* Employee */}
-                        <td className="px-6 py-5">
-                          <div className="flex flex-col">
-                            <span className="text-sm font-medium text-[#1e1b1b]">
-                              {req.staff_name}
-                            </span>
-                            <span className="text-[11px] text-gray-400">
-                              #{req.staff_number}
-                            </span>
-                          </div>
-                        </td>
-
-                        {/* Department */}
-                        <td className="px-6 py-5">
-                          <span className="text-sm text-[#1e1b1b]">
-                            {req.staff_department}
-                          </span>
-                        </td>
-
-                        {/* Amount */}
-                        <td className="px-6 py-5">
-                          <span className="text-sm font-semibold text-[#1e1b1b]">
-                            {Number(req.request_amount).toLocaleString()}
-                          </span>
-                        </td>
-
-                        {/* Installments */}
-                        <td className="px-6 py-5">
-                          <span className="text-sm text-[#1e1b1b]">
-                            {req.no_of_installments}
-                          </span>
-                        </td>
-
-                        {/* Type */}
-                        <td className="px-6 py-5">
-                          <span
-                            className={`inline-flex items-center rounded-full ${req.request_type === "oneoff" ? "bg-slate-100 text-slate-700" : "bg-cyan-100 text-cyan-700"} px-2.5 py-0.5 text-[11px] font-semibold capitalize`}
-                          >
-                            {req.request_type}
-                          </span>
-                        </td>
-
-                        {/* Exported */}
-                        <td className="px-6 py-5">
-                          <FlagBadge
-                            value={req.exported}
-                            trueLabel="Exported"
-                            falseLabel="Pending"
-                          />
-                        </td>
-
-                        {/* Altered */}
-                        <td className="px-6 py-5">
-                          <FlagBadge
-                            value={req.altered}
-                            trueLabel="Altered"
-                            falseLabel="—"
-                            tone="violet"
-                          />
-                        </td>
-
-                        {/* Requisition Date */}
-                        <td className="px-6 py-5">
-                          <span className="text-sm text-[#a18080]">
-                            {new Date(
-                              req.request_created_at,
-                            ).toLocaleDateString()}
-                          </span>
-                        </td>
-
-                        {/* Status */}
-                        <td className="px-6 py-5">
-                          <div className="flex items-center justify-between gap-4">
-                            <StatusFormatter status={req.approval_status} />
-                            <Info
-                              size={14}
-                              className={`${
-                                req.approval_status === "approved"
-                                  ? "text-emerald-200 group-hover:text-emerald-400"
-                                  : req.approval_status === "declined"
-                                    ? "text-red-200 group-hover:text-red-400"
-                                    : "text-amber-200 group-hover:text-amber-400"
-                              } transition-colors`}
-                            />
-                          </div>
-                        </td>
+                        <SalaryAdvanceRowCells req={req} />
                       </tr>
                     );
                   })
@@ -483,5 +402,90 @@ export default function SalaryAdvanceTable() {
         />
       </div>
     </div>
+  );
+}
+
+export function SalaryAdvanceRowCells({ req }: { req: SalaryAdvanceData }) {
+  return (
+    <>
+      {/* Employee */}
+      <td className="px-6 py-5">
+        <div className="flex flex-col">
+          <span className="text-sm font-medium text-[#1e1b1b]">
+            {req.staff_name}
+          </span>
+          <span className="text-[11px] text-gray-400">#{req.staff_number}</span>
+        </div>
+      </td>
+
+      {/* Department */}
+      <td className="px-6 py-5">
+        <span className="text-sm text-[#1e1b1b]">{req.staff_department}</span>
+      </td>
+
+      {/* Amount */}
+      <td className="px-6 py-5">
+        <span className="text-sm font-semibold text-[#1e1b1b]">
+          {Number(req.request_amount).toLocaleString()}
+        </span>
+      </td>
+
+      {/* Installments */}
+      <td className="px-6 py-5">
+        <span className="text-sm text-[#1e1b1b]">{req.no_of_installments}</span>
+      </td>
+
+      {/* Type */}
+      <td className="px-6 py-5">
+        <span
+          className={`inline-flex items-center rounded-full ${req.request_type === "oneoff" ? "bg-slate-100 text-slate-700" : "bg-cyan-100 text-cyan-700"} px-2.5 py-0.5 text-[11px] font-semibold capitalize`}
+        >
+          {req.request_type}
+        </span>
+      </td>
+
+      {/* Exported */}
+      <td className="px-6 py-5">
+        <FlagBadge
+          value={req.exported}
+          trueLabel="Exported"
+          falseLabel="Pending"
+        />
+      </td>
+
+      {/* Altered */}
+      <td className="px-6 py-5">
+        <FlagBadge
+          value={req.altered}
+          trueLabel="Altered"
+          falseLabel="—"
+          tone="violet"
+        />
+      </td>
+
+      {/* Requisition Date */}
+      <td className="px-6 py-5">
+        <span className="text-sm text-[#a18080]">
+          {new Date(req.request_created_at).toLocaleDateString()}
+        </span>
+      </td>
+
+      {/* Status */}
+      <td className="px-6 py-5">
+        <div className="flex items-center justify-between gap-4">
+          <StatusFormatter status={req.approval_status} />
+          <Info
+            size={14}
+            className={`${
+              req.approval_status === "approved"
+                ? "text-emerald-200 group-hover:text-emerald-400"
+                : req.approval_status === "declined"
+                  ? "text-red-200 group-hover:text-red-400"
+                  : "text-amber-200 group-hover:text-amber-400"
+            } transition-colors`}
+          />
+        </div>
+      </td>
+    </>
   );
 }

@@ -28,7 +28,8 @@ export interface TravelRequisitionDataProps {
 
 // Columns matched against when a search term is supplied — mirrors what's
 // visible in the table UI (employee, destination, mode, statuses, etc).
-const SEARCHABLE_COLUMNS = [
+// Also used by the analytics Records view (lib/analytics/records/travel.ts).
+export const TRAVEL_SEARCHABLE_COLUMNS = [
   "employee_name",
   "travel_destination",
   "travel_mode",
@@ -36,6 +37,19 @@ const SEARCHABLE_COLUMNS = [
   "travel_hr_approval_status",
   "travel_director_approval_status",
 ];
+
+// What a table row (and its details modal) needs; shared with the
+// analytics Records view
+export const TRAVEL_TABLE_COLUMNS = `request_id, request_created_at,
+        employee_name, travel_destination, travel_departure_date,
+        travel_return_date, travel_business_justification,
+        travel_mode, travel_total_cost,
+        travel_cost_center,
+        travel_hod_approval_status, travel_hr_approval_status, travel_director_approval_status,
+        travel_approval_tier, travel_hr_pushback_count,
+        amendment_count, last_amended_at,
+        -- Departure-date window shared by HR push-back and amendments
+        ${PUSHBACK_WINDOW_SQL} AS within_pushback_window`;
 
 export const getTravelRequisitionData = async ({
   dataFlag,
@@ -116,7 +130,7 @@ export const getTravelRequisitionData = async ({
   }
 
   if (searchTerm?.trim()) {
-    const searchClause = SEARCHABLE_COLUMNS.map(
+    const searchClause = TRAVEL_SEARCHABLE_COLUMNS.map(
       (col) => `${col}::text ILIKE $${baseParams.length + 1}`,
     ).join(" OR ");
     conditions.push(`(${searchClause})`);
@@ -129,17 +143,7 @@ export const getTravelRequisitionData = async ({
   const { limit, offset } = toSafeOffsetLimit({ page, pageSize });
 
   const baseQuery = `
-    SELECT
-        request_id, request_created_at,
-        employee_name, travel_destination, travel_departure_date,
-        travel_return_date, travel_business_justification,
-        travel_mode, travel_total_cost,
-        travel_cost_center,
-        travel_hod_approval_status, travel_hr_approval_status, travel_director_approval_status,
-        travel_approval_tier, travel_hr_pushback_count,
-        amendment_count, last_amended_at,
-        -- Departure-date window shared by HR push-back and amendments
-        ${PUSHBACK_WINDOW_SQL} AS within_pushback_window,
+    SELECT ${TRAVEL_TABLE_COLUMNS},
         COUNT(*) OVER() AS total_count
         FROM travel_requisitions
         ${whereClause}

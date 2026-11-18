@@ -3,6 +3,7 @@ import type {
   AnalyticsFilters,
   AnalyticsType,
 } from "@/lib/analytics/definitions";
+import { loadAdvanceAnalytics } from "@/lib/analytics/queries/advance";
 import { loadCasualAnalytics } from "@/lib/analytics/queries/casual";
 import { loadEmployeeAnalytics } from "@/lib/analytics/queries/employee";
 import { loadItAnalytics } from "@/lib/analytics/queries/it";
@@ -17,4 +18,5 @@ export const ANALYTICS_LOADERS: Record<
   casual: loadCasualAnalytics,
   employee: loadEmployeeAnalytics,
   it: loadItAnalytics,
+  advance: loadAdvanceAnalytics,
 };

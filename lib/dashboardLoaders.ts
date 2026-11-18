@@ -37,7 +37,7 @@ const LOADERS: Record<DashboardRequisitionType, Loader> = {
     getTravelRequisitionData,
   ),
   it: loader(
-    ["userData", "hodPending", "itPending", "itAll", "history"],
+    ["userData", "hodPending", "itPending", "history"],
     getITRequisitionData,
   ),
   access: loader(

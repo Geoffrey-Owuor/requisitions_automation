@@ -29,7 +29,9 @@ export interface EmployeeRequisitionDataProps {
 // Membership check for the array-gated stages — Retail Director/Director/HR
 // have no "assigned to me" column, so every member of the stage's array
 // table sees the same rows once the prior stage has approved.
-const MEMBERSHIP_QUERIES: Partial<Record<EmployeeRequisitionDataProps["dataFlag"], string>> = {
+const MEMBERSHIP_QUERIES: Partial<
+  Record<EmployeeRequisitionDataProps["dataFlag"], string>
+> = {
   retailDirectorPending:
     "SELECT 1 FROM retail_director_array WHERE retail_director_email = $1 LIMIT 1",
   directorPending:
@@ -38,7 +40,8 @@ const MEMBERSHIP_QUERIES: Partial<Record<EmployeeRequisitionDataProps["dataFlag"
     "SELECT 1 FROM hr_array WHERE hr_email = $1 AND 'employee' = ANY(hr_forms) LIMIT 1",
 };
 
-const SEARCHABLE_COLUMNS = [
+// Also used by the analytics Records view (lib/analytics/records/employee.ts).
+export const EMPLOYEE_SEARCHABLE_COLUMNS = [
   "e.employee_department",
   "e.submitter_name",
   "e.employee_hod_approval_status",
@@ -46,6 +49,30 @@ const SEARCHABLE_COLUMNS = [
   "e.employee_director_approval_status",
   "e.employee_hr_approval_status",
 ];
+
+// What a table row (and its details modal) needs, as `e` with its positions
+// rolled up as `agg`; shared with the analytics Records view
+export const EMPLOYEE_TABLE_COLUMNS = `e.request_id, e.request_created_at, e.submitter_email, e.submitter_name,
+        e.employee_department,
+        e.employee_hod_approval_status, e.employee_hod_approver,
+        e.employee_retail_director_approval_status, e.employee_retail_director_approver,
+        e.employee_director_approval_status, e.employee_director_approver,
+        e.employee_hr_approval_status, e.employee_hr_approver,
+        e.hr_before_director, e.amendment_count, e.last_amended_at,
+        e.imported_at IS NOT NULL AS imported, e.legacy_reference,
+        agg.total_positions, agg.total_headcount`;
+
+export const EMPLOYEE_TABLE_FROM = `employee_requisitions e
+        LEFT JOIN LATERAL (
+          SELECT COUNT(*) AS total_positions, SUM(number_required) AS total_headcount
+          FROM employee_requisition_positions p WHERE p.request_id = e.request_id
+        ) agg ON TRUE`;
+
+// A position of `e` whose title matches the search pattern parameter
+export const employeePositionSearchSql = (param: string) => `EXISTS (
+        SELECT 1 FROM employee_requisition_positions p
+        WHERE p.request_id = e.request_id AND p.position_title ILIKE ${param}
+      )`;
 
 export const getEmployeeRequisitionData = async ({
   dataFlag,
@@ -141,14 +168,11 @@ export const getEmployeeRequisitionData = async ({
 
   if (searchTerm?.trim()) {
     const term = `%${searchTerm.trim()}%`;
-    const searchClause = SEARCHABLE_COLUMNS.map(
+    const searchClause = EMPLOYEE_SEARCHABLE_COLUMNS.map(
       (col) => `${col}::text ILIKE $${baseParams.length + 1}`,
     ).join(" OR ");
     conditions.push(
-      `(${searchClause} OR EXISTS (
-        SELECT 1 FROM employee_requisition_positions p
-        WHERE p.request_id = e.request_id AND p.position_title ILIKE $${baseParams.length + 1}
-      ))`,
+      `(${searchClause} OR ${employeePositionSearchSql(`$${baseParams.length + 1}`)})`,
     );
     baseParams.push(term);
   }
@@ -162,22 +186,9 @@ export const getEmployeeRequisitionData = async ({
   // lateral aggregate so COUNT(*) OVER() pagination reflects requisitions,
   // not positions.
   const baseQuery = `
-    SELECT
-        e.request_id, e.request_created_at, e.submitter_email, e.submitter_name,
-        e.employee_department,
-        e.employee_hod_approval_status, e.employee_hod_approver,
-        e.employee_retail_director_approval_status, e.employee_retail_director_approver,
-        e.employee_director_approval_status, e.employee_director_approver,
-        e.employee_hr_approval_status, e.employee_hr_approver,
-        e.hr_before_director, e.amendment_count, e.last_amended_at,
-        e.imported_at IS NOT NULL AS imported, e.legacy_reference,
-        agg.total_positions, agg.total_headcount,
+    SELECT ${EMPLOYEE_TABLE_COLUMNS},
         COUNT(*) OVER() AS total_count
-        FROM employee_requisitions e
-        LEFT JOIN LATERAL (
-          SELECT COUNT(*) AS total_positions, SUM(number_required) AS total_headcount
-          FROM employee_requisition_positions p WHERE p.request_id = e.request_id
-        ) agg ON TRUE
+        FROM ${EMPLOYEE_TABLE_FROM}
         ${whereClause}
         ORDER BY e.request_created_at DESC
         LIMIT $${baseParams.length + 1} OFFSET $${baseParams.length + 2}

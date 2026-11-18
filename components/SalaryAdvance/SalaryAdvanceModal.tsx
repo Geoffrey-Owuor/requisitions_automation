@@ -27,7 +27,10 @@ interface SalaryAdvanceModalProps {
   isOpen: boolean;
   data: SalaryAdvanceData | null;
   onClose: () => void;
-  onSuccess: () => void; // Trigger refetch on the table
+  // Trigger refetch on the table; not needed when read-only
+  onSuccess?: () => void;
+  // The analytics Records view: no HR review, whatever the status
+  readOnly?: boolean;
 }
 
 function SectionHeader({
@@ -67,6 +70,7 @@ export function SalaryAdvanceModal({
   data,
   onClose,
   onSuccess,
+  readOnly = false,
 }: SalaryAdvanceModalProps) {
   const queryClient = useQueryClient();
 
@@ -91,7 +95,7 @@ export function SalaryAdvanceModal({
 
       // Invalidate card data
       queryClient.invalidateQueries({ queryKey: ["SalaryAdvancesCounts"] });
-      onSuccess(); // refetch table data
+      onSuccess?.(); // refetch table data
       onClose(); // close modal
     } else {
       triggerAlert("error", result.message);
@@ -99,6 +103,8 @@ export function SalaryAdvanceModal({
   };
 
   const isPending = data.approval_status?.toLowerCase() === "pending";
+  // Only HR reviews, from the HR dashboard; ReviewSalaryAdvance re-checks
+  const canReview = isPending && !readOnly;
 
   // No closing while a review is being saved
   const handleClose = () => {
@@ -225,7 +231,7 @@ export function SalaryAdvanceModal({
             <StatusFormatter status={data.approval_status} />
           </div>
 
-          {isPending ? (
+          {canReview ? (
             <div className="space-y-4 border-t border-gray-100 pt-4">
               <div>
                 <label className="mb-1 block text-[11px] font-bold tracking-widest text-gray-400 uppercase">
@@ -271,7 +277,11 @@ export function SalaryAdvanceModal({
             <div className="border-t border-gray-100 pt-4">
               <Field
                 label="Comments"
-                value={data.approver_comments || "No comments provided"}
+                value={
+                  isPending
+                    ? "Awaiting HR review"
+                    : data.approver_comments || "No comments provided"
+                }
               />
             </div>
           )}
