@@ -4,6 +4,7 @@ import type { ComponentType, ReactNode } from "react";
 import type { QueryResultRow } from "pg";
 import {
   BriefcaseBusiness,
+  CircleDollarSign,
   HardHat,
   Monitor,
   UserRoundPlus,
@@ -45,6 +46,12 @@ import {
   ITRequisitionRow,
 } from "@/components/Dashboard/ITRequisitionsDashboard/ITRequisitionsTable";
 import { ITRequisitionModal } from "@/components/Dashboard/ITRequisitionsDashboard/ITRequisitionsModal";
+import {
+  ADVANCE_COLUMNS,
+  SalaryAdvanceRowCells,
+} from "@/components/SalaryAdvance/SalaryAdvanceTable";
+import { SalaryAdvanceModal } from "@/components/SalaryAdvance/SalaryAdvanceModal";
+import type { SalaryAdvanceData } from "@/serverActions/GetSalaryAdvanceData";
 
 type ModalRenderer = (
   data: QueryResultRow | null,
@@ -60,6 +67,7 @@ const RECORD_TABLES: Partial<
     AnalyticsType,
     {
       title: string;
+      // Plural, for the empty state
       noun: string;
       Icon: LucideIcon;
       theme: RequisitionTableTheme;
@@ -72,7 +80,7 @@ const RECORD_TABLES: Partial<
 > = {
   travel: {
     title: "Travel Requisitions",
-    noun: "travel",
+    noun: "travel requisitions",
     Icon: BriefcaseBusiness,
     theme: ROSE_THEME,
     searchPlaceholder: "Search employee, destination, mode or status...",
@@ -89,7 +97,7 @@ const RECORD_TABLES: Partial<
   },
   casual: {
     title: "Casual Requisitions",
-    noun: "casual",
+    noun: "casual requisitions",
     Icon: HardHat,
     theme: EMERALD_THEME,
     searchPlaceholder: "Search location, department, section or status...",
@@ -106,7 +114,7 @@ const RECORD_TABLES: Partial<
   },
   employee: {
     title: "Employee Requisitions",
-    noun: "employee",
+    noun: "employee requisitions",
     Icon: UserRoundPlus,
     theme: VIOLET_THEME,
     searchPlaceholder: "Search department, submitter, position or status...",
@@ -123,7 +131,7 @@ const RECORD_TABLES: Partial<
   },
   it: {
     title: "IT Requisitions",
-    noun: "IT",
+    noun: "IT requisitions",
     Icon: Monitor,
     theme: NEUTRAL_THEME,
     searchPlaceholder: "Search employee, department or status...",
@@ -135,6 +143,24 @@ const RECORD_TABLES: Partial<
         data={data}
         dataFlag="history"
         onClose={onClose}
+      />
+    ),
+  },
+  advance: {
+    title: "Salary Advance Requests",
+    noun: "salary advance requests",
+    Icon: CircleDollarSign,
+    theme: ROSE_THEME,
+    searchPlaceholder: "Search staff, department, type or status...",
+    columns: ADVANCE_COLUMNS,
+    // The records route returns the HR table's row shape
+    Row: ({ req }) => <SalaryAdvanceRowCells req={req as SalaryAdvanceData} />,
+    renderModal: (data, isOpen, onClose) => (
+      <SalaryAdvanceModal
+        isOpen={isOpen}
+        data={data as SalaryAdvanceData | null}
+        onClose={onClose}
+        readOnly
       />
     ),
   },
@@ -168,8 +194,8 @@ export default function RecordsTable({
       }
       emptyState={{
         Icon: config.Icon,
-        heading: "No matching requisitions",
-        body: `No ${config.noun} requisitions were submitted in this range with these filters.`,
+        heading: "Nothing matches these filters",
+        body: `No ${config.noun} were submitted in this range with these filters.`,
       }}
       renderRow={(req) => <Row req={req} />}
       renderModal={config.renderModal}

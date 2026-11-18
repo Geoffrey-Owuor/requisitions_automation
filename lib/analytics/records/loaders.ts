@@ -3,6 +3,7 @@ import type { QueryResultRow } from "pg";
 import type { PaginatedResult } from "@/lib/pagination";
 import type { AnalyticsType } from "@/lib/analytics/definitions";
 import type { RecordsArgs } from "./shared";
+import { loadAdvanceRecords } from "./advance";
 import { loadCasualRecords } from "./casual";
 import { loadEmployeeRecords } from "./employee";
 import { loadItRecords } from "./it";
@@ -20,4 +21,5 @@ export const ANALYTICS_RECORD_LOADERS: Partial<
   casual: loadCasualRecords,
   employee: loadEmployeeRecords,
   it: loadItRecords,
+  advance: loadAdvanceRecords,
 };
