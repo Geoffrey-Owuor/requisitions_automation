@@ -123,8 +123,7 @@ interface RequisitionTableProps<TParams> {
   columns: Column[];
   renderRow: (row: QueryResultRow) => ReactNode;
   emptyState: EmptyStateConfig;
-  // Extra toolbar control shown next to Search/Refresh, e.g. ITDataExport
-  // for the itAll table.
+  // Extra toolbar control shown next to Search/Refresh
   toolbarSlot?: ReactNode;
   queryKey: unknown[];
   params: TParams;

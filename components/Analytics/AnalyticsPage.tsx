@@ -12,7 +12,13 @@ import {
   type AnalyticsFilters,
   type AnalyticsType,
 } from "@/lib/analytics/definitions";
+import {
+  analyticsPageQuery,
+  type AnalyticsView,
+  type RecordFilters,
+} from "@/lib/analytics/records";
 import AdvanceAnalytics from "./AdvanceAnalytics";
+import AnalyticsRecords from "./AnalyticsRecords";
 import CasualAnalytics from "./CasualAnalytics";
 import EmployeeAnalytics from "./EmployeeAnalytics";
 import ItAnalytics from "./ItAnalytics";
@@ -54,12 +60,16 @@ const fieldLabel =
 export default function AnalyticsPage({
   type,
   filters,
+  view,
+  recordFilters,
   departments,
   today,
 }: {
   type: AnalyticsType;
   // Already validated by the page
   filters: AnalyticsFilters;
+  view: AnalyticsView;
+  recordFilters: RecordFilters;
   departments: string[];
   // YYYY-MM-DD in Nairobi time
   today: string;
@@ -81,7 +91,10 @@ export default function AnalyticsPage({
   const applyFilters = (next: AnalyticsFilters) => {
     setDraft(next);
     if (!getAnalyticsFiltersError(next)) {
-      router.replace(`${pathname}?${filtersQuery(next)}`, { scroll: false });
+      router.replace(
+        `${pathname}?${analyticsPageQuery(next, view, recordFilters)}`,
+        { scroll: false },
+      );
     }
   };
 
@@ -173,11 +186,29 @@ export default function AnalyticsPage({
         )}
       </section>
 
-      {type === "travel" && <TravelAnalytics filters={filters} />}
-      {type === "casual" && <CasualAnalytics filters={filters} today={today} />}
-      {type === "employee" && <EmployeeAnalytics filters={filters} />}
-      {type === "it" && <ItAnalytics filters={filters} />}
-      {type === "advance" && <AdvanceAnalytics filters={filters} />}
+      {view === "records" ? (
+        <AnalyticsRecords
+          type={type}
+          filters={filters}
+          recordFilters={recordFilters}
+          onRecordFiltersChange={(next) =>
+            router.replace(
+              `${pathname}?${analyticsPageQuery(filters, "records", next)}`,
+              { scroll: false },
+            )
+          }
+        />
+      ) : (
+        <>
+          {type === "travel" && <TravelAnalytics filters={filters} />}
+          {type === "casual" && (
+            <CasualAnalytics filters={filters} today={today} />
+          )}
+          {type === "employee" && <EmployeeAnalytics filters={filters} />}
+          {type === "it" && <ItAnalytics filters={filters} />}
+          {type === "advance" && <AdvanceAnalytics filters={filters} />}
+        </>
+      )}
     </div>
   );
 }

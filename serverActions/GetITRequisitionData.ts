@@ -14,7 +14,7 @@ import {
 import { QueryResultRow } from "pg";
 
 export interface ITRequisitionDataProps {
-  dataFlag: "userData" | "hodPending" | "itPending" | "itAll" | "history";
+  dataFlag: "userData" | "hodPending" | "itPending" | "history";
   page?: number;
   pageSize?: number;
   searchTerm?: string;
@@ -22,7 +22,8 @@ export interface ITRequisitionDataProps {
 
 // Columns matched against when a search term is supplied — mirrors what's
 // visible in the table UI (employee, department, HOD/IT status, etc).
-const SEARCHABLE_COLUMNS = [
+// Also used by the analytics Records view (lib/analytics/records/it.ts).
+export const IT_SEARCHABLE_COLUMNS = [
   "employee_name",
   "employee_department",
   "employee_staff_number",
@@ -35,6 +36,14 @@ const SEARCHABLE_COLUMNS = [
   "replacement_new",
 ];
 
+// What a table row (and its details modal) needs; shared with the
+// analytics Records view
+export const IT_TABLE_COLUMNS = `request_id, request_created_at, submitter_email, submitter_name,
+    employee_name, employee_department, employee_staff_number, replacement_new,
+    requirements, other_requirements, requisition_date, date_joining, hod_approver_name,
+    hod_approver_status, hod_approver_comments, hod_approval_date, it_approver_name,
+    it_approver_status, it_approver_comments, it_approval_date, completion_status`;
+
 export const getITRequisitionData = async ({
   dataFlag,
   page = 1,
@@ -44,11 +53,15 @@ export const getITRequisitionData = async ({
   const user = await getSession();
   if (!user) return emptyPaginatedResult(page, pageSize);
 
-  // The IT queues expose every requisition, so verify it_array membership
-  // server-side rather than trusting the dashboard's gate.
-  if (dataFlag === "itPending" || dataFlag === "itAll") {
-    const { isITApprover } = await getApproverMemberships();
-    if (!isITApprover) return emptyPaginatedResult(page, pageSize);
+  // The IT queue and IT history expose every requisition that reached the
+  // IT stage, so verify it_array membership server-side rather than
+  // trusting the dashboard's gate.
+  const isITApprover =
+    dataFlag === "itPending" || dataFlag === "history"
+      ? (await getApproverMemberships()).isITApprover
+      : false;
+  if (dataFlag === "itPending" && !isITApprover) {
+    return emptyPaginatedResult(page, pageSize);
   }
 
   const baseParams: (string | number)[] = [];
@@ -74,23 +87,29 @@ export const getITRequisitionData = async ({
       );
       baseParams.push("pending", "approved");
       break;
-    case "history":
-      // HOD history — every requisition this user is the assigned HOD for,
-      // plus any they acted on as an alternate HOD.
-      // IT admins get the full history from itAll instead.
-      conditions.push(
+    case "history": {
+      // Their own HOD rows (assigned, or acted on as an alternate), plus
+      // (IT) everything the HOD approved, which reached the IT stage.
+      // The full list, whatever its stage, is the IT analytics Records view.
+      const scopes = [
         hodHistoryScopeSql(
           "hod_approver_email",
           "hod_actioned_by_email",
           `$${baseParams.length + 1}`,
         ),
-      );
+      ];
       baseParams.push(user.email);
+      if (isITApprover) {
+        scopes.push(`hod_approver_status = $${baseParams.length + 1}`);
+        baseParams.push("approved");
+      }
+      conditions.push(`(${scopes.join(" OR ")})`);
       break;
+    }
   }
 
   if (searchTerm?.trim()) {
-    const searchClause = SEARCHABLE_COLUMNS.map(
+    const searchClause = IT_SEARCHABLE_COLUMNS.map(
       (col) => `${col}::text ILIKE $${baseParams.length + 1}`,
     ).join(" OR ");
     conditions.push(`(${searchClause})`);
@@ -103,11 +122,7 @@ export const getITRequisitionData = async ({
   const { limit, offset } = toSafeOffsetLimit({ page, pageSize });
 
   const baseQuery = `
-    SELECT request_id, request_created_at, submitter_email, submitter_name,
-    employee_name, employee_department, employee_staff_number, replacement_new,
-    requirements, other_requirements, requisition_date, date_joining, hod_approver_name,
-    hod_approver_status, hod_approver_comments, hod_approval_date, it_approver_name,
-    it_approver_status, it_approver_comments, it_approval_date, completion_status,
+    SELECT ${IT_TABLE_COLUMNS},
     COUNT(*) OVER() AS total_count
     FROM it_requisitions
     ${whereClause}
@@ -119,10 +134,7 @@ export const getITRequisitionData = async ({
     const result = await query(baseQuery, [...baseParams, limit, offset]);
     return toPaginatedResult(result, page, pageSize);
   } catch (error) {
-    console.error(
-      "Error while trying to fetch IT requisition data:",
-      error,
-    );
+    console.error("Error while trying to fetch IT requisition data:", error);
     return emptyPaginatedResult(page, pageSize);
   }
 };

@@ -1,7 +1,7 @@
 import Link from "next/link";
+import { ChartColumnBig, Table2 } from "lucide-react";
 import {
   ANALYTICS,
-  analyticsFiltersQuery,
   analyticsHref,
   getAnalytics,
   type AnalyticsFilters,
@@ -11,19 +11,38 @@ import {
   ScrollingNav,
   StickyNavBar,
 } from "@/components/Dashboard/StickyNavBar";
+import {
+  analyticsPageQuery,
+  hasAnalyticsRecords,
+  type AnalyticsView,
+  type RecordFilters,
+} from "@/lib/analytics/records";
 
-// The page title, then a sticky dashboard switcher (keeping the filters)
-// for viewers who can see more than one dashboard. Rendered as
+const VIEWS: { view: AnalyticsView; label: string; Icon: typeof Table2 }[] = [
+  { view: "charts", label: "Charts", Icon: ChartColumnBig },
+  { view: "records", label: "Records", Icon: Table2 },
+];
+
+// The page title, then a sticky bar: a dashboard switcher (keeping the
+// filters and view) for viewers who can see more than one dashboard, and
+// the Charts | Records switch for dashboards with records. Rendered as
 // RequisitionPagesWrapper's header so the bar spans the full page width.
 export default function AnalyticsHeader({
   type,
   allowedTypes,
   filters,
+  view,
+  recordFilters,
 }: {
   type: AnalyticsType;
   allowedTypes: AnalyticsType[];
   filters: AnalyticsFilters;
+  view: AnalyticsView;
+  recordFilters: RecordFilters;
 }) {
+  const showSwitcher = allowedTypes.length > 1;
+  const showViews = hasAnalyticsRecords(type);
+
   const { heading, noun, Icon } = getAnalytics(type);
 
   return (
@@ -40,20 +59,26 @@ export default function AnalyticsHeader({
         </p>
       </div>
 
-      {allowedTypes.length > 1 && (
+      {(showSwitcher || showViews) && (
         <StickyNavBar>
-          <ScrollingNav
-            label="Analytics dashboards"
-            activeKey={type}
-            className="gap-1"
-          >
-            {ANALYTICS.filter((entry) => allowedTypes.includes(entry.type)).map(
-              (entry) => {
+          {showSwitcher ? (
+            <ScrollingNav
+              label="Analytics dashboards"
+              activeKey={type}
+              className="gap-1"
+            >
+              {ANALYTICS.filter((entry) =>
+                allowedTypes.includes(entry.type),
+              ).map((entry) => {
                 const isActive = entry.type === type;
                 return (
                   <Link
                     key={entry.type}
-                    href={`${analyticsHref(entry.type)}?${analyticsFiltersQuery(filters)}`}
+                    // Record filters belong to one dashboard, so they stay
+                    href={`${analyticsHref(entry.type)}?${analyticsPageQuery(
+                      filters,
+                      hasAnalyticsRecords(entry.type) ? view : "charts",
+                    )}`}
                     aria-current={isActive ? "page" : undefined}
                     className={`rounded-compact inline-flex shrink-0 items-center gap-1.5 px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-colors ${
                       isActive
@@ -65,9 +90,38 @@ export default function AnalyticsHeader({
                     {entry.label}
                   </Link>
                 );
-              },
-            )}
-          </ScrollingNav>
+              })}
+            </ScrollingNav>
+          ) : (
+            <div className="flex-1" />
+          )}
+
+          {showViews && (
+            <nav
+              aria-label="Dashboard view"
+              className="rounded-control flex shrink-0 gap-0.5 border border-neutral-200 bg-neutral-50 p-0.5"
+            >
+              {VIEWS.map((entry) => {
+                const isActive = entry.view === view;
+                return (
+                  <Link
+                    key={entry.view}
+                    href={`?${analyticsPageQuery(filters, entry.view, recordFilters)}`}
+                    scroll={false}
+                    aria-current={isActive ? "page" : undefined}
+                    className={`rounded-compact inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold transition-colors ${
+                      isActive
+                        ? "bg-white text-neutral-900 shadow-sm"
+                        : "text-neutral-500 hover:text-neutral-900"
+                    }`}
+                  >
+                    <entry.Icon className="h-3.5 w-3.5" />
+                    {entry.label}
+                  </Link>
+                );
+              })}
+            </nav>
+          )}
         </StickyNavBar>
       )}
     </>

@@ -112,8 +112,6 @@ export type DashboardTableEntry = {
   tab: DashboardTab;
   stage: string;
   isVisible: (viewer: DashboardViewer) => boolean;
-  // Overrides the tab's default empty-state body
-  emptyBody?: string;
 };
 
 const always = () => true;
@@ -130,7 +128,6 @@ function table(
   tab: DashboardTab,
   stage: string,
   isVisible: (viewer: DashboardViewer) => boolean,
-  emptyBody?: string,
 ): DashboardTableEntry {
   return {
     key: `${type}-${dataFlag}`,
@@ -139,7 +136,6 @@ function table(
     tab,
     stage,
     isVisible,
-    emptyBody,
   };
 }
 
@@ -148,13 +144,7 @@ export const DASHBOARD_TABLES: DashboardTableEntry[] = [
   table("travel", "userData", "mine", "Yours", always),
   table("travel", "hodPending", "pending", "HOD", isHod),
   table("travel", "hrPending", "pending", "HR", isTravelHr),
-  table(
-    "travel",
-    "directorPending",
-    "pending",
-    "Director",
-    isDirector,
-  ),
+  table("travel", "directorPending", "pending", "Director", isDirector),
   table(
     "travel",
     "history",
@@ -163,25 +153,17 @@ export const DASHBOARD_TABLES: DashboardTableEntry[] = [
     (v) => isHod(v) || isTravelHr(v) || isDirector(v),
   ),
 
-  // IT — it_array members already get the full history (with export) from itAll,
-  // so their IT history tab holds that table instead of the HOD history.
+  // IT — every requisition, whatever its stage, is the IT analytics
+  // Records view (analytics-it role)
   table("it", "userData", "mine", "Yours", always),
   table("it", "hodPending", "pending", "HOD", isHod),
   table("it", "itPending", "pending", "IT", isItApprover),
   table(
     "it",
-    "itAll",
-    "history",
-    "All",
-    isItApprover,
-    "No IT requisitions have been submitted yet.",
-  ),
-  table(
-    "it",
     "history",
     "history",
     "History",
-    (v) => isHod(v) && !isItApprover(v),
+    (v) => isHod(v) || isItApprover(v),
   ),
 
   // Key & Access
@@ -272,9 +254,7 @@ export function tableEmptyCopy(key: string): {
     case "history":
       return {
         heading: "No history yet",
-        body:
-          entry.emptyBody ??
-          `${noun.charAt(0).toUpperCase()}${noun.slice(1)} requisitions you're involved in approving will appear here.`,
+        body: `${noun.charAt(0).toUpperCase()}${noun.slice(1)} requisitions you're involved in approving will appear here.`,
       };
     default:
       return {
