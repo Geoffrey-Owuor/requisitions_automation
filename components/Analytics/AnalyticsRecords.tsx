@@ -20,11 +20,14 @@ export default function AnalyticsRecords({
   type,
   filters,
   recordFilters,
+  filtersClassName = "",
   onRecordFiltersChange,
 }: {
   type: AnalyticsType;
   filters: AnalyticsFilters;
   recordFilters: RecordFilters;
+  // Folds the filters away on phones, with the page's own (AnalyticsPage)
+  filtersClassName?: string;
   onRecordFiltersChange: (next: RecordFilters) => void;
 }) {
   const specs = ANALYTICS_RECORD_FILTERS[type] ?? [];
@@ -40,8 +43,9 @@ export default function AnalyticsRecords({
   return (
     <div className="space-y-4">
       <section
+        id="analytics-record-filters"
         aria-label="Record filters"
-        className="rounded-surface space-y-3 border border-neutral-200 bg-white p-4"
+        className={`rounded-surface space-y-3 border border-neutral-200 bg-white p-4 ${filtersClassName}`}
       >
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {specs.map((spec) => (
