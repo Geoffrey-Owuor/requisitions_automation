@@ -29,7 +29,8 @@ const FILTER_SQL: RecordFilterSql = {
 
 export const loadItRecords = (args: RecordsArgs) =>
   loadRecords({
-    table: "it_requisitions",
+    from: "it_requisitions r",
+    alias: "r",
     columns: IT_TABLE_COLUMNS,
     departmentColumn: "employee_department",
     searchable: IT_SEARCHABLE_COLUMNS,

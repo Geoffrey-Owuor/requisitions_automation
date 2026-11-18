@@ -7,6 +7,8 @@ import { Suspense } from "react";
 import { query } from "@/lib/db";
 import NotFoundRequest from "@/components/Approvers/TravelApprovers/NotFoundRequest";
 import { isUuid } from "@/lib/uuid";
+import { getSession } from "@/lib/session";
+import { canViewRequisition } from "@/lib/requisitionAccess";
 import RequisitionPagesWrapper from "@/components/Dashboard/RequisitionPagesWrapper";
 import AccessPdfSkeleton from "@/components/Skeletons/AccessPdfSkeleton";
 import AccessPdfModal from "@/components/Approvers/AccessApprovers/AccessPdfModal";
@@ -22,6 +24,13 @@ const page = async ({ params }: PdfDownloadProps) => {
 
   // request_id is a uuid column: Postgres throws on malformed input
   if (!isUuid(uuid)) return <NotFoundRequest />;
+
+  // A session is guaranteed by the dashboard layout, but not that it may see
+  // this requisition: unknown and off-limits look the same
+  const session = await getSession();
+  if (!session || !(await canViewRequisition("access", uuid, session.email))) {
+    return <NotFoundRequest />;
+  }
 
   // Our query
   const result = await query<PdfDataValues>(AccessDataQuery, [uuid]);

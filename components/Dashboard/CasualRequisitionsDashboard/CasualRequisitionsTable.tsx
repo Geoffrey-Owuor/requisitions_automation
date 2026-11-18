@@ -1,6 +1,7 @@
 "use client";
 import type { CasualRequisitionDataProps } from "@/serverActions/GetCasualRequisitionData";
 import { fetchDashboardTable } from "@/lib/dashboardApi";
+import type { QueryResultRow } from "pg";
 import { HardHat, Info } from "lucide-react";
 import RequisitionTable, { EMERALD_THEME } from "../RequisitionTable";
 import { CasualDetailsModal } from "./CasualDetailsModal";
@@ -14,7 +15,8 @@ const dynamicTitles: Record<CasualRequisitionDataProps["dataFlag"], string> = {
   history: "Casual Requisitions Approval History",
 };
 
-const COLUMNS = [
+// Shared with the analytics Records view (components/Analytics/records/)
+export const CASUAL_COLUMNS = [
   { key: "location", label: "Location" },
   { key: "department", label: "Department" },
   { key: "sections", label: "Sections" },
@@ -34,7 +36,7 @@ export default function CasualRequisitionsTable({
       Icon={HardHat}
       theme={EMERALD_THEME}
       searchPlaceholder="Search location, department, section or status..."
-      columns={COLUMNS}
+      columns={CASUAL_COLUMNS}
       queryKey={["CasualRequisitionsData"]}
       params={{ dataFlag }}
       queryFn={({ params, page, pageSize, searchTerm }) =>
@@ -45,54 +47,7 @@ export default function CasualRequisitionsTable({
         newRequisitionHref:
           dataFlag === "userData" ? newRequisitionHref("casual") : undefined,
       }}
-      renderRow={(req) => (
-        <>
-          <td className="px-6 py-5">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-[#1e1b1b]">
-                {req.casual_location}
-              </span>
-              {req.amendment_count > 0 && (
-                <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold whitespace-nowrap text-amber-700">
-                  Amended ×{req.amendment_count}
-                </span>
-              )}
-            </div>
-          </td>
-          <td className="px-6 py-5">
-            <span className="text-sm text-[#1e1b1b]">
-              {req.employee_department}
-            </span>
-          </td>
-          <td className="px-6 py-5">
-            <span className="text-sm text-[#a18080]">
-              {req.section_count ?? 0}
-            </span>
-          </td>
-          <td className="px-6 py-5">
-            <span className="text-sm text-[#1e1b1b]">
-              {req.total_casuals ?? 0}
-            </span>
-          </td>
-          <td className="px-6 py-5">
-            <span className="text-sm font-semibold">
-              KES {req.total_amount ?? 0}
-            </span>
-          </td>
-          <td className="px-6 py-5">
-            <StatusFormatter status={req.casual_hod_approval_status} />
-          </td>
-          <td className="px-6 py-5">
-            <div className="flex items-center justify-between gap-4">
-              <StatusFormatter status={req.casual_hr_approval_status} />
-              <Info
-                size={14}
-                className="text-emerald-200 transition-colors group-hover:text-emerald-400"
-              />
-            </div>
-          </td>
-        </>
-      )}
+      renderRow={(req) => <CasualRequisitionRow req={req} />}
       renderModal={(data, isOpen, close) => (
         <CasualDetailsModal
           isOpen={isOpen}
@@ -102,5 +57,53 @@ export default function CasualRequisitionsTable({
         />
       )}
     />
+  );
+}
+
+// One table row's cells, shared with the analytics Records view
+export function CasualRequisitionRow({ req }: { req: QueryResultRow }) {
+  return (
+    <>
+      <td className="px-6 py-5">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-[#1e1b1b]">
+            {req.casual_location}
+          </span>
+          {req.amendment_count > 0 && (
+            <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold whitespace-nowrap text-amber-700">
+              Amended ×{req.amendment_count}
+            </span>
+          )}
+        </div>
+      </td>
+      <td className="px-6 py-5">
+        <span className="text-sm text-[#1e1b1b]">
+          {req.employee_department}
+        </span>
+      </td>
+      <td className="px-6 py-5">
+        <span className="text-sm text-[#a18080]">{req.section_count ?? 0}</span>
+      </td>
+      <td className="px-6 py-5">
+        <span className="text-sm text-[#1e1b1b]">{req.total_casuals ?? 0}</span>
+      </td>
+      <td className="px-6 py-5">
+        <span className="text-sm font-semibold">
+          KES {req.total_amount ?? 0}
+        </span>
+      </td>
+      <td className="px-6 py-5">
+        <StatusFormatter status={req.casual_hod_approval_status} />
+      </td>
+      <td className="px-6 py-5">
+        <div className="flex items-center justify-between gap-4">
+          <StatusFormatter status={req.casual_hr_approval_status} />
+          <Info
+            size={14}
+            className="text-emerald-200 transition-colors group-hover:text-emerald-400"
+          />
+        </div>
+      </td>
+    </>
   );
 }

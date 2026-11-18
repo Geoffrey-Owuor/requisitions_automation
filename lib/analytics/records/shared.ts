@@ -27,25 +27,54 @@ export type RecordsArgs = {
 // Conditions are fixed text, never built from the request.
 export type RecordFilterSql = Record<string, Record<string, string>>;
 
+// The Status filter's SQL from a type's outcome and open-stage expressions
+// (bucketed as its analytics queries bucket them): "approved", and
+// "awaiting-{stage}" / "declined-{stage}" for each stage. Keep in step with
+// recordStatusFilter in lib/analytics/records.ts.
+export function statusFilterSql(
+  outcome: string,
+  openStage: string,
+  stages: readonly string[],
+): Record<string, string> {
+  const sql: Record<string, string> = {
+    approved: `(${outcome}) = 'approved'`,
+  };
+  for (const stage of stages) {
+    sql[`awaiting-${stage}`] =
+      `(${outcome}) = 'pending' AND (${openStage}) = '${stage}'`;
+    sql[`declined-${stage}`] =
+      `(${outcome}) = 'declined' AND (${openStage}) = '${stage}'`;
+  }
+  return sql;
+}
+
 export async function loadRecords({
-  table,
+  from,
+  alias,
   columns,
   departmentColumn,
   searchable,
+  extraSearch,
   filterSql,
   args: { filters, recordFilters, page, pageSize, searchTerm },
 }: {
-  table: string;
+  // The FROM clause, naming the requisitions table `alias`
+  from: string;
+  alias: string;
   columns: string;
   departmentColumn: string;
   searchable: readonly string[];
+  // Another search match, given the pattern parameter (e.g. on child rows)
+  extraSearch?: (param: string) => string;
   filterSql: RecordFilterSql;
   args: RecordsArgs;
 }): Promise<PaginatedResult<QueryResultRow>> {
+  const searchMatches = searchable.map((column) => `${column}::text ILIKE $4`);
+  if (extraSearch) searchMatches.push(extraSearch("$4"));
   const conditions = [
-    createdInRange("request_created_at"),
+    createdInRange(`${alias}.request_created_at`),
     `($3 = '' OR ${departmentColumn} = $3)`,
-    `($4 = '' OR ${searchable.map((column) => `${column}::text ILIKE $4`).join(" OR ")})`,
+    `($4 = '' OR ${searchMatches.join(" OR ")})`,
   ];
   for (const [key, value] of Object.entries(recordFilters)) {
     const condition = filterSql[key]?.[value];
@@ -56,9 +85,9 @@ export async function loadRecords({
   const { limit, offset } = toSafeOffsetLimit({ page, pageSize });
   const rows = await query(
     `SELECT ${columns}, COUNT(*) OVER() AS total_count
-     FROM ${table}
+     FROM ${from}
      WHERE ${conditions.join("\n       AND ")}
-     ORDER BY request_created_at DESC, request_id
+     ORDER BY ${alias}.request_created_at DESC, ${alias}.request_id
      LIMIT $5 OFFSET $6`,
     [
       filters.from,
