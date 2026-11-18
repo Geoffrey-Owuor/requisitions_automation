@@ -1,6 +1,6 @@
 "use server";
 import { getSession } from "@/lib/session";
-import { isEmployeeRequisitionApprover } from "@/lib/employeeApproverAccess";
+import { canViewRequisition } from "@/lib/requisitionAccess";
 import {
   getEmployeeEmailData,
   EmployeeEmailDataValues,
@@ -13,24 +13,13 @@ export async function getEmployeeRequisitionDetails(
 ): Promise<EmployeeEmailDataValues | null> {
   const session = await getSession();
   if (!session) return null;
+  // Checked first: requestId comes from the browser (lib/requisitionAccess.ts)
+  if (!(await canViewRequisition("employee", requestId, session.email))) {
+    return null;
+  }
 
   const data = await getEmployeeEmailData(requestId);
   if (!data.emailaddress) return null; // no such requisition
-
-  const isSubmitter = data.emailaddress === session.email;
-  const isApprover =
-    !isSubmitter &&
-    (await isEmployeeRequisitionApprover(session.email, {
-      assignedHodEmail: data.assignedhodemail,
-      hodActionedByEmail: data.hodemail,
-      hodApprovalStatus: data.hodapprovalstatus,
-      retailDirectorApprovalStatus: data.retaildirectorapprovalstatus,
-      directorApprovalStatus: data.directorapprovalstatus,
-      hrApprovalStatus: data.hrapprovalstatus,
-      hrBeforeDirector: data.hrbeforedirector,
-    }));
-
-  if (!isSubmitter && !isApprover) return null;
 
   return data;
 }

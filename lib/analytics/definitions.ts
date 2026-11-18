@@ -1,6 +1,7 @@
 import {
   BriefcaseBusiness,
   ChartColumnBig,
+  CircleDollarSign,
   HardHat,
   Monitor,
   UserRoundPlus,
@@ -23,11 +24,14 @@ export const ANALYTICS_PAGE = {
 };
 
 // Listed in the nav's order
-export type AnalyticsType = "travel" | "casual" | "employee" | "it";
+export type AnalyticsType = "travel" | "casual" | "employee" | "it" | "advance";
 
 export type AnalyticsDefinition = {
   type: AnalyticsType;
   label: string;
+  // The page heading, and what the dashboard counts ("requisitions")
+  heading: string;
+  noun: string;
   role: string;
   Icon: LucideIcon;
 };
@@ -36,26 +40,42 @@ export const ANALYTICS: AnalyticsDefinition[] = [
   {
     type: "travel",
     label: "Travel",
+    heading: "Travel Requisition Analytics",
+    noun: "requisitions",
     role: "analytics-travel",
     Icon: BriefcaseBusiness,
   },
   {
     type: "casual",
     label: "Casual",
+    heading: "Casual Requisition Analytics",
+    noun: "requisitions",
     role: "analytics-casual",
     Icon: HardHat,
   },
   {
     type: "employee",
     label: "Employee",
+    heading: "Employee Requisition Analytics",
+    noun: "requisitions",
     role: "analytics-employee",
     Icon: UserRoundPlus,
   },
   {
     type: "it",
     label: "IT",
+    heading: "IT Requisition Analytics",
+    noun: "requisitions",
     role: "analytics-it",
     Icon: Monitor,
+  },
+  {
+    type: "advance",
+    label: "Salary Advance",
+    heading: "Salary Advance Analytics",
+    noun: "salary advance requests",
+    role: "analytics-advance",
+    Icon: CircleDollarSign,
   },
 ];
 

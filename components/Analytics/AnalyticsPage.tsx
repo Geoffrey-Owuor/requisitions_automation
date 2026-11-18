@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Info } from "lucide-react";
+import { ChevronDown, Info, SlidersHorizontal } from "lucide-react";
 import { DatePicker } from "@/components/DatePicker";
 import { Select } from "@/components/Select";
 import {
@@ -12,6 +12,13 @@ import {
   type AnalyticsFilters,
   type AnalyticsType,
 } from "@/lib/analytics/definitions";
+import {
+  analyticsPageQuery,
+  type AnalyticsView,
+  type RecordFilters,
+} from "@/lib/analytics/records";
+import AdvanceAnalytics from "./AdvanceAnalytics";
+import AnalyticsRecords from "./AnalyticsRecords";
 import CasualAnalytics from "./CasualAnalytics";
 import EmployeeAnalytics from "./EmployeeAnalytics";
 import ItAnalytics from "./ItAnalytics";
@@ -47,18 +54,32 @@ const RANGE_PRESETS: RangePreset[] = [
   { label: "Last 12 months", range: defaultAnalyticsRange },
 ];
 
+// "2025-12-01" -> "1 Dec 2025", in UTC so the viewer's time zone can't
+// shift the day
+const formatDay = (date: string) =>
+  new Date(`${date}T00:00:00Z`).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+
 const fieldLabel =
   "text-[11px] font-bold tracking-widest text-gray-400 uppercase";
 
 export default function AnalyticsPage({
   type,
   filters,
+  view,
+  recordFilters,
   departments,
   today,
 }: {
   type: AnalyticsType;
   // Already validated by the page
   filters: AnalyticsFilters;
+  view: AnalyticsView;
+  recordFilters: RecordFilters;
   departments: string[];
   // YYYY-MM-DD in Nairobi time
   today: string;
@@ -80,21 +101,70 @@ export default function AnalyticsPage({
   const applyFilters = (next: AnalyticsFilters) => {
     setDraft(next);
     if (!getAnalyticsFiltersError(next)) {
-      router.replace(`${pathname}?${filtersQuery(next)}`, { scroll: false });
+      router.replace(
+        `${pathname}?${analyticsPageQuery(next, view, recordFilters)}`,
+        { scroll: false },
+      );
     }
   };
 
-  const activePreset = RANGE_PRESETS.find((preset) => {
-    const range = preset.range(today);
-    return range.from === draft.from && range.to === draft.to;
-  });
+  const presetFor = ({ from, to }: { from: string; to: string }) =>
+    RANGE_PRESETS.find((preset) => {
+      const range = preset.range(today);
+      return range.from === from && range.to === to;
+    });
+  const activePreset = presetFor(draft);
+
+  // On phones the filters fold behind one bar summarizing what's applied,
+  // so the figures or the table start near the top. From sm up they always
+  // show, and the bar is hidden.
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const phoneCollapsed = filtersOpen ? "" : "max-sm:hidden";
+  const recordFilterCount =
+    view === "records" ? Object.keys(recordFilters).length : 0;
+  const filtersSummary = [
+    presetFor(filters)?.label ??
+      `${formatDay(filters.from)} – ${formatDay(filters.to)}`,
+    filters.department || "All departments",
+    recordFilterCount > 0 &&
+      `${recordFilterCount} record ${recordFilterCount === 1 ? "filter" : "filters"}`,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
   return (
     <div className="space-y-4 px-2 pt-4 pb-6">
+      {/* Phones: the filters' toggle */}
+      <button
+        type="button"
+        onClick={() => setFiltersOpen((open) => !open)}
+        aria-expanded={filtersOpen}
+        aria-controls={
+          view === "records"
+            ? "analytics-filters analytics-record-filters"
+            : "analytics-filters"
+        }
+        className="rounded-surface flex w-full items-center gap-3 border border-neutral-200 bg-white px-4 py-3 text-left sm:hidden"
+      >
+        <SlidersHorizontal className="h-4 w-4 shrink-0 text-neutral-500" />
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-semibold text-neutral-900">
+            {filtersOpen ? "Hide filters" : "Filters"}
+          </span>
+          <span className="block truncate text-xs text-neutral-500">
+            {filtersSummary}
+          </span>
+        </span>
+        <ChevronDown
+          className={`h-4 w-4 shrink-0 text-neutral-500 transition-transform ${filtersOpen ? "rotate-180" : ""}`}
+        />
+      </button>
+
       {/* Filters */}
       <section
+        id="analytics-filters"
         aria-label="Analytics filters"
-        className="rounded-surface space-y-3 border border-neutral-200 bg-white p-4"
+        className={`rounded-surface space-y-3 border border-neutral-200 bg-white p-4 ${phoneCollapsed}`}
       >
         <div className="flex flex-wrap gap-1.5">
           {RANGE_PRESETS.map((preset) => {
@@ -165,15 +235,37 @@ export default function AnalyticsPage({
           <p className="flex items-start gap-2 text-xs text-gray-500">
             <Info className="mt-px h-3.5 w-3.5 shrink-0" />
             Submission dates in Nairobi time, up to 12 months.
-            &ldquo;Approved&rdquo; means fully approved at the final stage.
+            {type === "advance"
+              ? " “Approved” means approved by HR."
+              : " “Approved” means fully approved at the final stage."}
           </p>
         )}
       </section>
 
-      {type === "travel" && <TravelAnalytics filters={filters} />}
-      {type === "casual" && <CasualAnalytics filters={filters} today={today} />}
-      {type === "employee" && <EmployeeAnalytics filters={filters} />}
-      {type === "it" && <ItAnalytics filters={filters} />}
+      {view === "records" ? (
+        <AnalyticsRecords
+          type={type}
+          filters={filters}
+          recordFilters={recordFilters}
+          filtersClassName={phoneCollapsed}
+          onRecordFiltersChange={(next) =>
+            router.replace(
+              `${pathname}?${analyticsPageQuery(filters, "records", next)}`,
+              { scroll: false },
+            )
+          }
+        />
+      ) : (
+        <>
+          {type === "travel" && <TravelAnalytics filters={filters} />}
+          {type === "casual" && (
+            <CasualAnalytics filters={filters} today={today} />
+          )}
+          {type === "employee" && <EmployeeAnalytics filters={filters} />}
+          {type === "it" && <ItAnalytics filters={filters} />}
+          {type === "advance" && <AdvanceAnalytics filters={filters} />}
+        </>
+      )}
     </div>
   );
 }

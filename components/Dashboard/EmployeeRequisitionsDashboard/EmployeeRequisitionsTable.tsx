@@ -1,6 +1,7 @@
 "use client";
 import type { EmployeeRequisitionDataProps } from "@/serverActions/GetEmployeeRequisitionData";
 import { fetchDashboardTable } from "@/lib/dashboardApi";
+import type { QueryResultRow } from "pg";
 import { UserRoundPlus, Info } from "lucide-react";
 import RequisitionTable, { VIOLET_THEME } from "../RequisitionTable";
 import { EmployeeDetailsModal } from "./EmployeeDetailsModal";
@@ -18,7 +19,8 @@ const dynamicTitles: Record<EmployeeRequisitionDataProps["dataFlag"], string> =
     history: "Employee Requisitions Approval History",
   };
 
-const COLUMNS = [
+// Shared with the analytics Records view (components/Analytics/records/)
+export const EMPLOYEE_COLUMNS = [
   { key: "department", label: "Department" },
   { key: "positions", label: "Positions / Headcount" },
   { key: "hod", label: "HOD Status" },
@@ -39,7 +41,7 @@ export default function EmployeeRequisitionsTable({
       Icon={UserRoundPlus}
       theme={VIOLET_THEME}
       searchPlaceholder="Search department, submitter, position or status..."
-      columns={COLUMNS}
+      columns={EMPLOYEE_COLUMNS}
       queryKey={["EmployeeRequisitionsData"]}
       params={{ dataFlag }}
       queryFn={({ params, page, pageSize, searchTerm }) =>
@@ -55,52 +57,7 @@ export default function EmployeeRequisitionsTable({
         newRequisitionHref:
           dataFlag === "userData" ? newRequisitionHref("employee") : undefined,
       }}
-      renderRow={(req) => (
-        <>
-          <td className="px-6 py-5">
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-[#1e1b1b]">
-                {req.employee_department}
-              </span>
-              {req.imported && (
-                <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold whitespace-nowrap text-slate-600">
-                  Imported
-                </span>
-              )}
-              {req.amendment_count > 0 && (
-                <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold whitespace-nowrap text-amber-700">
-                  Amended ×{req.amendment_count}
-                </span>
-              )}
-            </div>
-          </td>
-          <td className="px-6 py-5">
-            <span className="text-sm text-[#1e1b1b]">
-              {req.total_positions ?? 0} / {req.total_headcount ?? 0}
-            </span>
-          </td>
-          <td className="px-6 py-5">
-            <StatusFormatter status={req.employee_hod_approval_status} />
-          </td>
-          <td className="px-6 py-5">
-            <StatusFormatter
-              status={req.employee_retail_director_approval_status}
-            />
-          </td>
-          <td className="px-6 py-5">
-            <StatusFormatter status={req.employee_hr_approval_status} />
-          </td>
-          <td className="px-6 py-5">
-            <div className="flex items-center justify-between gap-4">
-              <StatusFormatter status={req.employee_director_approval_status} />
-              <Info
-                size={14}
-                className="text-violet-200 transition-colors group-hover:text-violet-400"
-              />
-            </div>
-          </td>
-        </>
-      )}
+      renderRow={(req) => <EmployeeRequisitionRow req={req} />}
       renderModal={(data, isOpen, close) => (
         <EmployeeDetailsModal
           isOpen={isOpen}
@@ -110,5 +67,55 @@ export default function EmployeeRequisitionsTable({
         />
       )}
     />
+  );
+}
+
+// One table row's cells, shared with the analytics Records view
+export function EmployeeRequisitionRow({ req }: { req: QueryResultRow }) {
+  return (
+    <>
+      <td className="px-6 py-5">
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-[#1e1b1b]">
+            {req.employee_department}
+          </span>
+          {req.imported && (
+            <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold whitespace-nowrap text-slate-600">
+              Imported
+            </span>
+          )}
+          {req.amendment_count > 0 && (
+            <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold whitespace-nowrap text-amber-700">
+              Amended ×{req.amendment_count}
+            </span>
+          )}
+        </div>
+      </td>
+      <td className="px-6 py-5">
+        <span className="text-sm text-[#1e1b1b]">
+          {req.total_positions ?? 0} / {req.total_headcount ?? 0}
+        </span>
+      </td>
+      <td className="px-6 py-5">
+        <StatusFormatter status={req.employee_hod_approval_status} />
+      </td>
+      <td className="px-6 py-5">
+        <StatusFormatter
+          status={req.employee_retail_director_approval_status}
+        />
+      </td>
+      <td className="px-6 py-5">
+        <StatusFormatter status={req.employee_hr_approval_status} />
+      </td>
+      <td className="px-6 py-5">
+        <div className="flex items-center justify-between gap-4">
+          <StatusFormatter status={req.employee_director_approval_status} />
+          <Info
+            size={14}
+            className="text-violet-200 transition-colors group-hover:text-violet-400"
+          />
+        </div>
+      </td>
+    </>
   );
 }
