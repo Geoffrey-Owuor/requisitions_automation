@@ -9,12 +9,7 @@ import {
   ANALYTICS_RECORD_FILTERS,
   type RecordFilters,
 } from "@/lib/analytics/records";
-import ItRecordsTable from "./records/ItRecordsTable";
-
-export type RecordsTableProps = {
-  filters: AnalyticsFilters;
-  recordFilters: RecordFilters;
-};
+import RecordsTable from "./records/RecordsTable";
 
 const fieldLabel =
   "text-[11px] font-bold tracking-widest text-gray-400 uppercase";
@@ -73,9 +68,11 @@ export default function AnalyticsRecords({
         )}
       </section>
 
-      {type === "it" && (
-        <ItRecordsTable filters={filters} recordFilters={recordFilters} />
-      )}
+      <RecordsTable
+        type={type}
+        filters={filters}
+        recordFilters={recordFilters}
+      />
     </div>
   );
 }

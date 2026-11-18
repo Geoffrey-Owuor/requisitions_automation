@@ -3,21 +3,13 @@ import { query } from "@/lib/db";
 import { getSession } from "@/lib/session";
 import { isUuid } from "@/lib/uuid";
 import { isValidEmployeeStage } from "@/public/assets";
-import { isEmployeeRequisitionApprover } from "@/lib/employeeApproverAccess";
+import { canViewRequisition } from "@/lib/requisitionAccess";
 
 export type AttachmentRow = {
   original_filename: string;
   file_path: string;
   mime_type: string;
-  submitter_email: string;
   request_id: string;
-  employee_hod_email: string | null;
-  employee_hod_actioned_by_email: string | null;
-  employee_hod_approval_status: string;
-  employee_retail_director_approval_status: string;
-  employee_director_approval_status: string;
-  employee_hr_approval_status: string;
-  hr_before_director: boolean;
 };
 
 export type AttachmentAuthResult =
@@ -49,13 +41,8 @@ export async function authorizeAttachmentRequest(
 
   const result = await query<AttachmentRow>(
     `
-    SELECT a.original_filename, a.file_path, a.mime_type, r.submitter_email,
-    r.request_id, r.employee_hod_email, r.employee_hod_actioned_by_email,
-    r.employee_hod_approval_status,
-    r.employee_retail_director_approval_status, r.employee_director_approval_status,
-    r.employee_hr_approval_status, r.hr_before_director
+    SELECT a.original_filename, a.file_path, a.mime_type, a.request_id
     FROM ${attachmentTable} a
-    JOIN employee_requisitions r ON r.request_id = a.request_id
     WHERE a.attachment_id = $1
     `,
     [attachmentId],
@@ -72,12 +59,6 @@ export async function authorizeAttachmentRequest(
 
   let authorized = false;
 
-  // Submitter branch: a valid session matching the requisition's submitter
-  const session = await getSession();
-  if (session && session.email === attachment.submitter_email) {
-    authorized = true;
-  }
-
   // Approver branch: any member of the relevant stage's approver array,
   // regardless of whether that stage is still pending - mirrors the
   // existing approver-page behaviour of not scoping access to only the
@@ -92,23 +73,18 @@ export async function authorizeAttachmentRequest(
     }
   }
 
-  // Dashboard-approver branch: a logged-in session (no token/stage query
-  // params) belonging to an approver this specific requisition has actually
-  // reached — HOD, or a member of the director/retail-director/HR array once
-  // the chain is at (or past) their stage. This mirrors exactly which rows
-  // each approver's dashboard queue shows them, unlike the token branch
-  // above (deliberately looser: any array member, any stage, always).
-  if (!authorized && session) {
-    authorized = await isEmployeeRequisitionApprover(session.email, {
-      assignedHodEmail: attachment.employee_hod_email,
-      hodActionedByEmail: attachment.employee_hod_actioned_by_email,
-      hodApprovalStatus: attachment.employee_hod_approval_status,
-      retailDirectorApprovalStatus:
-        attachment.employee_retail_director_approval_status,
-      directorApprovalStatus: attachment.employee_director_approval_status,
-      hrApprovalStatus: attachment.employee_hr_approval_status,
-      hrBeforeDirector: attachment.hr_before_director,
-    });
+  // Session branch: anyone who may view this requisition — its submitter,
+  // HOD, a later-stage approver it has reached, or analytics-employee
+  // (lib/requisitionAccess.ts)
+  if (!authorized) {
+    const session = await getSession();
+    if (session) {
+      authorized = await canViewRequisition(
+        "employee",
+        attachment.request_id,
+        session.email,
+      );
+    }
   }
 
   if (!authorized) {

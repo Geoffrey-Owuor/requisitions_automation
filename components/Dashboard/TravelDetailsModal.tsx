@@ -37,7 +37,9 @@ interface ModalProps {
     | "hodPending"
     | "hrPending"
     | "directorPending"
-    | "history";
+    | "history"
+    // The analytics Records view: read-only, so no push-back either
+    | "records";
   onClose: () => void;
 }
 
@@ -59,6 +61,7 @@ export const TravelDetailsModal = ({
     directorPending: "director",
     userData: "user", // We have to make sure this is never used as it it not yet available in our data
     history: "user", // Read-only — approvals happen from the pending tables
+    records: "user",
   };
 
   const stage = STAGE_LEVELS[dataFlag];

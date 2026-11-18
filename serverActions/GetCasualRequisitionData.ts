@@ -22,12 +22,40 @@ export interface CasualRequisitionDataProps {
 // Columns matched (on the header row) when a search term is supplied —
 // section names are matched separately via an EXISTS subquery below since
 // they live in the child casual_requisition_sections table.
-const SEARCHABLE_COLUMNS = [
+// Also used by the analytics Records view (lib/analytics/records/casual.ts).
+export const CASUAL_SEARCHABLE_COLUMNS = [
   "c.employee_department",
   "c.casual_location",
   "c.casual_hod_approval_status",
   "c.casual_hr_approval_status",
 ];
+
+// What a table row (and its details modal) needs, as `c` with its sections
+// rolled up as `agg`; shared with the analytics Records view
+export const CASUAL_TABLE_COLUMNS = `c.request_id, c.request_created_at, c.submitter_email, c.submitter_name,
+        c.employee_department, c.casual_location,
+        c.casual_hod_approval_status, c.casual_hr_approval_status,
+        c.casual_hod_approver, c.casual_hr_approver,
+        c.amendment_count, c.last_amended_at,
+        agg.section_count, agg.total_casuals,
+        agg.total_amount, agg.period_from, agg.period_to`;
+
+export const CASUAL_TABLE_FROM = `casual_requisitions c
+        LEFT JOIN LATERAL (
+          SELECT
+            COUNT(*) AS section_count,
+            SUM(number_of_casuals) AS total_casuals,
+            SUM(casual_total_amount) AS total_amount,
+            MIN(engagement_period_from) AS period_from,
+            MAX(engagement_period_to) AS period_to
+          FROM casual_requisition_sections s WHERE s.request_id = c.request_id
+        ) agg ON TRUE`;
+
+// A section of `c` whose name matches the search pattern parameter
+export const casualSectionSearchSql = (param: string) => `EXISTS (
+        SELECT 1 FROM casual_requisition_sections s
+        WHERE s.request_id = c.request_id AND s.section_name ILIKE ${param}
+      )`;
 
 export const getCasualRequisitionData = async ({
   dataFlag,
@@ -96,14 +124,11 @@ export const getCasualRequisitionData = async ({
 
   if (searchTerm?.trim()) {
     const term = `%${searchTerm.trim()}%`;
-    const searchClause = SEARCHABLE_COLUMNS.map(
+    const searchClause = CASUAL_SEARCHABLE_COLUMNS.map(
       (col) => `${col}::text ILIKE $${baseParams.length + 1}`,
     ).join(" OR ");
     conditions.push(
-      `(${searchClause} OR EXISTS (
-        SELECT 1 FROM casual_requisition_sections s
-        WHERE s.request_id = c.request_id AND s.section_name ILIKE $${baseParams.length + 1}
-      ))`,
+      `(${searchClause} OR ${casualSectionSearchSql(`$${baseParams.length + 1}`)})`,
     );
     baseParams.push(term);
   }
@@ -117,25 +142,9 @@ export const getCasualRequisitionData = async ({
   // are rolled up via a lateral aggregate so COUNT(*) OVER() pagination
   // still reflects the number of requisitions, not sections.
   const baseQuery = `
-    SELECT
-        c.request_id, c.request_created_at, c.submitter_email, c.submitter_name,
-        c.employee_department, c.casual_location,
-        c.casual_hod_approval_status, c.casual_hr_approval_status,
-        c.casual_hod_approver, c.casual_hr_approver,
-        c.amendment_count, c.last_amended_at,
-        agg.section_count, agg.total_casuals,
-        agg.total_amount, agg.period_from, agg.period_to,
+    SELECT ${CASUAL_TABLE_COLUMNS},
         COUNT(*) OVER() AS total_count
-        FROM casual_requisitions c
-        LEFT JOIN LATERAL (
-          SELECT
-            COUNT(*) AS section_count,
-            SUM(number_of_casuals) AS total_casuals,
-            SUM(casual_total_amount) AS total_amount,
-            MIN(engagement_period_from) AS period_from,
-            MAX(engagement_period_to) AS period_to
-          FROM casual_requisition_sections s WHERE s.request_id = c.request_id
-        ) agg ON TRUE
+        FROM ${CASUAL_TABLE_FROM}
         ${whereClause}
         ORDER BY GREATEST(c.request_created_at, c.last_amended_at) DESC
         LIMIT $${baseParams.length + 1} OFFSET $${baseParams.length + 2}
