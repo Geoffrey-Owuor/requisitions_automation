@@ -12,6 +12,7 @@ import {
   type AnalyticsFilters,
   type AnalyticsType,
 } from "@/lib/analytics/definitions";
+import AdvanceAnalytics from "./AdvanceAnalytics";
 import CasualAnalytics from "./CasualAnalytics";
 import EmployeeAnalytics from "./EmployeeAnalytics";
 import ItAnalytics from "./ItAnalytics";
@@ -165,7 +166,9 @@ export default function AnalyticsPage({
           <p className="flex items-start gap-2 text-xs text-gray-500">
             <Info className="mt-px h-3.5 w-3.5 shrink-0" />
             Submission dates in Nairobi time, up to 12 months.
-            &ldquo;Approved&rdquo; means fully approved at the final stage.
+            {type === "advance"
+              ? " “Approved” means approved by HR."
+              : " “Approved” means fully approved at the final stage."}
           </p>
         )}
       </section>
@@ -174,6 +177,7 @@ export default function AnalyticsPage({
       {type === "casual" && <CasualAnalytics filters={filters} today={today} />}
       {type === "employee" && <EmployeeAnalytics filters={filters} />}
       {type === "it" && <ItAnalytics filters={filters} />}
+      {type === "advance" && <AdvanceAnalytics filters={filters} />}
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/session";
 import { getUserRoles } from "@/serverActions/GetUserRoles";
 import { loadAllDepartmentNames } from "@/lib/departments";
+import { loadAdvanceDepartmentNames } from "@/lib/analytics/queries/advance";
 import {
   ANALYTICS_PAGE,
   defaultAnalyticsRange,
@@ -72,7 +73,12 @@ const page = async ({
     ? { ...defaultAnalyticsRange(today), department: "" }
     : requested;
 
-  const departments = await loadAllDepartmentNames();
+  // Salary advances carry the department from the HR import, which needn't
+  // match base_departments, so that filter offers the names on requests
+  const departments =
+    type === "advance"
+      ? await loadAdvanceDepartmentNames()
+      : await loadAllDepartmentNames();
 
   return (
     <RequisitionPagesWrapper
