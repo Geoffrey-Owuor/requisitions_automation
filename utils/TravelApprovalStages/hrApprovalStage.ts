@@ -1,5 +1,6 @@
 import { loadDirectorArray } from "@/lib/loadApprovers";
 import { EmailSender } from "@/services/EmailSender";
+import { emailTravelFinance } from "./financeStage";
 
 type HrApprovalStageProps = {
   uuid: string;
@@ -111,8 +112,7 @@ export async function hrApprovalStage({
       }
 
       // Finance
-      EmailSender({
-        to: process.env.FIRST_FINANCE_EMAIL!,
+      emailTravelFinance({
         requestId: uuid,
         message: `This travel requisition has been approved by ${approverName}`,
         title: `Final Update: Travel Requisition Approved By ${approverName}`,

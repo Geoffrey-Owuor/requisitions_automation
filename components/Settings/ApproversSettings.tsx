@@ -276,7 +276,9 @@ function ApproverRow({
                 message:
                   stage === "hod"
                     ? `${approver.email} will no longer be offered as a HOD, and their alternate links are removed. Their past decisions stay on the requisitions.`
-                    : `${approver.email} will stop receiving ${stageLabel} approval emails and lose the ${stageLabel} dashboard queue. Their past decisions stay on the requisitions.`,
+                    : stage === "finance"
+                      ? `${approver.email} will stop receiving the Finance emails for travel requisitions and can no longer open travel requisitions or their PDFs through Finance.`
+                      : `${approver.email} will stop receiving ${stageLabel} approval emails and lose the ${stageLabel} dashboard queue. Their past decisions stay on the requisitions.`,
                 confirmLabel: "Remove approver",
                 action: () => removeApprover(stage, approver.id),
               })

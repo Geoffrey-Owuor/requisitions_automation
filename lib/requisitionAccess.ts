@@ -16,8 +16,8 @@ import { getUserRoles } from "@/serverActions/GetUserRoles";
 // - a member of a later stage's array once the requisition has reached
 //   that stage, exactly as their approval history shows it (the
 //   `history` scopes in serverActions/Get{Type}RequisitionData.ts)
-// - Travel's Finance mailbox (FIRST_FINANCE_EMAIL), which is emailed the
-//   PDF link on final approval and on push-backs
+// - for Travel, any finance_array member, since they're all emailed the PDF
+//   link on final approval and on push-backs (emailTravelFinance)
 // - holders of the type's analytics role, whose Records view lists every
 //   requisition of the type
 //
@@ -58,7 +58,8 @@ const RULES: Record<ViewableRequisitionType, AccessRule> = {
       `${member("director")} AND r.travel_hod_approval_status = 'approved'
         AND r.travel_hr_approval_status = 'approved'
         AND r.travel_director_approval_status <> 'N/A'`,
-      `$3 <> '' AND $2 = $3`,
+      // Finance is emailed the PDF link on final approval and push-backs
+      member("finance"),
     ],
   },
   it: {
@@ -136,13 +137,7 @@ export async function canViewRequisition(
        (${rule.stageScopes.map((scope) => `(${scope})`).join(" OR ")}) AS stage_access
      FROM ${rule.table} r
      WHERE r.request_id = $1`,
-    type === "travel"
-      ? [
-          requestId,
-          email,
-          (process.env.FIRST_FINANCE_EMAIL ?? "").trim().toLowerCase(),
-        ]
-      : [requestId, email],
+    [requestId, email],
   );
   if (rows.length === 0) return false;
   const row = rows[0];
