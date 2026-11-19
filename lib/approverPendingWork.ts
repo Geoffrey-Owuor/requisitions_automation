@@ -50,7 +50,7 @@ const STAGE_PENDING_SQL: Record<
   retail_director: `SELECT COUNT(*) AS count FROM employee_requisitions
     WHERE employee_hod_approval_status = 'approved'
     AND employee_retail_director_approval_status = 'pending'`,
-  // No approval flow uses the Finance array
+  // Finance only receives travel notifications, never pending work
   finance: null,
 };
 
