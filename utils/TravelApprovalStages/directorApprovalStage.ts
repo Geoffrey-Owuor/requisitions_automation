@@ -1,4 +1,5 @@
 import { EmailSender } from "@/services/EmailSender";
+import { emailTravelFinance } from "./financeStage";
 
 type DirectorApprovalStageProps = {
   uuid: string;
@@ -121,8 +122,7 @@ export function directorApprovalStage({
     }
 
     // Finance
-    EmailSender({
-      to: process.env.FIRST_FINANCE_EMAIL!,
+    emailTravelFinance({
       requestId: uuid,
       message: `This travel requisition has been approved by ${approverName}`,
       title: `Final Update: Travel Requisition Approved By ${approverName}`,

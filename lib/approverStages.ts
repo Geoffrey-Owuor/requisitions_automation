@@ -45,7 +45,7 @@ export const APPROVER_STAGES = [
     key: "finance",
     label: "Finance",
     description:
-      "Not used by any approval flow at the moment; kept for Finance notifications.",
+      "Not an approval stage. Members get the Finance emails for travel requisitions (final approval and HR push-backs) and can open any travel requisition and its PDF.",
   },
 ] as const;
 
