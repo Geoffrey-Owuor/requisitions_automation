@@ -164,8 +164,8 @@ export default function AdvanceAnalytics({
           columns: ["Repayment starts", "Approved (KES)", "Awaiting HR (KES)"],
           rows: data.byRepaymentMonth.map((row) => [
             formatMonth(row.month),
-            formatKesExact(row.approvedAmount),
-            formatKesExact(row.pendingAmount),
+            row.approvedAmount,
+            row.pendingAmount,
           ]),
         }}
       >
@@ -228,7 +228,7 @@ export default function AdvanceAnalytics({
             rows: data.byAmountBand.map((row) => [
               row.band,
               row.requests,
-              formatKesExact(row.amount),
+              row.amount,
             ]),
           }}
         >
@@ -297,15 +297,11 @@ export default function AdvanceAnalytics({
             table={{
               columns: ["Type", "Requests", "Amount (KES)"],
               rows: [
-                [
-                  "One-off",
-                  totals.oneoffRequests,
-                  formatKesExact(totals.oneoffAmount),
-                ],
+                ["One-off", totals.oneoffRequests, totals.oneoffAmount],
                 [
                   "Continuous (per month)",
                   totals.continuousRequests,
-                  formatKesExact(totals.continuousAmount),
+                  totals.continuousAmount,
                 ],
               ],
             }}
