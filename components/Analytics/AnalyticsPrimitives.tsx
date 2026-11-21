@@ -202,15 +202,16 @@ export function BarList({
   color,
   formatValue = formatCount,
 }: {
-  items: { label: string; value: number; detail?: string }[];
+  // `key` when labels can repeat; the label otherwise
+  items: { key?: string; label: string; value: number; detail?: string }[];
   color: string;
   formatValue?: (value: number) => string;
 }) {
   const max = Math.max(...items.map((item) => item.value), 1);
   return (
     <ul className="space-y-3">
-      {items.map(({ label, value, detail }) => (
-        <li key={label} className="space-y-1">
+      {items.map(({ key, label, value, detail }) => (
+        <li key={key ?? label} className="space-y-1">
           <div className="flex items-baseline justify-between gap-3 text-sm">
             <span className="truncate text-neutral-700">{label}</span>
             <span className="shrink-0 font-semibold text-neutral-900 tabular-nums">
