@@ -39,7 +39,7 @@ const STAGE_LABELS: Record<TravelStage, string> = {
 };
 
 const listHeading =
-  "-mb-2 text-[11px] font-bold tracking-widest text-gray-400 uppercase";
+  "text-[11px] font-bold tracking-widest text-gray-400 uppercase";
 
 const trips = (count: number) =>
   `${formatCount(count)} trip${count === 1 ? "" : "s"}`;
@@ -266,16 +266,18 @@ export default function TravelAnalytics({
           }}
         >
           <div className="space-y-4">
-            <p className={listHeading}>Mode</p>
-            <BarList
-              color={SERIES.approved}
-              items={data.byMode.map((row) => ({
-                label: row.mode,
-                value: row.trips,
-                detail: percent(row.trips, totals.approvedTrips),
-              }))}
-            />
-            <div className="space-y-4 border-t border-neutral-100 pt-3">
+            <div className="space-y-2">
+              <p className={listHeading}>Mode</p>
+              <BarList
+                color={SERIES.approved}
+                items={data.byMode.map((row) => ({
+                  label: row.mode,
+                  value: row.trips,
+                  detail: percent(row.trips, totals.approvedTrips),
+                }))}
+              />
+            </div>
+            <div className="space-y-2 border-t border-neutral-100 pt-3">
               <p className={listHeading}>Category</p>
               <BarList
                 color={SERIES.approved}
