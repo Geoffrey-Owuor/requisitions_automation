@@ -282,7 +282,15 @@ export default function CasualAnalytics({
               color={SERIES.approved}
               formatValue={formatKes}
               items={data.topSections.map((row) => ({
-                label: row.section,
+                key: `${row.department}\u0000${row.section}`,
+                // Section names are unique only within a department
+                label: data.topSections.some(
+                  (other) =>
+                    other.section === row.section &&
+                    other.department !== row.department,
+                )
+                  ? `${row.section} (${row.department})`
+                  : row.section,
                 value: row.amount,
                 detail: `(${plural(row.casualDays, "casual-day")})`,
               }))}
