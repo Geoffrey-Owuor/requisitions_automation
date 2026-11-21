@@ -4,9 +4,9 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Metadata } from "next";
 import LoginWrapper from "@/components/LoginWrapper";
-import Brand from "@/components/Brand";
+import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { ArrowLeft, FileText, Lock, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Lock, ShieldCheck } from "lucide-react";
 import HardRedirect from "@/components/HardRedirect";
 import HotpointMark from "@/components/HotpointMark";
 
@@ -46,7 +46,7 @@ export default async function LoginPage({ searchParams }: Props) {
     <div className="layout-scrollbar bg-canvas h-screen w-full selection:bg-rose-100 selection:text-rose-900">
       {/* Positioning context spans the scrolled content, not just the
           viewport-tall scroller, so the ambient layer reaches the footer. */}
-      <div className="relative min-h-full">
+      <div className="relative flex min-h-full flex-col">
         {/* ── AMBIENT BACKGROUND ── */}
         <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
           <div className="absolute top-[-20%] left-1/2 h-[70%] w-[80%] -translate-x-1/2 rounded-full bg-rose-200/50 blur-[120px]" />
@@ -55,25 +55,11 @@ export default async function LoginPage({ searchParams }: Props) {
           <div className="hero-grid absolute inset-x-0 top-0 h-[80vh]" />
         </div>
 
+        {/* Shared public header: sticky, and hides its own Login on /login. */}
+        <Header />
+
         {/* Structural Central Container */}
-        <div className="relative z-10 mx-auto flex min-h-screen max-w-6xl flex-col px-4">
-          {/* ── ENTERPRISE HEADER ── */}
-          <header className="flex h-18 items-center justify-between">
-            <Brand showText={true} />
-
-            <Link
-              href="/guidelines/travel"
-              className="rounded-control bg-brand-600 hover:bg-brand-700 flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold text-white transition-colors"
-            >
-              <FileText
-                size={14}
-                className="transition-colors group-hover:text-rose-500"
-              />
-              <span className="hidden sm:inline">Requisition Guidelines</span>
-              <span className="sm:hidden">Guidelines</span>
-            </Link>
-          </header>
-
+        <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col px-4">
           {/* ── MAIN CONTENT LAYER ── */}
           <main className="flex flex-1 items-center justify-center py-6">
             <div className="animate-rise relative w-full max-w-sm">
