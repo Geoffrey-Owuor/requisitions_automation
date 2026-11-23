@@ -9,6 +9,7 @@ import { ITEmailSender } from "@/services/ITEmailSender";
 import { itApprovalStage } from "@/utils/ITApprovalStages/itApprovalStage";
 import { hodApprovalStage } from "@/utils/ITApprovalStages/hodApprovalStage";
 import { isValidItStage, IT_STAGE_LABELS } from "@/public/assets";
+import { config } from "@/lib/config";
 
 export async function UpdateITRequisitionStatus(
   payload: UpdateRequestStatusProps,
@@ -160,7 +161,7 @@ export async function UpdateITRequisitionStatus(
         break;
       default:
         ITEmailSender({
-          to: process.env.ADMIN_EMAIL!,
+          to: config.email.recipients.admin,
           requestId: payload.uuid,
           message:
             "A wrong stage was passed in the IT requisition approval workflow for this requistion",

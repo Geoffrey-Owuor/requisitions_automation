@@ -7,6 +7,7 @@ import {
   employeeAmendmentsQuery,
   EmployeeAmendmentValues,
 } from "@/lib/employeeAmendment";
+import { config } from "@/lib/config";
 
 export interface EmployeeAttachmentValues {
   attachmentid: string;
@@ -189,7 +190,7 @@ export async function EmployeeEmailSender({
   });
 
   await sendEmail({
-    from: process.env.EMPLOYEE_EMAIL_SENDER!,
+    from: config.email.senders.employee,
     to: to,
     subject: title,
     html: emailHtml,

@@ -3,22 +3,31 @@
 // sendGraphMail - don't call the sendMail endpoint directly.
 import { ConfidentialClientApplication, Configuration } from "@azure/msal-node";
 import { createLimiter, sleep } from "@/utils/createLimiter";
+import { config } from "@/lib/config";
 
-const msalConfig: Configuration = {
-  auth: {
-    clientId: process.env.AUTH_MICROSOFT_ENTRA_ID_ID!,
-    authority: `https://login.microsoftonline.com/${process.env.AUTH_MICROSOFT_ENTRA_ID_TENANT_ID}`,
-    clientSecret: process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET!,
-  },
-};
+// Created on first send so a missing AUTH_MICROSOFT_ENTRA_ID_* variable fails
+// that send by name instead of every module that imports this one
+let cca: ConfidentialClientApplication | undefined;
 
-const cca = new ConfidentialClientApplication(msalConfig);
+function getClient() {
+  if (!cca) {
+    const msalConfig: Configuration = {
+      auth: {
+        clientId: config.entra.clientId,
+        authority: `https://login.microsoftonline.com/${config.entra.tenantId}`,
+        clientSecret: config.entra.clientSecret,
+      },
+    };
+    cca = new ConfidentialClientApplication(msalConfig);
+  }
+  return cca;
+}
 
 // MSAL caches the app token in memory, so this only hits the network when
 // the cached token is missing/expiring - but that call can fail on its own
 // ("network_error: Network request failed"), so it runs inside the retry loop.
 async function getAccessToken() {
-  const result = await cca.acquireTokenByClientCredential({
+  const result = await getClient().acquireTokenByClientCredential({
     scopes: ["https://graph.microsoft.com/.default"],
   });
   return result?.accessToken;

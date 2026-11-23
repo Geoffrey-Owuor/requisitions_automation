@@ -7,6 +7,7 @@ import { useState, useEffect, useId, useRef } from "react";
 import { preload } from "react-dom";
 import { usePathname } from "next/navigation";
 import { useUser } from "@/context/UserContext";
+import { publicConfig } from "@/lib/publicConfig";
 import {
   DashboardNavItem,
   GUIDELINES_NAV_ITEM,
@@ -42,13 +43,18 @@ const MICROSOFT_APPS: LauncherApp[] = [
     href: "https://outlook.cloud.microsoft",
     keywords: ["mail", "email", "calendar", "inbox"],
   },
-  {
-    key: "m365-onedrive",
-    name: "OneDrive",
-    iconSrc: "/icons/m365/onedrive.svg",
-    href: "https://example-my.sharepoint.com/",
-    keywords: ["files", "storage", "documents", "share"],
-  },
+  // The tenant's own URL, from NEXT_PUBLIC_ONEDRIVE_URL; hidden while unset
+  ...(publicConfig.oneDriveUrl
+    ? [
+        {
+          key: "m365-onedrive",
+          name: "OneDrive",
+          iconSrc: "/icons/m365/onedrive.svg",
+          href: publicConfig.oneDriveUrl,
+          keywords: ["files", "storage", "documents", "share"],
+        },
+      ]
+    : []),
   {
     key: "m365-teams",
     name: "Teams",

@@ -2,6 +2,7 @@ import { cache } from "react";
 import { query } from "@/lib/db";
 import { sendEmail } from "./EmailService";
 import { AccessRequisitionTemplate } from "@/utils/templates/AccessRequisitionTemplate";
+import { config } from "@/lib/config";
 
 export interface AccessMailTemplateValues {
   datesubmitted: string;
@@ -85,7 +86,7 @@ export async function AccessEmailSender({
   });
 
   await sendEmail({
-    from: process.env.ACCESS_EMAIL_SENDER!,
+    from: config.email.senders.access,
     to,
     subject: title,
     html: emailHtml,

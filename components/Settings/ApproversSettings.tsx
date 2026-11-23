@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { publicConfig } from "@/lib/publicConfig";
 import { useQuery } from "@tanstack/react-query";
 import { KeyRound, Plus, Trash2, X } from "lucide-react";
 import {
@@ -517,7 +518,7 @@ function AddApproverForm({
             className={inputClass}
             value={email}
             maxLength={255}
-            placeholder="name@example.com"
+            placeholder={publicConfig.emailPlaceholder}
             onChange={(e) => setEmail(e.target.value)}
           />
         </Field>

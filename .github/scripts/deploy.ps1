@@ -9,11 +9,13 @@
     The GitHub Actions runner workspace root directory.
 
 .PARAMETER AppName
-    The application process name defined in ecosystem.config.js.
+    The application process name defined in ecosystem.config.js. Falls back to
+    the DEPLOY_APP_NAME environment variable.
 
 .PARAMETER AppRootDir
-    Root directory of the target environment on the Windows host. Defaults to
-    the production root.
+    Root directory of the target environment on the Windows host (holds
+    ecosystem.config.js, releases\ and the current junction). Falls back to the
+    DEPLOY_APP_ROOT_DIR environment variable.
 
 .PARAMETER Standalone
     Deploy a Next.js standalone build (.next\standalone) instead of the full
@@ -30,10 +32,10 @@ param (
     [string]$SourceDir = $env:GITHUB_WORKSPACE,
 
     [Parameter(Mandatory=$false)]
-    [string]$AppName = "requisitions_automation",
+    [string]$AppName = $env:DEPLOY_APP_NAME,
 
     [Parameter(Mandatory=$false)]
-    [string]$AppRootDir = "C:\path\to\app",
+    [string]$AppRootDir = $env:DEPLOY_APP_ROOT_DIR,
 
     [Parameter(Mandatory=$false)]
     [switch]$Standalone
@@ -41,6 +43,17 @@ param (
 
 # Stop execution immediately if any command encounters an error
 $ErrorActionPreference = "Stop"
+
+# No built-in defaults, so the host's names and paths stay out of the repository
+foreach ($Required in @(
+    @{ Name = "SourceDir";  Value = $SourceDir;  Source = "-SourceDir or GITHUB_WORKSPACE" },
+    @{ Name = "AppName";    Value = $AppName;    Source = "-AppName or DEPLOY_APP_NAME" },
+    @{ Name = "AppRootDir"; Value = $AppRootDir; Source = "-AppRootDir or DEPLOY_APP_ROOT_DIR" }
+)) {
+    if ([string]::IsNullOrWhiteSpace($Required.Value)) {
+        throw "Missing $($Required.Name): pass $($Required.Source)."
+    }
+}
 
 # ==============================================================================
 # BLOCK 1: PATH DEFINITIONS

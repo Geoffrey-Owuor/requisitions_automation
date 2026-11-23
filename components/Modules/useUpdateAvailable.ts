@@ -1,8 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { publicConfig } from "@/lib/publicConfig";
 
-const CLIENT_VERSION = process.env.NEXT_PUBLIC_APP_VERSION;
+const CLIENT_VERSION = publicConfig.appVersion;
 const CHECK_INTERVAL_MS = 5 * 60 * 1000;
 // Switching windows back and forth shouldn't send a request each time
 const MIN_REQUEST_GAP_MS = 30 * 1000;

@@ -89,6 +89,7 @@
 // --- THE NEW WAY, DIRECTLY USING THE MICROSOFT GRAPH API---
 import { sendGraphMail } from "./GraphMailClient";
 import { withNoReplyNotice } from "@/utils/templates/NoReplyNotice";
+import { config } from "@/lib/config";
 
 interface EmailOptions {
   from: string;
@@ -109,23 +110,10 @@ interface EmailOptions {
 const EMAILS_DISABLED_MESSAGE =
   "Notification emails are disabled (NOTIFICATION_EMAILS_ENABLED=false)";
 
-let warnedAboutFlagValue = false;
-
+// Typos like "flase" or "0" log a warning (see lib/config.ts) instead of
+// silently sending
 function notificationEmailsEnabled(): boolean {
-  const raw = process.env.NOTIFICATION_EMAILS_ENABLED;
-  if (raw === undefined) return true;
-
-  const value = raw.trim().toLowerCase();
-  if (value === "false") return false;
-
-  // Surface typos like "flase" or "0" instead of silently sending
-  if (value !== "true" && !warnedAboutFlagValue) {
-    warnedAboutFlagValue = true;
-    console.warn(
-      `NOTIFICATION_EMAILS_ENABLED has an unrecognised value "${raw}" - emails will be sent. Use "false" to disable them.`,
-    );
-  }
-  return true;
+  return config.email.notificationsEnabled;
 }
 
 export const sendEmail = async ({

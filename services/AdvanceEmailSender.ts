@@ -2,6 +2,7 @@ import { cache } from "react";
 import { query } from "@/lib/db";
 import { sendEmail } from "./EmailService";
 import { AdvanceRequisitionTemplate } from "@/utils/templates/AdvanceRequisitionTemplate";
+import { config } from "@/lib/config";
 
 export interface AdvanceMailTemplateValues {
   datesubmitted: string;
@@ -66,7 +67,7 @@ export async function AdvanceEmailSender({
   });
 
   await sendEmail({
-    from: process.env.ADVANCE_EMAIL_SENDER!,
+    from: config.email.senders.advance,
     to,
     subject: title,
     html: emailHtml,

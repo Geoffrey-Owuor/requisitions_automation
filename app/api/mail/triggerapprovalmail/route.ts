@@ -6,6 +6,7 @@ import { AccessEmailSender } from "@/services/AccessEmailSender";
 import { AdvanceEmailSender } from "@/services/AdvanceEmailSender";
 import { CasualEmailSender } from "@/services/CasualEmailSender";
 import { EmployeeEmailSender } from "@/services/EmployeeEmailSender";
+import { config, secretMatches } from "@/lib/config";
 
 // An api to re-trigger a notification approval email for travel requisition
 export async function POST(request: NextRequest) {
@@ -21,7 +22,7 @@ export async function POST(request: NextRequest) {
     showPdfDownload, //Optional Value
   } = await request.json();
 
-  if (secret !== process.env.REVALIDATE_TAG_KEY) {
+  if (!secretMatches(secret, config.secrets.revalidateTag)) {
     return NextResponse.json(
       { message: "Invalid secret key" },
       { status: 401 },

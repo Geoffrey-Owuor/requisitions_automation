@@ -12,6 +12,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
 import { hasValidStaffApiKey } from "@/lib/staffApiKey";
+import { config } from "@/lib/config";
 
 const noStore = { "Cache-Control": "no-store" };
 
@@ -21,7 +22,7 @@ const clean = (value: unknown, max: number) =>
     : null;
 
 export async function POST(request: NextRequest) {
-  if (!process.env.STAFF_LOOKUP_API_KEY) {
+  if (!config.secrets.staffLookupApiKey) {
     console.error("STAFF_LOOKUP_API_KEY is not set - refusing staff lookups");
   }
   if (!hasValidStaffApiKey(request)) {

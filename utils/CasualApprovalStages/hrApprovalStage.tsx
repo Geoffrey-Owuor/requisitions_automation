@@ -4,6 +4,7 @@ import {
 } from "@/services/CasualEmailSender";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { CasualRequisitionPdf } from "@/components/Approvers/CasualApprovers/pdf/CasualRequisitionPdf";
+import { config } from "@/lib/config";
 
 type HrApprovalStageProps = {
   uuid: string;
@@ -62,7 +63,7 @@ export async function hrApprovalStage({
   }
 
   if (status === "approved") {
-    const externalProvider = process.env.EXTERNAL_CASUAL_PROVIDER!;
+    const externalProvider = config.email.recipients.externalCasualProvider;
 
     // Generate the PDF summaries - attached only to the HR and external provider emails.
     // The external provider gets a generalized version with submitter and approver details removed.

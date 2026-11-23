@@ -1,6 +1,7 @@
 import { sendEmail } from "./EmailService";
 import { AdvanceVerificationCodeTemplate } from "@/utils/templates/AdvanceVerificationCodeTemplate";
 import { AdvanceRecordInactiveTemplate } from "@/utils/templates/AdvanceRecordInactiveTemplate";
+import { config } from "@/lib/config";
 
 export interface AdvanceVerificationEmailProps {
   to: string;
@@ -16,7 +17,7 @@ export async function AdvanceVerificationEmailSender({
   const emailHtml = AdvanceVerificationCodeTemplate({ staffName, code });
 
   await sendEmail({
-    from: process.env.ADVANCE_EMAIL_SENDER!,
+    from: config.email.senders.advance,
     to,
     subject: "Your Salary Advance Verification Code",
     html: emailHtml,
@@ -29,7 +30,7 @@ export async function AdvanceRecordInactiveEmailSender({
   staffName,
 }: Omit<AdvanceVerificationEmailProps, "code">) {
   await sendEmail({
-    from: process.env.ADVANCE_EMAIL_SENDER!,
+    from: config.email.senders.advance,
     to,
     subject: "Salary Advance: your staff record is inactive",
     html: AdvanceRecordInactiveTemplate({ staffName }),

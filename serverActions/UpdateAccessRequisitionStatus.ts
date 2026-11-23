@@ -9,6 +9,7 @@ import { AccessEmailSender } from "@/services/AccessEmailSender";
 import { securityApprovalStage } from "@/utils/AccessApprovalStages/securityApprovalStage";
 import { hodApprovalStage } from "@/utils/AccessApprovalStages/hodApprovalStage";
 import { isValidAccessStage, ACCESS_STAGE_LABELS } from "@/public/assets";
+import { config } from "@/lib/config";
 
 export const UpdateAccessRequisitionStatus = async (
   payload: UpdateRequestStatusProps,
@@ -160,7 +161,7 @@ export const UpdateAccessRequisitionStatus = async (
         break;
       default:
         AccessEmailSender({
-          to: process.env.ADMIN_EMAIL!,
+          to: config.email.recipients.admin,
           requestId: payload.uuid,
           message:
             "A wrong stage was passed in the access requisition approval workflow for this requistion",

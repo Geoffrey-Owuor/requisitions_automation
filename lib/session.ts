@@ -1,10 +1,15 @@
 import "server-only";
 import { cookies } from "next/headers";
 import { SignJWT, jwtVerify } from "jose";
+import { config } from "@/lib/config";
 import { cache } from "react";
 import { isUserDeactivated } from "@/lib/users";
 
-const SECRET_KEY = new TextEncoder().encode(process.env.SESSION_SECRET);
+// Read on use: a missing SESSION_SECRET throws a named error from the call
+// that needs it, outside decrypt's catch so it isn't mistaken for a bad token
+function secretKey() {
+  return new TextEncoder().encode(config.sessionSecret);
+}
 const COOKIE_NAME = "requisitions_session";
 
 export type SessionPayload = {
@@ -22,13 +27,14 @@ export async function encrypt(payload: SessionPayload): Promise<string> {
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("7d") // Valid for 1 week
-    .sign(SECRET_KEY);
+    .sign(secretKey());
 }
 
 // 2. Verify and decode the JWT payload
 export async function decrypt(token: string): Promise<SessionPayload | null> {
+  const key = secretKey();
   try {
-    const { payload } = await jwtVerify(token, SECRET_KEY, {
+    const { payload } = await jwtVerify(token, key, {
       algorithms: ["HS256"],
     });
     const session = payload as SessionPayload;
@@ -46,7 +52,7 @@ export async function createSession(user: SessionPayload) {
 
   cookieStore.set(COOKIE_NAME, token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: config.isProduction,
     path: "/",
     sameSite: "lax",
     maxAge: 60 * 60 * 24 * 7, // 7 days matching the JWT expiration

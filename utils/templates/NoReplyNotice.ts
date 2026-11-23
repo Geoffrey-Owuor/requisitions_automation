@@ -7,6 +7,7 @@
 // Inline styles + tables only (Outlook), with explicit colours.
 
 import { escapeHtml } from "@/utils/escapeHtml";
+import { config } from "@/lib/config";
 
 const APP_NAME = "Hotpoint Apps Hub";
 
@@ -27,7 +28,9 @@ function topNotice(subject: string) {
 }
 
 function footerNotice() {
-  const appUrl = process.env.NEXT_PUBLIC_BASE_URL;
+  // The footer is on every email, verification codes included, so a missing
+  // base URL drops the link rather than failing the send
+  const appUrl = config.appBaseUrlIfSet;
   const followUp = appUrl
     ? `To follow up, open <a href="${escapeHtml(appUrl)}" style="color:#4b5563;font-weight:bold;text-decoration:underline;">${APP_NAME}</a>.`
     : `To follow up, open ${APP_NAME}.`;

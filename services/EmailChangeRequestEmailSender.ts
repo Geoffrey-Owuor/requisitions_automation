@@ -9,6 +9,7 @@ import {
   EmailChangeRequesterTemplate,
   EmailChangeSubmission,
 } from "@/utils/templates/EmailChangeRequestTemplate";
+import { config } from "@/lib/config";
 
 interface EmailChangeEmailProps {
   submission: EmailChangeSubmission;
@@ -21,15 +22,15 @@ export async function EmailChangeRequestEmailSender({
   submission,
   onFile,
 }: EmailChangeEmailProps) {
-  const from = process.env.ADVANCE_EMAIL_SENDER!;
+  const from = config.email.senders.advance;
 
   // HR + admin: the one that matters. Deliberately no replyTo (see template).
   const hrResult = await sendEmail({
     from,
     to: [
-      process.env.FIRST_HR_EMAIL!,
-      process.env.SECOND_HR_EMAIL!,
-      process.env.ADMIN_EMAIL!,
+      config.email.recipients.firstHr,
+      config.email.recipients.secondHr,
+      config.email.recipients.admin,
     ],
     subject: `Email Change Request - ${submission.staffName} (${submission.staffNumber})`,
     html: EmailChangeHrTemplate(submission, onFile),
@@ -77,7 +78,7 @@ export async function EmailChangeResolutionEmailSender(
   outcome: "approved" | "rejected",
   { staffName, requestedEmail, previousEmail }: EmailChangeResolutionProps,
 ) {
-  const from = process.env.ADVANCE_EMAIL_SENDER!;
+  const from = config.email.senders.advance;
 
   if (outcome === "rejected") {
     return sendEmail({
