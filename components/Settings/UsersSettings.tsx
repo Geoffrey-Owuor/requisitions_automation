@@ -14,6 +14,7 @@ import {
   type UserRoleAdminData,
 } from "@/serverActions/UserRoleAdmin";
 import { CONFIG_ADMIN_ROLE } from "@/lib/configAdmin";
+import { publicConfig } from "@/lib/publicConfig";
 import { Select } from "@/components/Select";
 import { UsersSettingsSkeleton } from "@/components/Skeletons/SettingsSkeleton";
 import {
@@ -462,7 +463,7 @@ function AddUserCard({ busy, run }: RunProps) {
               className={inputClass}
               value={email}
               maxLength={255}
-              placeholder="name@example.com"
+              placeholder={publicConfig.emailPlaceholder}
               onChange={(e) => setEmail(e.target.value)}
             />
           </Field>
