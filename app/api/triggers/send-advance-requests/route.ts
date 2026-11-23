@@ -3,6 +3,7 @@ import { Workbook } from "exceljs";
 import { query } from "@/lib/db";
 import { sendEmail } from "@/services/EmailService";
 import { addSheet, stripKeys } from "@/lib/excelExport";
+import { config, secretMatches } from "@/lib/config";
 
 export async function GET(request: NextRequest) {
   // Get current date
@@ -12,7 +13,7 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const token = searchParams.get("token");
 
-  if (token !== process.env.CRON_SECRET) {
+  if (!secretMatches(token, config.secrets.cron)) {
     return NextResponse.json(
       { message: "Invalid secret key" },
       { status: 401 },
@@ -173,11 +174,11 @@ export async function GET(request: NextRequest) {
 
     // Send the email with the generated buffer as an attachment
     const emailResult = await sendEmail({
-      from: process.env.ADVANCE_EMAIL_SENDER!,
+      from: config.email.senders.advance,
       to: [
-        process.env.FIRST_HR_EMAIL!,
-        process.env.SECOND_HR_EMAIL!,
-        process.env.THIRD_FINANCE_EMAIL!,
+        config.email.recipients.firstHr,
+        config.email.recipients.secondHr,
+        config.email.recipients.thirdFinance,
       ],
       subject: `Monthly Salary Advances Report - ${dateString}`,
       html: emailHtml,

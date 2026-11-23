@@ -1,6 +1,6 @@
 import { dateFormatter } from "@/public/assets";
 import { ITDataProps, ITMailTemplateValues } from "@/services/ITEmailSender";
-import { BASE_URL } from "@/public/assets";
+import { config } from "@/lib/config";
 
 interface ITRequisitionProps extends Omit<ITDataProps, "to"> {
   emailData: ITMailTemplateValues;
@@ -119,7 +119,7 @@ export function ITRequisitionTemplate({
           <!-- CTA Button -->
           <div style="margin-top: 32px; text-align: center;">
             <div style="${buttonStyle}">
-              <a href="${BASE_URL}/itapproval/${requestId}${reviewLink ?? ""}" style="background-color: #a31d1d; color: #ffffff; padding: 14px 36px; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 13px; display: inline-block;">Review Requisition</a>
+              <a href="${config.appBaseUrl}/itapproval/${requestId}${reviewLink ?? ""}" style="background-color: #a31d1d; color: #ffffff; padding: 14px 36px; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 13px; display: inline-block;">Review Requisition</a>
             </div>
           </div>
 

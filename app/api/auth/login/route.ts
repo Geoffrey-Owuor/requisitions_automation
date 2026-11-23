@@ -2,6 +2,7 @@
 import { MicrosoftEntraId, generateState, generateCodeVerifier } from "arctic";
 import { cookies } from "next/headers";
 import { getRequestOrigin } from "@/lib/getRequestOrigin";
+import { config } from "@/lib/config";
 
 export async function GET(req: Request) {
   // 1. Get the true origin via our helper
@@ -14,9 +15,9 @@ export async function GET(req: Request) {
 
   // Instantiate Arctic uniquely for the current domain
   const entraId = new MicrosoftEntraId(
-    process.env.AUTH_MICROSOFT_ENTRA_ID_TENANT_ID!,
-    process.env.AUTH_MICROSOFT_ENTRA_ID_ID!,
-    process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET!,
+    config.entra.tenantId,
+    config.entra.clientId,
+    config.entra.clientSecret,
     dynamicRedirectURI,
   );
 
@@ -24,7 +25,7 @@ export async function GET(req: Request) {
   const codeVerifier = generateCodeVerifier();
 
   const cookieStore = await cookies();
-  const isProd = process.env.NODE_ENV === "production";
+  const isProd = config.isProduction;
 
   // Set temporary tracking cookies for validation step
   cookieStore.set("oauth_state", state, {

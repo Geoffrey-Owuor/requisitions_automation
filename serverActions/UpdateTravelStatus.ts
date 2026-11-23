@@ -11,6 +11,7 @@ import { directorApprovalStage } from "@/utils/TravelApprovalStages/directorAppr
 import { EmailSender } from "@/services/EmailSender";
 import { isValidTravelStage, TRAVEL_STAGE_LABELS } from "@/public/assets";
 import { isDirectorEmail } from "@/utils/isDirectorEmail";
+import { config } from "@/lib/config";
 
 export type UpdateRequestStatusProps = {
   uuid: string;
@@ -250,7 +251,7 @@ export async function UpdateTravelStatus(
         break;
       default:
         EmailSender({
-          to: process.env.ADMIN_EMAIL!,
+          to: config.email.recipients.admin,
           requestId: payload.uuid,
           message:
             "A wrong stage was passed in the travel requisition approval workflow for this requistion",

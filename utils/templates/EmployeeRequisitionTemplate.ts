@@ -5,11 +5,11 @@ import {
 } from "@/services/EmployeeEmailSender";
 import {
   dateFormatter,
-  BASE_URL,
   EMPLOYEE_ATTACHMENT_TYPE_LABELS,
   formatJobGrade,
 } from "@/public/assets";
 import { escapeHtml } from "@/utils/escapeHtml";
+import { config } from "@/lib/config";
 import { employeeDisplayStages } from "@/lib/employeeApprovalOrder";
 import type { EmployeeStage } from "@/public/assets";
 
@@ -110,10 +110,10 @@ export function EmployeeRequisitionTemplate({
 
           <div style="margin-top: 32px; text-align: center;">
             <div style="${buttonStyle}">
-              <a href="${BASE_URL}/employeeapproval/${requestId}${reviewLink}" style="background-color: #a31d1d; color: #ffffff; padding: 14px 36px; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 13px; display: inline-block;">Review Requisition</a>
+              <a href="${config.appBaseUrl}/employeeapproval/${requestId}${reviewLink}" style="background-color: #a31d1d; color: #ffffff; padding: 14px 36px; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 13px; display: inline-block;">Review Requisition</a>
             </div>
             <div style="${viewButtonStyle} width: 100%;">
-              <a href="${BASE_URL}/dashboard/employeeview/${requestId}" style="color: #a31d1d; font-size: 12px; font-weight: 600; text-decoration: underline; display: inline-block; margin-top: 12px;">View Requisition</a>
+              <a href="${config.appBaseUrl}/dashboard/employeeview/${requestId}" style="color: #a31d1d; font-size: 12px; font-weight: 600; text-decoration: underline; display: inline-block; margin-top: 12px;">View Requisition</a>
             </div>
           </div>
 
@@ -153,7 +153,7 @@ function positionCard(position: EmployeePositionValues, reviewLink?: string) {
     .map(
       (attachment) => `
         <p style="margin: 8px 0 2px; font-size: 11px; font-weight: 700; color: #5a3a3a; text-transform: uppercase; letter-spacing: 0.5px;">${EMPLOYEE_ATTACHMENT_TYPE_LABELS[attachment.attachmenttype]}</p>
-        <a href="${BASE_URL}/api/employeerequisition/attachment/${attachment.attachmentid}${reviewLink ?? ""}" style="color: #a31d1d; font-size: 12px; font-weight: 600; text-decoration: underline; display: block;">${attachment.originalfilename}</a>`,
+        <a href="${config.appBaseUrl}/api/employeerequisition/attachment/${attachment.attachmentid}${reviewLink ?? ""}" style="color: #a31d1d; font-size: 12px; font-weight: 600; text-decoration: underline; display: block;">${attachment.originalfilename}</a>`,
     )
     .join("");
 

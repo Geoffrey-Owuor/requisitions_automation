@@ -1,6 +1,7 @@
 // An api endpoint for revalidating cached data on demand
 import { NextRequest, NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
+import { config, secretMatches } from "@/lib/config";
 
 // Get the current date and time
 const date = new Date().toLocaleString();
@@ -12,7 +13,7 @@ export async function GET(request: NextRequest) {
   const secret = searchParams.get("secret");
 
   // security check
-  if (!secret || !tag || secret !== process.env.REVALIDATE_TAG_KEY) {
+  if (!tag || !secretMatches(secret, config.secrets.revalidateTag)) {
     return NextResponse.json(
       { message: "Invalid provided params" },
       { status: 403 },

@@ -1,6 +1,7 @@
 import { pool } from "@/lib/db";
 import { PoolClient } from "pg";
 import { NextResponse, NextRequest } from "next/server";
+import { config, secretMatches } from "@/lib/config";
 
 export async function GET(request: NextRequest) {
   let client: PoolClient | undefined;
@@ -9,7 +10,7 @@ export async function GET(request: NextRequest) {
   const token = searchParams.get("token");
 
   // 1. Security Check: Ensure only your script can trigger this
-  if (token !== process.env.CRON_SECRET) {
+  if (!secretMatches(token, config.secrets.cron)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

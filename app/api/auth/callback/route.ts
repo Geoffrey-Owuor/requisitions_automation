@@ -9,15 +9,16 @@ import {
   isMicrosoftUnreachable,
   retryOnConnectFailure,
 } from "@/lib/microsoftSso";
+import { config } from "@/lib/config";
 
 export async function GET(req: Request) {
   const origin = await getRequestOrigin(req);
   const dynamicRedirectURI = `${origin}/api/auth/callback`;
 
   const entraId = new MicrosoftEntraId(
-    process.env.AUTH_MICROSOFT_ENTRA_ID_TENANT_ID!,
-    process.env.AUTH_MICROSOFT_ENTRA_ID_ID!,
-    process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET!,
+    config.entra.tenantId,
+    config.entra.clientId,
+    config.entra.clientSecret,
     dynamicRedirectURI,
   );
 

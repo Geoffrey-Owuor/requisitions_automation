@@ -10,6 +10,7 @@ import {
   TravelAmendmentValues,
   travelAmendmentsQuery,
 } from "@/lib/travelAmendment";
+import { config } from "@/lib/config";
 
 export interface EmailDataValues {
   emailaddress: string;
@@ -138,7 +139,7 @@ export async function EmailSender({
   });
 
   await sendEmail({
-    from: process.env.EMAIL_SENDER!,
+    from: config.email.senders.default,
     to: to,
     subject: title,
     html: emailHtml,

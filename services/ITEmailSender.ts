@@ -2,6 +2,7 @@ import { cache } from "react";
 import { query } from "@/lib/db";
 import { sendEmail } from "./EmailService";
 import { ITRequisitionTemplate } from "@/utils/templates/ITRequisitionTemplate";
+import { config } from "@/lib/config";
 
 export interface ITMailTemplateValues {
   datesubmitted: string;
@@ -77,7 +78,7 @@ export async function ITEmailSender({
   });
 
   await sendEmail({
-    from: process.env.IT_EMAIL_SENDER!,
+    from: config.email.senders.it,
     to,
     subject: title,
     html: emailHtml,

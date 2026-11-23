@@ -2,6 +2,7 @@ import fs from "fs/promises";
 import path from "path";
 import { randomUUID } from "crypto";
 import { EmployeeAttachmentType } from "@/public/assets";
+import { config } from "@/lib/config";
 
 // Allowed attachment types for Employee Requisition position attachments
 // (Job Description / KPI documents) — extension is the source of truth,
@@ -21,13 +22,7 @@ export const ALLOWED_ATTACHMENT_TYPES: Record<string, string[]> = {
 export const MAX_ATTACHMENT_BYTES_PER_FILE = 2 * 1024 * 1024; // 2MB
 
 export function getUploadDirectory(): string {
-  const uploadDir = process.env.UPLOAD_DIRECTORY;
-
-  if (!uploadDir) {
-    throw new Error("UPLOAD_DIRECTORY environment variable is not set");
-  }
-
-  return uploadDir;
+  return config.uploadDirectory;
 }
 
 // Strips path separators, traversal sequences, and control characters from

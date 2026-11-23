@@ -3,7 +3,7 @@ import {
   AccessDataProps,
   AccessMailTemplateValues,
 } from "@/services/AccessEmailSender";
-import { BASE_URL } from "@/public/assets";
+import { config } from "@/lib/config";
 import {
   ACCESS_LOCATIONS_LABEL,
   ACCESS_REQUIREMENTS_LABEL,
@@ -122,10 +122,10 @@ export function AccessRequisitionTemplate({
           <!-- CTA Button -->
           <div style="margin-top: 32px; text-align: center;">
             <div style="${buttonStyle}">
-              <a href="${BASE_URL}/accessapproval/${requestId}${reviewLink ?? ""}" style="background-color: #a31d1d; color: #ffffff; padding: 14px 36px; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 13px; display: inline-block;">Review Requisition</a>
+              <a href="${config.appBaseUrl}/accessapproval/${requestId}${reviewLink ?? ""}" style="background-color: #a31d1d; color: #ffffff; padding: 14px 36px; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 13px; display: inline-block;">Review Requisition</a>
             </div>
             <div style="${pdfButtonStyle} width: 100%;">
-              <a href="${BASE_URL}/dashboard/accesspdf/${requestId}" style="color: #a31d1d; font-size: 12px; font-weight: 600; text-decoration: underline; display: inline-block; margin-top: 12px;">Download PDF Summary</a>
+              <a href="${config.appBaseUrl}/dashboard/accesspdf/${requestId}" style="color: #a31d1d; font-size: 12px; font-weight: 600; text-decoration: underline; display: inline-block; margin-top: 12px;">Download PDF Summary</a>
             </div>
           </div>
 

@@ -2,6 +2,7 @@ import { cache } from "react";
 import { query } from "@/lib/db";
 import { CasualRequisitionTemplate } from "@/utils/templates/CasualRequisitionTemplate";
 import { sendEmail } from "./EmailService";
+import { config } from "@/lib/config";
 
 export interface CasualSectionValues {
   sectionname: string;
@@ -230,7 +231,7 @@ export async function CasualEmailSender({
   });
 
   await sendEmail({
-    from: process.env.CASUAL_EMAIL_SENDER!,
+    from: config.email.senders.casual,
     to: to,
     subject: title,
     html: emailHtml,

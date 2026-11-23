@@ -9,6 +9,7 @@ import { hodApprovalStage } from "@/utils/CasualApprovalStages/hodApprovalStage"
 import { hrApprovalStage } from "@/utils/CasualApprovalStages/hrApprovalStage";
 import { CasualEmailSender } from "@/services/CasualEmailSender";
 import { isValidCasualStage, CASUAL_STAGE_LABELS } from "@/public/assets";
+import { config } from "@/lib/config";
 
 export type UpdateRequestStatusProps = {
   uuid: string;
@@ -181,7 +182,7 @@ export async function UpdateCasualStatus(
         break;
       default:
         CasualEmailSender({
-          to: process.env.ACCESS_EMAIL_SENDER!,
+          to: config.email.senders.access,
           requestId: payload.uuid,
           message:
             "A wrong stage was passed in the casual requisition approval workflow for this requistion",

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { getSession } from "@/lib/session";
+import { config } from "@/lib/config";
 
 // Signs the SSO hand-off for an embedded app at the moment the iframe
 // requests it, then redirects the iframe there. The dashboard embedding pages
@@ -61,7 +62,7 @@ export async function GET(
     });
   }
 
-  const secret = process.env.SSO_SHARED_SECRET;
+  const secret = config.secrets.ssoShared;
   if (!secret) {
     console.error("SSO_SHARED_SECRET is not set - cannot sign embed SSO URL");
     return new NextResponse("Embedded sign-in is not configured", {

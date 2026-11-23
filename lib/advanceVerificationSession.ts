@@ -1,9 +1,14 @@
 import "server-only";
 import { cookies } from "next/headers";
 import { SignJWT, jwtVerify } from "jose";
+import { config } from "@/lib/config";
 import { query } from "@/lib/db";
 
-const SECRET_KEY = new TextEncoder().encode(process.env.SESSION_SECRET);
+// Read on use: a missing SESSION_SECRET throws a named error from the call
+// that needs it, outside decrypt's catch so it isn't mistaken for a bad token
+function secretKey() {
+  return new TextEncoder().encode(config.sessionSecret);
+}
 const COOKIE_NAME = "advance_form_session";
 const SESSION_DURATION = "60m";
 
@@ -20,14 +25,15 @@ async function encrypt(payload: AdvanceVerificationPayload): Promise<string> {
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime(SESSION_DURATION)
-    .sign(SECRET_KEY);
+    .sign(secretKey());
 }
 
 async function decrypt(
   token: string,
 ): Promise<AdvanceVerificationPayload | null> {
+  const key = secretKey();
   try {
-    const { payload } = await jwtVerify(token, SECRET_KEY, {
+    const { payload } = await jwtVerify(token, key, {
       algorithms: ["HS256"],
     });
     return payload as AdvanceVerificationPayload;
@@ -44,7 +50,7 @@ export async function createAdvanceFormSession(
 
   cookieStore.set(COOKIE_NAME, token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: config.isProduction,
     path: "/",
     sameSite: "lax",
     maxAge: 60 * 60, // 1 hour, matching the JWT expiration
