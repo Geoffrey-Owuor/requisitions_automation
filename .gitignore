@@ -30,8 +30,9 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# env files, the placeholder .env.example included (kept local on purpose)
 .env*
+.env.example
 ecosystem.config.js*
 node_modules.zip*
 

@@ -5,23 +5,44 @@ on:
     branches:
       - main
 
+# Host-specific values come from repository variables (Settings > Secrets and
+# variables > Actions > Variables), so no server names or paths live in the repo:
+#   DEPLOY_ENABLED       "true" only in the repository that deploys
+#   DEPLOY_APP_ROOT_DIR  app root on the server (ecosystem.config.js, releases,
+#                        .env.production)
+#   DEPLOY_APP_NAME      PM2 process name in ecosystem.config.js
+#   DEPLOY_APP_PORT      port the app listens on, for the smoke test
+#   DEPLOY_CACHE_ROOT    runner-local build cache directory
 env:
   # Runner-local cache root. This is a self-hosted box, so a plain directory on
   # the same disk beats actions/cache: that action tars the cache and ships it to
   # GitHub-hosted storage over the internet, which for a ~500 MB node_modules and
   # a Turbopack cache costs more than it saves.
-  CACHE_ROOT: C:\path\to\ci-cache
+  CACHE_ROOT: ${{ vars.DEPLOY_CACHE_ROOT }}
+  APP_ROOT_DIR: ${{ vars.DEPLOY_APP_ROOT_DIR }}
+  APP_NAME: ${{ vars.DEPLOY_APP_NAME }}
+  APP_PORT: ${{ vars.DEPLOY_APP_PORT }}
   # A Turbopack cache this old has usually drifted far enough from the tree that
   # a cold build is the safer bet.
   CACHE_MAX_AGE_DAYS: 14
 
 jobs:
   build-and-deploy:
-    # This ensures the job only runs in the organization fork, preventing hanging workflows in your personal repo
-    if: github.repository == 'example-org/example-repo'
+    # Only the deploying repository sets DEPLOY_ENABLED, so pushes to any other
+    # copy of the repo don't queue a job that no runner will pick up
+    if: vars.DEPLOY_ENABLED == 'true'
     runs-on: [self-hosted, windows, x64]
 
     steps:
+      - name: Check Deployment Variables
+        shell: powershell
+        run: |
+          $Missing = @("CACHE_ROOT", "APP_ROOT_DIR", "APP_NAME", "APP_PORT") |
+            Where-Object { [string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($_)) }
+          if ($Missing) {
+            throw "Missing values for: $($Missing -join ', '). Set the DEPLOY_* repository variables listed at the top of deploy.yml."
+          }
+
       - name: Checkout Source Code
         uses: actions/checkout@v4
         with:
@@ -140,11 +161,12 @@ jobs:
       - name: Inject Test Environment Variables
         shell: powershell
         run: |
-          if (Test-Path "C:\path\to\app\.env.production") {
-            Write-Host "Copying .env.production from requisitions_automation into build workspace..."
-            Copy-Item "C:\path\to\app\.env.production" -Destination ".env.production" -Force
+          $EnvFile = Join-Path $env:APP_ROOT_DIR ".env.production"
+          if (Test-Path $EnvFile) {
+            Write-Host "Copying .env.production from the app root into build workspace..."
+            Copy-Item $EnvFile -Destination ".env.production" -Force
           } else {
-            Write-Warning "C:\path\to\app\.env.production not found! NEXT_PUBLIC_ variables may be missing."
+            Write-Warning ".env.production not found in the app root! NEXT_PUBLIC_ variables may be missing."
           }
 
       - name: Build Next.js Application (Standalone Output)
@@ -224,7 +246,7 @@ jobs:
         shell: powershell
         run: |
           $ReleaseId = Get-Date -Format "yyyyMMdd-HHmmss"
-          powershell -ExecutionPolicy Bypass -File .\.github\scripts\deploy.ps1 -ReleaseId $ReleaseId -SourceDir "${{ github.workspace }}" -AppName "requisitions_automation" -AppRootDir "C:\path\to\app" -Standalone
+          powershell -ExecutionPolicy Bypass -File .\.github\scripts\deploy.ps1 -ReleaseId $ReleaseId -SourceDir "${{ github.workspace }}" -AppName $env:APP_NAME -AppRootDir $env:APP_ROOT_DIR -Standalone
 
       # A standalone tracing gap surfaces as MODULE_NOT_FOUND on first request, not
       # at boot, so confirm the process actually answers before calling this a pass.
@@ -236,7 +258,7 @@ jobs:
 
           while ((Get-Date) -lt $Deadline -and -not $Status) {
             try {
-              $Response = Invoke-WebRequest -Uri "http://localhost:4000" -UseBasicParsing -TimeoutSec 10
+              $Response = Invoke-WebRequest -Uri "http://localhost:$($env:APP_PORT)" -UseBasicParsing -TimeoutSec 10
               $Status = $Response.StatusCode
             } catch [System.Net.WebException] {
               # An HTTP error response still proves the server is listening
@@ -249,10 +271,10 @@ jobs:
           }
 
           if (-not $Status) {
-            throw "requisitions_automation did not respond on port 4000 within 60s. Check: pm2 logs requisitions_automation"
+            throw "$($env:APP_NAME) did not respond on port $($env:APP_PORT) within 60s. Check: pm2 logs $($env:APP_NAME)"
           }
 
-          Write-Host "requisitions_automation responded on port 4000 with HTTP $Status"
+          Write-Host "$($env:APP_NAME) responded on port $($env:APP_PORT) with HTTP $Status"
 
       # WORKSPACE CLEANUP STEP: Runs whether deployment succeeded or failed
       - name: Post-Deployment Workspace Cleanup
