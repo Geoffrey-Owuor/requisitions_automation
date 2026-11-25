@@ -337,11 +337,14 @@ html {
 
   /* The public pages lean on hover/active transforms for affordance. Honour the
      preference without removing the state changes themselves (colour, border,
-     shadow all still respond). */
+     shadow all still respond). Transitions get 0s, not a tiny duration:
+     transition-property defaults to `all`, so any non-zero duration would
+     make every element transition every property, and its first frame
+     paints the old value (a popover flashed at its pre-measurement spot). */
   *,
   *::before,
   *::after {
-    transition-duration: 0.01ms !important;
+    transition-duration: 0s !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
