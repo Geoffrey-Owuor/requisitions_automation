@@ -48,7 +48,7 @@ const Header = ({
           <nav className="flex items-center gap-1.5">
             {!onGuidelines && !onLogin && (
               <form
-                action="/api/auth/login"
+                action="/login"
                 method="GET"
                 onSubmit={handlePageLoginSubmit}
               >
@@ -104,19 +104,12 @@ const Header = ({
         </nav>
 
         <div className="hidden items-center gap-1.5 lg:flex">
-          <form
-            action="/api/auth/login"
-            method="GET"
-            onSubmit={() => setIsLoading(true)}
+          <Link
+            href="/login"
+            className="rounded-control hover:bg-brand-50 hover:text-brand-700 px-3 py-2 text-sm font-medium text-slate-600 transition-colors"
           >
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="rounded-control hover:bg-brand-50 hover:text-brand-700 cursor-pointer px-3 py-2 text-sm font-medium text-slate-600 transition-colors disabled:opacity-60"
-            >
-              {isLoading ? "Redirecting…" : "Login"}
-            </button>
-          </form>
+            Login
+          </Link>
 
           <Link
             href="/guidelines/travel"
@@ -155,19 +148,13 @@ const Header = ({
             ))}
 
             <div className="mt-2 flex flex-col gap-2 border-t border-slate-200 pt-3">
-              <form
-                action="/api/auth/login"
-                method="GET"
-                onSubmit={() => setIsLoading(true)}
+              <Link
+                href="/login"
+                onClick={() => setIsMenuOpen(false)}
+                className="rounded-control hover:bg-brand-50 hover:text-brand-700 w-full px-2 py-2.5 text-left text-sm font-medium text-slate-600 transition-colors"
               >
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="rounded-control hover:bg-brand-50 hover:text-brand-700 w-full cursor-pointer px-2 py-2.5 text-left text-sm font-medium text-slate-600 transition-colors disabled:opacity-60"
-                >
-                  {isLoading ? "Redirecting…" : "Login"}
-                </button>
-              </form>
+                Login
+              </Link>
 
               <Link
                 href="/guidelines/travel"

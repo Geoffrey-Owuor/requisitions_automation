@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import PurchaseIframeWrapper from "@/components/Iframes/PurchaseIframeWrapper";
-import HardRedirect from "@/components/HardRedirect";
+import { redirect } from "next/navigation";
 import { getSession } from "@/lib/session";
 
 export const metadata: Metadata = {
@@ -14,7 +14,7 @@ const page = async () => {
 
   // If no session exists, block access and redirect to the public login page
   if (!session) {
-    return <HardRedirect url="/api/auth/login" />;
+    redirect("/login?returnTo=%2Fdashboard%2Fstaffproductpurchase");
   }
 
   // The SSO URL is signed by /api/embed/staffproductpurchase when the iframe

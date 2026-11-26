@@ -10,6 +10,7 @@ import {
   retryOnConnectFailure,
 } from "@/lib/microsoftSso";
 import { config } from "@/lib/config";
+import { safeReturnTo } from "@/lib/safeReturnTo";
 
 export async function GET(req: Request) {
   const origin = await getRequestOrigin(req);
@@ -85,12 +86,7 @@ export async function GET(req: Request) {
     cookieStore.delete("oauth_return_to");
 
     // 3. Security Check: Ensure it's a local relative path to avoid open redirects
-    const safeReturnTo =
-      storedReturnTo.startsWith("/") && !storedReturnTo.startsWith("//")
-        ? storedReturnTo
-        : "/dashboard";
-
-    return Response.redirect(new URL(safeReturnTo, origin));
+    return Response.redirect(new URL(safeReturnTo(storedReturnTo), origin));
   } catch (error) {
     console.error("Authentication handshake error:", error);
     // Couldn't reach Microsoft at all (network) vs. Microsoft rejected it.

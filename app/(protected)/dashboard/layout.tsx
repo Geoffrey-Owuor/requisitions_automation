@@ -1,6 +1,6 @@
 // app/(protected)/layout.tsx
 import { getSession } from "@/lib/session"; // Updated import
-import HardRedirect from "@/components/HardRedirect";
+import { redirect } from "next/navigation";
 import AuthenticatedShell from "@/components/Dashboard/AuthenticatedShell";
 
 export default async function ProtectedLayout({
@@ -13,7 +13,7 @@ export default async function ProtectedLayout({
 
   // If no session exists, block access and redirect to the public login page
   if (!session) {
-    return <HardRedirect url="/api/auth/login" />;
+    redirect("/login");
   }
 
   return <AuthenticatedShell session={session}>{children}</AuthenticatedShell>;

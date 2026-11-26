@@ -118,6 +118,20 @@ export const config = {
     return required("SESSION_SECRET");
   },
 
+  // Email-code sign-in to the Hub (alongside Microsoft): the email domains
+  // allowed a code, comma-separated (e.g. "example.com"). Empty or unset
+  // turns the method off and the login page offers Microsoft alone.
+  get hubSignInEmailDomains(): string[] {
+    return [
+      ...new Set(
+        (optional("HUB_SIGN_IN_EMAIL_DOMAINS") ?? "")
+          .split(",")
+          .map((domain) => domain.trim().toLowerCase().replace(/^@/, ""))
+          .filter(Boolean),
+      ),
+    ];
+  },
+
   get uploadDirectory() {
     return required("UPLOAD_DIRECTORY");
   },

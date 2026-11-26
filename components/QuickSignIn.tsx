@@ -50,8 +50,9 @@ export default function QuickSignIn() {
   };
 
   const handleContinue = () => {
-    // Navigate directly to your API route to trigger the SSO flow
-    window.location.href = "/api/auth/login";
+    // The login page offers both sign-in methods, with this email prefilled
+    // for the email code
+    window.location.href = "/login";
 
     // Dismiss the component
     handleDismiss();
