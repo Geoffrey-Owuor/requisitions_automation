@@ -120,6 +120,10 @@ export async function requestHubSignInCode(
       );
     }
 
+    // Read before the code row is written, so a missing HUB_EMAIL_SENDER
+    // fails the request without leaving a row that counts against the limits
+    const sender = config.email.senders.hub;
+
     const code = randomInt(0, 10 ** HUB_SIGN_IN_CODE_LENGTH)
       .toString()
       .padStart(HUB_SIGN_IN_CODE_LENGTH, "0");
@@ -150,7 +154,7 @@ export async function requestHubSignInCode(
     }
 
     const sent = await sendEmail({
-      from: config.email.senders.default,
+      from: sender,
       to: email,
       subject: `${code} is your Apps Hub sign-in code`,
       html: HubSignInCodeTemplate({ code, expiryMinutes: EXPIRY_MINUTES }),

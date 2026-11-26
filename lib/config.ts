@@ -187,6 +187,9 @@ export const config = {
       get employee() {
         return required("EMPLOYEE_EMAIL_SENDER");
       },
+      get hub() {
+        return required("HUB_EMAIL_SENDER");
+      },
     },
     recipients: {
       get admin() {
