@@ -18,6 +18,7 @@ import {
   getDashboardNavGroups,
   isNavItemActive,
 } from "@/lib/dashboardNav";
+import { saveRailFit, visibleRailItems } from "@/lib/railFit";
 
 const RAIL_ITEM_CLASS =
   "group flex w-full shrink-0 flex-col items-center justify-center gap-1 rounded-surface py-2 text-[11px] leading-tight font-semibold transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-white/80 active:scale-95";
@@ -32,7 +33,26 @@ const railItemClass = (highlighted: boolean) =>
 // Matches the list's gap-1.5
 const RAIL_GAP_PX = 6;
 
-const DashboardSidebar = () => {
+// Shown over the still-hidden list on a browser's first visit, until the
+// rail has measured how many items fit. Each placeholder is built like a
+// rail item (same classes, a one-line label) so it has the same height, and
+// the column wraps, so a placeholder that would be cut off at the bottom
+// moves into a clipped second column instead.
+const RailSkeleton = ({ count }: { count: number }) => (
+  <div
+    aria-hidden="true"
+    className="pointer-events-none absolute inset-0 flex flex-col flex-wrap gap-x-4 gap-y-1.5 overflow-hidden"
+  >
+    {Array.from({ length: count }, (_, index) => (
+      <div key={index} className={`${RAIL_ITEM_CLASS} animate-pulse`}>
+        <span className="rounded-compact h-5 w-5 bg-white/15" />
+        <span className="w-10 rounded-full bg-white/15">&nbsp;</span>
+      </div>
+    ))}
+  </div>
+);
+
+const DashboardSidebar = ({ railFit }: { railFit: number | null }) => {
   const pathname = usePathname();
 
   const router = useRouter();
@@ -48,9 +68,14 @@ const DashboardSidebar = () => {
     GUIDELINES_NAV_ITEM,
   ];
 
-  // How many items fit the rail's height; the rest go into More, which takes
-  // the next slot. All items render until the first measurement.
-  const [visibleCount, setVisibleCount] = useState(items.length);
+  // How many slots fit the rail's height; when not every item fits, More
+  // takes the last slot. The server renders with the count the last visit
+  // measured (railFit, from a cookie - see lib/railFit.ts), so the rail
+  // arrives already split and hydration changes nothing. Without one (a
+  // browser's first visit) it can't know the window height, so the list
+  // stays hidden until measured rather than show items that then jump into
+  // More.
+  const [fits, setFits] = useState<number | null>(railFit);
   const spaceRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
   const itemHeightRef = useRef(0);
@@ -67,10 +92,13 @@ const DashboardSidebar = () => {
       const itemHeight = itemHeightRef.current;
       if (!itemHeight) return;
 
-      const fits = Math.floor(
+      const measured = Math.floor(
         (space.clientHeight + RAIL_GAP_PX) / (itemHeight + RAIL_GAP_PX),
       );
-      setVisibleCount(fits >= itemCount ? itemCount : Math.max(fits - 1, 0));
+      setFits((previous) => {
+        if (previous !== measured) saveRailFit(measured);
+        return measured;
+      });
     };
 
     measure();
@@ -79,6 +107,8 @@ const DashboardSidebar = () => {
     return () => observer.disconnect();
   }, [itemCount]);
 
+  const visibleCount =
+    fits === null ? itemCount : visibleRailItems(fits, itemCount);
   const visibleItems = items.slice(0, visibleCount);
   const overflowItems = items.slice(visibleCount);
 
@@ -98,8 +128,12 @@ const DashboardSidebar = () => {
         <div aria-hidden="true" className="mx-3 my-0.5 h-px bg-white/10" />
 
         {/* Measured: the space left under Home */}
-        <div ref={spaceRef} className="flex min-h-0 flex-1 flex-col">
-          <ul ref={listRef} className="flex flex-col gap-1.5">
+        <div ref={spaceRef} className="relative flex min-h-0 flex-1 flex-col">
+          {fits === null && <RailSkeleton count={itemCount + 1} />}
+          <ul
+            ref={listRef}
+            className={`flex flex-col gap-1.5 ${fits === null ? "invisible" : ""}`}
+          >
             {visibleItems.map((item) => (
               <li key={item.key}>
                 <RailLink

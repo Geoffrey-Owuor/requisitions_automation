@@ -6,9 +6,11 @@ import { Metadata } from "next";
 import LoginWrapper from "@/components/LoginWrapper";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { ArrowLeft, Lock, ShieldCheck } from "lucide-react";
-import HardRedirect from "@/components/HardRedirect";
+import { ArrowLeft, ShieldCheck } from "lucide-react";
 import HotpointMark from "@/components/HotpointMark";
+import EmailCodeSignIn from "@/components/EmailCodeSignIn";
+import { config } from "@/lib/config";
+import { safeReturnTo } from "@/lib/safeReturnTo";
 
 export const metadata: Metadata = {
   title: "Login",
@@ -31,16 +33,17 @@ const SSO_ERROR_MESSAGES: Record<string, string> = {
 
 export default async function LoginPage({ searchParams }: Props) {
   const session = await getSession();
+  const { returnTo: rawReturnTo, error } = await searchParams;
+  // Where either sign-in lands afterwards (proxy.ts sends signed-out
+  // dashboard and approval-page visits here with it)
+  const returnTo = rawReturnTo ? safeReturnTo(rawReturnTo) : undefined;
 
   if (session) {
-    redirect("/dashboard");
+    redirect(returnTo ?? "/dashboard");
   }
 
-  // Handle auto-redirect if requested by middleware
-  const { returnTo, error } = await searchParams;
-  if (returnTo) {
-    return <HardRedirect url="/api/auth/login" returnTo={returnTo} />;
-  }
+  // Empty while HUB_SIGN_IN_EMAIL_DOMAINS is unset: Microsoft only
+  const codeDomains = config.hubSignInEmailDomains;
 
   return (
     <div className="layout-scrollbar bg-canvas h-screen w-full selection:bg-rose-100 selection:text-rose-900">
@@ -78,16 +81,13 @@ export default async function LoginPage({ searchParams }: Props) {
 
                 {/* Typography Header Group */}
                 <div className="mb-6 text-center">
-                  <span className="rounded-compact mb-3 inline-flex items-center gap-1.5 border border-rose-100 bg-rose-50/70 px-3 py-1 text-[10px] font-bold tracking-[0.14em] text-rose-600 uppercase">
-                    <Lock size={10} />
-                    Secure Sign In
-                  </span>
                   <h1 className="mb-2 text-[26px] leading-tight font-semibold tracking-tight text-slate-900">
                     Welcome Back
                   </h1>
                   <p className="px-1 text-[13.5px] leading-relaxed font-normal text-slate-500">
-                    Valid work account required. Login using your Microsoft 365
-                    account to proceed.
+                    {codeDomains.length > 0
+                      ? "Valid work account required. Sign in with Microsoft 365, or get a one-time code at your work email."
+                      : "Valid work account required. Login using your Microsoft 365 account to proceed."}
                   </p>
                 </div>
 
@@ -110,7 +110,23 @@ export default async function LoginPage({ searchParams }: Props) {
                 )}
 
                 {/* Dynamic Handshake Interface Trigger */}
-                <LoginWrapper />
+                <LoginWrapper returnTo={returnTo} />
+
+                {codeDomains.length > 0 && (
+                  <>
+                    <div className="my-5 flex items-center gap-3">
+                      <div className="h-px flex-1 bg-slate-200" />
+                      <span className="text-[11px] font-medium text-slate-400">
+                        or use your work email
+                      </span>
+                      <div className="h-px flex-1 bg-slate-200" />
+                    </div>
+                    <EmailCodeSignIn
+                      domains={codeDomains}
+                      returnTo={returnTo}
+                    />
+                  </>
+                )}
 
                 {/* Trust strip */}
                 <div className="mt-6 flex items-center justify-center gap-2 px-4 py-2">
@@ -119,7 +135,9 @@ export default async function LoginPage({ searchParams }: Props) {
                     className="shrink-0 text-emerald-500"
                   />
                   <p className="text-[11.5px] text-slate-500">
-                    Protected by Microsoft Entra ID
+                    {codeDomains.length > 0
+                      ? "Microsoft Entra ID or a one-time email code"
+                      : "Protected by Microsoft Entra ID"}
                   </p>
                 </div>
 

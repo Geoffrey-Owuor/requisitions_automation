@@ -40,6 +40,29 @@ function port(name: string, fallback: number): number {
   return value;
 }
 
+// A required comma-separated list of email addresses. Spaces and empty
+// entries are ignored; an entry that isn't an address is dropped with a
+// warning rather than failing every send, but at least one must be valid.
+const warnedAboutEmailList = new Set<string>();
+function emailList(name: string): string[] {
+  const entries = required(name)
+    .split(",")
+    .map((entry) => entry.trim().toLowerCase())
+    .filter(Boolean);
+  const valid = entries.filter((entry) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(entry),
+  );
+  const invalid = entries.filter((entry) => !valid.includes(entry));
+  if (invalid.length > 0 && !warnedAboutEmailList.has(name)) {
+    warnedAboutEmailList.add(name);
+    console.warn(
+      `${name} has entries that aren't email addresses and will be skipped: ${invalid.join(", ")}`,
+    );
+  }
+  if (valid.length === 0) throw new MissingConfigError(name);
+  return [...new Set(valid)];
+}
+
 let warnedAboutEmailFlag = false;
 
 export const config = {
@@ -93,6 +116,20 @@ export const config = {
 
   get sessionSecret() {
     return required("SESSION_SECRET");
+  },
+
+  // Email-code sign-in to the Hub (alongside Microsoft): the email domains
+  // allowed a code, comma-separated (e.g. "example.com"). Empty or unset
+  // turns the method off and the login page offers Microsoft alone.
+  get hubSignInEmailDomains(): string[] {
+    return [
+      ...new Set(
+        (optional("HUB_SIGN_IN_EMAIL_DOMAINS") ?? "")
+          .split(",")
+          .map((domain) => domain.trim().toLowerCase().replace(/^@/, ""))
+          .filter(Boolean),
+      ),
+    ];
   },
 
   get uploadDirectory() {
@@ -164,8 +201,10 @@ export const config = {
       get thirdFinance() {
         return required("THIRD_FINANCE_EMAIL");
       },
-      get externalCasualProvider() {
-        return required("EXTERNAL_CASUAL_PROVIDER");
+      // One or more addresses, comma-separated: every one gets the approved
+      // casual requisition in a single email
+      get externalCasualProviders() {
+        return emailList("EXTERNAL_CASUAL_PROVIDER");
       },
     },
   },

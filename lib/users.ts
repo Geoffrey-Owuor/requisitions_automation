@@ -2,17 +2,25 @@ import "server-only";
 import { query } from "@/lib/db";
 
 // Records a sign-in in users (migration 029): creates the row on a first
-// sign-in, otherwise refreshes the name from Entra ID. A failure is logged
-// and swallowed - it must never block signing in, since roles are read by
-// email and still work for a row that exists.
-export async function recordSignIn(email: string, name: string) {
+// sign-in, otherwise refreshes the name from Entra ID. The email-code sign-in
+// passes refreshName: false, since its name is only a guess from the address
+// and must not replace one Entra ID or a config admin gave. A failure is
+// logged and swallowed - it must never block signing in, since roles are read
+// by email and still work for a row that exists.
+export async function recordSignIn(
+  email: string,
+  name: string,
+  { refreshName = true }: { refreshName?: boolean } = {},
+) {
   try {
     await query(
       `INSERT INTO users (email, username, last_sign_in_at)
        VALUES (LOWER(TRIM($1)), $2, NOW())
        ON CONFLICT (email) DO UPDATE
-       SET username = EXCLUDED.username, last_sign_in_at = NOW()`,
-      [email, name],
+       SET username = CASE WHEN $3 OR NULLIF(TRIM(users.username), '') IS NULL
+                      THEN EXCLUDED.username ELSE users.username END,
+           last_sign_in_at = NOW()`,
+      [email, name, refreshName],
     );
   } catch (error) {
     console.error("Error while recording a sign-in:", error);

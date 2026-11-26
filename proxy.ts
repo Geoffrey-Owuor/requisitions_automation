@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "./lib/session";
+import { safeReturnTo } from "./lib/safeReturnTo";
 
 // A simple proxy to redirect from designated pages when a valid cookie session is found
 const redirectPaths = ["/", "/login", "/advance"];
@@ -28,9 +29,14 @@ export async function proxy(request: NextRequest) {
   // 2. HANDLE REDIRECT PAGES (Redirect logged-in users away)
   if (redirectPaths.includes(pathname)) {
     if (session) {
-      // Signed-in staff use the salary advance form inside the dashboard
+      // Signed-in staff use the salary advance form inside the dashboard,
+      // and a login link with a returnTo goes straight there
       const target =
-        pathname === "/advance" ? "/dashboard/advance" : "/dashboard";
+        pathname === "/advance"
+          ? "/dashboard/advance"
+          : pathname === "/login"
+            ? safeReturnTo(request.nextUrl.searchParams.get("returnTo"))
+            : "/dashboard";
       return NextResponse.redirect(new URL(target, request.url));
     }
   }

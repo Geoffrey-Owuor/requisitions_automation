@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-const LoginWrapper = () => {
+const LoginWrapper = ({ returnTo }: { returnTo?: string }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -22,6 +22,7 @@ const LoginWrapper = () => {
       className="w-full"
       onSubmit={() => setIsLoading(true)}
     >
+      {returnTo && <input type="hidden" name="returnTo" value={returnTo} />}
       <button
         type="submit"
         disabled={isLoading}

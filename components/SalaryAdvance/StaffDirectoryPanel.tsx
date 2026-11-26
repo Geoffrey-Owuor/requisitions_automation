@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  Download,
   FileSpreadsheet,
   Info,
+  Loader2,
   Pencil,
   Plus,
   RotateCcw,
@@ -49,6 +51,7 @@ export default function StaffDirectoryPanel() {
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
   const [importing, setImporting] = useState(false);
   const { busy, run } = useSettingsRunner(DIRECTORY_KEY, []);
+  const { exporting, exportDirectory } = useStaffExport();
 
   const {
     data: staff,
@@ -131,6 +134,20 @@ export default function StaffDirectoryPanel() {
         >
           <FileSpreadsheet className="h-4 w-4" />
           Import from Excel
+        </button>
+        <button
+          type="button"
+          onClick={exportDirectory}
+          disabled={exporting}
+          aria-busy={exporting}
+          className="rounded-control inline-flex items-center gap-2 border border-neutral-300 bg-white px-3 py-2.5 text-sm font-medium text-neutral-800 hover:border-neutral-400 disabled:opacity-60"
+        >
+          {exporting ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Download className="h-4 w-4" />
+          )}
+          Export to Excel
         </button>
       </div>
 
@@ -296,6 +313,47 @@ const EMPTY_FORM = {
   department: "",
   location: "",
 };
+
+// Downloads every staff record (deactivated ones included) as an .xlsx.
+// Fetched rather than linked so a failure shows an alert instead of saving
+// the error response as the file.
+function useStaffExport() {
+  const triggerAlert = useAlertStore((state) => state.triggerAlert);
+  const [exporting, setExporting] = useState(false);
+
+  const exportDirectory = async () => {
+    setExporting(true);
+    try {
+      const response = await fetch("/api/salaryadvance/staff-export");
+      if (!response.ok) {
+        const body = await response.json().catch(() => null);
+        throw new Error(body?.message);
+      }
+      const filename =
+        /filename="([^"]+)"/.exec(
+          response.headers.get("Content-Disposition") ?? "",
+        )?.[1] ?? "Staff_Directory.xlsx";
+      const url = URL.createObjectURL(await response.blob());
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      triggerAlert(
+        "error",
+        (error instanceof Error && error.message) ||
+          "The staff directory could not be exported, please try again",
+      );
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  return { exporting, exportDirectory };
+}
 
 function StaffRecordModal({
   editing,
