@@ -11,6 +11,7 @@ import {
 } from "@/lib/microsoftSso";
 import { config } from "@/lib/config";
 import { safeReturnTo } from "@/lib/safeReturnTo";
+import { HANDOFF_PARAM, signInHandoffResponse } from "@/lib/signInHandoff";
 
 export async function GET(req: Request) {
   const origin = await getRequestOrigin(req);
@@ -26,6 +27,15 @@ export async function GET(req: Request) {
   const requestUrl = new URL(req.url);
   const code = requestUrl.searchParams.get("code");
   const state = requestUrl.searchParams.get("state");
+
+  // First pass, straight from Microsoft: paint the "Signing you in" screen,
+  // which comes straight back with HANDOFF_PARAM to do the work below
+  // (lib/signInHandoff.ts says why)
+  if (code && !requestUrl.searchParams.has(HANDOFF_PARAM)) {
+    const target = new URL(requestUrl.pathname + requestUrl.search, origin);
+    target.searchParams.set(HANDOFF_PARAM, "1");
+    return signInHandoffResponse(target);
+  }
 
   const cookieStore = await cookies();
   const storedState = cookieStore.get("oauth_state")?.value;

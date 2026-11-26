@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { ArrowLeft, Loader2, Mail } from "lucide-react";
 import {
   requestHubSignInCode,
@@ -10,10 +11,12 @@ import {
   HUB_SIGN_IN_CODE_LENGTH,
   HUB_SIGN_IN_RESEND_SECONDS,
 } from "@/lib/hubSignIn";
+import SignInTransition from "@/components/SignInTransition";
 
 // The login page's email-code sign-in: a work email, then the code sent to
 // it. A successful sign-in does a full page load of returnTo (not a client
-// navigation), so the dashboard starts with the new session cookie.
+// navigation), so the dashboard starts with the new session cookie. Until
+// that page paints, SignInTransition covers the login page.
 
 const LAST_USER_KEY = "Requisitions_Automation_lastUser";
 
@@ -41,6 +44,7 @@ export default function EmailCodeSignIn({
     null,
   );
   const [resendIn, setResendIn] = useState(0);
+  const [signingIn, setSigningIn] = useState(false);
   const codeRef = useRef<HTMLInputElement>(null);
 
   // Prefill the last account used in this browser (also what QuickSignIn
@@ -57,6 +61,19 @@ export default function EmailCodeSignIn({
       // No storage, or nothing usable saved
     }
   }, [domains]);
+
+  // Back from the dashboard can restore this page from the bfcache with the
+  // transition still up - drop it so the page is usable again
+  useEffect(() => {
+    const reset = (e: PageTransitionEvent) => {
+      if (e.persisted) {
+        setSigningIn(false);
+        setPending(null);
+      }
+    };
+    window.addEventListener("pageshow", reset);
+    return () => window.removeEventListener("pageshow", reset);
+  }, []);
 
   useEffect(() => {
     if (resendIn <= 0) return;
@@ -106,8 +123,19 @@ export default function EmailCodeSignIn({
     try {
       const result = await verifyHubSignInCode(email, code, returnTo);
       if (result.ok && result.redirectTo) {
-        // Stays pending: the page is about to be replaced
-        window.location.href = result.redirectTo;
+        // Stays pending: the page is about to be replaced. The transition
+        // paints first, so it's what stays on screen while that page loads.
+        // The timer covers a background tab, where animation frames don't run.
+        const target = result.redirectTo;
+        setSigningIn(true);
+        let started = false;
+        const go = () => {
+          if (started) return;
+          started = true;
+          window.location.assign(target);
+        };
+        requestAnimationFrame(() => setTimeout(go, 0));
+        setTimeout(go, 150);
         return;
       }
       setNotice({ ok: false, text: result.message });
@@ -168,6 +196,9 @@ export default function EmailCodeSignIn({
 
   return (
     <form onSubmit={handleCodeSubmit} className="flex flex-col gap-3">
+      {/* Portaled: the login card's transform and overflow would otherwise
+          contain a fixed overlay */}
+      {signingIn && createPortal(<SignInTransition />, document.body)}
       <label className="sr-only" htmlFor="hub-sign-in-code">
         {HUB_SIGN_IN_CODE_LENGTH}-digit code
       </label>

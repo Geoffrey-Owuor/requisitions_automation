@@ -1,6 +1,4 @@
 // app/login/page.tsx
-import { getSession } from "@/lib/session";
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Metadata } from "next";
 import LoginWrapper from "@/components/LoginWrapper";
@@ -31,16 +29,16 @@ const SSO_ERROR_MESSAGES: Record<string, string> = {
     "Your account has been deactivated. Please contact your administrator if you need access.",
 };
 
+// A signed-in visit never reaches this page: proxy.ts redirects it to
+// returnTo. Don't redirect here as well - a successful code sign-in sets the
+// session cookie in a server action, whose refresh re-renders this page, and
+// a redirect there would unmount the page, SignInTransition included, before
+// the full page load to returnTo even starts.
 export default async function LoginPage({ searchParams }: Props) {
-  const session = await getSession();
   const { returnTo: rawReturnTo, error } = await searchParams;
   // Where either sign-in lands afterwards (proxy.ts sends signed-out
   // dashboard and approval-page visits here with it)
   const returnTo = rawReturnTo ? safeReturnTo(rawReturnTo) : undefined;
-
-  if (session) {
-    redirect(returnTo ?? "/dashboard");
-  }
 
   // Empty while HUB_SIGN_IN_EMAIL_DOMAINS is unset: Microsoft only
   const codeDomains = config.hubSignInEmailDomains;
