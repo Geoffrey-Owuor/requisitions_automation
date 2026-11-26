@@ -1,4 +1,6 @@
+import { cookies } from "next/headers";
 import { SessionPayload } from "@/lib/session";
+import { RAIL_FIT_COOKIE, parseRailFit } from "@/lib/railFit";
 import { UserProvider } from "@/context/UserContext";
 import DashboardWrapper from "./DashboardWrapper";
 import UserSessionWrapper from "./UserSessionWrapper";
@@ -18,10 +20,12 @@ const AuthenticatedShell = async ({
 }) => {
   // Get the possible user roles assigned to the user, and which array-based
   // approval stages (Security/IT/Director/Retail Director/HR) they belong to
-  const [roles, memberships] = await Promise.all([
+  const [roles, memberships, cookieStore] = await Promise.all([
     getUserRoles(session.email),
     getApproverMemberships(),
+    cookies(),
   ]);
+  const railFit = parseRailFit(cookieStore.get(RAIL_FIT_COOKIE)?.value);
 
   // Construct user object properties mapped directly out of our session schema
   const userObject = {
@@ -40,7 +44,7 @@ const AuthenticatedShell = async ({
   return (
     <UserProvider user={userObject}>
       <UserSessionWrapper user={sessionObject}>
-        <DashboardWrapper>{children}</DashboardWrapper>
+        <DashboardWrapper railFit={railFit}>{children}</DashboardWrapper>
       </UserSessionWrapper>
     </UserProvider>
   );

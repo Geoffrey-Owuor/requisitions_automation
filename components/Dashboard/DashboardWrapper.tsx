@@ -14,7 +14,14 @@ const CORNER_OVERLAYS = [
   "hidden custom:block bottom-dashboard-gap right-dashboard-gap bg-[radial-gradient(circle_at_0_0,transparent_calc(var(--radius-dashboard)_-_0.5px),var(--color-red-950)_var(--radius-dashboard))]",
 ];
 
-const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
+const DashboardWrapper = ({
+  railFit,
+  children,
+}: {
+  // The desktop rail's last measured fit (lib/railFit.ts)
+  railFit: number | null;
+  children: React.ReactNode;
+}) => {
   return (
     // The guard wraps the navs too, so their links and Back button ask
     // before leaving a requisition form with unsaved input
@@ -24,7 +31,7 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
         <MobileHeader />
 
         {/* Desktop sidebar handles lg screens */}
-        <DashboardSidebar />
+        <DashboardSidebar railFit={railFit} />
 
         <div
           id="dashboard-wrapper"
