@@ -295,6 +295,12 @@ html {
   }
 }
 
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
 /* Sequential dot chase for the sign-in button's pending state. */
 @keyframes color-chase {
   0%,
