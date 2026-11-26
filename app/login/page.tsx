@@ -6,7 +6,7 @@ import { Metadata } from "next";
 import LoginWrapper from "@/components/LoginWrapper";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { ArrowLeft, Lock, ShieldCheck } from "lucide-react";
+import { ArrowLeft, ShieldCheck } from "lucide-react";
 import HotpointMark from "@/components/HotpointMark";
 import EmailCodeSignIn from "@/components/EmailCodeSignIn";
 import { config } from "@/lib/config";
@@ -81,10 +81,6 @@ export default async function LoginPage({ searchParams }: Props) {
 
                 {/* Typography Header Group */}
                 <div className="mb-6 text-center">
-                  <span className="rounded-compact mb-3 inline-flex items-center gap-1.5 border border-rose-100 bg-rose-50/70 px-3 py-1 text-[10px] font-bold tracking-[0.14em] text-rose-600 uppercase">
-                    <Lock size={10} />
-                    Secure Sign In
-                  </span>
                   <h1 className="mb-2 text-[26px] leading-tight font-semibold tracking-tight text-slate-900">
                     Welcome Back
                   </h1>
