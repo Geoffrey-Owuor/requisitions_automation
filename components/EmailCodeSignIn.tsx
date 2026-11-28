@@ -115,13 +115,20 @@ export default function EmailCodeSignIn({
     sendCode();
   };
 
-  const handleCodeSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (pending) return;
+  // Checks a full code - from the form, or as soon as the last digit is
+  // typed, pasted or autofilled. The ref blocks a second check before the
+  // pending state has re-rendered (e.g. a paste followed straight by Enter).
+  const verifyingRef = useRef(false);
+
+  const verifyCode = async (value: string) => {
+    if (verifyingRef.current || value.length !== HUB_SIGN_IN_CODE_LENGTH) {
+      return;
+    }
+    verifyingRef.current = true;
     setPending("verify");
     setNotice(null);
     try {
-      const result = await verifyHubSignInCode(email, code, returnTo);
+      const result = await verifyHubSignInCode(email, value, returnTo);
       if (result.ok && result.redirectTo) {
         // Stays pending: the page is about to be replaced. The transition
         // paints first, so it's what stays on screen while that page loads.
@@ -143,7 +150,14 @@ export default function EmailCodeSignIn({
     } catch {
       setNotice({ ok: false, text: "Something went wrong, please try again." });
     }
+    verifyingRef.current = false;
     setPending(null);
+  };
+
+  const handleCodeSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    if (pending) return;
+    verifyCode(code);
   };
 
   const noticeElement = notice && (
@@ -209,14 +223,19 @@ export default function EmailCodeSignIn({
         inputMode="numeric"
         autoComplete="one-time-code"
         pattern={`\\d{${HUB_SIGN_IN_CODE_LENGTH}}`}
-        maxLength={HUB_SIGN_IN_CODE_LENGTH}
         required
         value={code}
-        onChange={(e) =>
-          setCode(
-            e.target.value.replace(/\D/g, "").slice(0, HUB_SIGN_IN_CODE_LENGTH),
-          )
-        }
+        onChange={(e) => {
+          const next = e.target.value
+            .replace(/\D/g, "")
+            .slice(0, HUB_SIGN_IN_CODE_LENGTH);
+          setCode(next);
+          // Sign in as soon as the code is complete; the button stays as the
+          // fallback (e.g. retrying after a network error)
+          if (next.length === HUB_SIGN_IN_CODE_LENGTH && next !== code) {
+            verifyCode(next);
+          }
+        }}
         placeholder={"0".repeat(HUB_SIGN_IN_CODE_LENGTH)}
         disabled={pending !== null}
         className={`${inputClass} text-center font-mono text-lg tracking-[0.5em]`}
